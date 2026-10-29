@@ -71,7 +71,13 @@ Expressed as **relationships**, not coordinates. The engine renders the drawing 
 Written from the map after the map is final. Stored word for word and sent with every call in the encounter.
 
 ### 3.5 Invariants (campaign level, not per encounter)
-A short list of world facts that never change (e.g. "the drum beneath the fortress keeps the same slow beat; it is the Hollow King's heartbeat"). Sent to every call.
+A short list of world facts that never change once they are in play.
+
+- **Act gates.** An invariant can carry an act gate. The engine sends it only to calls from that act on.
+- **Why gate.** An invariant that isn't in play yet must not leak into narration, so it is kept out of context entirely rather than forbidden by a prompt rule.
+- **Example:** the Hollow King's heartbeat, a slow drumbeat beneath the fortress. It is inaudible and never mentioned in Acts 1–3. From Act 4 on, it keeps the same slow beat.
+
+Each invariant is sent to every call in the acts where it applies.
 
 ---
 
@@ -173,7 +179,7 @@ Per step: tick and advance schedules; check for unlisted observers (reveal and s
 
 | Tier | Blocks | Cached |
 |---|---|---|
-| Campaign | Role rules, style guide, worked examples, invariants, character sheets (stable part), companion profile (companion calls) | For the session |
+| Campaign | Role rules, style guide, worked examples, invariants in play this act, character sheets (stable part), companion profile (companion calls) | For the session; rebuilt when the act changes |
 | Encounter | Intent, people, map, opening description | For the encounter |
 | Live | State, canon added, event log, table read, draft card, recent raw exchanges, the request | No |
 

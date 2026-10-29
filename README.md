@@ -8,7 +8,7 @@ A text RPG run by AI: an AI dungeon master, two AI companions, and the player. T
 |---|---|
 | `docs/ai-dm-system-spec-v4.md` | **Current spec.** Architecture, calls, context assembly, encounter packet. |
 | `docs/ai-dm-system-spec-v3.md` | Previous spec. Kept for history; much of it is superseded (see v4 §12). |
-| `docs/encounter-design.md` | Encounter design principles: what makes an encounter good, time, space, senses and pursuit, a design process, and candidate engine quality checks. |
+| `docs/encounter-design.md` | Encounter design principles: what makes an encounter good, time, space, senses and pursuit, a design process, candidate engine quality checks, and a worked example (the Cells, rebuilt as a v4 packet). |
 | `legacy/gravenhold.html` | The original one-shot prototype (single-file React). Source of the companion, relationship, campfire and exploration-room systems. Also the best record of what goes wrong. |
 
 ---
