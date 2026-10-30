@@ -11,7 +11,7 @@ Companions act like fellow players: opinions, reasoning, disagreement, in-charac
 - **Huddle:** time is paused. Each companion gets her own call; the second sees the first's reply (`docs/spec/calls/companion.md`). She sees what the player sees, including the draft card and the priced card. She thinks about a plan through her `planning` bias (D38), and the engine picks one of three things she might say (D40).
 - **Private channel:** only the addressed companion is called. The whisper rings make this possible in the fiction (`content/setting.js`).
 - **Stances:** refuse, insist, or conditional, with conditional triggers written in the condition language. They're traced to her profile (beliefs, despises, rules). Only the player writes plan content.
-- **Campfire:** between encounters, with the full relationship picture (`docs/spec/calls/campfire.md`).
+- **Campfire:** between encounters, with the full relationship picture: talk and action together, one on one or with both, one call per companion (D45; `docs/spec/calls/campfire.md`).
 
 ## 2. What a companion file holds
 

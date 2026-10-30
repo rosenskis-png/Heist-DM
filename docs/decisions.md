@@ -205,3 +205,11 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 ### D43. Slack runs from −10 to +10, in 2% steps
 **Decided:** Supersedes the numbers in D41 (its rules stay). Slack runs from −10 to +10, each point moves a deadline by 2% of its tick (at most ±20%), and the total is rounded once to the nearest tick. It still changes by 1 per encounter, so reaching either end takes many encounters.
 **Why:** Finer steps and a slower drift, so one good or bad heist nudges the next without a visible swing.
+
+### D44. Moment records what the party learns, not only through checks
+**Decided:** The moment call can return `reveals`: ids of hidden things, routines or coming events the party now knows from the exchange, outside any check ("he walks, sits and drinks, every time," says Brannoc). The engine marks them known.
+**Why:** Plan timing (D35) and foreseen observers (D36) depend on what the party knows. Learning it in conversation has to update that state, not only a line of text.
+
+### D45. The campfire is talk and action together, one call per companion
+**Decided:** Camp is the one place where the player and a companion talk and act in the moment, with time passing and no world consequences, written as narration, her actions and her dialogue in one flow. A one-on-one scene is one call for her, and the other companion never sees it. When the player sits with both, each companion gets her own call per exchange, in turn, as in the huddle. Every campfire output is about the companion whose call it is. Contract: `docs/spec/calls/campfire.md`.
+**Why:** The campfire schema let several companions speak in one call, which would put each one's secrets in the other's context. And camp is where Gravenhold's companions shone, because talk and touch and action happened together; that shape belongs here and nowhere else.

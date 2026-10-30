@@ -14,6 +14,6 @@
 - **Combat:** one call per round. It narrates the last round's engine results, sets each enemy's intent for this round from its sheet, and gives a difficulty band for any unusual action the player declared. The engine does all the math and decides when combat ends. The player commands the whole party; kept stances still apply.
 
 ## Returns (`schemas/calls/moment.js`)
-The reply, plus, when relevant: facts the party just learned (one line each), disposition shifts, promises made, new texture, and any check.
+The reply, plus, when relevant: facts the party just learned (one line each), **the ids of anything it now knows** (a hidden thing, a routine, a coming event) because someone told them or they saw it in this exchange, outside a check (D44), disposition shifts, promises made, new texture, and any check.
 
 This call returns prose and structure together, an accepted exception to principle 3: the engine applies only the structured fields, and a check's two narrations are both written before the roll, so prose never decides state.

@@ -24,7 +24,7 @@ The plan side is split into several small sequential calls (decide → validate 
 |---|---|---|---|
 | **Encounter** | yes | yes | all |
 | **Room** (exploration, social, respite; D22) | no | no | moment, companion |
-| **Campfire** (between encounters) | no | no | campfire |
+| **Campfire** (between encounters) | no | no, time passes freely | campfire, one call per companion (D45) |
 
 ## Encounter loop
 
