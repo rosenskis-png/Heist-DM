@@ -8,6 +8,7 @@ import { execute } from "./plan.js";
 import { handoff } from "./handoff.js";
 import { applyMoment, endConversation } from "./moment.js";
 import { record } from "./table.js";
+import { resolve, scene, rollCard } from "./ledger.js";
 
 export { load, checkPacket, deadlineTick } from "./load.js";
 export { checkSteps, splitLongMoves, project, checkPricing, shownCard } from "./plan.js";
@@ -16,6 +17,7 @@ export { layoutFacts } from "./map.js";
 export { handoff } from "./handoff.js";
 export { checkMoment, checkWorld, checkOps, fighting } from "./moment.js";
 export { tableRead } from "./table.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions:
@@ -25,6 +27,10 @@ export { ODDS } from "./rng.js";
 // - {type: "moment", out, rolls?}: apply a validated Moment output: what the party learns, a check, a combat round.
 // - {type: "talked", with}: a conversation with an NPC has ended, which costs a tick (D69).
 // - {type: "ticks", n}: time passes (a wait, a world turn's pending ticks).
+// Ruled mode (D75):
+// - {type: "roll", card, rolls?}: roll every roll on the DM's card, before the DM plays it out (`s.dice`).
+// - {type: "resolve", card, dice, out}: the card, its dice, and the DM's account of what happened.
+// - {type: "scene", out, rolls?}: one Moment exchange the DM ruled; the engine rolls its checks.
 // - {type: "end", outcome}: the encounter ends without its objective (the player leaves, a fight is lost).
 export function apply(state, action) {
   const { packet, party, ...rest } = state;
@@ -41,6 +47,15 @@ export function apply(state, action) {
       break;
     case "talked":
       endConversation(s, action.with);
+      break;
+    case "roll":
+      s.dice = rollCard(s, action.card);
+      break;
+    case "resolve":
+      s.resolved = resolve(s, action.card, action.dice, action.out);
+      break;
+    case "scene":
+      s.scene = scene(s, action.out);
       break;
     case "ops":
       run(s, action.ops, action.ctx ?? {});

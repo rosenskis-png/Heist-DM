@@ -60,7 +60,7 @@ export function packetWarnings(packet, reference) {
 export const deadlineTick = (tick, slack) => Math.round(tick * (1 + 0.02 * slack));
 
 // The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's.
-export function load({ packet, party, slack = 0, seed = 1 }) {
+export function load({ packet, party, slack = 0, seed = 1, ruled = false }) {
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
   const { map, people, clock, start } = packet;
@@ -94,6 +94,8 @@ export function load({ packet, party, slack = 0, seed = 1 }) {
     exceptions: [],
     log: [],
     combat: null,
+    // Ruled mode (D75): the DM's facts, and the NPCs it has taken off their routines.
+    ...(ruled ? { ruled: true, facts: [], offRoutine: [] } : {}),
     fights: [],
     promises: [],
     // For the table read: plans committed, every roll, and the failure consequences that landed.

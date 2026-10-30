@@ -1,5 +1,7 @@
 // Ticks, schedules, events, meters and reaction triggers (docs/spec/engine.md §3–5).
 // `s.belief` marks a projection of what the party expects: routines and events it doesn't know don't run (D36, D47).
+// `s.ruled` is ruled mode (D75): the DM decides reactions, so triggers and meter decay don't run, and an NPC the
+// DM has taken off their routine (`s.offRoutine`) stays where the DM put them.
 import { person } from "./world.js";
 import { test } from "./cond.js";
 import { runRules, settle } from "./ops.js";
@@ -10,7 +12,7 @@ const knows = (s, sch) => sch.known || s.known.revealed.includes(sch.id);
 // The beats still in the cycle, minus any a ladder has dropped (at Suspicion 2: Pace, Sit).
 export function beatOf(s, npc, t = s.tick) {
   const sch = person(s, npc)?.schedule;
-  if (!sch || s.at[npc] == null) return null;
+  if (!sch || s.at[npc] == null || s.offRoutine?.includes(npc)) return null;
   if (s.belief && !knows(s, sch)) return null;
   const dropped = s.sched[npc]?.dropped ?? [];
   if (!dropped.length) return sch.beats[(t + sch.phase) % sch.period];
@@ -37,18 +39,18 @@ export function sensesOf(s, npc) {
 export function beginTick(s) {
   s.noticed = [];
   for (const p of scheduled(s)) {
-    if (s.at[p.id] == null || (s.belief && !knows(s, p.schedule))) continue;
+    if (s.at[p.id] == null || (s.belief && !knows(s, p.schedule)) || s.offRoutine?.includes(p.id)) continue;
     const o = s.sched[p.id]?.override;
     if (o && s.tick > o.to) s.sched[p.id].override = null;
     const active = o && s.tick >= o.from && s.tick <= o.to;
     s.at[p.id] = active ? o.position : beatOf(s, p.id).position;
   }
   for (const p of scheduled(s)) {
-    if (s.at[p.id] == null || (s.belief && !knows(s, p.schedule))) continue;
+    if (s.at[p.id] == null || (s.belief && !knows(s, p.schedule)) || s.offRoutine?.includes(p.id)) continue;
     runRules(s, beatOf(s, p.id).on_start);
   }
   events(s);
-  triggers(s);
+  if (!s.ruled) triggers(s);
   objectives(s);
 }
 
@@ -124,7 +126,7 @@ export function nextTick(s) {
     events(s, { deferred: true });
     s.warned = null;
   }
-  decay(s);
+  if (!s.ruled) decay(s);
   s.tick += 1;
   beginTick(s);
 }
