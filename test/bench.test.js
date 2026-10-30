@@ -7,7 +7,7 @@ import { stepSchema, pricingSchema } from "../schemas/index.js";
 
 const read = (path) => JSON.parse(readFileSync(new URL(`../${path}`, import.meta.url)));
 const cases = read("fixtures/bench/cases.json");
-const packet = read("fixtures/cells/packet.json");
+const packet = read("content/encounters/cells.json");
 
 const ids = new Set([
   ...packet.map.zones.map((z) => z.id),

@@ -1,4 +1,4 @@
-// The encounter packet. Meaning of each part: docs/spec/packet.md. Example: fixtures/cells/packet.json.
+// The encounter packet. Meaning of each part: docs/spec/packet.md. Example: content/encounters/cells.json.
 import { withDefs } from "./defs.js";
 
 const r = (name) => ({ $ref: `#/$defs/${name}` });

@@ -15,7 +15,7 @@ import { validate } from "../src/validate.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const read = (name) => JSON.parse(file(`fixtures/cells/${name}`));
-const packet = read("packet.json");
+const packet = JSON.parse(file("content/encounters/cells.json"));
 const party = [{ id: "player", name: classes.rogue.name, ...classes.rogue }, fern, lyra];
 const start = (over = {}) => load({ packet, party, ...over });
 const variant = (edit) => {

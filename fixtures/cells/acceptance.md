@@ -1,6 +1,6 @@
 # Acceptance test: the Cells
 
-The engine's first fixture (roadmap, Phase 3). It runs against `fixtures/cells/packet.json` (written in Phase 1 from `fixtures/cells/walkthrough.md` §1) with a seeded random number generator. The engine must:
+The engine's first fixture (roadmap, Phase 3). It runs against `content/encounters/cells.json` (written in Phase 1 from `fixtures/cells/walkthrough.md` §1) with a seeded random number generator. The engine must:
 
 1. **Load and validate** the packet, and reject:
    - a variant that contains a route field;

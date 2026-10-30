@@ -15,7 +15,7 @@ Gravenhold's defining failure was its opening cell-block escape. The player's fi
 
 ## 1. The packet
 
-As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with card 2's expected results in `card2.results.json`. Sample outputs for the other calls: `calls.json`.
+As data: `content/encounters/cells.json`. The two cards below: `card1.json` and `card2.json`, with card 2's expected results in `card2.results.json`. Sample outputs for the other calls: `calls.json`.
 
 **Intent**
 - **Objective:** `party_all_in: [stair_top]`.

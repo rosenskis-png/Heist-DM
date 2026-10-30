@@ -10,7 +10,7 @@ import { classes } from "../content/classes.js";
 
 const load = (name) => JSON.parse(readFileSync(new URL(`../fixtures/cells/${name}`, import.meta.url)));
 const valid = (schema, value) => assert.deepEqual(validate(schema, value), []);
-const packet = load("packet.json");
+const packet = JSON.parse(readFileSync(new URL("../content/encounters/cells.json", import.meta.url)));
 
 test("every $ref in every schema resolves", () => {
   for (const [name, schema] of Object.entries(schemas)) {

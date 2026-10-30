@@ -41,7 +41,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 - **Meters and their ladders,** such as suspicion. Each level applies operations; anything that should lapse when the meter falls carries `until`. Decay: `by` a step after `after_ticks` ticks in a row where `quiet_if` holds, never while `blocked_by` holds.
 - **Reaction triggers:** `when` a condition holds, run rules (`once` if it fires only once). Condition → operations, with no "unless he decides" (D18).
 
-Semantics: `docs/spec/engine.md`. Example: `fixtures/cells/packet.json`.
+Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 
 ## 5. Opening description
 Written from the map after the map is final. Stored word for word and sent with every call in the encounter.

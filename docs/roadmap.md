@@ -25,7 +25,7 @@ Write down what each part promises, precisely enough to build against.
 - [x] The condition language and the state-change operations: `schemas/defs.js`, `docs/spec/engine.md` §8–9.
 - [x] The schedule, meter and reaction formats: `schemas/packet.js`, `docs/spec/packet.md` §4.
 - [x] The geometry format (D28).
-- [x] The Cells packet as data: `fixtures/cells/packet.json`, with both cards and card 2's expected results.
+- [x] The Cells packet as data: `content/encounters/cells.json`, with both cards and card 2's expected results.
 
 **Exit:** the Cells packet, both of its cards and its expected results can be written without free-text escape hatches, except in the fields meant for judgment. Checked by `node --test` (`test/contracts.test.js`).
 

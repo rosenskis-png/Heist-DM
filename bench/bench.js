@@ -60,7 +60,7 @@ let controller = new AbortController();
 
 async function load() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-  const sources = ["fixtures/cells/packet.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
+  const sources = ["content/encounters/cells.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
   const code = ["src/context.js", "bench/checks.js"];
   const texts = await Promise.all([...sources, ...code].map(text));
   const [packet, cases] = texts.slice(0, 2).map(JSON.parse);
