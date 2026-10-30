@@ -367,3 +367,37 @@ The huddle keeps everything a player at the table has, including the map, her lo
 Contracts: `schemas/calls/adjudicate.js`, `resolve.js`, `scene.js`, and `schemas/ledger.js`. Spec: `docs/spec/ruled.md`.
 **Why:** The first two playtests (roadmap, Phase 4 findings) gave no room to play. The correct rat plan lost ticks to dice on trivial steps and one tick per step, and to a door the engine judged unworkable. The improvised game's ideas had no state they could change. Each engine rule was defensible on its own; together they were Gravenhold's competing rules, moved into code. Gravenhold felt like D&D because the DM ruled, and failed because nothing held it to its rulings and nothing made a plan resolve. Ruled mode keeps the plan card that fixed the stall, keeps a written record the DM must stay consistent with, and gives the judgment back.
 **Rules out:** Deciding between the two modes without playtests of both.
+
+### D76. Every ruled call has a size budget, and the ledger has limits
+**Decided:** In ruled mode:
+- **The ledger holds at most 20 facts,** each one line of at most 160 characters, and an output may add at most 6. A fact is how things are now and will matter later, with no other home. What happened is history: each step's account goes to the log. An output that would break a limit goes back for the one retry, with the active fact ids listed so it can retire or replace some.
+- **A card's rulings** are at most three lasting truths, and they join the ledger when the plan runs. Its `notes` (why no roll, what the plan leaves out) are shown on the card and then dropped.
+- **Calls get the latest,** not all of it: the last 16 log entries and the last 10 lines of texture.
+- **Plain text, not JSON:** the encounter and the ledger reach the DM's calls as plain lines, with alike things sharing a line. The packet's reactions come as its prose `notes`, not its triggers and meters.
+- **Each call gets its slice:** the card call gets no opening, companions get no log or texture (they get the DM's narration), and the scene call gets no perception table (the DM rules on sight from the map).
+- **Every call has an input budget** (`src/ask.js`). A call that crosses its budget still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` builds a late game with the ledger at its limits and fails if any ruled call goes over its budget.
+
+**Why:** In the third playtest, every late-game call was about 45 KB, and 17 KB of it was 82 "facts". Most were the card's notes about itself ("Calling out needs no roll"), stored permanently, some stale and contradicting the state ("all four doors are still locked" after they were opened). The encounter block was another 16.6 KB of JSON. Calls at the same point are now about 20 KB, and at most 25 KB with everything at its limits. Without limits and a test, the next growth would only show up in someone's usage.
+**Rules out:** Unbounded lists in any ruled call's input; storing a card's notes.
+
+### D77. Time is the plan's, talk is free, and ruled deadlines are half as long again
+**Decided:** In ruled mode:
+- **The card gives each step the tick it happens on and one `ends_at` for the whole plan.** Steps no longer carry durations that add up. A tick is about a minute of real work; talk, small actions and things done on the way take none; crossing the block takes a tick or two.
+- **Talk is free in the Moment:** questions, talk and social rolls take 0 ticks; only physical work takes time.
+- **The card reads the plan the way the player means it:** if the words say or plainly imply something ("as we escape"), it's in the plan. It still adds no waits, safety steps or better ideas, and keeps mistakes (D35).
+- **Every deadline is 1.5 times as far away** in ruled mode (`RULED_DEADLINE`), so Uzga arrives at tick 32, before slack (D41). A starting value.
+
+**Why:** In the third playtest, the escape took 5 ticks: each small action (tying Snag, unlocking, a cut hand) was a step with its own tick, and the card left out the escape the player plainly meant. Cards were remade 20 times as the player cut plans down to fit the clock. Deadlines were sized for the engine's one tick per step (D37), not for a DM's time.
+
+### D78. In ruled mode the account and its narration are one call
+**Decided:** The resolve call records what happened first and then narrates it, in the same answer (`narration`, last in its schema). Its texture becomes canon as before. Ruled mode has no separate narration call.
+**Why:** One fewer call of about 20 KB per plan. Principle 3's aim, prose that never invents state, is met by order: the record comes first, the prose is written from it, and only the record changes state. The scene call already worked this way, and the third playtest found it consistent.
+
+### D79. In encounters, companions get a brief and where they stand
+**Decided:** Supersedes D59's huddle allowlist and narrows D27. In encounters (huddle, private channel, and the DM's calls that voice them), a companion is her brief:
+- name, race, role, voice, beliefs, rules, `pursuit`, her `planning` hunch and what she reaches for, skills and abilities;
+- her standing with the player: a mood from a fixed list (warm, glad, steady, wary, grumpy, jealous) with why, and up to a few things she has learned.
+
+Her look, fantasy, backstory, secrets and romance arc are for the campfire only. The campfire writes her standing and what she learned (`schemas/calls/campfire.js`); until it's built, every companion is steady.
+**Why:** The designer's call (2026-10-30): secrets belong to camp, and in an encounter a companion only needs how she acts, plus a light read of how things stand. The mood list stops at grumpy and jealous, so a bad night at camp makes her prickly, not uncooperative. The brief is about a third of the profile, and it keeps one companion's secrets out of any call the other might share later.
+**Rules out:** Secrets, the full fantasy or the payoff scene in any encounter call.

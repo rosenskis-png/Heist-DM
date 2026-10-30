@@ -36,7 +36,7 @@ Text inside profiles may mention other companions by name (Fern's rule about Lis
 
 Gravenhold revealed parts of a profile as the relationship grew. Keep that, as engine-side gating: like an act gate, a field that isn't unlocked yet is absent from context, not forbidden by a rule.
 
-Each channel sends an allowlist of fields (D59): the huddle sends identity, fantasy, look, voice, depth, rules, skills, abilities (effect text only) and `planning.hunch` and `reaches_for`, gated as below. Fields on no list, such as `color`, `rate`, `leanFromHeat` and undeclared special cases, are never sent.
+Each channel sends an allowlist of fields (D59). **In encounters** (the huddle, private channels, and the DM's calls that voice her), a companion is her brief (D79): name, race, role, `voice`, `beliefs`, `rules`, `pursuit`, `planning.hunch` and `reaches_for`, skills and abilities (effect text only), and her standing: a mood from warm, glad, steady, wary, grumpy, jealous, with why, and what she has learned. Code: `briefProfile` in `src/context.js`. **At the campfire** she gets her full profile, gated as below; the campfire writes her standing and what she learned. Fields on no list, such as `color`, `rate`, `leanFromHeat` and undeclared special cases, are never sent.
 
 | Field | Sent when (Gravenhold's thresholds) |
 |---|---|

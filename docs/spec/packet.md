@@ -40,6 +40,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 - **Deadlines** leave room for some exploring and two recovered failures (D37).
 - **Meters and their ladders,** such as suspicion. Each level applies operations; anything that should lapse when the meter falls carries `until`. Decay: `by` a step after `after_ticks` ticks in a row where `quiet_if` holds, never while `blocked_by` holds.
 - **Reaction triggers:** `when` a condition holds, run rules (`once` if it fires only once). Condition → operations, with no "unless he decides" (D18).
+- **Notes:** the same reactions and ladders in plain words, for a DM who rules (`notes`; D76). Ruled mode sends these instead of the triggers and meters.
 
 Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 

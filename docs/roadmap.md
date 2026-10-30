@@ -123,6 +123,12 @@ The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 - **Watch for:** a person the DM moved and never put back on their routine; ledger facts piling up or contradicting each other; the card leaking what the party doesn't know in ways the hidden-name check can't see; the resolve call quietly overruling the dice or the card's stated costs.
 - If ruled mode wins, findings 1–5, 7 and 9 stop applying (they're the engine's rules), and Phase 6's question about the engine's vocabulary (below) changes shape.
 
+**Third playtest** (ruled mode, improvised; escaped at tick 19 of 21). The designer: ruled mode wins by a lot, with creativity and improv but no sycophancy or inconsistency (the DM turned down a weak bluff twice). Two problems:
+1. **Time too tight.** The escape took 5 ticks, because each small action was a step with its own tick and the card dropped the escape the player plainly meant. Cards were remade 20 times to fit plans to the clock. Fixed by D77.
+2. **Tokens.** Late-game calls were about 45 KB: 17 KB of facts (82 of them, mostly the card's notes, some stale) and 16.6 KB of encounter JSON. Fixed by D76 and D78; the same point in the game is now about 20 KB a call, with one call fewer per plan.
+
+**Next build, as discussed:** the table and action restructure. One main tab for talk (narration, the DM, NPCs and companions chiming in, all free), whispers, and an action tab for plans and fights. D79's briefs are what make one call voicing both companions safe.
+
 **Open questions**
 1. **Pacing and game feel.** Are the intent, the table read and worked examples enough for the world and pricing calls to pace well and price fairly? *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 2. **The Moment call's judgment.** Untested on the real model: whether it rolls when it should (and only then), keeps hidden things out, redirects actions instead of resolving them, and marks what the party learns. *Recommendation:* run the bench's Moment tab before the first playtest, and treat its misses like the Phase 2 bench findings.
