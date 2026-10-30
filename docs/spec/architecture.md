@@ -1,6 +1,6 @@
 # Architecture
 
-Who does what, the encounter loop, and time. For why it's shaped this way, see `docs/principles.md`.
+Who does what, the encounter loop, and time. For why it's shaped this way, see `docs/principles.md`. This is the engine's pipeline; ruled mode, where the DM rules and the engine keeps the books, is `docs/spec/ruled.md` (D75).
 
 ---
 

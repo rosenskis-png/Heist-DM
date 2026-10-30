@@ -65,4 +65,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 4: The Cells, playable,** is built: the game page, the call layer and the loop, checked by `test/game.test.js`. Its playtests are next. See `docs/roadmap.md`.
+**Phase 4: The Cells, playable,** is built, with two ways to run it: the engine's pipeline, and ruled mode, where the DM rules and the engine keeps the books (D75, `docs/spec/ruled.md`). The first playtests found the engine's rules too tight; the next ones compare the two. See `docs/roadmap.md`.
