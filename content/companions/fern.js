@@ -89,6 +89,8 @@ export default {
           { set_flag: { entity: "@self", key: "form", value: "animal" } },
           // The prison rat, the only animal she has seen at the start. Other forms wait for Phase 5.
           { set_flag: { entity: "@self", key: "size", value: "tiny" } },
+          // Paws, not hands: she can't work a lock or a latch (D64).
+          { set_flag: { entity: "@self", key: "hands", value: false } },
         ],
         one_way: true,
       },

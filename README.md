@@ -49,14 +49,14 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
 | `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
-| `src/` | Code. So far the contract validator |
+| `src/` | Code: the engine (`src/engine/`, D60), context assembly (`src/context.js`) and the contract validator |
 | `test/` | `node --test` suites |
 | `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The worked example, the Cells packet and cards as data, and the engine's first acceptance test |
 | `content/` | Game data: companions, pairs, classes, rules, setting. The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
-| `bench/` | The Phase 2 judgment test bench: an artifact page that runs the real prompts on hand-written inputs |
+| `bench/` | The Phase 2 judgment test bench: an artifact page that runs the real prompts on hand-written inputs, checked by the engine |
 | `fixtures/bench/` | The bench's test cases beyond the Cells cards |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
@@ -64,4 +64,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 2: Judgment test bench,** done: the prompts in `prompts/` and the bench page in `bench/`. **Phase 3: Engine core** is next. See `docs/roadmap.md`.
+**Phase 3: Engine core,** done: `src/engine/`, checked by `test/engine.test.js` against `fixtures/cells/acceptance.md`. **Phase 4: The Cells, playable** is next. See `docs/roadmap.md`.

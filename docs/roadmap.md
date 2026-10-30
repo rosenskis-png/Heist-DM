@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 3 (Engine core).** Phases 1 and 2 are done.
+**Current phase: 4 (The Cells, playable).** Phases 0–3 are done.
 
 ---
 
@@ -72,7 +72,17 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 
 Pure ES modules tested with `node --test`, with a seeded random number generator. Validation against the contracts already exists (`src/validate.js`); the engine adds the consistency checks in `docs/spec/packet.md` and everything in `docs/spec/engine.md`.
 
-**Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly.
+**Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly (D60).
+
+**Scope.** Code lives in `src/engine/`, one module per section of `docs/spec/engine.md`. Context assembly is pure and acceptance items 10–11 test it, so it moves from `bench/assemble.js` to `src/`. The bench's move, fit and flag checks become calls to the engine, and the bench keeps only its grading. Abilities, stances and objectives are built in general form from the `declared` blocks. Combat is built only as far as the Cells need (`start_combat` records that a fight has begun); its rounds wait for Phase 4.
+
+**Result.** Every item in `fixtures/cells/acceptance.md` passes in `test/engine.test.js`, and a recorded log replays to deep-equal state. Building it settled D61–D63 and corrected two fixtures: card 1's step 4 route listed a cell nobody stands in, and the acceptance test's slack example contradicted D43's arithmetic (at ±3, rounding once gives 22 and 20, not 21).
+
+**Carried into Phase 4:**
+- **Pricing leaks the engine can't see.** It sends back a shown reason that names a hidden thing or an NPC the party doesn't foresee. It can't catch one that describes an unforeseen fact in plain words ("he's got them on his belt"). The likeliest source is the `as_if` line the pricing call is sent (D42). *Recommendation:* watch for it in playtests before adding anything.
+- **Hazards** are always empty: the packet format has nothing that is one. The Cells don't need any.
+- **Combat rounds** (`content/rules.js`): `start_combat` only records the fight.
+- **The bench page now loads `src/`** (the engine and `src/context.js`), so republishing it needs those files.
 
 ## Phase 4: The Cells, playable
 
@@ -108,6 +118,15 @@ The Cells, plus 2–3 more packets including at least one room, and the hand-off
 
 **Open questions**
 1. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
+2. **Does the engine hold up beyond the Cells?** Its mechanisms are general (nothing in `src/engine/` names a Cells id), but it has only met one packet, so its vocabulary is Cells-sized. Known narrow spots:
+   - **Recognizing a broken plan early** (D62) covers only an item missing from where the plan expects it. Other broken preconditions (a door now barred, a contact who has left) are caught only when the step reaches them.
+   - **Hazards** (fire, a trap, a collapsing floor) have no packet format, so the card's `hazards` is always empty.
+   - **A fight or an ending** is the only kind of trigger that interrupts a plan before its next step. A trigger that changes the situation some other way is met at the effect.
+   - **Movement** is checked only by size, hands and side. Climbing, swimming or flying are priced by judgment, which is right unless a packet needs one enforced.
+   - **Traits** the engine reads are named in code (`sees_in_dark`, `hears_through_walls`). A new sense needs code.
+   - **Layout facts** list distances between every pair of connections and placed things in a zone, which grows fast in a big room.
+
+   *Recommendation:* build at least one Act 1 packet deliberately unlike the Cells (a room, a hazard, an NPC who leaves, a door worked from one side), and extend the engine only where that real packet needs it. The generator must not start (Phase 7) until two differently shaped packets pass.
 
 ## Phase 7: The generator
 

@@ -332,13 +332,14 @@
       "barriers": [],
       "hazards": [],
       "as_if": [
-        "The key ring is on the peg."
+        "The key ring is on the key peg."
       ],
       "interrupts": [
         {
           "code": "not_there",
           "id": "keyring",
-          "detail": "At the start of tick 1 (Snag's Pace beat) he lifts the key ring off the peg and clips it to his belt, in plain view of the cells. The party sees the peg is empty before Fern sets off."
+          "detail": "At the start of tick 1 (Snag's Pace beat) he lifts the key ring off the peg and clips it to his belt, in plain view of the cells. The party sees the peg is empty before Fern sets off.",
+          "effect": 1
         }
       ]
     },
@@ -369,10 +370,9 @@
       },
       "route": [
         "cell_far",
-        "corridor",
-        "cell_middle",
         "cell_near",
-        "cell_brannoc"
+        "cell_brannoc",
+        "corridor"
       ],
       "observers": [],
       "barriers": [

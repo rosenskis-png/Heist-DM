@@ -54,6 +54,7 @@ export const cardSchema = withDefs({
                 "locked",
                 "requires_failed",
                 "ability_spent",
+                "cant_work",
                 "trigger_fires",
                 "hidden_fact",
                 "wait_expired",

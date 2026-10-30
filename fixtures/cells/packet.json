@@ -239,7 +239,7 @@
         "id": "wild_shape_ends",
         "when": { "all": [{ "flag": ["fern", "form", "animal"] }, { "any": [{ "in_zone": ["fern", "stair"] }, { "in_zone": ["fern", "stair_top"] }, { "in_zone": ["fern", "cistern"] }] }] },
         "once": true,
-        "do": [{ "then": [{ "set_flag": { "entity": "fern", "key": "form", "value": "self" } }, { "set_flag": { "entity": "fern", "key": "size", "value": "medium" } }] }]
+        "do": [{ "then": [{ "set_flag": { "entity": "fern", "key": "form", "value": "self" } }, { "set_flag": { "entity": "fern", "key": "size", "value": "medium" } }, { "set_flag": { "entity": "fern", "key": "hands", "value": true } }] }]
       }
     ]
   },

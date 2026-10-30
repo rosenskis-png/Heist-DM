@@ -38,6 +38,8 @@ export const resultsSchema = withDefs({
           }),
         ),
         triggers: list(r("id")),
+        // A companion's stance tripped on this step: kept stops the plan before it; overridden is logged (engine.md §7).
+        stance: obj(["companion", "decision"], { companion: r("id"), decision: { enum: ["keep", "override"] } }),
       }),
       1,
     ),
