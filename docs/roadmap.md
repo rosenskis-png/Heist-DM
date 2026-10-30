@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 1 (Contracts),** built and awaiting the designer's review.
+**Current phase: 3 (Engine core).** Phases 1 and 2 are done.
 
 ---
 
@@ -33,16 +33,16 @@ Write down what each part promises, precisely enough to build against.
 
 A bare artifact page that takes a hand-written packet and hand-computed engine facts, and runs the real step, pricing and world calls, plus a Fern and Lyra huddle, through `sample`. The designer runs it and gives feedback; the page shows each call's input and output on screen.
 
-**Exit:**
+**Exit** (met; see Result below):
 - The Cells tests in `fixtures/cells/walkthrough.md` pass in 5 of 5 runs: a card on turn one; Card 1 priced as the party expects, with nothing the party doesn't foresee leaking into its bands or reasons; Card 2 about two Easy rolls, with the player's timing kept and none added.
-- Three plans the docs never mention (the bench-nail lockpick, bending the bars, bribing Snag through Brannoc) get fair prices.
-- Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `planning` block predicts more often (D38, D40), and her three candidates are genuinely different takes.
-- Model tiers are chosen (D15).
+- Three plans the docs never mention (the bench-nail lockpick, bending the bars, leaning on Snag through Brannoc) get fair prices.
+- Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `hunch` points at more often and the ones her `misses` describes less often (D38, D40, D50), and her three candidates are genuinely different takes.
+- Each call's tier at each position of the speed and quality setting is chosen (D48).
 
 **How to run this phase** (guidance from the design thread that shaped D35–D46)
 - **This phase tests judgment, not code.** Build only the bench page. The engine's facts are written by hand; don't start the engine or the UI.
 - **A prompt holds the judgment its call owns, and nothing else.** Before adding any instruction, ask whether structure already handles it (what the call sees, what the schema allows, what the engine validates). If a failure tempts you to add a rule, find its cause first (`docs/principles.md`, "Reflexes to resist"). Keep each prompt short enough to read in one go, and test whether an instruction earns its place by removing it.
-- **Worked examples are the main tool for feel.** Write them as carefully as content, tag them by act, and never send `fixtures/cells/walkthrough.md` §5 to Acts 1–3.
+- **Worked examples are the main tool for feel.** Write them as carefully as content, tag them by act, and never send `fixtures/cells/walkthrough.md` §5 to Acts 1–3. Never use the encounter under test as a worked example: the bench would grade a memorized answer.
 - **Try to break the new rules on purpose:**
   - the step call must keep a plan's mistakes: a plan with no timing stays literal, and it never adds waits or conditions (D35);
   - the pricing call must price each action as itself (`as_if`, D42) and never let something the party doesn't foresee into a band or a reason (D36);
@@ -51,9 +51,22 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 - **The designer judges feel; the bench shows evidence.** Show every call's assembled input and raw output, and the prompt size. When something feels wrong, record what happened and its cause here before changing anything.
 - **Don't reopen a decision without reading its "why".** To change one, add a new entry that supersedes it.
 
-**Open questions**
-1. **Companion baseline.** *Recommendation:* judge them against their profiles in `content/`. If the designer can export 2–3 Gravenhold transcripts with strong companion scenes, they make a better baseline.
-2. **Prompt shape.** *Recommendation:* one `prompts/<call>.md` per call: the role, the judgment it owns, a style guide shared across calls, and worked examples tagged by act. No rules about rules. Phase 2 is where these get written and tested.
+**Bench findings** (first 30 runs; cause, then fix)
+1. **Every step call wrote move paths as zones, not connections** (5 of 5). Cause: the contract said "id" and never said which kind. Fix: paths name zones (D51), and the bench checks fit. Two runs also carried the iron ring through the rat-sized gutter, right after ruling it too big; the fit check now catches that.
+2. **Narration moved Fern out of her cell** in 5 of 5 interrupted runs, and talked about "step one" and "the plan". Cause: it got the results without the steps they belong to, so it guessed from the plan's prose. Fix: it now sees each step with its result (`docs/spec/context.md` §2); the style guide keeps the machinery offstage.
+3. **The world call invented flags** in every run (`offering_deal`, `with_party`). Cause: an action that changes no tracked state had nowhere to go. Fix: D52.
+4. **Companions talked game mechanics** ("the ruling", "a one-way switch", "until the encounter ends"), echoing the wording of their ability text. Fix: the style guide keeps characters inside the world.
+5. **Pricing** stayed within a band of the targets. Keys in hand were priced Easy, not automatic: judgment, left alone.
+6. **Second round: the step call still chose routes.** When the plan didn't say which way, it sent the key ring through the gutter in most runs, and retrying split card 1 into eleven steps. Cause: route-finding was the AI's job, and the retry message pushed it to split every crossing. Fix: D54, and a ruling call for named routes that fail on size (D55).
+7. **Third round.** Every card 1 run retried over bookkeeping (an unlock left out, a three-crossing walk out): D56. The ruling call repeated the size labels it was given: D57.
+8. **Huddle:** Fern caught the one-rat hole in 5 of 10 lines said (her hunch) and the timing hole in 3 (her blind spot). Lyra caught timing in only 2, and spent most turns on Brannoc. The grader counted talk about Brannoc as the walk-out hole, so its flaw texts are now sharper.
+
+**Result.** The calls' judgment holds on the Cells. Every exit test above ran on the bench except the following, which the designer judged by gut instead of by repeated runs: Card 2 pricing and the nail and bars plans on the final prompts, and the `complex` tier for pricing and world. The tiers are D58. Companion voices were judged against their profiles in `content/`, since no Gravenhold transcripts were exported.
+
+**Carried into Phase 3:**
+- **Pricing leaks.** One early run named the keys' location in a shown reason. The engine's check (`docs/spec/engine.md` §6) must catch these, not the prompt.
+- **Rulings** (D55, D57) and **routes** (D54): the engine implements both, and the bench's `bench/checks.js` is the working reference for move validation, fit, keys and splitting long moves (D56).
+- **Flag keys** (D52): the engine rejects keys the packet doesn't use.
 
 ## Phase 3: Engine core (Node)
 
@@ -82,7 +95,7 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
 **Open questions**
-1. **Shapes for the special cases.** *Recommendation:* see the table in `docs/spec/companions.md`.
+1. **Shapes for the special cases.** Until they're declared, they're on no allowlist and never reach a prompt (D59); the engine resolves the active variant (Lisa's) and sends only that. *Recommendation:* see the table in `docs/spec/companions.md`.
 2. **Caps on relationship changes.** *Recommendation:* start from Gravenhold's caps (per-turn changes clamped; heat and intimacy gains capped at +4 per encounter) and tune after playtests.
 3. **Companion-driven events** (personal quests). *Recommendation:* each quest is placed in a packet at generation, as hidden things and an optional objective. The companion knows about it through her own data. Nothing fires unless it was placed.
 4. **Pairs with no written dynamic.** *Recommendation:* the pair starts at 0. Each companion's call already sees the other's public profile (name, role, blurb, voice) and judges the dynamic from her own beliefs, admires and despises.

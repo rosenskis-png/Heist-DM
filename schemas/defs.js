@@ -74,6 +74,7 @@ const senseChange = {
 
 const operation = {
   oneOf: [
+    // A path is one entry per crossing: the zone entered, or the connection where two join the same zones (D51).
     op("move", ["entity", "to"], { entity: ref, to: id, path: { type: "array", minItems: 1, maxItems: 2, items: id } }),
     op("give", ["item", "to"], { item: id, to: ref, path: { type: "array", minItems: 1, maxItems: 2, items: id } }),
     op("place", ["item", "zone"], { item: id, zone: ref }),

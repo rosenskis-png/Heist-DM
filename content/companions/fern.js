@@ -27,11 +27,13 @@ export default {
   deep: `She plants a seed with him at the freed spring and names him her heartwood: the one she always comes back to. She stays free.`,
   dark: `Pure hedonism with no tether: she pulls him into a life of pleasure without care for consequence, beautiful and a little reckless.`,
   voice: `Warm, laughing, plain-spoken, sensual. "Why would I be jealous? There's more of me when I love more. And I'd like more of you."`,
-  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
+  // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
   planning: {
     sees: `Living things: what an animal wants, what a plant can do, who's hungry. She'll find the rats that work for bread.`,
     misses: `Clocks and routines. She's unhurried and assumes things will wait. She never proposes hurting anyone, so she misses the plans where force is the honest answer.`,
     reaches_for: `A gentle plan with help from something alive: the rats, the moss, a kindness to a guard.`,
+    hunch: `The way through usually runs through something alive: an animal that wants something, a plant that could grow, someone hungry or lonely who'd help for a kindness.`,
   },
   rules: `Never invites a pair of sisters together (Lisa and her sister). No intimacy while she is in wild shape.`,
   skills: {

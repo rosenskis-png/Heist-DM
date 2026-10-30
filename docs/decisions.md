@@ -221,3 +221,68 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 ### D47. An interruption needs a step the party can tell will fail
 **Decided:** Clarifies D46. The plan stops only when what the party perceives, plus what it knows (learned routines, known events), shows that a *remaining step* won't work. Seeing something different from a snapshot isn't enough. If the plan takes the keys on Snag's Drink and Lyra sees the peg empty during his Pace, nothing stops: the party knows the keys go back on the peg before then. If the step takes them during that Pace, it stops. If the party doesn't know the routine, an empty peg does stop a plan that needs those keys, because from what they know, the plan is broken.
 **Why:** D46's wording ("isn't as the plan expects") could stop a well-timed plan at a moment the party fully expected. Recognition means recognizing the plan is in trouble, using everything the party knows.
+
+### D48. Speed against quality is a player setting
+**Decided:** Partly supersedes D15. The player chooses, in the game's settings, how to trade speed and cost against quality. Each position of the setting maps every call to one of the runtime's tiers (`quick`, `default`, `complex`). Phase 2 picks that map, call by call, from measured misses on the bench; D15's starting tiers are the middle position until then.
+**Why:** Every call is charged to the player's own usage (D2), so how much a smarter DM is worth is their call, not ours. A fixed tier per call would make that choice for every player at once.
+**Rules out:** One fixed tier per call for every player.
+
+### D49. Narration paints the scene; precision lives in the map and in answers
+**Decided:** Narration, the opening description included, gives the player an intuitive picture of the scene: who is where, what they're doing, what draws the eye, the rhythm of the place. It doesn't inventory it (dimensions, exact placements, every object). Exact details live in the structure: the map shows the layout (D9), and the Moment call answers any question about it straight (`docs/spec/calls/moment.md`).
+**Why:** Gravenhold's narration surveyed rooms in feet and lists to stay consistent, and the scene became hard to picture. That consistency now comes from structure, not prose, so the prose is free to do what prose is good at. A detail the narration leaves out is still there, and the player can ask about it.
+**Rules out:** Narration as the record of the layout; measurements and inventories in narration.
+
+### D50. A companion's bias is steered, not described
+**Decided:** Refines D38. Each companion's `planning` block gains a `hunch`: a belief about the situation, written the way a hint would be ("the way through usually runs through something alive"). Her call is given her `hunch` and `reaches_for`. It is never given `misses` or `sees`: those stay in her file as the designer's description of her bias, and the bench measures her against them. She is asked for her first instinct, not an analysis.
+**Why:** Telling a model what a character tends to miss points its attention straight at that thing, so a described blind spot defeats itself. Steering what the model attends to makes it actually miss things in the way she would, rather than acting out a bias it can see past. The aim is to bias the AI's response the way the character is biased, not to have it simulate a biased character.
+**Rules out:** Sending `misses` (or any description of her blind spots) to any call; numbers or rolls for how often she is right.
+
+### D51. A move's path names the zones it enters
+**Decided:** Each entry in a `move` or `give` path is one crossing, named by the zone it enters, or by the connection crossed where two connections join the same zones. The last entry is the destination. The engine resolves each crossing to its connection and checks that it exists and that everything crossing it fits (`docs/spec/engine.md` §2). A path has at most two entries; without a path, the destination must be the current zone or next to it.
+**Why:** On the bench, all five step calls wrote paths as the zones Fern passed through ("gutter", "guardroom"), never as connection ids. The contract said "id" without saying which kind. The AI's judgment is which way to go; finding the door between two zones is the engine's job (principle 2).
+**Rules out:** Requiring connection ids where the zones already say which way.
+
+### D52. State uses the packet's words; anything else is canon
+**Decided:** A `set_flag` from any call must use a flag key the packet or a character sheet already uses (in a thing's or connection's flags, a condition, a rule, or a declared ability). The engine rejects any other key and sends it back. A new fact the engine has no word for ("the bars are bent apart") is written as canon with `add_canon`, where the AIs read it. An NPC action that changes nothing the engine tracks (he calls out an offer) has empty `ops`; its `because` says what he does.
+**Why:** On the bench, the world call invented flags in every run (`offering_deal`, `with_party`, `wants_deal`) to give an action something to change. Nothing in the engine reads them, so they're invisible state that looks meaningful. Flags only mean something when a condition reads them.
+**Rules out:** Free-form flag keys; empty-looking state written to make an action feel concrete.
+
+### D53. A lockable connection has a second size for when it's unlocked
+**Decided:** A connection with a `locked` flag can give `fits_unlocked`: the biggest size that passes once it's unlocked. While it's locked, `fits` applies. A barred cell door `fits` small (a rat slips between the bars) and `fits_unlocked` medium (a person walks out).
+**Why:** The bench's fit check found that the Cells packet's cell doors let a rat through and never a person, even unlocked: one size can't describe both the gaps in a door and the doorway.
+**Rules out:** Treating an unlocked door as having no size limit.
+
+### D54. The engine finds the way unless the player names it
+**Decided:** Refines D51. A step's move or hand-off carries a `path` only when the player said which way ("down the gutter"). Otherwise the step call leaves it out, and the engine takes the shortest route that everyone moving, and everything they carry, fits through. A route longer than two crossings is more than one step, and goes back to the step call.
+**Why:** On the bench, when the plan didn't say which way, the step call routed the iron key ring through the rat-sized gutter in most runs, and its retries split the plan into eleven steps. Finding a route that fits is computation (principle 2); which way to go is the player's call (D35).
+**Rules out:** The step call choosing routes the player didn't.
+
+### D55. When a named route doesn't fit, the DM rules on it
+**Decided:** When a route the player named fails the engine's size check, the engine asks the ruling call one neutral question: can this thing pass through that connection, in this case? It sees the two descriptions, the sizes, who is doing it and the canon so far, and nothing about the plan. A yes becomes a canon ruling, and the engine lets that thing through that connection from then on. A no leaves the step as written, and reality interrupts it when it's reached (D36).
+**Why:** Sizes are four coarse categories, and the fiction is finer (a sack of gear can be passed through bars an item at a time). Asking the plan's own calls invites motivated reasoning; a question with no plan attached doesn't. The thing's own description still wins: the Cells' key ring is written as too big for the gutter.
+**Rules out:** Treating the size categories as the last word; letting the step or pricing call overrule them.
+
+### D56. The engine opens doors with keys and splits long moves
+**Decided:** Someone carrying a connection's `key` unlocks it as they pass through, without a separate effect. A move longer than two crossings is split by the engine into consecutive steps, each inheriting the step's actors, noise and timing, instead of going back to the step call.
+**Why:** On the bench, every card 1 run went back for a retry over one of these: "the rogue unlocks the doors" written without the unlock, and "we go" spanning three crossings. Both are bookkeeping, and a retry costs a whole second call.
+**Rules out:** Sending mechanical gaps back to the AI when code can close them.
+
+### D57. The ruling call judges the physical situation, not the size categories
+**Decided:** Refines D55. The ruling call gets the objects' descriptions and rough real dimensions (a rat-sized grate is about three inches across; cell bars are about five inches apart), never the size categories or "fits" labels, and returns how it would be done when the answer is yes.
+**Why:** Given the categories, it repeated them: in three of three runs it ruled the gear sack "too large for bars that only admit small items." The question is whether it would really work, which the categories can't answer.
+
+### D58. Model tiers: the middle position, and what's still untested
+**Decided:** Supersedes D15 for the companion call and settles the middle position of the speed and quality setting (D48). Rulings and the companion huddle run on `quick`. Steps, pricing, world and narration run on `default`. The generator and campfire keep `complex` (D15). The faster and smarter positions move every call one tier down or one tier up from this; Phase 4 tunes them from playtests.
+**Why:** On the bench the huddle on `quick` kept the companions' voices, said nothing about game mechanics, and offered the timing hole among a companion's three candidates in every run, so deliberating longer buys nothing a first instinct doesn't (D50). A ruling is one small question. Nothing in the step, pricing, world or narration runs showed a miss that a higher tier was needed for, so none moves up (D15's rule). Pricing, world and narration were not compared against `complex`, and the generator and campfire weren't run at all.
+**Rules out:** Moving a call up a tier without a measured miss it fixes.
+
+### D59. Each call's context is an allowlist
+**Decided:** Every call is built from an explicit list of what it gets, never by removing a few fields and sending the rest.
+- **Companion profiles:** each channel names the profile fields it sends (`docs/spec/companions.md` §3). Fields not on the list never reach a prompt: UI and engine data (`color`, `rate`, `leanFromHeat`) and special cases not yet declared (Lisa's `variants`, Nadia's Ember fields), until Phase 5 resolves the active variant in the engine.
+- **Abilities** go to every call as their effect text, without the engine's `declared` blocks (D30).
+- **The party's map** has no size categories, which players never see (D57).
+- **The world call** gets only the people present, routines as labels, and the ids of the reactions the engine runs, not their rules, senses or beat rules, which the engine has already applied. It returns structure only, so it gets no prose style guide.
+
+The huddle keeps everything a player at the table has, including the map, her look and outfit, and the other companions' abilities (D40).
+**Why:** Building by exclusion sent Lisa's full variant text (about 12 KB) on every call, and would send any field added later. The world call was paying for rules that had already run.
+**Rules out:** Sending a profile or packet slice "minus a few fields".

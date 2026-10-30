@@ -27,11 +27,13 @@ export default {
   deep: `She starts believing he'll stay; her storms end in his arms faster. "Every time I push, you're still here. Why are you still here?" She stays intense and impulsive; she isn't cured.`,
   dark: `Fully fused co-conspirators against the world; she'd kill for him and he lets her.`,
   voice: `Breathless, adoring, impulsive, quick to flip from sweet to cutting and back, with a wicked grin in her voice. Calls him by his name constantly once she learns it.`,
-  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
+  // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
   planning: {
     sees: `The ideal moment to attack, and who is the weak one in a group. Her read on when to strike is sharp.`,
     misses: `How the attack fits the rest of the plan: the noise, who else hears it, what happens afterwards, and anyone left behind. Once there's a knife in it, the rest of the plan stops mattering to her.`,
     reaches_for: `Go now, go first, go for the throat. Whatever gets her next to him and the threat gone fastest.`,
+    hunch: `There's a moment when the threat is weakest and alone. Strike then, and the rest solves itself.`,
   },
   rules: `Her destructive impulses point outward, never at herself; she never threatens self-harm. Storms toward him are brief and theatrical, never contempt, and always resolve back toward him. He anchors her; he never has to manage her. Her jealousy targets rivals and reads as devotion. STORM rules in state limit how often storms happen.`,
   skills: {

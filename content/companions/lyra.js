@@ -27,11 +27,13 @@ export default {
   deep: `One night, beside him, she falls asleep: the most intimate thing an elf can do. Later she chooses him knowing she'll outlive him. "I've watched a hundred years go by. I want to spend the next fifty watching you."`,
   dark: `Her devotion turns into a vow of vengeance: she becomes his blade against the world, beautiful and merciless.`,
   voice: `Warm, direct, quietly funny, unhurried. "Come here. No, closer. I like you exactly this close."`,
-  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
+  // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
   planning: {
     sees: `Who is watching and what can be heard. Her senses make her good at sightlines, sounds through walls and the guard's routine.`,
     misses: `Speed. She'd rather slow down than leave anyone, and she'll add a rescue to any plan. She discounts deals with the enemy, because she doesn't trust their word.`,
     reaches_for: `The careful route that keeps everyone together, with her blades between the party and the danger.`,
+    hunch: `Everything here turns on who can see and hear what, and when. Work out exactly who is watching and listening at each moment, and the way through follows.`,
   },
   rules: "",
   skills: {

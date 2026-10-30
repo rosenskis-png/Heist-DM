@@ -136,10 +136,10 @@
       { "id": "cistern", "name": "Cistern", "purpose": "An old dwarven cistern the Maw has forgotten; the ale crawl's far end.", "light": "dark", "level": -1, "rects": [[9, 0, 3, 3]], "hidden": true }
     ],
     "connections": [
-      { "id": "bars_far", "kind": "bars", "name": "Far cell door", "between": ["cell_far", "corridor"], "wall": [[0, 2], [2, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
-      { "id": "bars_middle", "kind": "bars", "name": "Middle cell door", "between": ["cell_middle", "corridor"], "wall": [[2, 2], [4, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
-      { "id": "bars_near", "kind": "bars", "name": "Near cell door", "between": ["cell_near", "corridor"], "wall": [[4, 2], [6, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
-      { "id": "bars_brannoc", "kind": "bars", "name": "Brannoc's cell door", "between": ["cell_brannoc", "corridor"], "wall": [[2, 4], [4, 4]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_far", "kind": "bars", "name": "Far cell door", "between": ["cell_far", "corridor"], "wall": [[0, 2], [2, 2]], "fits": "small", "fits_unlocked": "medium", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_middle", "kind": "bars", "name": "Middle cell door", "between": ["cell_middle", "corridor"], "wall": [[2, 2], [4, 2]], "fits": "small", "fits_unlocked": "medium", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_near", "kind": "bars", "name": "Near cell door", "between": ["cell_near", "corridor"], "wall": [[4, 2], [6, 2]], "fits": "small", "fits_unlocked": "medium", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_brannoc", "kind": "bars", "name": "Brannoc's cell door", "between": ["cell_brannoc", "corridor"], "wall": [[2, 4], [4, 4]], "fits": "small", "fits_unlocked": "medium", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
       { "id": "far_corner", "kind": "opening", "between": ["cell_far_back", "cell_far"], "wall": [[1, 0], [1, 1]], "fits": "large", "see_through": true, "operated_from": "both" },
       { "id": "doorway", "kind": "opening", "name": "Guardroom doorway", "between": ["corridor", "guardroom"], "wall": [[6, 2], [6, 4]], "fits": "large", "see_through": true, "operated_from": "both" },
       { "id": "stair_foot", "kind": "opening", "between": ["guardroom", "stair"], "wall": [[10, 0], [10, 2]], "fits": "large", "see_through": true, "operated_from": "both" },
@@ -156,7 +156,7 @@
       { "id": "peg", "name": "Key peg", "properties": "An iron peg on the guardroom wall, behind the stool and five feet from the cask.", "size": "tiny", "location": { "zone": "guardroom", "at": [8, 1] } },
       { "id": "stool", "name": "Snag's stool", "properties": "Three-legged, set in the doorway so it faces down the corridor.", "size": "small", "location": { "zone": "guardroom", "at": [6, 2] } },
       { "id": "drum", "name": "War drum", "properties": "The Maw's alarm, passed along through the Warrens by other drums. Its head is hide, so a rat can gnaw through it. Hangs on a hook by the stool, its stick beside it.", "size": "medium", "flags": { "gnawed": false }, "location": { "zone": "guardroom", "at": [7, 2] } },
-      { "id": "cask", "name": "Ale cask", "properties": "A big cask on a cradle in the guardroom corner, with a squeaking tap. It hides the mouth of the ale crawl.", "size": "large", "location": { "zone": "guardroom", "at": [9, 0] } },
+      { "id": "cask", "name": "Ale cask", "properties": "A big cask on a cradle in the guardroom corner, with a squeaking tap.", "size": "large", "location": { "zone": "guardroom", "at": [9, 0] } },
       { "id": "gear_sack", "name": "The party's gear", "properties": "A sack under the guardroom table holding everything taken from the party. Carrying it costs an extra step.", "size": "medium", "location": { "zone": "guardroom", "at": [8, 3] } },
       { "id": "bench_far", "name": "Bench", "properties": "A plank bench in the far cell. Its nails are working loose; prying one free takes a step and makes a creak. A nail makes a passable lockpick.", "size": "medium", "location": { "zone": "cell_far", "at": [0, 1] } },
       { "id": "bucket_far", "name": "Waste bucket", "properties": "Dumping it down the grate floods the guardroom drain, and Snag spends a tick cleaning up, cursing, with his back turned.", "size": "small", "location": { "zone": "cell_far" } },
@@ -168,8 +168,8 @@
     "facts": [
       { "id": "iron", "text": "Bars and locks are iron, so nature magic can't touch them. Entangle only takes hold on the mossy, cracked floor at the far end of the corridor." },
       { "id": "stair_door", "text": "Shouting doesn't carry past the heavy door at the top of the stair. Only the war drum reaches the Warrens." },
-      { "id": "wild_shape_ends", "text": "Ruling made in advance: Fern's Wild Shape ends when she leaves the cell block (the stair, the stair top or the cistern)." },
-      { "id": "crawl_behind_cask", "text": "Behind the cask, a low crawl runs to the old cistern. Snag uses it to steal ale and hides it from Uzga.", "hidden": true }
+      { "id": "wild_shape_ends", "text": "Ruling made in advance: Fern's Wild Shape ends when she leaves the cell block." },
+      { "id": "crawl_behind_cask", "text": "Behind the cask, hidden by it, a low crawl runs to the old cistern. Snag uses it to steal ale and hides it from Uzga.", "hidden": true }
     ]
   },
   "clock": {

@@ -27,11 +27,13 @@ export default {
   deep: `She reclaims her power, makes him her consort, and stays queen, with him hers. Her dominance never reverses; it becomes devotion.`,
   dark: `Her craving to be desired turns possessive: she keeps him in a gilded cage of pleasure, adored, indulged, and never allowed to leave.`,
   voice: `Low, unhurried, amused, velvet-commanding. "Shh. You don't have to decide anything tonight. Just do as I say. Good."`,
-  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
+  // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
   planning: {
     sees: `Leverage: who fears whom, who can be turned, where the chain of command is weak. She reads an NPC's price at once.`,
     misses: `Physical practicalities. She doesn't crawl or climb, and forgets that others will have to. She treats people as pieces, so she misses the cost a plan has for them.`,
     reaches_for: `Make someone else do the work: turn the guard, use the prisoner, command rather than sneak.`,
+    hunch: `Someone here can be made to do the work for you. Find who fears whom, and what they'd give to be safe.`,
   },
   rules: "Her dominance never reverses.",
   skills: {

@@ -9,7 +9,7 @@ The player writes the plan in prose, usually as numbered steps. It can include t
 
 ## Returns (`schemas/calls/step.js`)
 - **Steps.** One step is one zone traversal or one distinct time-consuming action. Parallel actions by different characters share a step. Restating or elaborating creates no step.
-- Each step lists its actors, its zone, how loud it is, what it uses, and its **effects** as state-change operations (moves, items, flags). A move crosses at most two connections.
+- Each step lists its actors, its zone, how loud it is, what it uses, and its **effects** as state-change operations (moves, items, flags). A move crosses at most two connections, and its path names the zones it enters (D51), given only when the player named the way (D54). Flags use only the packet's own keys; a new fact is canon (D52).
 - **Timing, only where the player gave it:** `when` (wait until a condition holds, with `max_wait` if the player said how long). Without `when`, a step happens right after the previous one.
 - **Conditions, only where the player gave them:** `if`, with `otherwise` set to `skip` ("if not, she doesn't"), `stop` ("if not, we call it off"), or the alternative action the player described ("if not, she comes back").
 - Timing and conditions are written as `plan_condition`s: only things a party member could see or hear, plus the time, and only what the party knows (things it has seen, routines it has learned). During execution, someone in the party has to be able to perceive the condition when it's checked, or the plan stops there (D39). The step call doesn't fix that for the player: "if he's asleep" is written as the player said it, even if no one will be able to see him.

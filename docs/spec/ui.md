@@ -37,5 +37,8 @@ On a phone the three are tabs, each with an unread marker (roadmap, Phase 4).
 
 Gravenhold's `Game` component is built around one chat log and is not reused. Its `MapSVG` draws rectangles that don't follow the real layout and is not reused.
 
+## Settings
+- **Speed and quality** (D48): a choice between faster, cheaper calls and a smarter DM, charged to the player's own usage.
+
 ## Developer view (recommended)
 A hidden panel showing the last call's assembled input and raw output, held in memory only and never stored (D10). It makes precise playtest feedback easy to give.

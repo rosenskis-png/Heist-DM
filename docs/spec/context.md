@@ -26,11 +26,12 @@ Prompts are always ordered campaign → encounter → live. `sample` gives no pr
 | State, canon, event log | full | full | full | full | full | known only |
 | Engine route and observer facts | — | ✓, foreseen and unforeseen kept apart (D36) | — | — | — | — |
 | Table read | — | — | ✓ | — | — | — |
-| Card | plan + decided stances | validated steps (internal facts kept apart) | results | results + world actions | draft | draft and card as shown (D40) |
+| Card | plan + decided stances | validated steps (internal facts kept apart) | results | steps with their results + world actions | draft | draft and card as shown (D40) |
 | Recent raw exchanges | few | — | — | few | current conversation | visible huddle this encounter, plus recent narration the party witnessed |
 | Huddle content | — | — | — | — | — | own channels |
 | Companion secrets and relationships | — | — | — | — | — | own only, gated (`docs/spec/companions.md`) |
 
+- **Allowlists** (D59): each column above is built from an explicit list. Abilities go without their `declared` blocks; the party's map has no size categories; the world call gets only the people present, routines as labels, and the ids of the engine's reactions, with no prose style guide.
 - **Coordinates never go to any call** (D9). The map block is relationships plus facts the engine derived from geometry.
 - **Hidden things** go only to the plan calls and the Moment AI, marked hidden.
 - **Companions** see only what the party knows, plus their own data.
@@ -57,8 +58,10 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Moment | `sample.json` | off | `default` |
 | Companion | `sample.json` | off | `default` |
 | Campfire | `sample.json` | off | `complex` |
+| Ruling | `sample.json` | on | `quick` |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same state and plan get the same ruling, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
+- **Tiers are a player setting** (D48). The table gives the middle position; each position of the setting maps every call to a tier.
 - **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`.

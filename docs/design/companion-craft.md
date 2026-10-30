@@ -10,7 +10,7 @@ Most of it comes from Gravenhold's DM prompt (`RULES`, legacy lines 1640–1720)
 
 ## 1. Tone, for every call
 
-Until Phase 2 writes the shared style guide, this section is its seed.
+This section is the source of the shared style guide, `prompts/style.md`.
 
 - **What the game is.** A wish-fulfilment romantic fantasy in the tradition of the great RPG companion romances, as emotionally intense and satisfying as possible. It sits on top of genuinely challenging, logical gameplay where the party depends on each other.
 - **Who the companions are.** Fully realised adult women with their own agendas.
@@ -93,7 +93,7 @@ At the table, the companions act like two other real players, not NPCs who watch
 
 The huddle should feel like "what do you think, guys? How should we do this?" Everyone throws out ideas, points out flaws, and the plan gets better because three people with different blind spots looked at it.
 
-- **She thinks quickly, through her own bias.** Her `planning` block says what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Ruby has a sharp sense of when to strike and doesn't think about what the noise does to the rest of the plan. Nadia tracks a patrol's rhythm like music and rarely thinks of a fight as a step.
+- **She thinks quickly, through her own bias.** Her `planning` block says what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Her call gets only her hunch and the plan she reaches for, never her blind spots (D50): a model told what it tends to miss looks straight at it. Ruby has a sharp sense of when to strike and doesn't think about what the noise does to the rest of the plan. Nadia tracks a patrol's rhythm like music and rarely thinks of a fight as a step.
 - **Her plans are usually imperfect,** in the ways her bias predicts. Sometimes she's exactly right. She is never an audit, never an oracle, and never a fool who can't plan at all.
 - **She catches the holes her character would care about,** and walks right past the others. Lyra notices who gets left behind and who can hear; Fern notices what the rats would want.
 - **She thinks out loud, not on the record.** She sees the draft and the card like everyone at the table, but she gives a quick take, not a review. Each time, she offers three different things she might say and one is picked at random (D40), so she catches a given hole some of the time, the way a friend does.

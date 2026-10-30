@@ -28,7 +28,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
   - Each zone is a list of rectangles `[x, y, w, h]` on a `level` (0 by default). Walls are implicit at zone edges. Zones on one level don't overlap.
   - A connection on one level is a `wall` segment `[[x1, y1], [x2, y2]]` on the edge its two zones share. A connection between levels (stairs, a grate into a gutter) is one `square` inside both zones' footprints.
   - A thing gets an `at` square only when where it sits matters or the map should show it. Otherwise it just sits in its zone.
-- **Connections:** what links two zones (door, bars, grate, drain, opening, stairs, crawl), with the biggest size that `fits` through, `see_through`, flags (`locked`), **which side each one is operated from** and whether it can be reached from the other side, the `key` if any, plus extra travel cost in ticks.
+- **Connections:** what links two zones (door, bars, grate, drain, opening, stairs, crawl), with the biggest size that `fits` through (and, for a lockable one, `fits_unlocked`, D53), `see_through`, flags (`locked`), **which side each one is operated from** and whether it can be reached from the other side, the `key` if any, plus extra travel cost in ticks.
 - **Sense links:** per NPC, or per beat for an NPC on a schedule: the zones they see, and the zones they hear with the quietest sound they catch there.
 - **Light level** per zone.
 - **Things:** objects with properties (free text for the AI to judge, plus a size and any flags the engine checks), and where they are: a zone or a holder. Schedules move them through beats' `on_start` rules.
@@ -56,6 +56,7 @@ Written from the map after the map is final. Stored word for word and sent with 
 - Every observer says what it can see and hear.
 - Every zone has a purpose line.
 - The geometry agrees with the relationships: zones don't overlap, each connection lies on the wall its two zones share, and each thing sits inside its zone.
+- No visible text names a hidden thing. A hidden zone, connection, thing or fact is described only in hidden entries and in the parts of the packet the party never sees (the intent, NPC sheets), so the party's view of the map gives nothing away.
 - No route-like fields. The schema allows no unknown fields, so a `routes` field anywhere is rejected.
 
 ### Quality: warnings only, tuned after playtests (roadmap, Phase 7)

@@ -8,6 +8,7 @@
 NPC actions and reactions as state-change operations: moves, disposition shifts, a fight starting, an alarm raised.
 - Each must follow from an NPC's sheet and from what just happened.
 - No new entities or threats beyond those placed in the packet (principle 8).
+- Flags use only keys the packet already uses. An action that changes nothing the engine tracks has empty ops (D52).
 - Reactions the packet already writes as triggers are run by the engine, not decided here (D18).
 
 ## Pacing lives here
