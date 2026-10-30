@@ -154,3 +154,27 @@ Seeing and hearing stay authored per observer and beat. There is no ray casting.
 ### D34. A card shows problems instead of pricing the impossible
 **Decided:** The engine projects each step as if the earlier steps' problems were fixed, so one problem doesn't flag every later step. A step with a problem of its own (the keys aren't on the peg at that tick; a trigger fires first) shows the problem and isn't sent for pricing.
 **Why:** Card 1 priced walking the party past Snag after the engine had already projected him going for the drum: odds on a step that can't happen as written. The card's job is to surface every timing problem at once (`fixtures/cells/walkthrough.md` §6), and a problem says that better than a long-shot price.
+
+### D35. The player writes the plan, including its timing and conditions
+**Decided:** The player writes the plan in prose, usually as numbered steps, and can include timing ("when he sits down, Fern grabs the keys") and conditions ("if the cask is unguarded, she takes the sack; if not, she leaves it"). The step call turns those words into steps with `when` (wait until a condition holds, up to a limit) and `if` / `otherwise` (skip, stop, or do something else). It never adds timing or conditions the player didn't write. A step with no `when` happens right after the previous one. A `when` or `if` may refer only to things the party knows, including routines it has learned. Shape: `schemas/calls/step.js`.
+**Why:** When the AI fills in timing, a plan that goes wrong feels like the DM fumbled it; when the player chose it, the mistake and the success are both theirs. Literal steps with no way to say "wait" made plans fail for not being choreographed to the beat.
+**Rules out:** The step call inferring "sensible" timing on the player's behalf.
+
+### D36. The card prices the plan the party expects; reality interrupts it
+**Decided:** Supersedes D34.
+- **The card warns about nothing.** It shows no problems, and never says a step can't happen.
+- **Every step is priced at its own honest odds, as the party expects the world to be:** only the observers, barriers and hazards the party foresees, and as if each step's preconditions hold. "She picks the vault lock" is priced as picking the lock, even if a guard the party doesn't know about is about to walk in. Bands stay as in D33.
+- **Timing is shown only in terms the party knows** (the beats of a routine it has learned).
+- **During execution, the plan stops where reality differs from what the card expected,** before that thing happens: an NPC the party didn't foresee would perceive the step, an effect can't happen (the peg is empty), a hidden fact defeats it, a trigger fires first, or a wait runs out. The earlier steps stand.
+- **An unforeseen arrival gets a warning roll.** The pricing call judges its band in advance, unseen. On a success the party hears it coming, and the first step of their next plan happens before it lands. On a failure it lands as the scene opens.
+**Why:** The card was an oracle. Reviewing it costs nothing, so a player could probe a schedule the party had never learned by editing plans and reading the problems. Failing in the fiction is play; failing on the card is paperwork. Fairness belongs in the world: anything a plan depends on must be perceivable or learnable before the player commits (`docs/design/encounter-craft.md` §4.3).
+**Rules out:** Problems shown on the card; pricing that reflects things the party can't know; hidden rolls for unforeseen observers (they interrupt instead).
+
+### D37. Deadlines leave room for two recovered failures
+**Decided:** Supersedes the sizing in D31. An encounter's deadline should fit some exploring plus a plan in which two key rolls fail and both recoveries are handled well. Uzga now arrives at tick 21 (a starting value; playtests move it).
+**Why:** With no warnings on the card (D36), more plans fail in the fiction, so recovery needs more room. A failure must still leave a new situation, never a dead end.
+
+### D38. Companions think about plans as biased characters, not reviewers
+**Decided:** The companion call no longer receives the draft card. Companions react to a plan only when it comes up in the huddle. Each companion file has a `planning` block: what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Her ideas come quickly and through that bias: often imperfect, occasionally right, never an audit. The craft is in `docs/design/companion-craft.md` §6.
+**Why:** A model given the draft card and the facts will catch nearly every hole, which makes the companions a filtered oracle and turns the huddle into a free plan-checker. The fun of the huddle is talking through imperfect plans together, with everyone pointing out flaws and improving them.
+**Rules out:** Sending the draft card to companion calls; companions as advisors who always know best, and as foils who are always wrong.

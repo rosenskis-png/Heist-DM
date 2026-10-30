@@ -149,6 +149,7 @@ This is also how a success produces something interesting.
 - **Better still, make the cycle visible instead of something to memorize.** A patrol carrying a torch through a dark cavern shows its own position. The players watch it the same way their characters do.
 - **Being locked in a cell, a good vantage point, or a quiet opening can make watching free on purpose.** The deadline then sets the price.
 - **Anything the players must know to have a fair chance should be learnable in more than one way.**
+- **Fairness lives in the world, not on the card.** The card never warns that a plan will go wrong (D36). So everything a plan depends on must be perceivable or learnable before the player commits: the keys hang on Snag's belt while he paces, in plain view, and the routine can be heard through the wall. A plan that misses it is the player's miscalculation, and the scene picks up at the moment it shows.
 
 ### 4.4 Alarm: a resource that changes the tempo
 - **The strongest single engine is a trade between two pressures:**

@@ -2,7 +2,8 @@
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
 
-// Steps the engine flagged with a problem of their own are not priced (docs/spec/engine.md §6).
+// Every step is priced as the party expects the world to be (D36). Things the party doesn't foresee
+// are not priced here; they interrupt the plan during execution.
 export const pricingSchema = withDefs({
   $id: "pricing",
   ...obj(["steps", "rulings"], {
@@ -12,7 +13,7 @@ export const pricingSchema = withDefs({
         risks: list(
           obj(["id", "covers", "difficulty", "reason", "on_fail"], {
             id: r("id"),
-            // Observer, barrier or hazard ids from the engine's facts for this step.
+            // Observer, barrier or hazard ids from the engine's foreseen facts for this step.
             covers: list(r("id"), 1),
             difficulty: r("difficulty"),
             reason: r("text"),
@@ -37,5 +38,15 @@ export const pricingSchema = withDefs({
       1,
     ),
     rulings: list(r("text")),
+    // Internal, never shown: for each projected arrival the party doesn't foresee, how hard it is for
+    // the party to hear it coming (docs/spec/engine.md §6).
+    warnings: list(
+      obj(["n", "covers", "difficulty", "reason"], {
+        n: { type: "integer", minimum: 1 },
+        covers: r("id"),
+        difficulty: { oneOf: [{ const: "automatic" }, r("difficulty")] },
+        reason: r("text"),
+      }),
+    ),
   }),
 });

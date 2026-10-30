@@ -13,7 +13,22 @@ export const resultsSchema = withDefs({
       obj(["n", "tick", "outcome", "rolls"], {
         n: { type: "integer", minimum: 1 },
         tick: { type: "integer", minimum: 0 },
-        outcome: { enum: ["done", "stopped", "skipped", "revealed"] },
+        waited: { type: "integer", minimum: 0 },
+        // stopped: a failed risk with stops_plan. interrupted: reality differed from what the card expected.
+        // skipped: an `if` was false and `otherwise` was "skip". alternative: `otherwise` ran instead.
+        outcome: { enum: ["done", "stopped", "interrupted", "skipped", "alternative"] },
+        interrupt: obj(["code", "detail"], {
+          code: r("id"),
+          effect: { type: "integer", minimum: 0 },
+          id: r("id"),
+          detail: r("text"),
+          // For an arrival: whether the party heard it coming (and so acts first on the next plan).
+          warning: obj(["odds", "roll", "success"], {
+            odds: r("odds"),
+            roll: { type: "integer", minimum: 1, maximum: 100 },
+            success: { type: "boolean" },
+          }),
+        }),
         rolls: list(
           obj(["risk", "odds", "roll", "success"], {
             risk: r("id"),

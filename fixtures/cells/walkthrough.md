@@ -4,7 +4,7 @@ The project's first fixture: a worked example of good encounter design (`docs/de
 
 Gravenhold's defining failure was its opening cell-block escape. The player's first-turn plan ("Fern turns into a rat, gets the keys, everyone walks out") took ten exchanges and zero dice. Below is the same encounter as a packet (`docs/spec/packet.md`), built on the encounter craft guide.
 
-**The test it has to pass:** that plan gets a card on turn one, at most one edit, and a couple of rolls, and the party is out of their cells by the third exchange. Whether the plan works isn't the interesting question. The interesting question is the goblin standing between the party and the stair when it does.
+**The test it has to pass:** that plan gets a card on turn one. Whether the player catches its mistake on the card or the world interrupts it, the party is out of their cells within four exchanges, with a couple of rolls. Whether the plan works isn't the interesting question. The interesting question is the goblin standing between the party and the stair when it does.
 
 **If this is used as a prompt example,** send only §1–4. §5 names an Act 4 invariant, and per the act gate (`docs/spec/context.md` §3), no Act 1–3 call may contain it.
 
@@ -31,7 +31,7 @@ As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with
 | NPC | Wants | Fears | Knows | Will never |
 |---|---|---|---|---|
 | **Snag**, goblin jailer | a quiet shift, his ale, to win at bones against himself | Sergeant Uzga, and above all being blamed | the ale crawl behind the cask; which key fits which cell | go upstairs to report a problem himself; fight loose prisoners alone (he goes for the drum, and if the drum is useless, he bargains) |
-| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 18 for Fern |
+| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 21 for Fern |
 | **Brannoc**, human miner in the cell opposite | out | being left behind | Snag's routine (a week of watching); where the occupiers dig at the sacred spring; that Snag comes back from his breaks smelling of wet stone | keep quiet if they leave him: "Take me, or I tell the sergeant everything I saw." He also has a hoard of crusts |
 
 **Snag's cycle.** One plan step is one tick, and the cycle repeats every three ticks.
@@ -60,7 +60,7 @@ As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with
 **Bringing suspicion back down.**
 - Suspicion drops by 1 after a full cycle (three ticks) in which Snag notices nothing odd and every prisoner he can see is lying still. Pretending to sleep counts.
 - It can't drop while something he knows is wrong is still wrong, such as an empty peg or a torn drum.
-- Lying low costs three of the eighteen ticks before Uzga arrives, so it trades safety for time.
+- Lying low costs three of the twenty-one ticks before Uzga arrives, so it trades safety for time.
 
 **Map, written as relationships**
 - **Cells (far, middle, near):** "where the Maw keeps tribute until it's sorted."
@@ -93,12 +93,12 @@ As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with
 - **Ruling made in advance:** Fern's Wild Shape ends when the party leaves the cell block.
 
 **Opening description.** It's written from the map and puts everything on the table:
-- Snag's club rattling along the bars.
+- Snag's club rattling along the bars, and his keys jangling at his belt while he walks.
 - The drum and the keys, visible from the near cells.
 - Uzga's voice on the stair as she leaves: "The druid goes up at watch change. Have her clean."
 - Brannoc's terms, stated out loud.
 
-So the deadline, the miner's threat and where the keys live are all known from the start.
+So the deadline, the miner's threat and where the keys live, on the peg or on his belt, are all perceivable from the start. Snag's routine is `known` in the packet: Lyra hears it through the wall. This is what makes the card's silence fair (D36).
 
 ## 2. How the rat plan plays
 
@@ -106,19 +106,28 @@ So the deadline, the miner's threat and where the keys live are all known from t
 - **Lyra** can hear through the wall: "He walks, he sits, he drinks. Over and over. Right now it's the cask." She also insists on freeing Brannoc, which follows from her trait "won't leave anyone behind." That becomes a pending stance the player rules on.
 - **Fern:** "The rats down here are starving and very chatty."
 
-The player commits the Gravenhold plan exactly as written: *Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.*
+The player commits the Gravenhold plan exactly as written: *Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.* It has no timing in it, so each step happens right after the one before (D35).
 
-**Card 1: the plan as written.** The engine projects each step's tick against Snag's cycle. Nothing is rolled yet; the card shows the plan's honest price.
-- **Fern changes shape** on the current beat, Drink, while Snag is at the cask with his back to the door: automatic. A step takes place in the tick it starts in (D16).
-- **Fetching the keys** lands on a Pace beat, and **the keys aren't on the peg:** Snag carries them while he paces.
-- **One rat dragging an iron ring** down the lit corridor past his stool: **Very hard.**
-- **Leaving** lands on his next Pace: he walks the corridor, sees the open doors, and the drum is whole, so he goes for it and a fight starts. The card shows that instead of pricing a walk past him (D34).
+**Card 1: the plan as written.** Every step is priced as the party expects the world to be (D36). The card shows when each step falls on Snag's routine, because the party knows it, and it warns about nothing.
 
-This one card teaches the player the whole cycle and the drum, through the card rather than through trial and error.
+| # | Step | Snag's beat | Difficulty |
+|---|---|---|---|
+| 1 | Fern changes shape | Drink | automatic |
+| 2 | Fern runs to the guardroom and takes the keys off the peg | Pace | Easy: a rat in the corridor while he paces it |
+| 3 | She drags the ring down the corridor to the far cell | Sit | Very hard: one rat, iron scraping on stone, past his stool |
+| 4 | The rogue unlocks everyone | Drink | automatic |
+| 5 | Everyone walks out | Pace | Near impossible: four people down the corridor he's pacing |
+| 6 | Up the stair | Sit | automatic |
 
-**Exchange 2: one edit.**
+The card doesn't say that the keys are on Snag's belt during step 2, or that he'll see the open doors before step 5. The party knows his routine and can see the beats on the card; spotting it is their job.
+
+**Exchange 2, path A: the player catches it.** Step 2 lands on his Pace, and his keys go on his belt when he walks. The player rewrites the plan with timing:
 
 > "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too."
+
+That's Card 2, below.
+
+**Exchange 2, path B: the player commits card 1.** Fern changes on the Drink beat. On the Pace beat she runs the corridor (Easy, rolled 40: success) and reaches the peg. It's empty: the keys jingle on Snag's belt as he walks past. **The plan is interrupted there** (`card1.results.json`). It isn't a failure. Fern is a rat in the guardroom at tick 2, Snag is sitting back down, and the keys go back on the peg behind him as he does. The world turn picks up at that moment, and the player plans from a better position than they started in. The next card can be card 2's steps 3–5, on the same beats: the interruption cost the player an exchange, not time.
 
 **Card 2: the edited plan**
 
@@ -130,6 +139,7 @@ This one card teaches the player the whole cycle and the drum, through the card 
 | 4 | The rats carry the ring to Lyra; Fern gnaws the drumhead | Drink | gnawing hide ten feet behind him | Easy | He kicks the rat off his drum (Fern loses 1 HP). Suspicion 1. The drum still works. The plan continues. |
 | 5 | Lyra unlocks all four doors | Pace: **he reaches for the empty peg** | none: he sees the doors open, but the drum is already gnawed (step 4), and a key is a key | automatic | — |
 
+- **Steps 1, 3 and 4 carry the player's own timing** (`when`: "while he's at the cask", "when he sits back down", "on his next drink"). Steps 2 and 5 have none, so each happens right after the step before.
 - **Lyra's stance** is resolved, because the plan frees Brannoc.
 - **The cost:** two dice, both Easy, across five steps on one card.
 
@@ -140,7 +150,7 @@ This one card teaches the player the whole cycle and the drum, through the card 
 
 That's the plan done. On the world turn, Snag acts from his sheet. The drum is useless, so he bargains: "Uzga'll skin me either way."
 
-**If step 3 had failed,** the ring would be on Snag's belt and his Suspicion at 1. He's still drinking, but the keys stay on him until his Suspicion is back to 0. The party can lie still for a cycle to bring it down and try again on the next Sit. That costs three of the fifteen ticks left before Uzga.
+**If step 3 had failed,** the ring would be on Snag's belt and his Suspicion at 1. He's still drinking, but the keys stay on him until his Suspicion is back to 0. The party can lie still for a cycle to bring it down and try again on the next Sit. That costs three of the eighteen ticks left before Uzga.
 
 **If step 4 had failed,** the same moment at tick 4 has Snag diving for the drumstick. A fight starts, with the Warrens one beat away from being alerted.
 
@@ -149,18 +159,18 @@ That's the plan done. On the world turn, Snag acts from his sheet. The drum is u
 Every option here comes from state that's already in the packet:
 
 - **Kill Snag.** He's aware, so the rogue can't backstab him; it would be a fight. The step is tagged `lethal`, which trips Fern's conditional stance ("won't kill needlessly"). Overriding her costs relationship.
-- **Tie him up.** This costs a step. Uzga finds him at tick 18, and he talks.
+- **Tie him up.** This costs a step. Uzga finds him at tick 21, and he talks.
 - **Take his deal.** The Maw's faction rules say bribes work and loyalty doesn't.
   - The deal: they tie him up so it looks like he fought, and in exchange he shows them the crawl behind the cask.
   - The crawl is the hidden exit. It's a surprise placed at design time, and it only helps.
   - Getting the deal is a social check. His loyalty lasts exactly as long as staying loyal is safer than betraying them.
 - **Get the gear.** The sack is under the table: one step to grab, and it slows them afterward.
 - **Deal with Brannoc.** He's slow and weak, but he knows where the spring diggings are, and that's Fern's personal quest.
-- **Watch the clock.** It's tick 5, and Uzga comes at tick 18. That's room for one thing here to go wrong and be recovered (D31).
+- **Watch the clock.** It's tick 5, and Uzga comes at tick 21. That's room for two things here to go wrong and be recovered (D37).
 
 ## 4. What carries into the Warrens
 
-- **Alert:** none (drum gnawed, Snag dealt with), low (Uzga finds the cells empty at tick 18), or high (the drum was beaten).
+- **Alert:** none (drum gnawed, Snag dealt with), low (Uzga finds the cells empty at tick 21), or high (the drum was beaten).
 - **Gear:** recovered or not.
 - **Snag:** dead (and Fern sees the player differently), tied up and talking, or an ally of convenience who knows the ale crawls through the Warrens.
 - **Brannoc:** with them, or left behind to tell Uzga which way they went.
@@ -184,6 +194,6 @@ Every option here comes from state that's already in the packet:
 
 ## 6. The risk to watch
 
-The card-edit loop is the new place a stall could hide. If each edit turned up one more problem, the player would be playing whack-a-mole with the AI that prices the plan, instead of with the companions as in the old game.
+Interruptions are the new place a bad feeling could hide. An interruption the player couldn't have seen coming reads as a gotcha, and a string of them reads as the DM moving the goalposts.
 
-The pricing call already defends against this: it prices every observer along the whole route at its projected tick, so card 1 surfaces every timing problem at once. If playtests show players needing three or more edits, check whether the opening and world turns make the cycle visible enough. Don't fix it by adding a rule.
+The defence is in the world, not on the card: everything a plan depends on must be perceivable or learnable before the player commits (`docs/design/encounter-craft.md` §4.3). In the Cells, the keys jangle at Snag's belt while he walks, Lyra hears his routine through the wall, and the card shows the beats. If playtests show players feeling ambushed, check whether the opening, the world turns and the map's clock make the situation visible enough. Don't fix it by putting warnings back on the card.

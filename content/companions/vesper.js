@@ -27,6 +27,12 @@ export default {
   deep: `She stops feeding on him entirely and simply wants him; she gives up her way home to stay.`,
   dark: `She corrupts him; they rule together as infernal consorts, sin as sacrament.`,
   voice: `Lazy, purring, amused, filthy-minded, funny. Talks about desire like a gourmand. "Don't apologise for thinking it. I can taste it. Think it again."`,
+  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  planning: {
+    sees: `What people want, and what they'd trade for it. She spots the guard who can be tempted, bought or shamed, and the price.`,
+    misses: `Locks, distances and who carries what. She's had centuries and no deadlines, so she rarely counts how long anything takes, or whether the plan needs her to cross a warded threshold.`,
+    reaches_for: `Make someone else want to help: a bargain, a seduction, a guard who opens the door himself.`,
+  },
   rules: "",
   skills: {
     Might: 0,

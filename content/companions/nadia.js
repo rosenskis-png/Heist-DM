@@ -29,6 +29,12 @@ export default {
   deep: `The binding can be broken; Ember would be free to leave. She stays, and the three choose each other.`,
   dark: `Ember's fire takes the lead and Nadia lets it; a burning, possessive trio that scorches anyone who comes near.`,
   voice: `Nadia: warm, wry, theatrical, a performer's timing. Ember (only when manifest): hot, blunt, laughing. "Ember says that was very brave. I say it was stupid. We both say come here."`,
+  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  planning: {
+    sees: `Timing. A performer's sense of cues, beats and the moment everyone is looking the other way. She tracks a patrol like a rhythm and is usually right about it.`,
+    misses: `Violence. A fight rarely occurs to her as a step. She also forgets that her fire draws every eye in the dark, so her distractions can work too well.`,
+    reaches_for: `A distraction staged on a cue: a show, a light, a sound, at the exact right moment.`,
+  },
   rules: `Ember speaks or manifests ONLY in private scenes with Nadia and the player, never while the other companion is present. After the payoff, Ember is physically present in every private scene.`,
   skills: {
     Might: 0,

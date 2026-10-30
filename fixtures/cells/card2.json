@@ -11,6 +11,7 @@
       {
         "n": 1,
         "summary": "Fern changes into a rat at the back of her cell.",
+        "when": { "until": { "beat": ["snag", "drink"] } },
         "actors": ["fern"],
         "zone": "cell_middle",
         "noise": "silent",
@@ -30,6 +31,7 @@
       {
         "n": 3,
         "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
+        "when": { "until": { "beat": ["snag", "sit"] } },
         "actors": ["brannoc", "fern"],
         "zone": "guardroom",
         "noise": "quiet",
@@ -40,6 +42,7 @@
       {
         "n": 4,
         "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
+        "when": { "until": { "beat": ["snag", "drink"] } },
         "actors": ["fern"],
         "zone": "guardroom",
         "noise": "quiet",
@@ -71,11 +74,11 @@
     "internal_checks": []
   },
   "facts": [
-    { "n": 1, "tick": 0, "beats": { "snag": "drink" }, "route": ["cell_middle"], "observers": [], "barriers": [], "hazards": [], "problems": [] },
-    { "n": 2, "tick": 1, "beats": { "snag": "pace" }, "route": ["cell_middle", "gutter", "guardroom"], "observers": [], "barriers": [], "hazards": [], "problems": [] },
-    { "n": 3, "tick": 2, "beats": { "snag": "sit" }, "route": ["cell_brannoc", "guardroom"], "observers": ["snag"], "barriers": [], "hazards": [], "problems": [] },
-    { "n": 4, "tick": 3, "beats": { "snag": "drink" }, "route": ["guardroom", "corridor", "cell_near"], "observers": ["snag"], "barriers": [], "hazards": [], "problems": [] },
-    { "n": 5, "tick": 4, "beats": { "snag": "pace" }, "route": ["cell_near", "corridor"], "observers": ["snag"], "barriers": ["bars_near", "bars_middle", "bars_far", "bars_brannoc"], "hazards": [], "problems": [] }
+    { "n": 1, "tick": 0, "beats": { "snag": "drink" }, "route": ["cell_middle"], "observers": [], "barriers": [], "hazards": [], "interrupts": [] },
+    { "n": 2, "tick": 1, "beats": { "snag": "pace" }, "route": ["cell_middle", "gutter", "guardroom"], "observers": [], "barriers": [], "hazards": [], "interrupts": [] },
+    { "n": 3, "tick": 2, "beats": { "snag": "sit" }, "route": ["cell_brannoc", "guardroom"], "observers": ["snag"], "barriers": [], "hazards": [], "interrupts": [] },
+    { "n": 4, "tick": 3, "beats": { "snag": "drink" }, "route": ["guardroom", "corridor", "cell_near"], "observers": ["snag"], "barriers": [], "hazards": [], "interrupts": [] },
+    { "n": 5, "tick": 4, "beats": { "snag": "pace" }, "route": ["cell_near", "corridor"], "observers": ["snag"], "barriers": ["bars_near", "bars_middle", "bars_far", "bars_brannoc"], "hazards": [], "interrupts": [] }
   ],
   "pricing_call": {
     "steps": [

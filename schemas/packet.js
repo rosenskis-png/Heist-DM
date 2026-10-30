@@ -72,7 +72,11 @@ const beat = obj(["id", "position", "senses"], {
   on_start: list(r("rule")),
 });
 
-const schedule = obj(["period", "phase", "beats"], {
+const schedule = obj(["id", "period", "phase", "beats"], {
+  // The id a `reveal` uses when the party learns the routine.
+  id: r("id"),
+  // Whether the party knows the routine from the start. Foreseen observers depend on it (D36).
+  known: { type: "boolean" },
   // Ticks per beat is 1, so period = number of beats. At tick t the beat is beats[(t + phase) % period].
   period: { type: "integer", minimum: 1 },
   phase: { type: "integer", minimum: 0 },
@@ -98,6 +102,8 @@ const npc = obj(["id", "name", "wants", "fears", "knows", "will_never", "temper"
 
 const event = obj(["id", "do"], {
   id: r("id"),
+  // Whether the party knows it's coming (Uzga's arrival is announced in the opening).
+  known: { type: "boolean" },
   at_tick: { type: "integer", minimum: 0 },
   when: r("condition"),
   do: list(r("rule"), 1),

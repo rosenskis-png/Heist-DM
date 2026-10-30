@@ -10,7 +10,7 @@
     "fail_forward": {
       "id": "fern_taken",
       "label": "Uzga takes Fern upstairs at the watch change; Act 2 opens as a rescue",
-      "condition": { "all": [{ "tick": [">=", 18] }, { "in_zone": ["fern", "cell_middle"] }] }
+      "condition": { "all": [{ "tick": [">=", 21] }, { "in_zone": ["fern", "cell_middle"] }] }
     },
     "optional": [
       { "id": "gear", "label": "Recover the gear sack", "condition": { "holds": ["party", "gear_sack"] } }
@@ -32,6 +32,8 @@
       "disposition": "bored",
       "position": "guardroom",
       "schedule": {
+        "id": "snag_routine",
+        "known": true,
         "period": 3,
         "phase": 2,
         "beats": [
@@ -172,7 +174,7 @@
   },
   "clock": {
     "events": [
-      { "id": "uzga_arrives", "at_tick": 18, "do": [{ "then": [{ "move": { "entity": "uzga", "to": "guardroom" } }] }] }
+      { "id": "uzga_arrives", "known": true, "at_tick": 21, "do": [{ "then": [{ "move": { "entity": "uzga", "to": "guardroom" } }] }] }
     ],
     "meters": [
       {
@@ -246,5 +248,5 @@
     "positions": { "player": "cell_far", "fern": "cell_middle", "lyra": "cell_near" },
     "ops": []
   },
-  "opening": "Snag's club rattles along the bars, cell by cell, and stops at the cask. The tap squeaks; he starts to hum. From your cell at the dark end of the block you can see the guardroom past the torch: the war drum on its hook by his stool, and the key ring hanging on its peg behind it. Uzga's voice comes down the stair as she leaves: \"The druid goes up at watch change. Have her clean.\" The heavy door shuts above. Across the corridor, the miner presses his face to his bars. \"Take me with you,\" he whispers, \"or I tell the sergeant everything I saw.\""
+  "opening": "Snag's club rattles along the bars, cell by cell, his keys jangling at his belt. He hangs them on the peg as he passes the stool, and stops at the cask. The tap squeaks; he starts to hum. From your cell at the dark end of the block you can see the guardroom past the torch: the war drum on its hook by his stool, and the key ring on its peg behind it. Uzga's voice comes down the stair as she leaves: \"The druid goes up at watch change. Have her clean.\" The heavy door shuts above. Across the corridor, the miner presses his face to his bars. \"Take me with you,\" he whispers, \"or I tell the sergeant everything I saw.\""
 }

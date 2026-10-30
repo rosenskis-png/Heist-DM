@@ -8,7 +8,7 @@ The pillar Gravenhold proved (D23). This file covers what a companion is in data
 
 Companions act like fellow players: opinions, reasoning, disagreement, in-character values. They **never** hold the plan hostage, gatekeep, invent conditions, or take actions that aren't on the card. If one won't do something, she takes a **stance** and the player rules on it.
 
-- **Huddle:** time is paused. Each companion gets her own call; the second sees the first's reply (`docs/spec/calls/companion.md`).
+- **Huddle:** time is paused. Each companion gets her own call; the second sees the first's reply (`docs/spec/calls/companion.md`). She doesn't see the draft card; she hears about a plan when it comes up, and thinks about it through her `planning` bias (D38).
 - **Private channel:** only the addressed companion is called. The whisper rings make this possible in the fiction (`content/setting.js`).
 - **Stances:** refuse, insist, or conditional, with conditional triggers written in the condition language. They're traced to her profile (beliefs, despises, rules). Only the player writes plan content.
 - **Campfire:** between encounters, with the full relationship picture (`docs/spec/calls/campfire.md`).
@@ -26,6 +26,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
+| Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
 | Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
 | Special cases | currently inline, e.g. Nadia's `emberVoice` and `emberLook`, and Lisa's `sisterNote` and `variants`. Phase 5 turns these into declared data (§6). |
 

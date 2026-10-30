@@ -16,13 +16,14 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 - **Routing on the zone graph:** routes and travel time in ticks; whether a zone is reachable given the current connection flags; which side a barrier can be operated from.
 - **Observers per step:** every NPC who, at the step's tick, is in a zone on the step's route, sees one, or hears one at the step's noise level or louder (`silent` < `quiet` < `speech` < `loud`). Senses come from the NPC's sheet or current beat, edited by meters. Example: at Suspicion 1, Snag can see the far cell's back corner. The route is every zone an actor or moved thing occupies during the step.
 - **The perceivable set:** what the party can perceive right now. This is what the companions and the map are given.
+- **What the party knows:** everything it has perceived or learned, plus the routines and events marked `known` in the packet or revealed in play. Foreseen observers on the card come from this (§6).
 
 ## 3. Time and schedules
 - **Ticks,** per the table in `docs/spec/architecture.md`, with D16's rule that a step takes place in the tick it starts in.
 - **Pending ticks** are applied one at a time, checking for arrivals after each.
 - **Cycles:** a period, a phase offset, and a state per beat. A beat can move things, not just people: the keys are on Snag's belt during Pace and on the peg during Sit and Drink.
 - **One-time events:** fire at a given tick, or when a condition is met.
-- **Projection:** the state at any future tick. The card needs this.
+- **Projection:** the state at any future tick, as it will really be and as the party expects it to be. The card needs both (§6).
 - **Edits:** meters and triggers can change schedules. At Suspicion 2, Snag's Drink beat is dropped.
 
 ## 4. Meters
@@ -34,30 +35,42 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 The engine runs deterministic reactions written in the packet:
 - noise heard → investigate next tick, suspicion +1;
 - keys touched → keys stay on belt until suspicion is 0;
-- Uzga arrives at tick 18.
+- Uzga arrives at tick 21.
 
 **The boundary** (D18): if a reaction can be written as condition → operations with no "unless he decides", it's an engine rule. Anything that chooses between options (how Snag bargains, what he'll accept) goes to the world call.
 
 ## 6. The plan pipeline
+The card prices the plan the party expects; reality interrupts it (D36).
+
 1. **Validate the step call's output:**
    - every move follows a connection;
    - every id is real;
-   - every **precondition holds at the projected tick** (e.g. the keys aren't on the peg during a Pace beat).
-2. **Attach facts to each step:** its projected tick, its route, the observers who can see or hear it at that tick, and the barriers it crosses.
-3. **Check the pricing call's output.** On every step without a problem, every observer, barrier and hazard the engine listed must have either a priced risk or a named mitigation. Anything uncovered is sent back.
-4. **Strip internal-only fields** (hidden checks) before the card is shown.
-   **Problems** (an effect that can't happen at its projected tick: the keys aren't on the peg, a trigger fires first) are shown on the card. They aren't errors in the step call and aren't sent back. Each step is projected as if the earlier steps' problems were fixed, so problems don't cascade, and a step with a problem of its own isn't priced: the card shows the problem instead (D34).
+   - every `when` and `if` refers only to things the party knows, including learned routines (D35).
+2. **Project each step.** Each step is projected as if the earlier steps went as planned:
+   - **its tick:** right after the previous step, or, with a `when`, the first tick its condition holds, waiting at most `max_wait` ticks (default 6);
+   - **its route,** and the barriers it crosses;
+   - **foreseen observers and hazards:** those the party knows will be there at that tick (NPCs it knows of, on routines and events it knows). Observers include anyone who perceives the actors while they wait;
+   - **interrupts** (internal): where reality is projected to differ from what the party expects. An NPC the party didn't foresee would see or hear the step (`arrival`); an effect can't happen at that tick (the keys aren't on the peg, the ring is too big for the gutter); a hidden fact defeats it; a trigger fires first; a wait runs out.
+3. **Check the pricing call's output.**
+   - Every step is priced, including steps with interrupts, as if their preconditions held.
+   - Every foreseen observer, barrier and hazard has a priced risk or a named mitigation, and nothing else is priced. Anything uncovered is sent back.
+   - Every `arrival` has a warning band.
+   - A shown reason or failure summary that names something the party doesn't know is sent back.
+4. **Strip the internal fields** (interrupts, internal checks, warnings) before the card is shown.
 5. **Execute each step in order:**
-   - advance the tick and apply schedules (each beat's `on_start` rules), meters and triggers;
-   - check for observers the card didn't list (reveal them and stop);
-   - run internal checks on hidden facts (reveal and stop);
+   - apply the tick's schedules (each beat's `on_start` rules), meters and triggers;
+   - if the step has a `when` that doesn't hold yet, the actors wait: the tick passes and the line above repeats. If `max_wait` runs out first, the plan is interrupted (`wait_expired`);
+   - evaluate its `if`; when it's false, apply `otherwise`: skip the step, stop the plan, or run the alternative instead;
+   - **interrupt before the step begins** if something the card didn't foresee would perceive it, a trigger has fired that changes the situation, or an internal check reveals a hidden fact. For an arrival, roll the warning: on a success, the party's next plan gets one step before it lands (the arrival resolves at the end of that tick instead of the start); on a failure, it lands as the scene opens. An arrival the card never projected (the world changed mid-plan) rolls at Medium;
    - skip risks whose conditions no longer hold;
    - roll the remaining risks;
    - apply the consequences of failed risks: their operations, minus the step effects they `cancel`;
-   - apply the step's remaining effects;
+   - apply the step's effects in order. **An effect that can't happen interrupts the plan there:** the earlier effects stand, and the fact behind it becomes known (the peg is empty);
    - run triggers; stop if a failed risk had `stops_plan`;
    - check the objective, any combat start, kept stance triggers and player checkpoints.
-6. **Log every result as structured data** for the narration call.
+6. **Log every result as structured data** for the narration call, including each interrupt and its warning roll.
+
+An interrupt is not a failure. The world turn picks up at that moment, and the player plans from there.
 
 ## 7. Dice, combat, abilities, stances
 - **Dice:** the AIs judge a difficulty band; the engine rolls a d100 against the band's number (D33). No AI reads or writes these numbers, and the player never sees them. The random number generator is seedable, so tests and replays are reproducible.
@@ -110,7 +123,7 @@ One list, used by triggers, rules, ladders, events, consequences, effects, abili
 | `set_disposition` | changes an NPC's disposition |
 | `edit_schedule` | drops a beat, or overrides an NPC's position for some ticks |
 | `set_sense` | changes what an NPC sees or hears on a beat |
-| `reveal` | reveals a hidden thing |
+| `reveal` | makes a hidden thing, or an NPC's routine, known to the party |
 | `add_canon` | records texture or a ruling |
 | `use_ability` | spends a use and applies the ability's declared effects (D30) |
 | `add_ticks` | adds pending ticks (an extra-time consequence) |

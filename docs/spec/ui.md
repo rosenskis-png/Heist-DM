@@ -16,8 +16,9 @@ Splitting the single chat into three is one of the project's two breakthroughs. 
 On a phone the three are tabs, each with an unread marker (roadmap, Phase 4).
 
 ## The card
-- **Shown:** steps, what each changes, each risk's difficulty band ("Easy", never a percentage; D33) and its one-line reason, what failure costs, any step's problem in place of a price, pending stances with keep / resolved / override.
-- **Never shown:** internal checks on hidden facts.
+- **The plan is the player's prose,** usually numbered steps, with any timing and conditions they wrote (D35).
+- **Shown:** steps, what each changes, when each happens in terms the party knows (a learned routine's beat, a wait the player asked for, a condition), each risk's difficulty band ("Easy", never a percentage; D33) and its one-line reason, what failure costs, pending stances with keep / resolved / override.
+- **Never shown:** anything the party doesn't foresee: interrupts, warnings, internal checks on hidden facts (D36). The card never says a plan will go wrong.
 - The player can confirm, edit the plan text (which re-runs the step and pricing calls), or add checkpoints.
 
 ## The map (D9)

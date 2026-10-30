@@ -1,5 +1,6 @@
 // A card: the plan, the decided stances, the step call's steps, the engine's facts per step, and the
 // pricing call's prices. Facts are written by the engine (docs/spec/engine.md §6). Examples: fixtures/cells/card*.json.
+// Before the card is shown, the engine strips the internal fields: interrupts, internal checks and warnings.
 import { withDefs } from "./defs.js";
 import { stepSchema } from "./calls/step.js";
 import { pricingSchema } from "./calls/pricing.js";
@@ -25,20 +26,30 @@ export const cardSchema = withDefs({
       }),
     ),
     step_call: stepOutput,
+    // Each step is projected as if the earlier steps went as planned (D36).
     facts: list(
-      obj(["n", "tick", "beats", "route", "observers", "barriers", "hazards", "problems"], {
+      obj(["n", "tick", "beats", "route", "observers", "barriers", "hazards", "interrupts"], {
         n: { type: "integer", minimum: 1 },
+        // The tick the step starts on, after any wait.
         tick: { type: "integer", minimum: 0 },
+        waited: { type: "integer", minimum: 0 },
         beats: { type: "object", additionalProperties: r("id") },
         route: list(r("id"), 1),
+        // Foreseen only: what the party knows is there at that tick. These are what the pricing call covers.
         observers: list(r("id")),
         barriers: list(r("id")),
         hazards: list(r("id")),
-        // Effects that can't happen at the projected tick. Shown on the card; not an error in the step call.
-        problems: list(
-          obj(["effect", "code", "detail"], {
+        // Internal, never shown: where reality is projected to differ from what the party expects. During
+        // execution the plan stops there (docs/spec/engine.md §6).
+        interrupts: list(
+          obj(["code", "detail"], {
+            code: {
+              enum: ["arrival", "not_there", "too_big", "locked", "requires_failed", "ability_spent", "trigger_fires", "hidden_fact", "wait_expired"],
+            },
+            // The step effect it stops at; absent when it stops the step before it begins.
             effect: { type: "integer", minimum: 0 },
-            code: { enum: ["not_there", "no_connection", "too_big", "locked", "requires_failed", "ability_spent", "trigger_fires"] },
+            // The NPC, thing or fact involved.
+            id: r("id"),
             detail: r("text"),
           }),
         ),

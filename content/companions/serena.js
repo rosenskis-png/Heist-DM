@@ -27,6 +27,12 @@ export default {
   deep: `She stops running from him, and runs only when she wants him to chase her, for fun.`,
   dark: `The chase never ends and turns cruel: she plays him and every rival against each other, and loves the war.`,
   voice: `Lilting, giggly, teasing, quick; calls him 'hunter'. Occasionally lets slip something centuries old, then laughs it off. "Everyone wants to catch me, hunter. You're the first one I'm slowing down for. Don't tell anyone."`,
+  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  planning: {
+    sees: `The clever angle nobody else sees: the illusion, the misdirection, the trick that makes a guard look the wrong way.`,
+    misses: `The boring parts: carrying, locks, iron, how long it takes. Her plans get more elegant than they need to be, and she can't resist a dare even when the plan doesn't need one.`,
+    reaches_for: `A trick: a phantom, a false face, a lie that makes someone else do the dangerous part.`,
+  },
   rules: `Before the payoff she grants at most a stolen kiss, and only when he genuinely out-thinks her (she pretends it was his idea, then slips free).`,
   skills: {
     Might: -1,

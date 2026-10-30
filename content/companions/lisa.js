@@ -27,6 +27,12 @@ export default {
   deep: `She tells her sister. The confrontation is her climax, resolving differently depending on whether he's romancing the older sister too.`,
   dark: `She wants the affair to last forever: she engineers near-discoveries for the thrill, nudges him to stay with her sister so the secret never ends, and the sneaking becomes the whole relationship.`,
   voice: `Light, teasing, quick, flirty, with a confident edge that drops low and conspiratorial when they're alone. "She's asleep. Be quiet. Come here."`,
+  // How she thinks about plans in the huddle (D38). Quick and biased, not an audit: see docs/design/companion-craft.md §6.
+  planning: {
+    sees: `How people underestimate her. She spots where a harmless-looking girl can walk in, ask a question or play bait.`,
+    misses: `The risk to herself, and how her sister will react. She doesn't plan for what happens if the act fails.`,
+    reaches_for: `Take the risky part herself, to prove she can, and preferably somewhere her sister can't stop her.`,
+  },
   rules: `The sisters NEVER share intimacy with the player together, and no scene implies it. Lisa is always explicitly adult and her sister visibly older.`,
   skills: {
     Might: 1,

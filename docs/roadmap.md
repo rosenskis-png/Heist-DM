@@ -34,9 +34,9 @@ Write down what each part promises, precisely enough to build against.
 A bare artifact page that takes a hand-written packet and hand-computed engine facts, and runs the real step, pricing and world calls, plus a Fern and Lyra huddle, through `sample`. The designer runs it and gives feedback; the page shows each call's input and output on screen.
 
 **Exit:**
-- The Cells tests in `fixtures/cells/walkthrough.md` pass in 5 of 5 runs: a card on turn one, at most one edit, Card 1 surfaces the keys and Pace problem, and Card 2 is about two Easy rolls.
+- The Cells tests in `fixtures/cells/walkthrough.md` pass in 5 of 5 runs: a card on turn one; Card 1 priced as the party expects, with nothing the party doesn't foresee leaking into its bands or reasons; Card 2 about two Easy rolls, with the player's timing kept and none added.
 - Three plans the docs never mention (the bench-nail lockpick, bending the bars, bribing Snag through Brannoc) get fair prices.
-- Fern and Lyra read like Gravenhold's companions.
+- Fern and Lyra read like Gravenhold's companions, and in a huddle about a plan each catches some holes and misses others, the way her `planning` block predicts (D38).
 - Model tiers are chosen (D15).
 
 **Open questions**
@@ -49,13 +49,16 @@ Pure ES modules tested with `node --test`, with a seeded random number generator
 
 **Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly.
 
+**Open questions**
+1. **Whose eyes a condition is checked with.** A `when` or `if` ("if the vault is empty") is evaluated against the true state, and the step call may only write conditions about what the party knows (D35). But the acting character may not be able to see the thing at that moment. *Recommendation:* keep the true state for now; if playtests show characters acting on things they couldn't see, evaluate a condition only when its subject is in the actor's perceivable set, and treat it as false otherwise.
+
 ## Phase 4: The Cells, playable
 
 The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 
 **Exit:**
-- The rat plan gets the party out of their cells by exchange 3.
-- Across 5 playtests: no stalls, and a median of 2 card edits or fewer.
+- The rat plan gets the party out of their cells by exchange 4.
+- Across 5 playtests: no stalls, a median of 2 card edits or fewer, and no interruption that a playtester calls unfair (D36).
 - The map matches the walkthrough's layout exactly.
 
 **Open questions**

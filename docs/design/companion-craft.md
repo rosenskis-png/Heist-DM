@@ -89,6 +89,18 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 
 At the table, the companions act like two other real players, not NPCs who watch.
 
+### Talking a plan through
+
+The huddle should feel like "what do you think, guys? How should we do this?" Everyone throws out ideas, points out flaws, and the plan gets better because three people with different blind spots looked at it.
+
+- **She thinks quickly, through her own bias.** Her `planning` block says what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Ruby has a sharp sense of when to strike and doesn't think about what the noise does to the rest of the plan. Nadia tracks a patrol's rhythm like music and rarely thinks of a fight as a step.
+- **Her plans are usually imperfect,** in the ways her bias predicts. Sometimes she's exactly right. She is never an audit, never an oracle, and never a fool who can't plan at all.
+- **She catches the holes her character would care about,** and walks right past the others. Lyra notices who gets left behind and who can hear; Fern notices what the rats would want.
+- **She reacts to what's said in the huddle.** She doesn't see the draft card (D38), so she isn't checking the plan line by line. If the player asks what she thinks, she answers as herself.
+- **The two companions improve each other's ideas,** and contradict them, as much as the player's.
+
+### What to keep, and what is banned
+
 **Keep:**
 - **Every idea comes with reasoning:** what she noticed, what it means, what she suggests. Never bare instructions.
 - **Their reads vary:** confident or unsure, right or wrong. A wrong idea is logical from her point of view.

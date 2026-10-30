@@ -31,10 +31,10 @@ The plan side is split into several small sequential calls (decide → validate 
 1. **World turn.** The engine applies pending ticks and schedules. The world call decides NPC reactions and arrivals; the narration call describes the situation.
 2. **Huddle** (time paused). The player talks with the companions. Their stances go onto the draft card as pending.
 3. **Moments** (optional). Questions, checks, conversations and fights (`docs/spec/calls/moment.md`). Actions are redirected to the draft card.
-4. **Commit.** The player submits the plan and decides each pending stance (keep / resolved / override). Only the player writes plan content.
-5. **Card.** The step call, engine validation and the pricing call. The player confirms or edits.
-6. **Execute.** The engine resolves the card step by step (`docs/spec/engine.md`). Narration covers everything up to the end of the plan or the first stop.
-7. **Stop or finish.** On a stop, go back to step 1. The engine checks the objective after every step, and the encounter ends when it's met.
+4. **Commit.** The player writes the plan, with any timing and conditions (D35), and decides each pending stance (keep / resolved / override). Only the player writes plan content.
+5. **Card.** The step call, engine validation and the pricing call. Every step is priced as the party expects the world to be; the card warns about nothing (D36). The player confirms or edits.
+6. **Execute.** The engine resolves the card step by step (`docs/spec/engine.md` §6). Narration covers everything up to the end of the plan or the first stop.
+7. **Stop, interruption or finish.** A failed risk can stop the plan. Reality can interrupt it: something the party didn't foresee, a step that can't happen as they expected. Either way, go back to step 1 from that moment. The engine checks the objective after every step, and the encounter ends when it's met.
 
 ## Time
 
@@ -43,6 +43,7 @@ Ticks exist only in encounters. Schedules are written in ticks when the packet i
 | Event | Ticks |
 |---|---|
 | Plan step | 1 |
+| Waiting in a plan (`when`) | 1 per tick waited |
 | Extra-time consequence | as stated |
 | Check | 1 (added to pending) |
 | Conversation | 1 when it ends |

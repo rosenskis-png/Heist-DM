@@ -312,7 +312,7 @@
       "observers": [],
       "barriers": [],
       "hazards": [],
-      "problems": []
+      "interrupts": []
     },
     {
       "n": 2,
@@ -330,11 +330,12 @@
       ],
       "barriers": [],
       "hazards": [],
-      "problems": [
+      "interrupts": [
         {
-          "effect": 1,
           "code": "not_there",
-          "detail": "At tick 1 (Snag's Pace beat) the key ring is on Snag's belt, not on the peg."
+          "effect": 1,
+          "id": "keyring",
+          "detail": "At tick 1 (Snag's Pace beat) the key ring is on Snag's belt, not on the peg. Fern reaches the peg and finds it empty."
         }
       ]
     },
@@ -354,7 +355,7 @@
       ],
       "barriers": [],
       "hazards": [],
-      "problems": []
+      "interrupts": []
     },
     {
       "n": 4,
@@ -377,7 +378,7 @@
         "bars_brannoc"
       ],
       "hazards": [],
-      "problems": []
+      "interrupts": []
     },
     {
       "n": 5,
@@ -395,11 +396,11 @@
       ],
       "barriers": [],
       "hazards": [],
-      "problems": [
+      "interrupts": [
         {
-          "effect": 0,
           "code": "trigger_fires",
-          "detail": "At the start of tick 4 Snag walks the corridor and sees the open doors (prisoner_loose): the drum is whole, so he goes for it and a fight starts."
+          "id": "snag",
+          "detail": "At the start of tick 4 Snag walks the corridor and sees the open doors (prisoner_loose). The drum is whole, so he goes for it and a fight starts before anyone moves."
         }
       ]
     },
@@ -416,7 +417,7 @@
       "observers": [],
       "barriers": [],
       "hazards": [],
-      "problems": []
+      "interrupts": []
     }
   ],
   "pricing_call": {
@@ -424,6 +425,32 @@
       {
         "n": 1,
         "risks": [],
+        "mitigations": []
+      },
+      {
+        "n": 2,
+        "risks": [
+          {
+            "id": "rat_run",
+            "covers": [
+              "snag"
+            ],
+            "difficulty": "easy",
+            "reason": "A rat running the corridor while he paces it, in a block full of rats, with nothing in her mouth yet.",
+            "on_fail": {
+              "summary": "He stamps at the rat as it passes. Fern loses 1 HP; the plan continues.",
+              "ops": [
+                {
+                  "damage": {
+                    "actor": "fern",
+                    "amount": 1
+                  }
+                }
+              ],
+              "stops_plan": false
+            }
+          }
+        ],
         "mitigations": []
       },
       {
@@ -485,6 +512,25 @@
             "note": "A key is a key."
           }
         ]
+      },
+      {
+        "n": 5,
+        "risks": [
+          {
+            "id": "walk_out",
+            "covers": [
+              "snag"
+            ],
+            "difficulty": "near_impossible",
+            "reason": "Four people walking down the corridor he's pacing, to the door behind him, past cell doors standing open.",
+            "on_fail": {
+              "summary": "He sees you and goes for the drum. A fight starts, and the Warrens are one drumbeat from the alarm. The plan stops.",
+              "ops": [],
+              "stops_plan": true
+            }
+          }
+        ],
+        "mitigations": []
       },
       {
         "n": 6,

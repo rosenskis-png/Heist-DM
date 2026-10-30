@@ -22,11 +22,11 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Meter values,** e.g. Snag's suspicion.
 - **NPC dispositions.**
 - **Ability uses spent,** and one-way states (Fern stays a rat until the encounter ends).
-- **Known flags:** what the party has perceived or learned. These drive the map and the companions' view.
+- **Known flags:** what the party has perceived or learned, including routines and events (marked `known` in the packet, or revealed in play). These drive the map, the companions' view, and which observers a card foresees (D36).
 - **Canon added:** texture introduced after the opening (anything narrated is real once said) and **rulings** ("rats can drag the ring, slowly, and it scrapes"). Append-only; later calls may not contradict them.
 - **Event log:** one line per resolved card, roll, fight or conversation. The engine writes it from structured results. The only AI-written lines are the Moment AI's "learned" facts.
 - **Table read:** plans committed vs. expected length, roll outcomes and any streak, consequences that landed, and the player's last 2–3 messages word for word. Facts only, no verdicts. Sent only to the world call.
-- **Draft card:** steps the player has added or the Moment AI has redirected, plus pending companion stances.
+- **Draft card:** steps the player has added or the Moment AI has redirected, plus pending companion stances. Companions see only the stances (D38).
 - **Objective status,** e.g. "in the archway: 0 of 3".
 
 Raw transcripts are kept within an encounter, but only the last few messages of the relevant channel go into prompts. Anything consequential is already in state, canon or the event log.
