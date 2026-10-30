@@ -120,10 +120,10 @@ The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 
 **Open questions**
 1. **Pacing and game feel.** Are the intent, the table read and worked examples enough for the world and pricing calls to pace well and price fairly? *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
-4. **Who owns talking to someone in earshot** (finding 6)? Calling out to the jailer is both talk and an act in the world. *Recommendation:* the Moment owns it, with persuasion as a check and the time it costs, and the step call sends a step whose point is persuading someone back there, the way the Moment sends actions to the plan. The card keeps physical plans.
-5. **Call records for playtests** (finding 11). *Recommendation:* during playtests the save keeps the last few dozen call outputs (not inputs) and the replay log, so a post-mortem can see what each call said; D10 still holds, since it's the player's own save.
 2. **The Moment call's judgment.** Untested on the real model: whether it rolls when it should (and only then), keeps hidden things out, redirects actions instead of resolving them, and marks what the party learns. *Recommendation:* run the bench's Moment tab before the first playtest, and treat its misses like the Phase 2 bench findings.
 3. **Combat on the real model** (D67). Only recorded outputs have run it. *Recommendation:* play at least one playtest into the fight on purpose (open a cell on Snag's Pace with the drum whole), and watch whether bands, yields and the end of the fight feel fair.
+4. **Who owns talking to someone in earshot** (finding 6)? Calling out to the jailer is both talk and an act in the world. *Recommendation:* the Moment owns it, with persuasion as a check and the time it costs, and the step call sends a step whose point is persuading someone back there, the way the Moment sends actions to the plan. The card keeps physical plans.
+5. **Call records for playtests** (finding 11). *Recommendation:* during playtests the save keeps the last few dozen call outputs (not inputs) and the replay log, so a post-mortem can see what each call said; D10 still holds, since it's the player's own save.
 
 **Carried from Phase 3:** pricing leaks the engine can't see are still unwatched (*recommendation:* watch for them in playtests); hazards are still always empty, which the Cells don't need.
 
