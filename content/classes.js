@@ -1,0 +1,181 @@
+// Extracted from Gravenhold (legacy/gravenhold.html). See docs/spec/companions.md.
+export const classes = {
+  fighter: {
+    name: "Fighter",
+    mods: {
+      Might: 4,
+      Agility: 2,
+      Stealth: 0,
+      Lore: -1,
+      Insight: 1,
+      Presence: 1,
+    },
+    blurb: "Hard to stop, hard to hide.",
+    abilities: {
+      hp: 6,
+      combat: {
+        id: "overpower",
+        name: "Overpower",
+        uses: "at will",
+        effect: `In a straight melee duel against ONE enemy (no other enemy engaging you), you win: kill or disable it. Takes the whole moment and is loud: every enemy within earshot is alerted.`,
+      },
+      noncombat: {
+        id: "strength",
+        name: "Brute Strength",
+        uses: "at will",
+        effect: `Break, bend, lift, hold or force anything a very strong person plausibly could: doors, bars, a portcullis for a moment, a person. Always loud.`,
+      },
+      limits: ["Loud: no stealth while armoured", "No magic"],
+    },
+  },
+  rogue: {
+    name: "Rogue",
+    mods: {
+      Might: 0,
+      Agility: 4,
+      Stealth: 4,
+      Lore: 0,
+      Insight: 1,
+      Presence: 2,
+    },
+    blurb: "Every lock is a question with an answer.",
+    abilities: {
+      hp: 4,
+      combat: {
+        id: "backstab",
+        name: "Backstab",
+        uses: "at will",
+        effect: `Kill one enemy from behind who is unaware of your location. If any other enemy is within hearing distance, roll Stealth on the kill to see whether they hear.`,
+      },
+      noncombat: {
+        id: "sleight",
+        name: "Sleight",
+        uses: "at will",
+        effect: `Pick mundane locks, lift or plant small items, and disarm simple mechanisms, as long as no one is directly watching your hands. Warded or magical locks: no.`,
+      },
+      limits: [
+        "Can't win a straight fight against an aware, armed enemy",
+        "No magic",
+      ],
+    },
+  },
+  wizard: {
+    name: "Wizard",
+    mods: {
+      Might: -1,
+      Agility: 1,
+      Stealth: 1,
+      Lore: 5,
+      Insight: 2,
+      Presence: 0,
+    },
+    blurb: "Knows things that get people killed.",
+    abilities: {
+      hp: 4,
+      combat: {
+        id: "sleep",
+        name: "Sleep",
+        uses: "once per encounter",
+        perRest: 2,
+        effect: `Up to three creatures that are not yet alert to a fight fall asleep for a minute; noise or a hit wakes them.`,
+      },
+      noncombat: {
+        id: "hand",
+        name: "Mage Hand",
+        uses: "at will",
+        effect: `An invisible hand that can do anything a hand could do to a small object up to 30 feet away: pull a lever, lift keys, unlatch a door from the far side, knock something over as a distraction. Can't lift more than a few pounds or attack.`,
+      },
+      limits: ["Physically weak", "Spells need speech and free hands"],
+    },
+  },
+  cleric: {
+    name: "Cleric",
+    mods: {
+      Might: 1,
+      Agility: 0,
+      Stealth: 0,
+      Lore: 2,
+      Insight: 3,
+      Presence: 2,
+    },
+    blurb: "Faith as a tool and a burden.",
+    abilities: {
+      hp: 4,
+      combat: {
+        id: "command",
+        name: "Command",
+        uses: "once per encounter",
+        perRest: 3,
+        effect: `One creature that understands you obeys a one-word command (Drop, Flee, Halt, Kneel) for a few seconds.`,
+      },
+      noncombat: {
+        id: "hands",
+        name: "Laying On of Hands",
+        uses: "once per encounter",
+        perRest: 3,
+        effect: `Touch a person or thing to restore 2 HP, cure poison or disease, or learn whether it is cursed, possessed or undead.`,
+      },
+      limits: ["Command needs the target to understand you"],
+    },
+  },
+  ranger: {
+    name: "Ranger",
+    mods: {
+      Might: 1,
+      Agility: 3,
+      Stealth: 3,
+      Lore: 1,
+      Insight: 2,
+      Presence: 0,
+    },
+    blurb: "Notices what moved, and when.",
+    abilities: {
+      hp: 4,
+      combat: {
+        id: "shot",
+        name: "Marked Shot",
+        uses: "once per encounter",
+        perRest: 3,
+        effect: `With a ranged weapon, kill or disable one target at range that is unaware of you or standing still. After the shot, enemies take cover.`,
+      },
+      noncombat: {
+        id: "track",
+        name: "Tracker",
+        uses: "at will",
+        effect: `Read any trail, scuff or debris to learn who passed, how many, how recently and which way, and predict patrol patterns.`,
+      },
+      limits: ["Needs a ranged weapon for Marked Shot"],
+    },
+  },
+  bard: {
+    name: "Bard",
+    mods: {
+      Might: -1,
+      Agility: 2,
+      Stealth: 1,
+      Lore: 1,
+      Insight: 2,
+      Presence: 5,
+    },
+    blurb: "Words are the sharpest thing in the room.",
+    abilities: {
+      hp: 4,
+      combat: {
+        id: "captivate",
+        name: "Captivate",
+        uses: "once per encounter",
+        perRest: 3,
+        effect: `While you perform, up to three enemies who can hear you stand transfixed and do nothing. Ends the moment you stop, or if any of them is attacked.`,
+      },
+      noncombat: {
+        id: "tongue",
+        name: "Silver Tongue",
+        uses: "at will",
+        effect: `Talk anyone into a plausible lie or request, if they have no strong reason to doubt you.`,
+      },
+      limits: [
+        "Silver Tongue fails on anyone with a strong reason to doubt you",
+      ],
+    },
+  },
+};
