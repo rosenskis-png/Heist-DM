@@ -1,0 +1,252 @@
+{
+  "id": "cells",
+  "mode": "encounter",
+  "act": 1,
+  "intent": {
+    "objective": { "id": "escaped", "label": "The whole party at the top of the stair", "condition": { "party_all_in": "stair_top" } },
+    "alternates": [
+      { "id": "cistern", "label": "The whole party in the cistern, through the crawl", "condition": { "party_all_in": "cistern" } }
+    ],
+    "fail_forward": {
+      "id": "fern_taken",
+      "label": "Uzga takes Fern upstairs at the watch change; Act 2 opens as a rescue",
+      "condition": { "all": [{ "flag": ["uzga", "arrived", true] }, { "in_zone": ["fern", "cell_middle"] }] }
+    },
+    "optional": [
+      { "id": "gear", "label": "Recover the gear sack", "condition": { "holds": ["party", "gear_sack"] } }
+    ],
+    "purpose": "The party's first test of each other. A good first plan should get them out of the cells fast; what the encounter is really about is the state they leave in: their gear, the alarm, the jailer, and the miner across the corridor.",
+    "expected_plans": [1, 3]
+  },
+  "people": [
+    {
+      "id": "snag",
+      "name": "Snag, goblin jailer",
+      "tier": "guard",
+      "wants": "A quiet shift, his ale, and to win at bones against himself.",
+      "fears": "Sergeant Uzga, and above all being blamed.",
+      "knows": "The ale crawl behind the cask. Which key fits which cell.",
+      "will_never": "Go upstairs to report a problem himself. Fight loose prisoners alone.",
+      "temper": "Lazy and sour; bullies anyone who can't hit back.",
+      "under_pressure": "Goes for the drum. If the drum is useless, he bargains: his loyalty lasts exactly as long as staying loyal is safer than betraying them.",
+      "disposition": "bored",
+      "position": "guardroom",
+      "schedule": {
+        "id": "snag_routine",
+        "known": true,
+        "period": 3,
+        "phase": 2,
+        "beats": [
+          {
+            "id": "pace",
+            "label": "Walks the corridor, dragging his club along every bar",
+            "position": "corridor",
+            "senses": {
+              "sees": ["corridor"],
+              "hears": { "zones": ["corridor", "cell_far", "cell_far_back", "cell_middle", "cell_near", "cell_brannoc", "guardroom"], "level": "loud" }
+            },
+            "cue": "The club clattering along the bars.",
+            "on_start": [
+              { "if": { "holds": ["peg", "keyring"] }, "then": [{ "give": { "item": "keyring", "to": "snag" } }] },
+              { "if": { "not": { "holds": ["snag", "keyring"] } }, "then": [{ "set_flag": { "entity": "snag", "key": "keys_missing", "value": true } }] }
+            ]
+          },
+          {
+            "id": "sit",
+            "label": "On the stool in the guardroom doorway, playing bones",
+            "position": "guardroom",
+            "senses": {
+              "sees": ["corridor", "cell_far", "cell_middle", "cell_near", "cell_brannoc"],
+              "hears": { "zones": ["corridor", "cell_far", "cell_far_back", "cell_middle", "cell_near", "cell_brannoc", "guardroom"], "level": "speech" }
+            },
+            "cue": "Bones clicking.",
+            "on_start": [
+              {
+                "if": { "all": [{ "holds": ["snag", "keyring"] }, { "not": { "flag": ["snag", "keys_on_belt", true] } }, { "not": { "flag": ["snag", "on_guard", true] } }] },
+                "then": [{ "give": { "item": "keyring", "to": "peg" } }]
+              }
+            ]
+          },
+          {
+            "id": "drink",
+            "label": "At the cask with his back to the door, humming",
+            "position": "guardroom",
+            "senses": {
+              "sees": [],
+              "hears": { "zones": ["corridor", "cell_far", "cell_far_back", "cell_middle", "cell_near", "cell_brannoc", "guardroom"], "level": "loud" }
+            },
+            "cue": "The tap squeaking; humming.",
+            "on_start": [
+              {
+                "if": { "all": [{ "holds": ["snag", "keyring"] }, { "not": { "flag": ["snag", "keys_on_belt", true] } }, { "not": { "flag": ["snag", "on_guard", true] } }] },
+                "then": [{ "give": { "item": "keyring", "to": "peg" } }]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "uzga",
+      "name": "Uzga, hobgoblin sergeant",
+      "tier": "elite",
+      "wants": "Tribute delivered on time.",
+      "fears": "Warchief Grizzak.",
+      "knows": "Nothing about the cell block's routine; she leaves that to Snag.",
+      "will_never": "Tolerate a sloppy jailer.",
+      "temper": "Brisk, cold, and in a hurry.",
+      "under_pressure": "Calls the Warrens down on anything she can't settle in one blow.",
+      "disposition": "brisk",
+      "position": null,
+      "senses": {
+        "sees": ["guardroom", "corridor", "cell_far", "cell_middle", "cell_near", "cell_brannoc"],
+        "hears": { "zones": ["guardroom", "corridor", "stair"], "level": "speech" }
+      }
+    },
+    {
+      "id": "brannoc",
+      "name": "Brannoc, human miner",
+      "tier": "civilian",
+      "wants": "Out.",
+      "fears": "Being left behind.",
+      "knows": "Snag's routine, from a week of watching. Where the occupiers dig at the sacred spring. That Snag comes back from his breaks smelling of wet stone.",
+      "will_never": "Keep quiet if they leave him: \"Take me, or I tell the sergeant everything I saw.\"",
+      "temper": "Worn thin and sharp-tongued, but steady.",
+      "under_pressure": "Bargains with what he has: his crusts and what he knows.",
+      "disposition": "desperate",
+      "position": "cell_brannoc",
+      "senses": {
+        "sees": ["corridor", "cell_far", "cell_middle", "cell_near", "cell_brannoc"],
+        "hears": { "zones": ["corridor", "cell_far", "cell_far_back", "cell_middle", "cell_near", "cell_brannoc"], "level": "speech" }
+      }
+    }
+  ],
+  "map": {
+    "zones": [
+      { "id": "cell_far_back", "name": "Far cell, back corner", "purpose": "The one spot in the block the stool can't see: out of the torchlight, behind the bench.", "light": "dark", "rects": [[0, 0, 1, 1]] },
+      { "id": "cell_far", "name": "Far cell", "purpose": "Where the Maw keeps tribute until it's sorted. The dark end of the block.", "light": "dark", "rects": [[1, 0, 1, 1], [0, 1, 2, 1]] },
+      { "id": "cell_middle", "name": "Middle cell", "purpose": "Where the Maw keeps tribute until it's sorted.", "light": "dim", "rects": [[2, 0, 2, 2]] },
+      { "id": "cell_near", "name": "Near cell", "purpose": "Where the Maw keeps tribute until it's sorted. Its back wall is the guardroom's.", "light": "dim", "rects": [[4, 0, 2, 2]] },
+      { "id": "cell_brannoc", "name": "Brannoc's cell", "purpose": "Where the Maw keeps the miner it caught digging near the spring.", "light": "dim", "rects": [[2, 4, 2, 2]] },
+      { "id": "corridor", "name": "Corridor", "purpose": "Snag's beat. One torch hangs at the guardroom end; the far end is dark, its floor cracked and mossy where the gutter seeps.", "light": "dim", "rects": [[0, 2, 6, 2]] },
+      { "id": "guardroom", "name": "Guardroom", "purpose": "Where the jailers eat, dice and drink between rounds; the drain takes the gutter to the midden.", "light": "bright", "rects": [[6, 0, 4, 5]] },
+      { "id": "stair", "name": "Stair", "purpose": "The only way up to the Warrens, and the way Uzga comes down.", "light": "dim", "rects": [[10, 0, 2, 2]] },
+      { "id": "stair_top", "name": "Stair top", "purpose": "The landing behind the heavy door, where the Warrens begin.", "light": "dim", "level": 1, "rects": [[10, 0, 2, 2]] },
+      { "id": "gutter", "name": "Gutter", "purpose": "Carries the cells' seepage and waste to the guardroom drain. Rat country.", "light": "dark", "level": -1, "rects": [[0, 1, 8, 1], [2, 2, 2, 3]] },
+      { "id": "cistern", "name": "Cistern", "purpose": "An old dwarven cistern the Maw has forgotten; the ale crawl's far end.", "light": "dark", "level": -1, "rects": [[9, 0, 3, 3]], "hidden": true }
+    ],
+    "connections": [
+      { "id": "bars_far", "kind": "bars", "name": "Far cell door", "between": ["cell_far", "corridor"], "wall": [[0, 2], [2, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_middle", "kind": "bars", "name": "Middle cell door", "between": ["cell_middle", "corridor"], "wall": [[2, 2], [4, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_near", "kind": "bars", "name": "Near cell door", "between": ["cell_near", "corridor"], "wall": [[4, 2], [6, 2]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "bars_brannoc", "kind": "bars", "name": "Brannoc's cell door", "between": ["cell_brannoc", "corridor"], "wall": [[2, 4], [4, 4]], "fits": "small", "see_through": true, "flags": { "locked": true }, "operated_from": "corridor", "reachable_from_other_side": true, "key": "keyring" },
+      { "id": "far_corner", "kind": "opening", "between": ["cell_far_back", "cell_far"], "wall": [[1, 0], [1, 1]], "fits": "large", "see_through": true, "operated_from": "both" },
+      { "id": "doorway", "kind": "opening", "name": "Guardroom doorway", "between": ["corridor", "guardroom"], "wall": [[6, 2], [6, 4]], "fits": "large", "see_through": true, "operated_from": "both" },
+      { "id": "stair_foot", "kind": "opening", "between": ["guardroom", "stair"], "wall": [[10, 0], [10, 2]], "fits": "large", "see_through": true, "operated_from": "both" },
+      { "id": "stair_flight", "kind": "stairs", "name": "The flight and the heavy door at its top", "between": ["stair", "stair_top"], "square": [11, 0], "fits": "large", "see_through": false, "operated_from": "both" },
+      { "id": "grate_far", "kind": "grate", "between": ["cell_far", "gutter"], "square": [1, 1], "fits": "tiny", "see_through": true, "operated_from": "both" },
+      { "id": "grate_middle", "kind": "grate", "between": ["cell_middle", "gutter"], "square": [2, 1], "fits": "tiny", "see_through": true, "operated_from": "both" },
+      { "id": "grate_near", "kind": "grate", "between": ["cell_near", "gutter"], "square": [4, 1], "fits": "tiny", "see_through": true, "operated_from": "both" },
+      { "id": "grate_brannoc", "kind": "grate", "between": ["cell_brannoc", "gutter"], "square": [2, 4], "fits": "tiny", "see_through": true, "operated_from": "both" },
+      { "id": "drain", "kind": "drain", "name": "Guardroom drain", "between": ["guardroom", "gutter"], "square": [7, 1], "fits": "tiny", "see_through": true, "operated_from": "both" },
+      { "id": "crawl", "kind": "crawl", "name": "The ale crawl", "between": ["guardroom", "cistern"], "square": [9, 0], "fits": "medium", "see_through": false, "operated_from": "both", "ticks": 1, "hidden": true }
+    ],
+    "things": [
+      { "id": "keyring", "name": "Key ring", "properties": "Iron, six keys, heavy for a rat. One rat can drag it slowly, and it scrapes on the stone. Several rats can carry it quietly. Too big for the gutter.", "size": "small", "location": { "holder": "peg" } },
+      { "id": "peg", "name": "Key peg", "properties": "An iron peg on the guardroom wall, behind the stool and five feet from the cask.", "size": "tiny", "location": { "zone": "guardroom", "at": [8, 1] } },
+      { "id": "stool", "name": "Snag's stool", "properties": "Three-legged, set in the doorway so it faces down the corridor.", "size": "small", "location": { "zone": "guardroom", "at": [6, 2] } },
+      { "id": "drum", "name": "War drum", "properties": "The Maw's alarm, passed along through the Warrens by other drums. Its head is hide, so a rat can gnaw through it. Hangs on a hook by the stool, its stick beside it.", "size": "medium", "flags": { "gnawed": false }, "location": { "zone": "guardroom", "at": [7, 2] } },
+      { "id": "cask", "name": "Ale cask", "properties": "A big cask on a cradle in the guardroom corner, with a squeaking tap. It hides the mouth of the ale crawl.", "size": "large", "location": { "zone": "guardroom", "at": [9, 0] } },
+      { "id": "gear_sack", "name": "The party's gear", "properties": "A sack under the guardroom table holding everything taken from the party. Carrying it costs an extra step.", "size": "medium", "location": { "zone": "guardroom", "at": [8, 3] } },
+      { "id": "bench_far", "name": "Bench", "properties": "A plank bench in the far cell. Its nails are working loose; prying one free takes a step and makes a creak. A nail makes a passable lockpick.", "size": "medium", "location": { "zone": "cell_far", "at": [0, 1] } },
+      { "id": "bucket_far", "name": "Waste bucket", "properties": "Dumping it down the grate floods the guardroom drain, and Snag spends a tick cleaning up, cursing, with his back turned.", "size": "small", "location": { "zone": "cell_far" } },
+      { "id": "bucket_middle", "name": "Waste bucket", "properties": "Dumping it down the grate floods the guardroom drain, and Snag spends a tick cleaning up, cursing, with his back turned.", "size": "small", "location": { "zone": "cell_middle" } },
+      { "id": "bucket_near", "name": "Waste bucket", "properties": "Dumping it down the grate floods the guardroom drain, and Snag spends a tick cleaning up, cursing, with his back turned.", "size": "small", "location": { "zone": "cell_near" } },
+      { "id": "crusts", "name": "Brannoc's crusts", "properties": "A week's hoarded bread crusts. The half-starved gutter rats will work for them.", "size": "tiny", "location": { "holder": "brannoc" } },
+      { "id": "gutter_rats", "name": "Gutter rats", "properties": "Half-starved prison rats living in the gutter. They talk to anyone who can talk to animals, and they'll work for bread.", "size": "tiny", "location": { "zone": "gutter" } }
+    ],
+    "facts": [
+      { "id": "iron", "text": "Bars and locks are iron, so nature magic can't touch them. Entangle only takes hold on the mossy, cracked floor at the far end of the corridor." },
+      { "id": "stair_door", "text": "Shouting doesn't carry past the heavy door at the top of the stair. Only the war drum reaches the Warrens." },
+      { "id": "wild_shape_ends", "text": "Ruling made in advance: Fern's Wild Shape ends when she leaves the cell block (the stair, the stair top or the cistern)." },
+      { "id": "crawl_behind_cask", "text": "Behind the cask, a low crawl runs to the old cistern. Snag uses it to steal ale and hides it from Uzga.", "hidden": true }
+    ]
+  },
+  "clock": {
+    "events": [
+      { "id": "uzga_arrives", "known": true, "deadline": true, "at_tick": 21, "do": [{ "then": [{ "move": { "entity": "uzga", "to": "guardroom" } }, { "set_flag": { "entity": "uzga", "key": "arrived", "value": true } }] }] }
+    ],
+    "meters": [
+      {
+        "id": "suspicion",
+        "name": "Snag's suspicion",
+        "scope": "snag",
+        "start": 0,
+        "max": 3,
+        "levels": {
+          "1": [{ "set_sense": { "npc": "snag", "beat": "sit", "change": { "sees_add": ["cell_far_back"] }, "until": { "meter": ["suspicion", "<", 1] } } }],
+          "2": [{ "edit_schedule": { "npc": "snag", "drop_beat": "drink", "until": { "meter": ["suspicion", "<", 2] } } }],
+          "3": [{ "set_flag": { "entity": "snag", "key": "on_guard", "value": true, "until": { "meter": ["suspicion", "<", 3] } } }]
+        },
+        "decay": {
+          "by": 1,
+          "after_ticks": 3,
+          "quiet_if": { "not": { "noticed_by": "snag" } },
+          "blocked_by": {
+            "any": [
+              { "flag": ["snag", "keys_missing", true] },
+              { "flag": ["snag", "knows_drum_torn", true] }
+            ]
+          }
+        }
+      }
+    ],
+    "triggers": [
+      {
+        "id": "noise_heard",
+        "when": { "noticed_by": "snag" },
+        "do": [{ "then": [{ "meter_add": { "meter": "suspicion", "by": 1 } }, { "edit_schedule": { "npc": "snag", "override": { "position": "@step_zone", "ticks": 1 } } }] }]
+      },
+      {
+        "id": "keys_touched",
+        "when": { "all": [{ "noticed_by": "snag" }, { "holds": ["snag", "keyring"] }, { "not": { "beat": ["snag", "pace"] } }] },
+        "do": [{ "then": [{ "set_flag": { "entity": "snag", "key": "keys_on_belt", "value": true, "until": { "meter": ["suspicion", "=", 0] } } }] }]
+      },
+      {
+        "id": "peg_empty",
+        "when": { "flag": ["snag", "keys_missing", true] },
+        "once": true,
+        "do": [{ "then": [{ "set_disposition": { "npc": "snag", "value": "searching" } }] }]
+      },
+      {
+        "id": "prisoner_loose",
+        "when": {
+          "all": [
+            { "any": [{ "flag": ["bars_far", "locked", false] }, { "flag": ["bars_middle", "locked", false] }, { "flag": ["bars_near", "locked", false] }, { "flag": ["bars_brannoc", "locked", false] }] },
+            { "any": [{ "beat": ["snag", "pace"] }, { "beat": ["snag", "sit"] }] }
+          ]
+        },
+        "once": true,
+        "do": [
+          {
+            "if": { "flag": ["drum", "gnawed", true] },
+            "then": [{ "set_disposition": { "npc": "snag", "value": "bargaining" } }],
+            "else": [{ "set_disposition": { "npc": "snag", "value": "going_for_drum" } }, { "start_combat": { "enemies": ["snag"] } }]
+          }
+        ]
+      },
+      {
+        "id": "wild_shape_ends",
+        "when": { "all": [{ "flag": ["fern", "form", "animal"] }, { "any": [{ "in_zone": ["fern", "stair"] }, { "in_zone": ["fern", "stair_top"] }, { "in_zone": ["fern", "cistern"] }] }] },
+        "once": true,
+        "do": [{ "then": [{ "set_flag": { "entity": "fern", "key": "form", "value": "self" } }, { "set_flag": { "entity": "fern", "key": "size", "value": "medium" } }] }]
+      }
+    ]
+  },
+  "start": {
+    "tick": 0,
+    "positions": { "player": "cell_far", "fern": "cell_middle", "lyra": "cell_near" },
+    "ops": []
+  },
+  "opening": "Snag's club rattles along the bars, cell by cell, his keys jangling at his belt. He hangs them on the peg as he passes the stool, and stops at the cask. The tap squeaks; he starts to hum. From your cell at the dark end of the block you can see the guardroom past the torch: the war drum on its hook by his stool, and the key ring on its peg behind it. Uzga's voice comes down the stair as she leaves: \"The druid goes up at watch change. Have her clean.\" The heavy door shuts above. Across the corridor, the miner presses his face to his bars. \"Take me with you,\" he whispers, \"or I tell the sergeant everything I saw.\""
+}

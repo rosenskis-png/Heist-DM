@@ -1,0 +1,137 @@
+{
+  "packet": "cells",
+  "tick": 0,
+  "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
+  "stances": [
+    { "companion": "lyra", "kind": "insist", "text": "We take the miner with us.", "decision": "resolved" },
+    { "companion": "fern", "kind": "conditional", "text": "I won't help kill anyone who doesn't need killing.", "trigger": { "step_tagged": "lethal" }, "decision": "keep" }
+  ],
+  "step_call": {
+    "steps": [
+      {
+        "n": 1,
+        "summary": "Fern changes into a rat at the back of her cell.",
+        "when": { "until": { "beat": ["snag", "drink"] } },
+        "actors": ["fern"],
+        "zone": "cell_middle",
+        "noise": "silent",
+        "uses": [{ "kind": "ability", "id": "wildshape", "actor": "fern" }],
+        "effects": [{ "use_ability": { "actor": "fern", "ability": "wildshape" } }],
+        "tags": []
+      },
+      {
+        "n": 2,
+        "summary": "Fern goes down the gutter to the guardroom drain.",
+        "actors": ["fern"],
+        "zone": "guardroom",
+        "noise": "quiet",
+        "effects": [{ "move": { "entity": "fern", "to": "guardroom", "path": ["grate_middle", "drain"] } }],
+        "tags": []
+      },
+      {
+        "n": 3,
+        "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
+        "when": { "until": { "beat": ["snag", "sit"] } },
+        "actors": ["brannoc", "fern"],
+        "zone": "guardroom",
+        "noise": "quiet",
+        "uses": [{ "kind": "thing", "id": "crusts" }, { "kind": "thing", "id": "gutter_rats" }],
+        "effects": [{ "consume": { "item": "crusts" } }, { "give": { "item": "keyring", "to": "fern" } }],
+        "tags": ["theft"]
+      },
+      {
+        "n": 4,
+        "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
+        "when": { "until": { "beat": ["snag", "drink"] } },
+        "actors": ["fern"],
+        "zone": "guardroom",
+        "noise": "quiet",
+        "uses": [{ "kind": "thing", "id": "gutter_rats" }],
+        "effects": [
+          { "give": { "item": "keyring", "to": "lyra", "path": ["doorway", "bars_near"] } },
+          { "set_flag": { "entity": "drum", "key": "gnawed", "value": true } }
+        ],
+        "tags": []
+      },
+      {
+        "n": 5,
+        "summary": "Lyra unlocks her door through the bars, steps out, and unlocks the other three.",
+        "actors": ["lyra"],
+        "zone": "corridor",
+        "noise": "quiet",
+        "uses": [{ "kind": "thing", "id": "keyring" }],
+        "effects": [
+          { "set_flag": { "entity": "bars_near", "key": "locked", "value": false } },
+          { "move": { "entity": "lyra", "to": "corridor", "path": ["bars_near"] } },
+          { "set_flag": { "entity": "bars_middle", "key": "locked", "value": false } },
+          { "set_flag": { "entity": "bars_far", "key": "locked", "value": false } },
+          { "set_flag": { "entity": "bars_brannoc", "key": "locked", "value": false } }
+        ],
+        "tags": []
+      }
+    ],
+    "rulings": [],
+    "internal_checks": []
+  },
+  "facts": [
+    { "n": 1, "tick": 0, "beats": { "snag": "drink" }, "route": ["cell_middle"], "observers": [], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 2, "tick": 1, "beats": { "snag": "pace" }, "route": ["cell_middle", "gutter", "guardroom"], "observers": [], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 3, "tick": 2, "beats": { "snag": "sit" }, "route": ["cell_brannoc", "guardroom"], "observers": ["snag"], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 4, "tick": 3, "beats": { "snag": "drink" }, "route": ["guardroom", "corridor", "cell_near"], "observers": ["snag"], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 5, "tick": 4, "beats": { "snag": "pace" }, "route": ["cell_near", "corridor"], "observers": ["snag"], "barriers": ["bars_near", "bars_middle", "bars_far", "bars_brannoc"], "hazards": [], "as_if": [], "interrupts": [] }
+  ],
+  "pricing_call": {
+    "steps": [
+      { "n": 1, "risks": [], "mitigations": [] },
+      { "n": 2, "risks": [], "mitigations": [] },
+      {
+        "n": 3,
+        "risks": [
+          {
+            "id": "ring_lift",
+            "covers": ["snag"],
+            "difficulty": "easy",
+            "reason": "Iron clinking behind him in a quiet room, but the peg is behind the stool, he's watching the cells, and fed rats squabbling sound like rats.",
+            "on_fail": {
+              "summary": "He swats the rats off the peg and clips the ring to his belt. The plan stops.",
+              "ops": [{ "give": { "item": "keyring", "to": "snag" } }],
+              "cancels": [1],
+              "stops_plan": true
+            }
+          }
+        ],
+        "mitigations": []
+      },
+      {
+        "n": 4,
+        "risks": [
+          {
+            "id": "drum_gnaw",
+            "covers": ["snag"],
+            "difficulty": "easy",
+            "reason": "Gnawing hide ten feet behind him while he hums at the squeaking tap; the ring goes the other way, out the door.",
+            "on_fail": {
+              "summary": "He kicks the rat off his drum. Fern loses 1 HP. The drum still works; the plan continues.",
+              "ops": [{ "damage": { "actor": "fern", "amount": 1 } }],
+              "cancels": [1],
+              "stops_plan": false
+            }
+          }
+        ],
+        "mitigations": []
+      },
+      {
+        "n": 5,
+        "risks": [],
+        "mitigations": [
+          { "covers": "snag", "by": "step", "ref": 4, "note": "He sees the doors open, but the drum is gnawed through: nothing he can do this tick stops them." },
+          { "covers": "bars_near", "by": "item", "ref": "keyring", "note": "A key is a key." },
+          { "covers": "bars_middle", "by": "item", "ref": "keyring", "note": "A key is a key." },
+          { "covers": "bars_far", "by": "item", "ref": "keyring", "note": "A key is a key." },
+          { "covers": "bars_brannoc", "by": "item", "ref": "keyring", "note": "A key is a key." }
+        ]
+      }
+    ],
+    "rulings": ["Several rats paid in bread can carry the key ring quietly; one rat alone can only drag it."]
+  }
+}

@@ -1,0 +1,553 @@
+{
+  "packet": "cells",
+  "tick": 0,
+  "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
+  "stances": [
+    {
+      "companion": "lyra",
+      "kind": "insist",
+      "text": "We take the miner with us.",
+      "decision": "resolved"
+    },
+    {
+      "companion": "fern",
+      "kind": "conditional",
+      "text": "I won't help kill anyone who doesn't need killing.",
+      "trigger": {
+        "step_tagged": "lethal"
+      },
+      "decision": "keep"
+    }
+  ],
+  "step_call": {
+    "steps": [
+      {
+        "n": 1,
+        "summary": "Fern changes into a rat.",
+        "actors": [
+          "fern"
+        ],
+        "zone": "cell_middle",
+        "noise": "silent",
+        "uses": [
+          {
+            "kind": "ability",
+            "id": "wildshape",
+            "actor": "fern"
+          }
+        ],
+        "effects": [
+          {
+            "use_ability": {
+              "actor": "fern",
+              "ability": "wildshape"
+            }
+          }
+        ],
+        "tags": []
+      },
+      {
+        "n": 2,
+        "summary": "Fern slips through her bars, runs to the guardroom and takes the keys off the peg.",
+        "actors": [
+          "fern"
+        ],
+        "zone": "guardroom",
+        "noise": "quiet",
+        "effects": [
+          {
+            "move": {
+              "entity": "fern",
+              "to": "guardroom",
+              "path": [
+                "bars_middle",
+                "doorway"
+              ]
+            }
+          },
+          {
+            "give": {
+              "item": "keyring",
+              "to": "fern"
+            }
+          }
+        ],
+        "tags": [
+          "theft"
+        ]
+      },
+      {
+        "n": 3,
+        "summary": "Fern drags the ring down the corridor to the far cell.",
+        "actors": [
+          "fern"
+        ],
+        "zone": "cell_far",
+        "noise": "speech",
+        "effects": [
+          {
+            "move": {
+              "entity": "fern",
+              "to": "cell_far",
+              "path": [
+                "doorway",
+                "bars_far"
+              ]
+            }
+          },
+          {
+            "give": {
+              "item": "keyring",
+              "to": "player"
+            }
+          }
+        ],
+        "tags": []
+      },
+      {
+        "n": 4,
+        "summary": "The rogue unlocks the far door through the bars, steps out and lets everyone out, Brannoc too.",
+        "actors": [
+          "player",
+          "fern",
+          "lyra",
+          "brannoc"
+        ],
+        "zone": "corridor",
+        "noise": "quiet",
+        "uses": [
+          {
+            "kind": "thing",
+            "id": "keyring"
+          }
+        ],
+        "effects": [
+          {
+            "set_flag": {
+              "entity": "bars_far",
+              "key": "locked",
+              "value": false
+            }
+          },
+          {
+            "move": {
+              "entity": "player",
+              "to": "corridor",
+              "path": [
+                "bars_far"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "fern",
+              "to": "corridor",
+              "path": [
+                "bars_far"
+              ]
+            }
+          },
+          {
+            "set_flag": {
+              "entity": "bars_middle",
+              "key": "locked",
+              "value": false
+            }
+          },
+          {
+            "set_flag": {
+              "entity": "bars_near",
+              "key": "locked",
+              "value": false
+            }
+          },
+          {
+            "set_flag": {
+              "entity": "bars_brannoc",
+              "key": "locked",
+              "value": false
+            }
+          },
+          {
+            "move": {
+              "entity": "lyra",
+              "to": "corridor",
+              "path": [
+                "bars_near"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "brannoc",
+              "to": "corridor",
+              "path": [
+                "bars_brannoc"
+              ]
+            }
+          }
+        ],
+        "tags": []
+      },
+      {
+        "n": 5,
+        "summary": "Everyone goes through the guardroom to the foot of the stair.",
+        "actors": [
+          "player",
+          "fern",
+          "lyra",
+          "brannoc"
+        ],
+        "zone": "stair",
+        "noise": "quiet",
+        "effects": [
+          {
+            "move": {
+              "entity": "player",
+              "to": "stair",
+              "path": [
+                "doorway",
+                "stair_foot"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "fern",
+              "to": "stair",
+              "path": [
+                "doorway",
+                "stair_foot"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "lyra",
+              "to": "stair",
+              "path": [
+                "doorway",
+                "stair_foot"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "brannoc",
+              "to": "stair",
+              "path": [
+                "doorway",
+                "stair_foot"
+              ]
+            }
+          }
+        ],
+        "tags": []
+      },
+      {
+        "n": 6,
+        "summary": "Up the stair and through the heavy door.",
+        "actors": [
+          "player",
+          "fern",
+          "lyra",
+          "brannoc"
+        ],
+        "zone": "stair_top",
+        "noise": "quiet",
+        "effects": [
+          {
+            "move": {
+              "entity": "player",
+              "to": "stair_top",
+              "path": [
+                "stair_flight"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "fern",
+              "to": "stair_top",
+              "path": [
+                "stair_flight"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "lyra",
+              "to": "stair_top",
+              "path": [
+                "stair_flight"
+              ]
+            }
+          },
+          {
+            "move": {
+              "entity": "brannoc",
+              "to": "stair_top",
+              "path": [
+                "stair_flight"
+              ]
+            }
+          }
+        ],
+        "tags": []
+      }
+    ],
+    "rulings": [],
+    "internal_checks": []
+  },
+  "facts": [
+    {
+      "n": 1,
+      "tick": 0,
+      "beats": {
+        "snag": "drink"
+      },
+      "route": [
+        "cell_middle"
+      ],
+      "observers": [],
+      "barriers": [],
+      "hazards": [],
+      "as_if": [],
+      "interrupts": []
+    },
+    {
+      "n": 2,
+      "tick": 1,
+      "beats": {
+        "snag": "pace"
+      },
+      "route": [
+        "cell_middle",
+        "corridor",
+        "guardroom"
+      ],
+      "observers": [
+        "snag"
+      ],
+      "barriers": [],
+      "hazards": [],
+      "as_if": [
+        "The key ring is on the peg."
+      ],
+      "interrupts": [
+        {
+          "code": "not_there",
+          "effect": 1,
+          "id": "keyring",
+          "detail": "At tick 1 (Snag's Pace beat) the key ring is on Snag's belt, not on the peg. Fern reaches the peg and finds it empty."
+        }
+      ]
+    },
+    {
+      "n": 3,
+      "tick": 2,
+      "beats": {
+        "snag": "sit"
+      },
+      "route": [
+        "guardroom",
+        "corridor",
+        "cell_far"
+      ],
+      "observers": [
+        "snag"
+      ],
+      "barriers": [],
+      "hazards": [],
+      "as_if": [],
+      "interrupts": []
+    },
+    {
+      "n": 4,
+      "tick": 3,
+      "beats": {
+        "snag": "drink"
+      },
+      "route": [
+        "cell_far",
+        "corridor",
+        "cell_middle",
+        "cell_near",
+        "cell_brannoc"
+      ],
+      "observers": [],
+      "barriers": [
+        "bars_far",
+        "bars_middle",
+        "bars_near",
+        "bars_brannoc"
+      ],
+      "hazards": [],
+      "as_if": [],
+      "interrupts": []
+    },
+    {
+      "n": 5,
+      "tick": 4,
+      "beats": {
+        "snag": "pace"
+      },
+      "route": [
+        "corridor",
+        "guardroom",
+        "stair"
+      ],
+      "observers": [
+        "snag"
+      ],
+      "barriers": [],
+      "hazards": [],
+      "as_if": [],
+      "interrupts": [
+        {
+          "code": "trigger_fires",
+          "id": "snag",
+          "detail": "At the start of tick 4 Snag walks the corridor and sees the open doors (prisoner_loose). The drum is whole, so he goes for it and a fight starts before anyone moves."
+        }
+      ]
+    },
+    {
+      "n": 6,
+      "tick": 5,
+      "beats": {
+        "snag": "sit"
+      },
+      "route": [
+        "stair",
+        "stair_top"
+      ],
+      "observers": [],
+      "barriers": [],
+      "hazards": [],
+      "as_if": [],
+      "interrupts": []
+    }
+  ],
+  "pricing_call": {
+    "steps": [
+      {
+        "n": 1,
+        "risks": [],
+        "mitigations": []
+      },
+      {
+        "n": 2,
+        "risks": [
+          {
+            "id": "rat_run",
+            "covers": [
+              "snag"
+            ],
+            "difficulty": "easy",
+            "reason": "A rat running the corridor while he paces it, in a block full of rats, with nothing in her mouth yet.",
+            "on_fail": {
+              "summary": "He stamps at the rat as it passes. Fern loses 1 HP; the plan continues.",
+              "ops": [
+                {
+                  "damage": {
+                    "actor": "fern",
+                    "amount": 1
+                  }
+                }
+              ],
+              "stops_plan": false
+            }
+          }
+        ],
+        "mitigations": []
+      },
+      {
+        "n": 3,
+        "risks": [
+          {
+            "id": "ring_drag",
+            "covers": [
+              "snag"
+            ],
+            "difficulty": "very_hard",
+            "reason": "One rat dragging an iron ring that scrapes on the stone, the length of the lit corridor, past his stool while he's watching the cells.",
+            "on_fail": {
+              "summary": "He stamps on the ring and clips it back on his belt. The plan stops.",
+              "ops": [
+                {
+                  "give": {
+                    "item": "keyring",
+                    "to": "snag"
+                  }
+                }
+              ],
+              "cancels": [
+                0,
+                1
+              ],
+              "stops_plan": true
+            }
+          }
+        ],
+        "mitigations": []
+      },
+      {
+        "n": 4,
+        "risks": [],
+        "mitigations": [
+          {
+            "covers": "bars_far",
+            "by": "item",
+            "ref": "keyring",
+            "note": "A key is a key."
+          },
+          {
+            "covers": "bars_middle",
+            "by": "item",
+            "ref": "keyring",
+            "note": "A key is a key."
+          },
+          {
+            "covers": "bars_near",
+            "by": "item",
+            "ref": "keyring",
+            "note": "A key is a key."
+          },
+          {
+            "covers": "bars_brannoc",
+            "by": "item",
+            "ref": "keyring",
+            "note": "A key is a key."
+          }
+        ]
+      },
+      {
+        "n": 5,
+        "risks": [
+          {
+            "id": "walk_out",
+            "covers": [
+              "snag"
+            ],
+            "difficulty": "near_impossible",
+            "reason": "Four people walking down the corridor he's pacing, to the door behind him, past cell doors standing open.",
+            "on_fail": {
+              "summary": "He sees you and goes for the drum. A fight starts, and the Warrens are one drumbeat from the alarm. The plan stops.",
+              "ops": [],
+              "stops_plan": true
+            }
+          }
+        ],
+        "mitigations": []
+      },
+      {
+        "n": 6,
+        "risks": [],
+        "mitigations": []
+      }
+    ],
+    "rulings": [
+      "One rat alone can drag the key ring, slowly, and it scrapes on the stone."
+    ]
+  }
+}

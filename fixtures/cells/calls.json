@@ -1,0 +1,105 @@
+{
+  "companion": [
+    {
+      "candidates": [
+        {
+          "message": "He walks, he sits, he drinks. Over and over. Right now it's the cask. And we're not leaving the miner.",
+          "stance": {
+            "kind": "insist",
+            "text": "We take the miner with us.",
+            "traced_to": {
+              "field": "limits",
+              "item": "Won't leave anyone behind"
+            }
+          }
+        },
+        {
+          "message": "Listen to him: club on the bars means he's walking, bones means he's sitting, the tap means he's drinking. Whatever we do, we do it on the tap. And the miner comes with us.",
+          "stance": {
+            "kind": "insist",
+            "text": "We take the miner with us.",
+            "traced_to": {
+              "field": "limits",
+              "item": "Won't leave anyone behind"
+            }
+          }
+        },
+        {
+          "message": "I can take him when he sits, if someone gets me out first. He'll never see me coming from the near cell. The miner comes too.",
+          "stance": {
+            "kind": "insist",
+            "text": "We take the miner with us.",
+            "traced_to": {
+              "field": "limits",
+              "item": "Won't leave anyone behind"
+            }
+          }
+        }
+      ],
+      "reactions": []
+    },
+    {
+      "candidates": [
+        {
+          "message": "The rats down here are starving and very chatty."
+        },
+        {
+          "message": "I could be a rat in two breaths, love. The gutter runs under all of us, and I'd bet bread buys a lot of help down there."
+        },
+        {
+          "message": null
+        }
+      ],
+      "reactions": []
+    }
+  ],
+  "world": {
+    "actions": [
+      {
+        "npc": "snag",
+        "because": "Under pressure he bargains once the drum is useless, and he fears being blamed more than anything.",
+        "ops": [
+          {
+            "set_disposition": {
+              "npc": "snag",
+              "value": "bargaining"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "narration": {
+    "text": "The doors swing open just as Snag's hand closes on an empty peg. He comes down the corridor with his club up, finds three loose prisoners and a miner, and spins for the drum. Its head is in tatters. \"Uzga'll skin me either way,\" he says.",
+    "texture": [
+      "Snag's club is a table leg wrapped in rusted wire."
+    ]
+  },
+  "moment": {
+    "reply": "Snag squints at you over his bones. \"Ale crawl? Never heard of it.\" His eyes flick to the cask.",
+    "learned": [
+      "Snag glanced at the cask when you mentioned a way out."
+    ],
+    "check": {
+      "actor": "player",
+      "skill": "Presence",
+      "difficulty": "medium",
+      "reason": "Bribes work in the Maw and he's scared of Uzga, but he doesn't trust you yet.",
+      "on_success": {
+        "text": "\"Tie me up proper,\" he mutters. \"Make it look like I fought. Then I'll show you something.\"",
+        "ops": [
+          {
+            "set_disposition": {
+              "npc": "snag",
+              "value": "dealing"
+            }
+          }
+        ]
+      },
+      "on_failure": {
+        "text": "\"Nice try.\" He shifts his grip on the club.",
+        "ops": []
+      }
+    }
+  }
+}

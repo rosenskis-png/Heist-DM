@@ -1,0 +1,80 @@
+[
+  {
+    "card": "card1.json: the rat run succeeds, and the plan is interrupted at the empty peg",
+    "rolls": [
+      40
+    ],
+    "steps": [
+      {
+        "n": 1,
+        "tick": 0,
+        "outcome": "done",
+        "rolls": []
+      },
+      {
+        "n": 2,
+        "tick": 1,
+        "outcome": "interrupted",
+        "rolls": [
+          {
+            "risk": "rat_run",
+            "odds": 80,
+            "roll": 40,
+            "success": true
+          }
+        ],
+        "interrupt": {
+          "code": "not_there",
+          "effect": 1,
+          "id": "keyring",
+          "detail": "Fern reaches the peg and it's empty: the keys jingle on Snag's belt as he walks the corridor."
+        }
+      }
+    ],
+    "expect": {
+      "all": [
+        {
+          "tick": [
+            "=",
+            2
+          ]
+        },
+        {
+          "in_zone": [
+            "fern",
+            "guardroom"
+          ]
+        },
+        {
+          "flag": [
+            "fern",
+            "form",
+            "animal"
+          ]
+        },
+        {
+          "not": {
+            "holds": [
+              "fern",
+              "keyring"
+            ]
+          }
+        },
+        {
+          "meter": [
+            "suspicion",
+            "=",
+            0
+          ]
+        },
+        {
+          "flag": [
+            "bars_far",
+            "locked",
+            true
+          ]
+        }
+      ]
+    }
+  }
+]
