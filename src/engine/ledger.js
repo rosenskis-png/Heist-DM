@@ -7,6 +7,10 @@ import { revealable } from "./moment.js";
 import { d100, ODDS } from "./rng.js";
 import { enemyTiers } from "../../content/rules.js";
 
+// The ledger's size limits (D76). Facts are what's true now and matters later; history goes to the log. A
+// ruling that would leave more than `facts` active, or add more than `newFacts` at once, goes back for the retry.
+export const LEDGER = { facts: 20, newFacts: 6 };
+
 const ids = (s, ...kinds) =>
   new Set(
     kinds.flatMap((k) =>
@@ -41,6 +45,22 @@ export function checkChanges(s, ch = {}, at = "changes") {
   for (const m of ch.moods ?? []) if (!isNpc(s, m.npc)) bad("person", m.npc);
   const can = revealable(s);
   for (const id of ch.reveal ?? []) if (!can.has(id)) errors.push(`${at}: ${id} isn't hidden, a routine or an event`);
+  return errors;
+}
+
+// The fact budget for one call's output: every change it could make, the card's rulings included.
+export function checkFactBudget(s, all) {
+  const active = new Set(s.facts.map((f) => f.id));
+  const added = new Set();
+  for (const ch of all) {
+    for (const f of ch?.facts ?? []) if (!active.has(f.id)) added.add(f.id);
+  }
+  const retired = new Set(all.flatMap((ch) => ch?.retire ?? []));
+  const total = [...active].filter((id) => !retired.has(id)).length + [...added].filter((id) => !retired.has(id)).length;
+  const errors = [];
+  if (added.size > LEDGER.newFacts) errors.push(`${added.size} new facts at once; record at most ${LEDGER.newFacts}, only what's true now and will matter later (what happened goes in "what")`);
+  if (total > LEDGER.facts)
+    errors.push(`the ledger would hold ${total} facts; it holds at most ${LEDGER.facts}. Retire facts that are no longer true or no longer matter, or replace one by reusing its id. Active: ${[...active].join(", ")}`);
   return errors;
 }
 
@@ -107,8 +127,9 @@ export function checkCard(s, out) {
     last = Math.max(last, st.at);
     for (const id of st.who) if (!who.has(id)) errors.push(`step ${st.n}: ${id} isn't a person in this encounter`);
   });
+  if (out.ends_at < last) errors.push(`ends_at (${out.ends_at}) is before the last step's tick (${last})`);
   const terms = hiddenTerms(s);
-  const shown = [...out.steps.flatMap((st) => [st.summary, st.roll?.reason, st.roll?.fails]), ...out.rulings.map((r) => r.text)].filter(Boolean).join(" \n ").toLowerCase();
+  const shown = [...out.steps.flatMap((st) => [st.summary, st.roll?.reason, st.roll?.fails]), ...out.rulings.map((r) => r.text), ...(out.notes ?? [])].filter(Boolean).join(" \n ").toLowerCase();
   for (const t of terms) if (shown.includes(t)) errors.push(`the card names "${t}", which the party doesn't know about`);
   for (const r of out.rulings) errors.push(...checkChanges(s, { facts: [r] }, `ruling ${r.id}`));
   return errors;
@@ -141,6 +162,7 @@ export function checkResolve(s, card, rolls, out) {
     errors.push(...checkChanges(s, st.changes, `step ${st.n}`));
   }
   errors.push(...checkChanges(s, out.after, "after"));
+  errors.push(...checkFactBudget(s, [{ facts: card.rulings }, ...out.steps.map((st) => st.changes), out.after]));
   const happened = card.steps.filter((c) => out.steps.some((st) => st.n === c.n && st.happened !== "no"));
   const floor = Math.max(s.tick, ...happened.map((c) => c.at));
   if (out.ends_at < floor) errors.push(`ends_at must be tick ${floor} or later`);
@@ -156,6 +178,8 @@ export function resolve(s, card, rolls, out) {
     if (st.happened !== "no") advanceTo(s, c.at);
     if (s.ended) break;
     applyChanges(s, st.changes);
+    // What happened is history: it goes in the log, which every call sees the end of, not in the facts.
+    log(s, { step: st.n, [st.happened === "yes" ? "did" : st.happened === "partly" ? "partly" : "didnt"]: st.what });
   }
   if (!s.ended) advanceTo(s, out.ends_at);
   if (!s.ended) applyChanges(s, out.after);
@@ -176,6 +200,7 @@ export function checkScene(s, out) {
     errors.push(...checkChanges(s, c.success.changes, `check ${i + 1} success`), ...checkChanges(s, c.failure.changes, `check ${i + 1} failure`));
   });
   errors.push(...checkChanges(s, out.changes));
+  errors.push(...checkFactBudget(s, [out.changes, ...(out.checks ?? []).flatMap((c) => [c.success.changes, c.failure.changes])]));
   if (out.ticks > 12) errors.push("an exchange takes at most 12 ticks; longer is a plan");
   return errors;
 }

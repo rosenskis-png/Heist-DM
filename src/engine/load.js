@@ -59,6 +59,10 @@ export function packetWarnings(packet, reference) {
 // A deadline moves by 2% of its tick per point of slack, rounded once (D41, D43).
 export const deadlineTick = (tick, slack) => Math.round(tick * (1 + 0.02 * slack));
 
+// In ruled mode a deadline is half as long again (D77): the DM's time counts real work, not steps, and talk is
+// free, so plans there are meant to have room to experiment. A starting value; playtests move it.
+export const RULED_DEADLINE = 1.5;
+
 // The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's.
 export function load({ packet, party, slack = 0, seed = 1, ruled = false }) {
   const problems = checkPacket(packet, party);
@@ -82,7 +86,9 @@ export function load({ packet, party, slack = 0, seed = 1, ruled = false }) {
     senseEdits: [],
     untils: [],
     known: { revealed: [] },
-    due: Object.fromEntries(clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick])),
+    due: Object.fromEntries(
+      clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? Math.round(deadlineTick(e.at_tick, slack) * (ruled ? RULED_DEADLINE : 1)) : e.at_tick]),
+    ),
     slack,
     fired: [],
     on: [],

@@ -9,6 +9,7 @@ import { ruledCard, ruledCommit, ruledScene } from "../src/game/ruled.js";
 import { mapView, clockView, partyView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
+import { LEDGER } from "../src/engine/ledger.js";
 
 const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment", "adjudicate", "resolve", "scene"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
@@ -171,7 +172,9 @@ function Game({ env, slot, initial, onQuit }) {
   const calls = useRef([]);
   const s = session.state;
 
-  const io = { sample: env.sample, speed, onStart: (call) => (setBusy(STATUS[call] ?? "Thinking…"), refresh()), onCall: (r) => calls.current.unshift(r) };
+  // A call whose input crossed its budget is recorded in the save, so growth never goes unnoticed (D76).
+  const onOver = (w) => (session.warnings ??= []).push({ ...w, tick: session.state.tick, at: Date.now() });
+  const io = { sample: env.sample, speed, onStart: (call) => (setBusy(STATUS[call] ?? "Thinking…"), refresh()), onCall: (r) => calls.current.unshift(r), onOver };
 
   const save = async () => {
     try {
@@ -349,7 +352,9 @@ function CardBody({ view, checkpoints, toggle }) {
         </div>
       </li>`)}
     </ol>
+    ${view.done ? html`<div className="small"><b>${view.done}.</b></div>` : null}
     ${view.rulings?.length ? html`<div className="small muted">${view.rulings.map((r, i) => html`<div key=${i}>Ruling: ${r}</div>`)}</div>` : null}
+    ${view.notes?.length ? html`<div className="small muted">${view.notes.map((r, i) => html`<div key=${i}>${r}</div>`)}</div>` : null}
   </div>`;
 }
 
@@ -483,7 +488,8 @@ function DevView({ session, calls, onExport }) {
   const replay = () => JSON.stringify({ start: { ...session.start, party: session.state.party.map((p) => p.id), player: session.player }, actions: session.actions });
   return html`<section className="dev" aria-label="Developer view">
     <h3 style=${{ margin: 0 }}>Developer view</h3>
-    <div className="counts"><span>Exchanges: <b>${c.exchanges}</b></span><span>Card edits: <b>${c.edits}</b></span><span>Everyone out of their starting zone at exchange: <b>${c.out ?? "not yet"}</b></span><span>Tick: <b>${session.state.tick}</b></span></div>
+    <div className="counts"><span>Exchanges: <b>${c.exchanges}</b></span><span>Card edits: <b>${c.edits}</b></span><span>Everyone out of their starting zone at exchange: <b>${c.out ?? "not yet"}</b></span><span>Tick: <b>${session.state.tick}</b></span>${session.state.facts ? html`<span>Facts: <b>${session.state.facts.length}/${LEDGER.facts}</b></span>` : null}<span>Input sent this session: <b>${(calls.reduce((n, r) => n + r.size, 0) / 1024).toFixed(0)} KB</b> in ${calls.length} calls</span></div>
+    ${session.warnings?.length ? html`<p className="error">${session.warnings.length} call${session.warnings.length > 1 ? "s" : ""} went over budget: ${session.warnings.slice(-3).map((w) => `${w.call} ${(w.size / 1024).toFixed(1)} KB of ${(w.budget / 1024).toFixed(0)} KB at tick ${w.tick}`).join("; ")}. Worth a look: something is growing.</p>` : null}
     <div className="row" style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
       <button className="ghost" onClick=${() => onExport(`heist-dm-replay-tick${session.state.tick}.json`, replay())}>Export this session's replay log</button>
     </div>

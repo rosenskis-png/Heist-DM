@@ -78,11 +78,11 @@ test("a scene rolls its checks, and its time passes with the routines", () => {
   assert.equal(lost.at.snag, "guardroom");
 });
 
-test("placed events still run: Uzga arrives at 21 and takes Fern if she's in her cell", () => {
-  const s = apply(load(start), { type: "scene", out: { reply: "You wait.", ticks: 12 } });
-  const end = apply(s, { type: "scene", out: { reply: "You wait.", ticks: 12 } });
-  assert.equal(end.ended?.outcome, "fern_taken");
-  assert.equal(end.tick, 21);
+test("placed events still run, half as long again (D77): Uzga arrives at 32 and takes Fern if she's in her cell", () => {
+  let s = load(start);
+  for (let i = 0; i < 3; i++) s = apply(s, { type: "scene", out: { reply: "You wait.", ticks: 12 } });
+  assert.equal(s.ended?.outcome, "fern_taken");
+  assert.equal(s.tick, 32);
 });
 
 test("rulings name real things, and anything can be a fact", () => {

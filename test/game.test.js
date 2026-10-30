@@ -214,7 +214,7 @@ function ruledSample(script) {
 }
 
 test("ruled mode: the rat plan is one card, and the party is out at exchange 1", async () => {
-  const sample = ruledSample({ adjudicate: [ratCard], resolve: [ratPlayed], narration: [told("Up the stair, all of you.")] });
+  const sample = ruledSample({ adjudicate: [ratCard], resolve: [ratPlayed] });
   const io = { sample };
   const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, seed: 7, mode: "ruled" });
   session.draft.plan = card2.plan;
@@ -234,7 +234,7 @@ test("ruled mode: the rat plan is one card, and the party is out at exchange 1",
 
 test("ruled mode: a failed resolve keeps its dice, so trying again can't reroll them", async () => {
   const bad = { steps: [], ends_at: 0 };
-  const sample = ruledSample({ adjudicate: [ratCard], resolve: [bad, bad, ratPlayed], narration: [told("Out.")] });
+  const sample = ruledSample({ adjudicate: [ratCard], resolve: [bad, bad, ratPlayed] });
   const io = { sample };
   const session = newSession({ packet, player: { name: "", class: "rogue" }, mode: "ruled" });
   session.draft.plan = "The rat plan.";

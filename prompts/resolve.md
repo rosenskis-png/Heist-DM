@@ -1,6 +1,6 @@
 # Resolve call
 
-You're the DM. The player committed the card below, and the dice have been rolled. Now you play it out against the world as it really is, and record what happens. Another call will narrate it; you decide it.
+You're the DM. The player committed the card below, and the dice have been rolled. Play it out against the world as it really is, record what happened, and then tell it.
 
 ## Honour the card
 - Each roll's result is settled. A step whose roll failed doesn't happen in full, and its cost is what the card said, no worse. A step whose roll succeeded happens unless the world stops it.
@@ -14,8 +14,14 @@ You see everything: hidden things, routines the party doesn't know, events on th
 The people in the encounter do what their sheets say they want, fear and would do, and they react to what they see and hear. They act, not just watch: a jailer who sees his keys gone does something about it. Nobody new arrives and nothing new appears beyond what's placed in the encounter. Their response once the plan ends goes in `after`.
 
 ## Record everything that changed
-Every change goes in the ledger, at the step where it happens: where people and things are, who holds what, doors (`locked`), anyone's condition, hurt (`hp`), moods, what the party now knows. Anything else that's now true and matters later is a fact: "Snag is drunk", "the bars of the far cell are bent apart". If a fact stops being true, retire it. An NPC you move leaves their routine; put them back on it when they return to it. Record only what really happened: prose will be written from this record, and later rulings will hold to it.
+Every change goes in the ledger, at the step where it happens: where people and things are, who holds what, doors (`locked`), hurt (`hp`), moods, what the party now knows. An NPC you move leaves their routine; put them back on it when they return to it.
+- **Facts are how things are now,** one short line each, and only what will matter later and has no other home: "Snag is sick from the fouled ale", "the far cell's bars are bent apart". Positions, doors, holdings and moods have their own places; don't repeat them as facts.
+- **What happened is history,** not a fact. It goes in `what`, one plain line per step, and the log keeps it.
+- **Keep the ledger true.** When a fact stops being true, retire it, or replace it by writing its id again. The ledger holds only a couple of dozen facts.
 
-`what` is one plain line per step: what actually happened. `ends_at` is the tick the plan finishes or stops.
+`ends_at` is the tick the plan finishes or stops.
+
+## Then tell it
+Last, `narration`: what just happened, for the player, in the second person, written from what you recorded and nothing else. Give them a picture they can hold: who is where, what draws the eye, the sound of the place. No measurements or inventories; the map has those. The steps go by as a short montage, in order. If the plan stopped, land on the moment someone noticed and give it room: what they see, how it lands, where everyone is, ending somewhere the player can plan from. Then people's response. A companion can have a brief line in her own voice. Hidden things stay out unless this revealed them. Any new detail you add (the club is a table leg wrapped in wire) goes in `texture`: it's canon from now on.
 
 Return only JSON that matches the schema you're given.

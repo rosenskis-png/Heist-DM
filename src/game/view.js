@@ -151,8 +151,8 @@ export function mapView(s) {
   };
 }
 
-// A ruled card (D75) in the same shape as `cardView`: each step's tick, the beats the party knows at that tick,
-// how long it takes, and its roll.
+// A ruled card (D75) in the same shape as `cardView`: each step's tick and the beats the party knows at that
+// tick, its roll, when the whole plan is done (D77), and the DM's notes on it.
 export function ruledCardView(s, card, { brief = false } = {}) {
   const routines = s.packet.people.filter((p) => knownRoutine(s, p) && !s.offRoutine?.includes(p.id));
   const steps = card.steps.map((st) => {
@@ -163,9 +163,10 @@ export function ruledCardView(s, card, { brief = false } = {}) {
     };
     if (brief) return out;
     const beats = routines.map((p) => `${short(s, p.id)}: ${cap(beatOf(s, p.id, st.at)?.id ?? "")}`);
-    return { ...out, on: [`Tick ${st.at}`, ...beats, st.takes ? `${st.takes} tick${st.takes > 1 ? "s" : ""}` : "No time"], mitigations: [] };
+    return { ...out, on: [`Tick ${st.at}`, ...beats], mitigations: [] };
   });
-  return brief ? { plan: card.plan, steps } : { plan: card.plan, steps, rulings: card.rulings.map((r) => r.text), stances: card.stances ?? [], ruled: true };
+  const done = `Done by tick ${card.ends_at}`;
+  return brief ? { plan: card.plan, steps, done } : { plan: card.plan, steps, done, rulings: card.rulings.map((r) => r.text), notes: card.notes ?? [], stances: card.stances ?? [], ruled: true };
 }
 
 // The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, and events it knows are coming.

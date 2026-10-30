@@ -17,7 +17,7 @@ export { layoutFacts } from "./map.js";
 export { handoff } from "./handoff.js";
 export { checkMoment, checkWorld, checkOps, fighting } from "./moment.js";
 export { tableRead } from "./table.js";
-export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms } from "./ledger.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms, checkFactBudget, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions:

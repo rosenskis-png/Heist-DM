@@ -10,8 +10,9 @@ export const changes = obj([], {
   holds: list(obj(["item", "by"], { item: r("id"), by: { oneOf: [r("id"), { type: "null" }] } })),
   // A flag on a person, thing or connection, any key. Doors use `locked`.
   flags: list(obj(["on", "key", "value"], { on: r("id"), key: r("id"), value: { type: ["string", "number", "boolean"] } })),
-  // A fact, added or (same id) replaced. Known facts are ones the party knows.
-  facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), about: list(r("id")), known: { type: "boolean" } })),
+  // A fact, added or (same id) replaced: one short line about how things are now, not what happened (that's the
+  // log). Known facts are ones the party knows. The ledger holds a fixed number of them (D76).
+  facts: list(obj(["id", "text"], { id: r("id"), text: { type: "string", minLength: 1, maxLength: 160 }, about: list(r("id")), known: { type: "boolean" } })),
   // Facts that stop being true.
   retire: list(r("id")),
   hp: list(obj(["who", "by"], { who: r("id"), by: { type: "integer" } })),

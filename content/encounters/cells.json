@@ -2,6 +2,15 @@
   "id": "cells",
   "name": "The Cells",
   "mode": "encounter",
+  "notes": [
+    "Snag hears a noise: he comes to look on the next tick, and his suspicion rises a step.",
+    "Something has touched his keys: he wears them on his belt until he's calm again.",
+    "The peg is empty when he reaches for it: he won't report it; he searches the corridor with his club.",
+    "A prisoner is loose: he goes for the war drum. If the drum is useless, he bargains.",
+    "The war drum is the Maw's alarm: beaten, it's passed along through the Warrens by other drums, and the alert goes up. Its head is hide.",
+    "His suspicion rises a step for each thing he notices. At the first he watches the cells instead of his bones, and the far cell's back corner is no longer hidden from him. At the second he stops drinking. At the third his keys stay on his belt, his club stays out and he keeps out of reach.",
+    "Suspicion falls a step after a full quiet cycle with every prisoner he can see lying still, never while something he knows is wrong is still wrong (an empty peg, a torn drum)."
+  ],
   "act": 1,
   "intent": {
     "objective": { "id": "escaped", "label": "The whole party at the top of the stair", "condition": { "party_all_in": "stair_top" } },

@@ -20,5 +20,9 @@ export const campfireSchema = withDefs({
     commitments: list(r("text")),
     // Only beats the engine listed as ready or always allowed; the engine rejects any other.
     beats: list(r("id")),
+    // Where she stands with the player now, as encounters will see it (D79): a mood from a short list, never
+    // further than grumpy or jealous, and why. And anything she has learned that changes how she acts.
+    standing: obj(["mood", "why"], { mood: { enum: ["warm", "glad", "steady", "wary", "grumpy", "jealous"] }, why: { type: "string", minLength: 1, maxLength: 120 } }),
+    learned: { ...list({ type: "string", minLength: 1, maxLength: 120 }), maxItems: 2 },
   }),
 });

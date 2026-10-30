@@ -153,6 +153,9 @@ export const packetSchema = withDefs({
     id: r("id"),
     // What the player sees it called.
     name: r("text"),
+    // How people react, in plain words, for a DM who rules (D76). The engine's triggers and meters say the same as
+    // rules; ruled mode sends these instead.
+    notes: { type: "array", items: r("text") },
     mode: { enum: ["encounter", "room"] },
     act: { type: "integer", minimum: 1 },
     intent: obj(["purpose"], {

@@ -1,13 +1,12 @@
-// The encounter loop in ruled mode (D75): the DM rules on a plan (the card), the engine rolls its dice, the DM
-// plays it out against the real world and records what changed, and the narration call tells it. In the Moment
+// The encounter loop in ruled mode (D75): the DM rules on a plan (the card), the engine rolls its dice, and the DM
+// plays it out against the real world, records what changed and tells it (D78). In the Moment
 // tab, the DM rules on each exchange. The huddle is the same as in the engine's mode (`huddle` in turns.js).
-import { stateFor, timelineFor, perceptionFor } from "../context.js";
+import { ledgerText, aheadText } from "../context.js";
 import { nameOf } from "../engine/world.js";
 import { ruledCardView } from "./view.js";
 import { adjudicateCall } from "../calls/adjudicate.js";
 import { resolveCall } from "../calls/resolve.js";
 import { sceneCall } from "../calls/scene.js";
-import { narrationCall } from "../calls/narration.js";
 import { post, act, envFor } from "./session.js";
 import { last, narrated, exchange, markOut, draftView, conversation } from "./turns.js";
 
@@ -25,7 +24,7 @@ export async function ruledCard(session, io, prompts) {
   if (session.card) session.counts.edits += 1;
   const stances = stancesOf(session);
   const recent = last(session.feeds.moment, 6).map((e) => ({ from: e.who, text: e.text }));
-  const out = await adjudicateCall(io, env, s, { plan, stances, now: stateFor(s), timeline: timelineFor(s, { party: true }), recent });
+  const out = await adjudicateCall(io, env, s, { plan, stances, now: ledgerText(s), timeline: aheadText(s, { party: true }), recent });
   session.card = { ruled: true, card: { ...out, plan, stances } };
   return session.card.card;
 }
@@ -48,26 +47,14 @@ export async function ruledCommit(session, io, prompts, { checkpoints = [], roll
   }
   const dice = session.card.dice;
   let s = session.state;
-  const end = Math.max(...card.steps.map((st) => st.at + st.takes));
   const { plan, stances, ...dmCard } = card;
-  const out = await resolveCall(io, env, s, { plan, card: dmCard, dice: diceFor(card, dice), stances, now: stateFor(s), timeline: timelineFor(s, { ticks: end - s.tick + 4 }) }, card, dice);
+  const out = await resolveCall(io, env, s, { plan, card: dmCard, dice: diceFor(card, dice), stances, now: ledgerText(s), timeline: aheadText(s, { ticks: card.ends_at - s.tick + 4 }) }, card, dice);
   s = act(session, { type: "resolve", card, dice, out });
   session.card = null;
   session.draft = { plan: "", stances: [] };
-  try {
-    const n = await narrationCall(io, env, {
-      plan,
-      steps: card.steps.map(({ n, summary, who, at }) => ({ n, summary, who, at })),
-      results: { dice: diceFor(card, dice), steps: out.steps.map(({ n, happened, what }) => ({ n, happened, what })), stopped: out.stopped ?? null },
-      world: out.after ?? {},
-      state: stateFor(s),
-      recent: narrated(session, 2),
-    });
-    if (n.texture.length) act(session, { type: "ops", source: "narration", ops: n.texture.map((text) => ({ add_canon: { kind: "texture", text } })) });
-    post(session, "plan", { who: "dm", kind: "narration", text: n.text });
-  } catch (e) {
-    post(session, "plan", { who: "system", text: `The narration call failed (${e.message}). What happened: ${out.steps.map((st) => st.what).join(" ")}` });
-  }
+  // The narration comes with the account (D78): one call decides what happened, then tells it.
+  if (out.narration.texture.length) act(session, { type: "ops", source: "narration", ops: out.narration.texture.map((text) => ({ add_canon: { kind: "texture", text } })) });
+  post(session, "plan", { who: "dm", kind: "narration", text: out.narration.text });
   markOut(session);
   if (session.state.ended) session.ended = session.state.handoff;
   return out;
@@ -82,9 +69,8 @@ export async function ruledScene(session, io, prompts, { to = "dm", text, rolls 
   exchange(session);
   const c = {
     to: to === "dm" ? "dm" : nameOf(s, to),
-    now: stateFor(s),
-    timeline: timelineFor(s, { ticks: 8 }),
-    perception: perceptionFor(s),
+    now: ledgerText(s),
+    timeline: aheadText(s, { ticks: 8 }),
     draft: draftView(session),
     recent: narrated(session, 2),
     conversation: conversation(session, to),

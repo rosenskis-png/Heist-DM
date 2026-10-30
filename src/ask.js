@@ -10,6 +10,11 @@ export const MIDDLE = { step: "default", pricing: "default", world: "default", n
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 
+// How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
+// runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
+// `test/budget.test.js` holds every ruled call under its budget at the ledger's limits.
+export const BUDGET = { adjudicate: 25600, resolve: 25600, scene: 25600, companion: 20480, narration: 49152, step: 49152, pricing: 49152, world: 49152, moment: 49152, ruling: 8192 };
+
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
 const REPLAY = new Set(["step", "pricing", "world", "ruling", "adjudicate"]);
 const LIMIT = 256 * 1024;
@@ -30,11 +35,15 @@ const pause = (ms, signal) =>
   });
 
 // `io` is the runtime: `sample`, the `speed` setting, an abort `signal`, `onStart` (which call is running, for
-// the page's status line) and `onCall`, which gets every call's input and raw output for the developer view
-// (held in memory only, D10).
+// the page's status line), `onOver` (a call's input crossed its budget) and `onCall`, which gets every call's
+// input and raw output for the developer view (held in memory only, D10).
 export async function ask(io, { call, input, schema, check = () => [] }) {
   const tier = tierFor(call, io.speed);
   const record = { call, tier, at: Date.now(), input, size: new TextEncoder().encode(input).length };
+  if (BUDGET[call] && record.size > BUDGET[call]) {
+    record.over = BUDGET[call];
+    io.onOver?.({ call, size: record.size, budget: BUDGET[call] });
+  }
   if (record.size > LIMIT) throw new CallFailed(call, [`its input is ${record.size} bytes, over the 256 KiB limit`], record);
   const opts = { modelTier: tier, cache: REPLAY.has(call), signal: io.signal };
   // One backoff on rate_limited, never a loop.

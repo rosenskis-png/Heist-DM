@@ -4,7 +4,7 @@
 import { checkSteps, splitLongMoves, project, shownCard, tableRead } from "../engine/index.js";
 import { d100 } from "../engine/rng.js";
 import { nameOf, zoneOf } from "../engine/world.js";
-import { stateFor, perceptionFor } from "../context.js";
+import { stateFor, perceptionFor, ledgerText } from "../context.js";
 import { stepCall } from "../calls/step.js";
 import { pricingCall } from "../calls/pricing.js";
 import { worldCall } from "../calls/world.js";
@@ -62,8 +62,8 @@ export async function huddle(session, io, prompts, { to = "all", text }) {
     const others = env.companions.filter((o) => o !== self);
     const c = {
       channel: to === "all" ? "huddle" : "private",
-      now: stateFor(s, { party: true }),
-      recent: narrated(session),
+      now: s.ruled ? ledgerText(s, { party: true, history: false }) : stateFor(s, { party: true }),
+      recent: narrated(session, 2),
       draft: draftView(session),
       card: session.card ? cardView(s, session.card.card, { brief: true }) : null,
     };

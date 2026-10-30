@@ -35,6 +35,8 @@ export function newSession({ packet, player, seed = 1, slack = 0, act = packet.a
     talking: null,
     counts: { exchanges: 0, edits: 0, out: null },
     reactions: [],
+    // Where each companion stands with the player (D79): written at camp, read in encounters.
+    standing: Object.fromEntries(companionIds(packet).map((id) => [id, { mood: "steady", learned: [] }])),
     actions: [],
   };
   post(session, "plan", { who: "dm", kind: "narration", text: packet.opening });
@@ -71,6 +73,7 @@ export function envFor(session, prompts) {
     connections: new Map(packet.map.connections.map((c) => [c.id, c])),
     // Relationships stay at their starting values until Phase 5 ports the model (D65).
     rel: {},
+    standing: session.standing,
     pairFor: (a, others) => others.map((b) => pairs[`${a}|${b}`] ?? pairs[`${b}|${a}`]).find(Boolean) ?? null,
   };
 }
