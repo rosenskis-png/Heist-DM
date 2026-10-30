@@ -111,9 +111,10 @@ The player commits the Gravenhold plan exactly as written: *Fern turns into a ra
 **Card 1: the plan as written.** The engine projects each step's tick against Snag's cycle. Nothing is rolled yet; the card shows the plan's honest price.
 - **Fern changes shape** on the current beat, Drink, while Snag is at the cask with his back to the door: automatic. A step takes place in the tick it starts in (D16).
 - **Fetching the keys** lands on a Pace beat, and **the keys aren't on the peg:** Snag carries them while he paces.
-- **One rat dragging an iron ring** down the lit corridor past his stool: **Very hard, 20%.**
+- **One rat dragging an iron ring** down the lit corridor past his stool: **Very hard.**
+- **Leaving** lands on his next Pace: he walks the corridor, sees the open doors, and the drum is whole, so he goes for it and a fight starts. The card shows that instead of pricing a walk past him (D34).
 
-This one card teaches the player the whole cycle, through the card rather than through trial and error.
+This one card teaches the player the whole cycle and the drum, through the card rather than through trial and error.
 
 **Exchange 2: one edit.**
 
@@ -121,12 +122,12 @@ This one card teaches the player the whole cycle, through the card rather than t
 
 **Card 2: the edited plan**
 
-| # | Step | Snag's beat | Risk | Odds | If it fails |
+| # | Step | Snag's beat | Risk | Difficulty | If it fails |
 |---|---|---|---|---|---|
 | 1 | Fern changes at the back of her cell | Drink | — | automatic | — |
 | 2 | Fern goes down the gutter to the guardroom drain | Pace | — | automatic | — |
-| 3 | Brannoc tosses his crusts; Fern and the rats lift the ring off the peg | Sit, with the peg behind him | iron clinking behind him in a quiet room | Easy, 80% | He swats the rats and clips the ring to his belt. Suspicion 1. The plan stops. |
-| 4 | The rats carry the ring to Lyra; Fern gnaws the drumhead | Drink | gnawing hide ten feet behind him | Easy, 80% | He kicks the rat off his drum (Fern loses 1 HP). Suspicion 1. The drum still works. The plan continues. |
+| 3 | Brannoc tosses his crusts; Fern and the rats lift the ring off the peg | Sit, with the peg behind him | iron clinking behind him in a quiet room | Easy | He swats the rats and clips the ring to his belt. Suspicion 1. The plan stops. |
+| 4 | The rats carry the ring to Lyra; Fern gnaws the drumhead | Drink | gnawing hide ten feet behind him | Easy | He kicks the rat off his drum (Fern loses 1 HP). Suspicion 1. The drum still works. The plan continues. |
 | 5 | Lyra unlocks all four doors | Pace: **he reaches for the empty peg** | none: he sees the doors open, but the drum is already gnawed (step 4), and a key is a key | automatic | — |
 
 - **Lyra's stance** is resolved, because the plan frees Brannoc.
@@ -183,6 +184,6 @@ Every option here comes from state that's already in the packet:
 
 ## 6. The risk to watch
 
-The card-edit loop is the new place a stall could hide. If each edit turned up one more problem, the player would be playing whack-a-mole with the AI that sets the odds, instead of with the companions as in the old game.
+The card-edit loop is the new place a stall could hide. If each edit turned up one more problem, the player would be playing whack-a-mole with the AI that prices the plan, instead of with the companions as in the old game.
 
 The pricing call already defends against this: it prices every observer along the whole route at its projected tick, so card 1 surfaces every timing problem at once. If playtests show players needing three or more edits, check whether the opening and world turns make the cycle visible enough. Don't fix it by adding a rule.

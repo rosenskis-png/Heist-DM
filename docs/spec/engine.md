@@ -44,9 +44,9 @@ The engine runs deterministic reactions written in the packet:
    - every id is real;
    - every **precondition holds at the projected tick** (e.g. the keys aren't on the peg during a Pace beat).
 2. **Attach facts to each step:** its projected tick, its route, the observers who can see or hear it at that tick, and the barriers it crosses.
-3. **Check the pricing call's output.** Every observer, barrier and hazard the engine listed must have either a priced risk or a named mitigation. Anything uncovered is sent back.
+3. **Check the pricing call's output.** On every step without a problem, every observer, barrier and hazard the engine listed must have either a priced risk or a named mitigation. Anything uncovered is sent back.
 4. **Strip internal-only fields** (hidden checks) before the card is shown.
-   **Problems** (an effect that can't happen at its projected tick: the keys aren't on the peg, a trigger fires first) are shown on the card. They aren't errors in the step call and aren't sent back.
+   **Problems** (an effect that can't happen at its projected tick: the keys aren't on the peg, a trigger fires first) are shown on the card. They aren't errors in the step call and aren't sent back. Each step is projected as if the earlier steps' problems were fixed, so problems don't cascade, and a step with a problem of its own isn't priced: the card shows the problem instead (D34).
 5. **Execute each step in order:**
    - advance the tick and apply schedules (each beat's `on_start` rules), meters and triggers;
    - check for observers the card didn't list (reveal them and stop);
@@ -60,7 +60,11 @@ The engine runs deterministic reactions written in the packet:
 6. **Log every result as structured data** for the narration call.
 
 ## 7. Dice, combat, abilities, stances
-- **Dice:** a d100 roll against odds from the bands in `docs/spec/calls/pricing.md`. The random number generator is seedable, so tests and replays are reproducible.
+- **Dice:** the AIs judge a difficulty band; the engine rolls a d100 against the band's number (D33). No AI reads or writes these numbers, and the player never sees them. The random number generator is seedable, so tests and replays are reproducible.
+
+  | Band | Easy | Medium | Hard | Very hard | Near impossible |
+  |---|---|---|---|---|---|
+  | Succeeds on d100 ≤ | 80 | 65 | 45 | 25 | 10 |
 - **Combat** (Gravenhold's rule; `content/rules.js`):
   - HP;
   - abilities whose conditions are met bypass HP;

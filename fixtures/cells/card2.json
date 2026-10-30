@@ -88,7 +88,6 @@
             "id": "ring_lift",
             "covers": ["snag"],
             "difficulty": "easy",
-            "odds": 80,
             "reason": "Iron clinking behind him in a quiet room, but the peg is behind the stool, he's watching the cells, and fed rats squabbling sound like rats.",
             "on_fail": {
               "summary": "He swats the rats off the peg and clips the ring to his belt. The plan stops.",
@@ -107,7 +106,6 @@
             "id": "drum_gnaw",
             "covers": ["snag"],
             "difficulty": "easy",
-            "odds": 80,
             "reason": "Gnawing hide ten feet behind him while he hums at the squeaking tap; the ring goes the other way, out the door.",
             "on_fail": {
               "summary": "He kicks the rat off his drum. Fern loses 1 HP. The drum still works; the plan continues.",

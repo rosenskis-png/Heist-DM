@@ -5,7 +5,10 @@
       "stance": {
         "kind": "insist",
         "text": "We take the miner with us.",
-        "traced_to": { "field": "limits", "item": "Won't leave anyone behind" }
+        "traced_to": {
+          "field": "limits",
+          "item": "Won't leave anyone behind"
+        }
       },
       "reactions": []
     },
@@ -19,25 +22,48 @@
       {
         "npc": "snag",
         "because": "Under pressure he bargains once the drum is useless, and he fears being blamed more than anything.",
-        "ops": [{ "set_disposition": { "npc": "snag", "value": "bargaining" } }]
+        "ops": [
+          {
+            "set_disposition": {
+              "npc": "snag",
+              "value": "bargaining"
+            }
+          }
+        ]
       }
     ]
   },
   "narration": {
     "text": "The doors swing open just as Snag's hand closes on an empty peg. He comes down the corridor with his club up, finds three loose prisoners and a miner, and spins for the drum. Its head is in tatters. \"Uzga'll skin me either way,\" he says.",
-    "texture": ["Snag's club is a table leg wrapped in rusted wire."]
+    "texture": [
+      "Snag's club is a table leg wrapped in rusted wire."
+    ]
   },
   "moment": {
     "reply": "Snag squints at you over his bones. \"Ale crawl? Never heard of it.\" His eyes flick to the cask.",
-    "learned": ["Snag glanced at the cask when you mentioned a way out."],
+    "learned": [
+      "Snag glanced at the cask when you mentioned a way out."
+    ],
     "check": {
       "actor": "player",
       "skill": "Presence",
       "difficulty": "medium",
-      "odds": 65,
       "reason": "Bribes work in the Maw and he's scared of Uzga, but he doesn't trust you yet.",
-      "on_success": { "text": "\"Tie me up proper,\" he mutters. \"Make it look like I fought. Then I'll show you something.\"", "ops": [{ "set_disposition": { "npc": "snag", "value": "dealing" } }] },
-      "on_failure": { "text": "\"Nice try.\" He shifts his grip on the club.", "ops": [] }
+      "on_success": {
+        "text": "\"Tie me up proper,\" he mutters. \"Make it look like I fought. Then I'll show you something.\"",
+        "ops": [
+          {
+            "set_disposition": {
+              "npc": "snag",
+              "value": "dealing"
+            }
+          }
+        ]
+      },
+      "on_failure": {
+        "text": "\"Nice try.\" He shifts his grip on the club.",
+        "ops": []
+      }
     }
   }
 }

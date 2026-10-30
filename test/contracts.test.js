@@ -36,11 +36,15 @@ test("both Cells cards are valid", () => {
   valid(schemas.cardSchema, load("card2.json"));
 });
 
-test("every observer and barrier on each card is priced or mitigated", () => {
+test("each step is priced, unless it has a problem of its own", () => {
   for (const file of ["card1.json", "card2.json"]) {
     const card = load(file);
     for (const facts of card.facts) {
       const priced = card.pricing_call.steps.find((s) => s.n === facts.n);
+      if (facts.problems.length) {
+        assert.equal(priced, undefined, `${file} step ${facts.n} has a problem and must not be priced`);
+        continue;
+      }
       assert.ok(priced, `${file} step ${facts.n} has no pricing`);
       const covered = new Set([...priced.risks.flatMap((r) => r.covers), ...priced.mitigations.map((m) => m.covers)]);
       for (const id of [...facts.observers, ...facts.barriers, ...facts.hazards]) {

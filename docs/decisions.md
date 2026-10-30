@@ -145,3 +145,12 @@ Seeing and hearing stay authored per observer and beat. There is no ray casting.
 ### D32. Contracts are schema files, checked by `node --test`
 **Decided:** Every contract is a JSON Schema in `schemas/`: the packet, the card, execution results, the shared condition language and operations, and one file per call in `schemas/calls/`. The same files go to `sample.json` and to the engine's validator (`src/validate.js`, dependency-free). `test/contracts.test.js` runs the Cells packet, both cards and their expected results through them. The narration call moves to `sample.json` so its texture comes back as a separate field.
 **Why:** "No free-text escape hatches" is easy to fool yourself about in prose. Writing the contracts this way also caught a fixture error: card 2's step 5 happens on Snag's Pace beat, in the corridor he's watching, so he is an observer there, covered by step 4 (the drum is gnawed). The walkthrough and acceptance test now say so.
+
+### D33. The AIs judge difficulty bands, not percentages
+**Decided:** The pricing and moment calls return a difficulty band (easy, medium, hard, very hard, near impossible), a one-line reason and the stakes. They never return a number. The engine rolls a d100 against one fixed number per band (`docs/spec/engine.md` §7), and the card shows the band and the stakes, never a percentage.
+**Why:** "Easy 80" against "Easy 85" is precision the AI can't honestly have; the judgment is the band, the reason and what failure costs. Percentages on every risk make the card read like a video game.
+**Supersedes:** the odds ranges in the pricing call's band table.
+
+### D34. A card shows problems instead of pricing the impossible
+**Decided:** The engine projects each step as if the earlier steps' problems were fixed, so one problem doesn't flag every later step. A step with a problem of its own (the keys aren't on the peg at that tick; a trigger fires first) shows the problem and isn't sent for pricing.
+**Why:** Card 1 priced walking the party past Snag after the engine had already projected him going for the drum: odds on a step that can't happen as written. The card's job is to surface every timing problem at once (`fixtures/cells/walkthrough.md` §6), and a problem says that better than a long-shot price.

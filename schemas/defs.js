@@ -142,8 +142,10 @@ export const defs = {
   // The quietest sound a listener catches, and how loud a step is.
   noise: { enum: ["silent", "quiet", "speech", "loud"] },
   size: { enum: ["tiny", "small", "medium", "large"] },
-  difficulty: { enum: ["trivial", "easy", "medium", "hard", "very_hard", "near_impossible"] },
-  odds: { type: "integer", minimum: 5, maximum: 100 },
+  // What the AIs judge. The engine turns a band into the number it rolls against (docs/spec/engine.md §7).
+  difficulty: { enum: ["easy", "medium", "hard", "very_hard", "near_impossible"] },
+  // Engine-side only: the number a band rolls against. No AI reads or writes it.
+  odds: { type: "integer", minimum: 1, maximum: 100 },
 };
 
 export const withDefs = (schema) => ({ ...schema, $defs: { ...defs, ...(schema.$defs ?? {}) } });

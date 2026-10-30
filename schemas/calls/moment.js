@@ -2,11 +2,10 @@
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
 
-const check = obj(["actor", "skill", "difficulty", "odds", "reason", "on_success", "on_failure"], {
+const check = obj(["actor", "skill", "difficulty", "reason", "on_success", "on_failure"], {
   actor: r("id"),
   skill: { enum: ["Might", "Agility", "Stealth", "Lore", "Insight", "Presence"] },
   difficulty: r("difficulty"),
-  odds: r("odds"),
   reason: r("text"),
   on_success: obj(["text", "ops"], { text: r("text"), ops: r("operations") }),
   on_failure: obj(["text", "ops"], { text: r("text"), ops: r("operations") }),
@@ -26,11 +25,10 @@ export const momentSchema = withDefs({
     combat: obj(["intents", "unusual"], {
       intents: list(obj(["enemy", "intent"], { enemy: r("id"), intent: r("text"), target: r("id") })),
       unusual: list(
-        obj(["actor", "action", "difficulty", "odds", "reason", "on_success", "on_failure"], {
+        obj(["actor", "action", "difficulty", "reason", "on_success", "on_failure"], {
           actor: r("id"),
           action: r("text"),
           difficulty: r("difficulty"),
-          odds: r("odds"),
           reason: r("text"),
           on_success: r("operations"),
           on_failure: r("operations"),

@@ -2,6 +2,7 @@
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
 
+// Steps the engine flagged with a problem of their own are not priced (docs/spec/engine.md §6).
 export const pricingSchema = withDefs({
   $id: "pricing",
   ...obj(["steps", "rulings"], {
@@ -9,12 +10,11 @@ export const pricingSchema = withDefs({
       obj(["n", "risks", "mitigations"], {
         n: { type: "integer", minimum: 1 },
         risks: list(
-          obj(["id", "covers", "difficulty", "odds", "reason", "on_fail"], {
+          obj(["id", "covers", "difficulty", "reason", "on_fail"], {
             id: r("id"),
             // Observer, barrier or hazard ids from the engine's facts for this step.
             covers: list(r("id"), 1),
             difficulty: r("difficulty"),
-            odds: r("odds"),
             reason: r("text"),
             on_fail: obj(["summary", "ops", "stops_plan"], {
               summary: r("text"),
