@@ -141,8 +141,8 @@
   },
   {
    "id": "bribe",
-   "title": "Bribing Snag through Brannoc",
-   "plan": "When Snag sits down, Brannoc calls him over and makes him an offer: let us out, and we'll tie him up so it looks like we overpowered him. Uzga can't blame him for that.",
+   "title": "Leaning on Snag through Brannoc",
+   "plan": "When Snag sits down, Brannoc calls him over and keeps his voice low: he knows Snag sneaks off to drink on shift, he comes back smelling of wet stone every time, and he'll tell Uzga unless Snag leaves Lyra's door unlocked on his next round.",
    "stances": [
     {
      "companion": "lyra",
@@ -166,7 +166,7 @@
     "ifs": 0,
     "steps": [
      1,
-     2
+     3
     ]
    }
   }
@@ -1130,13 +1130,13 @@
   },
   {
    "id": "bribe",
-   "title": "Bribing Snag through Brannoc",
-   "plan": "When Snag sits down, Brannoc calls him over and makes him an offer: let us out, and we'll tie him up so it looks like we overpowered him. Uzga can't blame him for that.",
+   "title": "Leaning on Snag through Brannoc",
+   "plan": "When Snag sits down, Brannoc calls him over and keeps his voice low: he knows Snag sneaks off to drink on shift, he comes back smelling of wet stone every time, and he'll tell Uzga unless Snag leaves Lyra's door unlocked on his next round.",
    "step_call": {
     "steps": [
      {
       "n": 1,
-      "summary": "Brannoc calls Snag over to his bars and offers him a deal: open the doors, and the prisoners tie him up so it looks like he was overpowered.",
+      "summary": "Brannoc calls Snag over and threatens to tell Uzga about his drinking unless Snag leaves the near cell unlocked on his next round.",
       "when": {
        "until": {
         "beat": [
@@ -1158,7 +1158,9 @@
         }
        }
       ],
-      "tags": []
+      "tags": [
+       "deception"
+      ]
      }
     ],
     "rulings": [],
@@ -1183,7 +1185,7 @@
      "interrupts": []
     }
    ],
-   "look_for": "The offer speaks to what Snag fears most (blame), but it's a prisoner talking. The gut for a charismatic character is about 70% (Medium).",
+   "look_for": "Brannoc's leverage is real (his sheet: Snag smells of wet stone after breaks) and it hits Snag's worst fear, being blamed; but it's a prisoner threatening his jailer. The gut for a persuasive offer was about 70% (Medium).",
    "expect": {
     "bands": [
      "medium"
