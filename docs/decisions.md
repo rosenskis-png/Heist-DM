@@ -305,3 +305,8 @@ The huddle keeps everything a player at the table has, including the map, her lo
 ### D63. A key opens a door in passing only when someone needs it open
 **Decided:** Refines D56. Someone carrying a connection's key unlocks it as they pass only if something moving with them doesn't fit through it while it's locked. A rat dragging the key ring between the bars leaves the door locked.
 **Why:** Unlocking on every pass let Fern unlock the far cell's door while delivering the ring, which set off Snag's `prisoner_loose` trigger a step early. An unlock nobody wrote, and nobody needed, is the step call's job to write, not the engine's.
+
+### D64. Working a door takes hands, from a side it's worked from
+**Decided:** Locking, unlocking or otherwise setting a flag on a connection needs one of the step's actors to have hands and stand on a side it can be worked from (`operated_from`, or either side if `reachable_from_other_side`). The same goes for unlocking in passing (D56, D63): whoever carries the key needs hands and must come at it from a workable side. Everyone has hands unless a flag says otherwise; Wild Shape's `declared` block sets `hands: false`, and the packet's rule that ends it gives them back. A step that breaks this isn't sent back to the step call. It's the plan's mistake (D35), and reality interrupts it at that effect (`cant_work`, D36).
+**Why:** The designer's ruling: a rat can't turn a key. The engine also wasn't checking `operated_from` at all, though the packet records it for every barrier.
+**Rules out:** A rat, or anyone else without hands, unlocking a door; working a barrier from a side it can't be reached from.

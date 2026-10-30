@@ -1,6 +1,6 @@
 // Map facts from geometry, routes and fit (docs/spec/engine.md §2, D28, D51, D53, D54, D56).
 // Coordinates stay in here; the AIs get only the facts derived from them (D9).
-import { SIZES, conn, sizeOf, carried, flag } from "./world.js";
+import { SIZES, conn, sizeOf, carried, flag, zoneOf, isParty, isNpc } from "./world.js";
 
 const FT = 5;
 
@@ -26,25 +26,41 @@ export function crossings(s, from, path) {
   return { conns: out, end: here };
 }
 
-// What fits through a connection now: `fits`, or `fits_unlocked` once it's unlocked or someone moving
-// carries its key, who unlocks it in passing (D53, D56).
-const hasKey = (s, c, movers) => c.key && movers.some((m) => m === c.key || carried(s, m).includes(c.key));
-export function fitsNow(s, c, movers) {
-  const locked = flag(s, c.id, "locked") === true && !hasKey(s, c, movers);
+// Working a connection (locking, unlocking, opening) takes someone with hands, on a side it's worked from (D64).
+// Anyone a sheet or a flag hasn't taken hands from has them: Fern as a rat doesn't.
+export const hasHands = (s, id) => (isParty(s, id) || isNpc(s, id)) && flag(s, id, "hands") !== false;
+export const workedFrom = (c, z) => c.between.includes(z) && (c.operated_from === "both" || c.operated_from === z || c.reachable_from_other_side === true);
+
+// Why none of these actors can work this connection from where they are, or null if one can.
+export function cantWork(s, c, actors) {
+  const able = actors.filter((a) => hasHands(s, a));
+  if (!able.length) return "no_hands";
+  return able.some((a) => workedFrom(c, zoneOf(s, a))) ? null : "wrong_side";
+}
+
+// Someone moving who carries a connection's key, has hands, and comes at it from a side it's worked from.
+const opener = (s, c, movers, from) =>
+  c.key && workedFrom(c, from) && movers.some((m) => hasHands(s, m) && carried(s, m).includes(c.key));
+
+// What fits through a connection now: `fits`, or `fits_unlocked` once it's unlocked or someone moving can
+// unlock it in passing (D53, D56).
+export function fitsNow(s, c, movers, from) {
+  const locked = flag(s, c.id, "locked") === true && !opener(s, c, movers, from);
   return !locked && c.fits_unlocked ? c.fits_unlocked : c.fits;
 }
 
-// Why a mover can't cross: null if it can. A ruling's exception lets that thing through that connection (D55).
-export function blocked(s, c, mover, movers) {
+// Why a mover can't cross from `from`: null if it can. A ruling's exception lets that thing through that
+// connection (D55).
+export function blocked(s, c, mover, movers, from) {
   if (s.exceptions.includes(`${mover}|${c.id}`)) return null;
-  if (SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(fitsNow(s, c, movers))) return null;
+  if (SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(fitsNow(s, c, movers, from))) return null;
   const opens = c.fits_unlocked && SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(c.fits_unlocked);
   return opens ? "locked" : "too_big";
 }
 
-// Only when someone moving needs it open: a rat carrying the ring slips through the bars without unlocking them.
-export const unlocksInPassing = (s, c, movers) =>
-  flag(s, c.id, "locked") === true && hasKey(s, c, movers) && movers.some((m) => SIZES.indexOf(sizeOf(s, m)) > SIZES.indexOf(c.fits));
+// Only when someone moving needs it open: a rat carrying the ring slips through the bars without unlocking them (D63).
+export const unlocksInPassing = (s, c, movers, from) =>
+  flag(s, c.id, "locked") === true && opener(s, c, movers, from) && movers.some((m) => SIZES.indexOf(sizeOf(s, m)) > SIZES.indexOf(c.fits));
 
 // The shortest way everything moving fits through, as connection ids (D54). Hidden connections count only
 // once revealed; the party can't take a way it doesn't know.
@@ -56,7 +72,7 @@ export function route(s, from, to, movers) {
     if (here === to) return seen.get(here);
     for (const c of s.packet.map.connections) {
       if (!c.between.includes(here) || (c.hidden && !s.known.revealed.includes(c.id))) continue;
-      if (movers.some((m) => blocked(s, c, m, movers))) continue;
+      if (movers.some((m) => blocked(s, c, m, movers, here))) continue;
       const next = other(c, here);
       if (!seen.has(next)) seen.set(next, [...seen.get(here), c.id]), queue.push(next);
     }

@@ -118,6 +118,15 @@ The Cells, plus 2–3 more packets including at least one room, and the hand-off
 
 **Open questions**
 1. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
+2. **Does the engine hold up beyond the Cells?** Its mechanisms are general (nothing in `src/engine/` names a Cells id), but it has only met one packet, so its vocabulary is Cells-sized. Known narrow spots:
+   - **Recognizing a broken plan early** (D62) covers only an item missing from where the plan expects it. Other broken preconditions (a door now barred, a contact who has left) are caught only when the step reaches them.
+   - **Hazards** (fire, a trap, a collapsing floor) have no packet format, so the card's `hazards` is always empty.
+   - **A fight or an ending** is the only kind of trigger that interrupts a plan before its next step. A trigger that changes the situation some other way is met at the effect.
+   - **Movement** is checked only by size, hands and side. Climbing, swimming or flying are priced by judgment, which is right unless a packet needs one enforced.
+   - **Traits** the engine reads are named in code (`sees_in_dark`, `hears_through_walls`). A new sense needs code.
+   - **Layout facts** list distances between every pair of connections and placed things in a zone, which grows fast in a big room.
+
+   *Recommendation:* build at least one Act 1 packet deliberately unlike the Cells (a room, a hazard, an NPC who leaves, a door worked from one side), and extend the engine only where that real packet needs it. The generator must not start (Phase 7) until two differently shaped packets pass.
 
 ## Phase 7: The generator
 

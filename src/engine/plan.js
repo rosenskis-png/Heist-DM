@@ -4,7 +4,7 @@ import { clone, conn, person, thing, isParty, isNpc, nameOf, zoneOf, carried } f
 import { test, subjects, beatsNamed } from "./cond.js";
 import { run, abilityOf } from "./ops.js";
 import { nextTick, beatOf, triggers, objectives, log } from "./clock.js";
-import { crossings, route, blocked, unlocksInPassing } from "./map.js";
+import { crossings, route, blocked, unlocksInPassing, cantWork } from "./map.js";
 import { npcPerceives, whoPerceives, partyPerceives } from "./perceive.js";
 import { d100, ODDS } from "./rng.js";
 
@@ -107,16 +107,27 @@ function movePlan(s, op) {
     if (!conns) {
       // Name the first thing that can't get through, for the interruption.
       const any = route({ ...s, exceptions: [...s.exceptions, ...ignoreFit(s, movers)] }, from, to, movers) ?? [];
-      const blocks = any.flatMap((cid) => movers.filter((m) => blocked(s, conn(s, cid), m, movers)).map((m) => ({ who: m, connection: cid, why: blocked(s, conn(s, cid), m, movers) })));
+      const blocks = [];
+      let here = from;
+      for (const cid of any) {
+        for (const m of movers) {
+          const why = blocked(s, conn(s, cid), m, movers, here);
+          if (why) blocks.push({ who: m, connection: cid, why });
+        }
+        here = conn(s, cid).between.find((z) => z !== here);
+      }
       return { conns: any, blocks: blocks.length ? blocks : [{ who: id, connection: null, why: "too_big" }] };
     }
   }
   const blocks = [];
-  for (const cid of conns)
+  let here = from;
+  for (const cid of conns) {
     for (const m of movers) {
-      const why = blocked(s, conn(s, cid), m, movers);
+      const why = blocked(s, conn(s, cid), m, movers, here);
       if (why) blocks.push({ who: m, connection: cid, why });
     }
+    here = conn(s, cid).between.find((z) => z !== here);
+  }
   return { conns, blocks };
 }
 const ignoreFit = (s, movers) => s.packet.map.connections.flatMap((c) => movers.map((m) => `${m}|${c.id}`));
@@ -245,13 +256,15 @@ export function project(s, steps, internalChecks = []) {
         if (max && (real.uses[v.actor]?.[v.ability] ?? 0) >= max) interrupts.push({ code: "ability_spent", effect: e, id: v.actor, detail: `${a.name} is spent for this encounter.` });
       }
       if (k === "set_flag" && v.key === "locked" && v.value === false && conn(real, v.entity) && real.flags[v.entity]?.locked) barriers.push(v.entity);
+      const work = workProblem(real, op, step.actors, e);
+      if (work) interrupts.push(work);
       if (k === "move" || k === "give") {
         const p = movePlan(real, op);
         const id = k === "move" ? v.entity : v.item;
         let here = zoneOf(real, id);
         enter(t, here);
         for (const cid of p.conns ?? []) {
-          if (unlocksInPassing(real, conn(real, cid), [id, ...carried(real, id)]) && !barriers.includes(cid)) barriers.push(cid);
+          if (unlocksInPassing(real, conn(real, cid), [id, ...carried(real, id)], here) && !barriers.includes(cid)) barriers.push(cid);
           enter(t, (here = conn(real, cid).between.find((z) => z !== here)));
         }
         for (const b of p.blocks) interrupts.push({ code: b.why, effect: e, id: b.who, detail: `${cap(nameOf(real, b.who))} can't get through ${b.connection ? nameOf(real, b.connection) : "on any route"}.` });
@@ -425,7 +438,7 @@ export function execute(s, card) {
     for (let e = 0; e < action.effects.length; e++) {
       if (cancels.has(e)) continue;
       const seen = e > 0 && i + 1 < steps.length ? recognize(s, steps, i + 1, facts, plan) : null;
-      const stopHere = seen ? { ...seen, effect: e } : effectProblem(s, action.effects[e], e, plan[i]?.[e]);
+      const stopHere = seen ? { ...seen, effect: e } : effectProblem(s, action.effects[e], e, plan[i]?.[e], action.actors);
       if (stopHere) {
         triggers(s, ctx);
         nextTick(s);
@@ -538,8 +551,10 @@ function hiddenFact(s, step, checks) {
 
 // Why an effect can't happen right now, if it can't: the item isn't where the plan left it, something
 // doesn't fit, a door is locked, an ability is spent.
-function effectProblem(s, op, e, need) {
+function effectProblem(s, op, e, need, actors) {
   const [k, v] = opOf(op);
+  const work = workProblem(s, op, actors, e);
+  if (work) return work;
   if (need && !sameLoc(locOf(s, need.item), need.loc))
     return { code: "not_there", effect: e, id: need.item, detail: `${cap(nameOf(s, need.item))} is ${where(s, locOf(s, need.item))}, not ${where(s, need.loc)}.` };
   if (k === "use_ability") {
@@ -554,6 +569,17 @@ function effectProblem(s, op, e, need) {
     if (b) return { code: b.why, effect: e, id: b.who, detail: `${cap(nameOf(s, b.who))} can't get through ${b.connection ? nameOf(s, b.connection) : "any way there"}.` };
   }
   return null;
+}
+
+// Setting a flag on a connection is working it: someone among the step's actors needs hands and to be on a
+// side it's worked from (D64). A rat can't turn a key.
+function workProblem(s, op, actors, e) {
+  const [k, v] = opOf(op);
+  const c = k === "set_flag" ? conn(s, v.entity) : null;
+  const why = c && cantWork(s, c, actors);
+  if (!why) return null;
+  const detail = why === "no_hands" ? `No one doing this has hands to work ${nameOf(s, c.id)}.` : `No one doing this is on a side ${nameOf(s, c.id)} can be worked from.`;
+  return { code: "cant_work", effect: e, id: c.id, detail };
 }
 
 // The zones a step will occupy, from where everyone is now: for checking which risks still hold.

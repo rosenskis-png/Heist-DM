@@ -19,10 +19,12 @@ function travel(s, id, from, to, path) {
   if (!from || from === to) return;
   const movers = [id, ...carried(s, id)];
   const conns = path ? crossings(s, from, path).conns : route(s, from, to, movers) ?? [];
+  let here = from;
   for (const cid of conns) {
     const c = conn(s, cid);
-    if (unlocksInPassing(s, c, movers)) s.flags[cid].locked = false;
+    if (unlocksInPassing(s, c, movers, here)) s.flags[cid].locked = false;
     if (c.ticks) s.pending += c.ticks;
+    here = c.between.find((z) => z !== here);
   }
 }
 

@@ -345,3 +345,25 @@ test("replaying a recorded log reproduces state exactly", () => {
   const other = replay({ start: { ...begin, seed: 8 }, actions });
   assert.equal(typeof other.rng, "number");
 });
+
+// D64: working a door takes hands, from a side it's worked from.
+test("a rat can't unlock a door, even holding the key; nor can anyone on the wrong side", () => {
+  let s = ops(start(), [{ use_ability: { actor: "fern", ability: "wildshape" } }, { give: { item: "keyring", to: "fern" } }]);
+  const unlock = (who, door) => [{ actors: [who], zone: "cell_middle", summary: "Unlock the door.", effects: [{ set_flag: { entity: door, key: "locked", value: false } }] }];
+  const c = card(s, unlock("fern", "bars_middle"));
+  assert.deepEqual(c.facts[0].interrupts.map((i) => [i.code, i.id]), [["cant_work", "bars_middle"]]);
+  const paws = apply(s, { type: "execute", card: c });
+  assert.deepEqual([paws.results[0].outcome, paws.results[0].interrupt.code], ["interrupted", "cant_work"]);
+  assert.equal(paws.flags.bars_middle.locked, true);
+
+  // The rogue with the key walks out, unlocking in passing; without hands, the way is shut.
+  const handed = ops(start(), [{ give: { item: "keyring", to: "player" } }, move("player", "corridor")]);
+  assert.deepEqual([handed.at.player, handed.flags.bars_far.locked], ["corridor", false]);
+  const handless = ops(start(), [{ give: { item: "keyring", to: "player" } }, { set_flag: { entity: "player", key: "hands", value: false } }]);
+  assert.ok(checkSteps(handless, { steps: [{ n: 1, summary: "Out.", actors: ["player"], zone: "corridor", noise: "quiet", tags: [], effects: [move("player", "corridor")] }], rulings: [], internal_checks: [] }).errors.length);
+
+  const inside = load({ packet: variant((p) => (p.map.connections.find((x) => x.id === "bars_far").reachable_from_other_side = false)), party });
+  const held = ops(inside, [{ give: { item: "keyring", to: "player" } }]);
+  const wrong = card(held, [{ actors: ["player"], zone: "cell_far", summary: "Unlock it from inside.", effects: [{ set_flag: { entity: "bars_far", key: "locked", value: false } }] }]);
+  assert.match(wrong.facts[0].interrupts[0].detail, /side/);
+});
