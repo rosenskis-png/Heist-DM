@@ -1,0 +1,70 @@
+# The encounter packet
+
+Everything fixed for one encounter. It's built by the generator (or by hand until Phase 7), validated by the engine, and fixed for the whole encounter. Live changes go in encounter state (`docs/spec/state.md`), never here.
+
+How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked example is `fixtures/cells/`.
+
+---
+
+## 1. Intent
+- **Objective:** a condition the engine can check, written in the condition language (`docs/spec/engine.md`), such as `party_all_in: [stair_top]`.
+- **Alternate objectives,** including one fail-forward ending.
+- **Optional objectives,** such as `item_held: gear_sack`.
+- **Purpose:** what this encounter is for, in one or two concrete sentences.
+- **Expected length,** in plans committed (e.g. 1–2, 3–5).
+- **No routes, ever.** The intent never lists solutions, obvious or alternative. The generator may privately check that at least one route exists, but that route is never stored or sent. The engine rejects a packet with route-like fields.
+
+Rooms (D22) have `mode: "room"` and no objective.
+
+## 2. People
+One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they react under pressure, `disposition`, position, and a `schedule` if they have one. NPC reactions on world turns come from these sheets.
+
+## 3. Map
+
+The map is structure: an exact layout plus the relationships the AIs reason with (D9, principle 5).
+
+- **Zones:** an id, a short description, and a **purpose line** saying why the zone exists and how it's used (e.g. "where the jailers eat, dice and sleep in shifts; the drain runs to the midden"). The purpose is what keeps improvised detail consistent.
+- **Geometry:** the exact footprint of every zone, and where every connection and thing sits in it. Format: Phase 1 (`docs/roadmap.md`). The engine and the UI use geometry. The AIs get derived facts ("the corridor is 40 ft long", "the stool is 5 ft from the peg"), never coordinates.
+- **Connections:** what links two zones (door, bars, grate, stairs, crawl), with attributes (`locked`, `open`, `see_through`, `climb`, rat-sized…), **which side each one is operated from** and whether it can be reached from the other side, plus travel cost in ticks.
+- **Sense links:** which zones can be seen or heard from which, per observer, and whether that changes with a schedule beat.
+- **Light level** per zone.
+- **Things:** objects with properties (free text for the AI to judge, plus any flags the engine checks), and where they are: a zone, a holder, or a schedule.
+- **Fixed facts:** physical facts that rule things out, including load-bearing material facts ("the hinges of cell 1 are rotten and give way under a heavy impact") and rulings made in advance ("Wild Shape ends when the party leaves the cell block").
+- **Hidden things:** marked hidden. Included for the AI, never shown to the player until revealed.
+
+## 4. Clock and reactions
+- **Schedules,** written in ticks: repeating cycles (a period, a phase offset, and a state per beat) and one-time events (at a tick, or when a condition is met). A beat can move things as well as people.
+- **Meters and their ladders,** such as suspicion. Each level applies state changes, and decay can be blocked by a condition.
+- **Reaction triggers:** condition → state-change rules the engine runs without asking an AI (D18).
+
+Formats: Phase 1. Semantics: `docs/spec/engine.md`.
+
+## 5. Opening description
+Written from the map after the map is final. Stored word for word and sent with every call in the encounter.
+
+---
+
+## Validation
+
+### Consistency: a failure means the packet is rejected and regenerated
+- Every id that's referenced exists.
+- Every barrier says how it's operated and from which side.
+- Every observer says what it can see and hear.
+- Every zone has a purpose line.
+- The geometry agrees with the relationships: zones don't overlap, each connection lies on the wall its two zones share, and each thing sits inside its zone.
+- No route-like fields.
+
+### Quality: warnings only, tuned after playtests (roadmap, Phase 7)
+| Check | Principle (`docs/design/encounter-craft.md`) |
+|---|---|
+| Every element is connected to at least two others | Interlock (§3.3) |
+| Zones the objective depends on have two or more routes to them, or are flagged as the deliberate chokepoint | Loops, not tubes (§5.1) |
+| Every exit has a closing condition, and the alarm ladder refers to it | Exits (§5.5) |
+| All schedule periods share one tick grid; at most two independent clock sources | Few sources, one grid (§4.1) |
+| At least one one-time event before the encounter's natural end | Waiting costs something (§4.2) |
+| Every schedule has a cue the party can perceive from a zone they start in or can reach | Learnable cycles (§4.3) |
+| Every party member's abilities interact with at least one element | Everyone has essential work (§3.4) |
+| Each usable thing has at least one property beyond its description | Properties, not difficulties (§3.2) |
+
+### Size
+The engine measures each serialized packet and warns above twice the size of the Cells (D26). An encounter that big is split at a doorway, and each piece hands its state to the next.
