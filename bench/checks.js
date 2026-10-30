@@ -150,3 +150,21 @@ export function companionChecks(out) {
 export function rulingChecks(out, c) {
   return [{ name: "Ruled as expected", ok: out.answer === c.expect ? true : false, detail: `${out.answer} (expected ${c.expect})` }];
 }
+
+// The Moment call (docs/spec/calls/moment.md): rolls where the case expects one, redirects actions, marks what
+// the party learns, and keeps hidden things out of everything the player reads.
+export function momentChecks(out, c, env) {
+  const e = c.expect;
+  const shown = [out.reply, ...(out.learned ?? []), ...(out.texture ?? []), out.check?.on_failure.text, out.redirect?.step].filter(Boolean).join(" \n ").toLowerCase();
+  const leaked = env.hiddenTerms.filter((t) => shown.includes(t));
+  const missing = (e.reveals ?? []).filter((id) => !(out.reveals ?? []).includes(id));
+  const strikeDamage = (out.combat?.actions ?? []).filter((a) => a.kind === "strike" && [...a.on_success.ops, ...a.on_failure.ops].some((op) => op.damage));
+  return [
+    check(e.check ? "Rolls" : "No roll", !!out.check === e.check, out.check ? `${out.check.skill}, ${out.check.difficulty}` : "no check"),
+    check(e.redirect ? "Goes on the plan" : "Not redirected", !!out.redirect === e.redirect, out.redirect?.step ?? ""),
+    ...(e.reveals ? [check("Marks what was learned", missing.length === 0, missing.length ? `missing ${missing.join(", ")}` : (out.reveals ?? []).join(", "))] : []),
+    ...(e.combat ? [check("Runs the round", !!out.combat, out.combat ? `${out.combat.actions.length} actions` : "no combat"), check("Strikes leave damage to the engine", strikeDamage.length === 0, strikeDamage.map((a) => a.actor).join(", "))] : []),
+    check("Hidden things stay out", leaked.length === 0, leaked.join(", ")),
+    check("Length", "info", `${(out.reply ?? "").split(/\s+/).filter(Boolean).length} words`),
+  ];
+}

@@ -2,11 +2,11 @@
 // cases in fixtures/bench/cases.json through `sample`, shows each call's input and output, and saves every
 // run and note to the artifact's db so the design thread can read them.
 import { validate } from "../src/validate.js";
-import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, rulingSchema } from "../schemas/index.js";
+import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, rulingSchema, momentSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import * as A from "../src/context.js";
-import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
+import { load as loadEncounter, apply, checkSteps, checkMoment } from "../src/engine/index.js";
 import { flagKeys } from "../src/engine/plan.js";
 import * as C from "./checks.js";
 
@@ -44,10 +44,11 @@ const KINDS = [
   { id: "narration", label: "Narration", schema: narrationSchema },
   { id: "huddle", label: "Huddle", schema: companionSchema, call: "companion" },
   { id: "ruling", label: "Rulings", schema: rulingSchema },
+  { id: "moment", label: "Moment", schema: momentSchema },
 ];
-const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling"];
+const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment"];
 const TIERS = ["quick", "default", "complex"];
-const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", ruling: "quick", grader: "quick" };
+const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", ruling: "quick", moment: "default", grader: "quick" };
 const settings = store.get("bench.settings", { runs: 3, tiers: {} });
 settings.tiers = { ...DEFAULT_TIERS, ...settings.tiers };
 const saveSettings = () => store.set("bench.settings", settings);
@@ -149,6 +150,7 @@ async function runOne(kind, c) {
   const run = { kind, case: c.id, tier, at: Date.now(), version };
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
+    if (kind === "moment") return Object.assign(run, await runMoment(c, k.schema, tier));
     const input = A[`${kind}Input`](env, c, k.schema);
     // A named route that fails only on size goes to the ruling call (D55), not back to the step call.
     const engine =
@@ -169,6 +171,30 @@ async function runOne(kind, c) {
     run.error = errorText(e);
   }
   return run;
+}
+
+// A Moment exchange on the live engine state the case sets up: a packet variant where a routine isn't known yet,
+// and any ops (a fight starting) applied first.
+async function runMoment(c, schema, tier) {
+  let packet = env.packet;
+  if (c.unknown) {
+    packet = structuredClone(packet);
+    for (const p of packet.people) if (p.schedule && c.unknown.includes(p.schedule.id)) p.schedule.known = false;
+  }
+  let s = packet === env.packet ? env.state : loadEncounter({ packet, party: env.party });
+  if (c.ops) s = apply(s, { type: "ops", ops: c.ops });
+  const name = c.to === "dm" ? "dm" : packet.people.find((p) => p.id === c.to).name;
+  const input = A.momentInput({ ...env, packet }, {
+    to: name,
+    now: A.stateFor(s),
+    perception: A.perceptionFor(s),
+    fight: s.combat ? { party_hp: { ...s.hp } } : null,
+    conversation: [{ from: "player", text: c.message }],
+  }, schema);
+  const r = await ask(input, schema, tier, (o) => checkMoment(s, o));
+  const checks = r.errors.length ? [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.momentChecks(r.out, c, env);
+  checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
+  return { ...r, input, checks };
 }
 
 // The engine's check of a step call's output, with the rulings granted so far (D55).
@@ -375,6 +401,16 @@ function readable(kind, c, run) {
   if (kind === "world")
     return h("ul", { class: "acts" }, (o.actions ?? []).length ? o.actions.map((a) => h("li", {}, h("b", {}, a.npc), ` ${a.because}`, h("code", {}, JSON.stringify(a.ops)))) : h("li", {}, "Nobody acts."));
   if (kind === "ruling") return h("p", { class: "prose" }, h("b", {}, `${o.answer}: `), o.text);
+  if (kind === "moment")
+    return h(
+      "div",
+      { class: "prose" },
+      h("p", {}, o.reply ?? ""),
+      o.check ? h("div", { class: "risk" }, h("b", {}, `${o.check.skill} · ${o.check.difficulty.replace("_", " ")}`), ` ${o.check.reason}`, h("div", { class: "fail" }, `Success: ${o.check.on_success.text}`), h("div", { class: "fail" }, `Failure: ${o.check.on_failure.text}`)) : null,
+      o.redirect ? h("p", { class: "texture" }, `To the plan: ${o.redirect.step}`) : null,
+      o.combat ? h("ul", { class: "acts" }, o.combat.intents.map((i) => h("li", {}, h("b", {}, i.enemy), ` ${i.intent}${i.yields ? " (yields)" : ""}`)), o.combat.actions.map((a) => h("li", {}, h("b", {}, a.actor), ` ${a.kind} · ${a.difficulty.replace("_", " ")}: ${a.reason}`))) : null,
+      [...(o.reveals ?? []).map((id) => `Now known: ${id}`), ...(o.learned ?? []).map((l) => `Learned: ${l}`), ...(o.texture ?? []).map((t) => `Texture: ${t}`)].map((t) => h("p", { class: "texture" }, t)),
+    );
   if (kind === "narration")
     return h("div", { class: "prose" }, (o.text ?? "").split(/\n+/).map((p) => h("p", {}, p)), o.texture?.length ? h("p", { class: "texture" }, `Texture: ${o.texture.join(" · ")}`) : null);
   return null;
@@ -455,7 +491,7 @@ function caseCard(kind, c) {
     { class: "case" },
     h("div", { class: "case-head" }, h("h2", {}, c.title), ui.button),
     c.look_for ? h("p", { class: "look" }, c.look_for) : null,
-    c.plan ? h("blockquote", {}, c.plan) : null,
+    c.plan ? h("blockquote", {}, c.plan) : c.message ? h("blockquote", {}, `To ${c.to === "dm" ? "the DM" : c.to}: ${c.message}`) : null,
     h("div", { class: "row" }, ui.summary, ui.status),
     ui.flaws,
     ui.runs,

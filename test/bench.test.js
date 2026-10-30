@@ -34,3 +34,12 @@ test("bench expected bands are real bands", () => {
   const bands = [...pricingSchema.$defs.difficulty.enum, "automatic"];
   for (const c of cases.pricing) for (const b of c.expect.bands) assert.ok(bands.includes(b), `${c.id}: ${b}`);
 });
+
+test("bench moment cases name real people and say what they expect", () => {
+  const routines = packet.people.filter((p) => p.schedule).map((p) => p.schedule.id);
+  for (const c of cases.moment) {
+    assert.ok(c.to === "dm" || packet.people.some((p) => p.id === c.to), c.id);
+    assert.equal(typeof c.expect.check, "boolean", c.id);
+    for (const id of c.unknown ?? []) assert.ok(routines.includes(id), `${c.id}: ${id}`);
+  }
+});

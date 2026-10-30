@@ -1691,5 +1691,118 @@
    "look_for": "A sack of gear can be emptied and passed through bars an item at a time, so the size categories are too coarse here: expect yes.",
    "expect": "yes"
   }
+ ],
+ "moment": [
+  {
+   "id": "search_spot",
+   "title": "Searching a spot always rolls",
+   "to": "dm",
+   "message": "I run my hands along the floor of my cell, under the bench, looking for anything loose.",
+   "look_for": "A check (Lore or Insight-ish searching), whether or not anything is there. Two outcomes written up front. No time passes in the reply.",
+   "expect": {
+    "check": true,
+    "redirect": false
+   }
+  },
+  {
+   "id": "could_see",
+   "title": "Could she see that from there?",
+   "to": "dm",
+   "message": "From her cell, can Lyra see the key peg?",
+   "look_for": "A straight yes or no from the perception facts, with the reason. No roll.",
+   "expect": {
+    "check": false,
+    "redirect": false
+   }
+  },
+  {
+   "id": "other_way",
+   "title": "A question near a hidden thing",
+   "to": "dm",
+   "message": "Is there any way out of the guardroom besides the stair?",
+   "look_for": "The crawl stays hidden: the answer is what the party can see, without hinting at the cask. No roll unless they search a specific spot.",
+   "expect": {
+    "check": false,
+    "redirect": false
+   }
+  },
+  {
+   "id": "redirect_lock",
+   "title": "An action goes on the plan",
+   "to": "dm",
+   "message": "I work the lock of my cell door with the bench nail.",
+   "look_for": "Not resolved here: the reply says it goes on the plan, and `redirect` holds it as one step in the player's words.",
+   "expect": {
+    "check": false,
+    "redirect": true
+   }
+  },
+  {
+   "id": "brannoc_routine",
+   "title": "Brannoc tells the routine",
+   "to": "brannoc",
+   "message": "You've been watching him for a week. What does he do, exactly?",
+   "unknown": [
+    "snag_routine"
+   ],
+   "look_for": "Brannoc answers in his own voice, from what he knows. His routine is marked known (`reveals`) and the fact goes in `learned`.",
+   "expect": {
+    "check": false,
+    "redirect": false,
+    "reveals": [
+     "snag_routine"
+    ]
+   }
+  },
+  {
+   "id": "bribe_snag",
+   "title": "Uncertain persuasion is a check",
+   "to": "snag",
+   "message": "Snag. There's coin in our gear sack. Open the far cell and half of it's yours.",
+   "look_for": "Snag plays from his sheet (fears blame, fears Uzga). Talking him round is uncertain, so it's a check, with both outcomes written.",
+   "expect": {
+    "check": true,
+    "redirect": false
+   }
+  },
+  {
+   "id": "fight_round",
+   "title": "A combat round",
+   "to": "dm",
+   "message": "I go for Snag with the bench nail. Lyra cuts in beside me. Fern bites his ankle.",
+   "ops": [
+    {
+     "move": {
+      "entity": "player",
+      "to": "corridor"
+     }
+    },
+    {
+     "move": {
+      "entity": "lyra",
+      "to": "corridor"
+     }
+    },
+    {
+     "move": {
+      "entity": "snag",
+      "to": "corridor"
+     }
+    },
+    {
+     "start_combat": {
+      "enemies": [
+       "snag"
+      ]
+     }
+    }
+   ],
+   "look_for": "Snag's intent from his sheet (the drum, or bargaining once it's useless). A band per declared action; strikes carry no damage ops. Fern is a rat: her bite is judged as one.",
+   "expect": {
+    "check": false,
+    "redirect": false,
+    "combat": true
+   }
+  }
  ]
 }
