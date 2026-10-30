@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 4 (The Cells, playable).** Phases 0–3 are done.
+**Current phase: 4 (The Cells, playable).** Phases 0–3 are done. Phase 4 is built; its playtests are next.
 
 ---
 
@@ -81,8 +81,8 @@ Pure ES modules tested with `node --test`, with a seeded random number generator
 **Carried into Phase 4:**
 - **Pricing leaks the engine can't see.** It sends back a shown reason that names a hidden thing or an NPC the party doesn't foresee. It can't catch one that describes an unforeseen fact in plain words ("he's got them on his belt"). The likeliest source is the `as_if` line the pricing call is sent (D42). *Recommendation:* watch for it in playtests before adding anything.
 - **Hazards** are always empty: the packet format has nothing that is one. The Cells don't need any.
-- **Combat rounds** (`content/rules.js`): `start_combat` only records the fight.
-- **The bench page now loads `src/`** (the engine and `src/context.js`), so republishing it needs those files.
+- **Combat rounds** (`content/rules.js`): `start_combat` only records the fight. *Built in Phase 4 (D67).*
+- **The bench page now loads `src/`** (the engine and `src/context.js`), so republishing it needs those files. *Republished in Phase 4.*
 
 ## Phase 4: The Cells, playable
 
@@ -93,10 +93,23 @@ The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 - Across 5 playtests: no stalls, a median of 2 card edits or fewer, and no interruption that a playtester calls unfair (D36).
 - The map matches the walkthrough's layout exactly.
 
+**Built** (D65–D74):
+- **The game page** (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp): `app/`, drawing `src/game/` (the loop, the session and what the page shows) over the engine. Every call goes through one module in `src/calls/` and `src/ask.js`.
+- **The engine** gained moments, conversations, combat rounds, player checkpoints and the table read.
+- **The Moment call** has its prompt, and the bench has a Moment tab with seven cases (https://claude.ai/artifact/NyXj8wTvQDe7rsRtUNAHSc, republished with `src/`).
+- `test/game.test.js` plays the rat plan with recorded outputs and gets the party out by exchange 4; `test/moment.test.js` covers the engine additions.
+
+**How to run the playtests**
+- **Run the bench's Moment tab first,** a few times per case. It's the call players use most, and the only one never run on the real model. Record what it does wrong and why here before changing the prompt.
+- **Then play.** The developer view (Menu) counts exchanges and card edits, and shows the exchange by which everyone had left where they started: that's the exit's "out by exchange 4". It also shows every call's input and output. Export the replay log with any bug report.
+- **What counts:** a stall is the game waiting on something the player can't see how to give. An unfair interruption is one the playtester says they had no way to see coming. Record each one with its cause before fixing anything.
+
 **Open questions**
 1. **Pacing and game feel.** Are the intent, the table read and worked examples enough for the world and pricing calls to pace well and price fairly? *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
-2. **Map renderer.** *Recommendation:* SVG drawn from geometry. Unknown zones are not drawn, and an exit to an unknown zone shows as a labelled gap. The clock is always visible next to it.
-3. **Layout on a phone.** *Recommendation:* Plan, Moment and Companions as tabs, with an unread marker on each. The card opens as a sheet over the Plan tab.
+2. **The Moment call's judgment.** Untested on the real model: whether it rolls when it should (and only then), keeps hidden things out, redirects actions instead of resolving them, and marks what the party learns. *Recommendation:* run the bench's Moment tab before the first playtest, and treat its misses like the Phase 2 bench findings.
+3. **Combat on the real model** (D67). Only recorded outputs have run it. *Recommendation:* play at least one playtest into the fight on purpose (open a cell on Snag's Pace with the drum whole), and watch whether bands, yields and the end of the fight feel fair.
+
+**Carried from Phase 3:** pricing leaks the engine can't see are still unwatched (*recommendation:* watch for them in playtests); hazards are still always empty, which the Cells don't need.
 
 ## Phase 5: Companions ported
 

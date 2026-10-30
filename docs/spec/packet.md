@@ -44,7 +44,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 
 ## 5. Opening description
-Written from the map after the map is final. Stored word for word and sent with every call in the encounter.
+Written from the map after the map is final. Stored word for word and sent with every call in the encounter. The packet's `name` is what the player sees it called ("The Cells").
 
 ---
 

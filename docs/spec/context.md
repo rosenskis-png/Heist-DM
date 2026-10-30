@@ -25,6 +25,7 @@ Prompts are always ordered campaign → encounter → live. `sample` gives no pr
 | Opening description | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 | State, canon, event log | full | full | full | full | full | known only |
 | Engine route and observer facts | — | ✓, foreseen and unforeseen kept apart (D36) | — | — | — | — |
+| Engine perception facts (what each member sees and hears now, and from each known zone) | — | — | — | — | ✓ (D39) | — |
 | Table read | — | — | ✓ | — | — | — |
 | Card | plan + decided stances | validated steps (internal facts kept apart) | results | steps with their results + world actions | draft | draft and card as shown (D40) |
 | Recent raw exchanges | few | — | — | few | current conversation | visible huddle this encounter, plus recent narration the party witnessed |
@@ -56,12 +57,12 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | World | `sample.json` | on | `default` |
 | Narration | `sample.json` | off | `default` |
 | Moment | `sample.json` | off | `default` |
-| Companion | `sample.json` | off | `default` |
+| Companion | `sample.json` | off | `quick` (D58) |
 | Campfire | `sample.json` | off | `complex` |
 | Ruling | `sample.json` | on | `quick` |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same state and plan get the same ruling, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
-- **Tiers are a player setting** (D48). The table gives the middle position; each position of the setting maps every call to a tier.
-- **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`.
+- **Tiers are a player setting** (D48). The table gives the middle position, Balanced; Faster moves every call one tier down and Smarter one tier up (D71). Code: `src/ask.js`.
+- **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`. Each call has one module in `src/calls/`.

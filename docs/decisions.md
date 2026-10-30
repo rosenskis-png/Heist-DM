@@ -310,3 +310,46 @@ The huddle keeps everything a player at the table has, including the map, her lo
 **Decided:** Locking, unlocking or otherwise setting a flag on a connection needs one of the step's actors to have hands and stand on a side it can be worked from (`operated_from`, or either side if `reachable_from_other_side`). The same goes for unlocking in passing (D56, D63): whoever carries the key needs hands and must come at it from a workable side. Everyone has hands unless a flag says otherwise; Wild Shape's `declared` block sets `hands: false`, and the packet's rule that ends it gives them back. A step that breaks this isn't sent back to the step call. It's the plan's mistake (D35), and reality interrupts it at that effect (`cant_work`, D36).
 **Why:** The designer's ruling: a rat can't turn a key. The engine also wasn't checking `operated_from` at all, though the packet records it for every barrier.
 **Rules out:** A rat, or anyone else without hands, unlocking a door; working a barrier from a side it can't be reached from.
+
+### D65. Phase 4 plays the Cells' own party, with relationships held still
+**Decided:** The playable Cells use the party the packet places: the player as the rogue, with Fern and Lyra. Setup asks only for a name. Companions talk, take stances and return tagged reactions; the reactions are recorded but not scored, and the relationship tracks stay at their starting values until Phase 5 ports the model.
+**Why:** The Cells are built around these three characters' abilities (`fixtures/cells/walkthrough.md`, assumptions). Scoring without the caps, READY and configurations would be half a port. Phase 4 tests the loop, not the romance arc.
+**Rules out:** Choosing a class or companions before Phase 5; scoring reactions with part of the model.
+
+### D66. Time spent between plans catches up before a card is made
+**Decided:** Checks and conversations add pending ticks. When the player asks for a card, those ticks pass first, one at a time: the world call responds and the narration call tells it. Only then is the plan turned into steps and priced, from that tick. A world turn also follows every executed card and every fight that ends.
+**Why:** Pending ticks were applied "at the next world turn", which came after the next plan ran. A plan made after three checks would have started three ticks in the past.
+**Rules out:** Pricing a plan from a tick that has already passed.
+
+### D67. In a fight, every declared action gets a band, and the engine deals the damage
+**Decided:** Supersedes the moment call's "a band for any unusual action". Each round, the Moment AI gives every action the player declares a kind (strike, ability or other), a target, a band, a reason and both outcomes, and gives each enemy an intent from its sheet, with `yields` when its sheet says it would flee, surrender or bargain. The engine rolls each action against its band; an ability whose conditions are met is automatic. A strike that lands deals 1 damage, or 2 with a real weapon; a strike that misses is hit back for 1. An ability that succeeds takes its target out of the fight. Every enemy nobody engaged hits its target for 1. Enemy HP comes from the sheet or its tier (`content/rules.js`); Gravenhold's DCs aren't used. The fight ends when no enemy is left in it, or when the whole party is down. Ticks accrue on even rounds. Shape: `schemas/calls/moment.js`.
+**Why:** One way to roll everywhere (D33). How hard it is to stab a jailer with a bench nail while he swings a club is a judgment. A fixed table from enemy tier to band would make it a lookup.
+**Rules out:** DC arithmetic; damage for strikes written by the AI.
+
+### D68. Skill numbers inform the band, never the roll
+**Decided:** A character's skill numbers (a class's `mods`, a companion's `skills`) are on the sheets the pricing and moment calls read when they choose a band. The engine never adds them to a roll.
+**Why:** D33 made the band the judgment and keeps numbers away from the AI. Adding modifiers to a band's number would bring percentages back by the side door, and the band already has the skill in view.
+
+### D69. A player checkpoint pauses the plan after its step
+**Decided:** On the priced card, the player can mark any step except the last as "pause after this step". The plan stops after it as if it had ended there (`checkpoint` in the results), and the world turn runs. Shape: `schemas/card.js`.
+**Why:** `docs/spec/ui.md` promised checkpoints, but nothing implemented them. It's the player's one tool against a plan running further than they trust it, and the choice is theirs, not the DM's.
+
+### D70. The player chooses who they're talking to
+**Decided:** The Moment tab has an addressee: the DM, or a person the party can see or hear. Questions to the DM cost no time. A conversation with a person costs one tick when it ends: when the player turns to someone else, when a check happens, or when a card is made. During a fight, the tab takes the round's actions instead.
+**Why:** The time table charged a conversation "1 when it ends" without saying when that is. Asking the AI would be a judgment it has no information for; a choice the player makes is structure.
+
+### D71. Speed and quality has three positions
+**Decided:** Settles D48's map. Faster moves every call one tier down (never below `quick`), Balanced is D58's tiers, and Smarter moves every call one tier up (never above `complex`). Balanced is the default. The choice is kept per player, in their browser.
+**Why:** One tier either way is the simplest map that makes the choice mean something. Playtests can move individual calls later.
+
+### D72. The map, the clock and the layout
+**Decided:** Settles roadmap Phase 4 questions 2 and 3, as recommended. The map is SVG drawn from the packet's geometry: walls between squares of different zones, each connection in its place (bars dashed, red while locked), the placed things the party can see, the party, and the people the party perceives. Zones the party doesn't know aren't drawn, and a connection into one is a labelled gap. Each level is drawn separately, with the others beside the main one at the same scale. The clock (the tick, each known routine's beat and cue, and known coming events) sits with the map, and its short form is always in the header. On a phone, Plan, Moment and Companions are tabs with unread markers, the map is one tap away, and the card opens as a sheet over Plan. On a wide screen, the map and clock hold a column beside the tabs.
+**Why:** The roadmap's recommendations, built as written.
+
+### D73. The Cells packet is content
+**Decided:** The Cells packet moves from `fixtures/cells/packet.json` to `content/encounters/cells.json`, and gains a player-facing `name`. Its cards and expected results stay in `fixtures/cells/`. One correction comes with the move: the three party cells and Brannoc's cell see each other across the corridor (`sees`).
+**Why:** The game loads it now, and game data lives in `content/`. The opening has the miner pressing his face to his bars across the corridor, but the packet gave no sightline, so the map couldn't show him and the Moment tab couldn't offer him as someone to talk to.
+
+### D74. A save holds the table as well as the engine
+**Decided:** Extends D11. A save also holds what the table said (the plan, moment, huddle and private feeds), the draft card with its stances, any open conversation, the exit-test counts and the recorded companion reactions. It doesn't store the packet or the character sheets; they come back from content by id. The replay log (D60) is kept in memory for the session and can be exported from the developer view, but it isn't saved. Saves are three slots per player in the artifact's db, under the player's own private path, falling back to the browser when the db isn't available, with JSON export and import.
+**Why:** A reloaded game has to show what everyone said and what the player was drafting, and none of that is engine state, so the replay doesn't cover it. Storing content by id keeps a save well under the db's 256 KiB document limit.

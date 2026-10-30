@@ -76,7 +76,7 @@ The card prices the plan the party expects; reality interrupts it (D36).
    - apply the step's effects in order;
    - **an interruption happens at the first instant anyone in the party could recognize that a remaining step won't work** (D46, D47, D62), not when a character runs into it. Before the step begins and before each of its effects, the engine re-projects the plan's remaining steps from what the party perceives right now plus what it knows (learned routines, known events). If that projection shows a step failing, the plan stops there. Something merely different right now isn't enough: an empty peg during Snag's Pace doesn't stop a plan that takes the keys on his Drink, because the party knows they'll be back by then. Moves already made stand, and what they noticed becomes known. Recognizing takes seeing: the party must see the spot where the plan expects a thing, and see it isn't there (D62). If no one could notice it until the effect itself, it interrupts at that effect;
    - run triggers; stop if a failed risk had `stops_plan`;
-   - check the objective, any combat start, kept stance triggers and player checkpoints.
+   - check the objective, any combat start, kept stance triggers and player checkpoints. A checkpoint stops the plan after its step (D69).
 6. **Log every result as structured data** for the narration call, including each interrupt and its warning roll.
 
 An interrupt is not a failure. The world turn picks up at that moment, and the player plans from there.
@@ -87,16 +87,21 @@ An interrupt is not a failure. The world turn picks up at that moment, and the p
   | Band | Easy | Medium | Hard | Very hard | Near impossible |
   |---|---|---|---|---|---|
   | Succeeds on d100 ≤ | 80 | 65 | 45 | 25 | 10 |
-- **Combat** (Gravenhold's rule; `content/rules.js`):
-  - HP;
-  - abilities whose conditions are met bypass HP;
-  - each exchange, enemies who weren't dealt with deal damage;
+- **Skill numbers** are on the sheets the AIs read when they choose a band. The engine never adds them to a roll (D68).
+- **Moments** (`src/engine/moment.js`): the engine applies a validated Moment output. What the party learned is marked known and logged, dispositions and promises are recorded, texture becomes canon, and a check rolls its band, applies the matching outcome and adds a pending tick. A conversation adds a pending tick when it ends (D70).
+- **Combat** (Gravenhold's rule, `content/rules.js`, rolled as bands, D67):
+  - enemies join a fight with the HP on their sheet, or their tier's;
+  - each round, every declared action rolls its band; an ability whose conditions are met is automatic;
+  - a strike that lands deals 1, or 2 with a real weapon; one that misses is hit back for 1;
+  - an ability that succeeds takes its target out of the fight, and an enemy that yields leaves it;
+  - each enemy nobody engaged hits its target for 1;
   - a character at 0 HP is down, not dead;
-  - the engine decides when combat ends;
+  - the fight ends when no enemy is left in it, or the whole party is down;
   - ticks accrue on rounds 2, 4, 6….
 - **Abilities:** the engine tracks uses per encounter and per rest, and one-way states, from each ability's `declared` block (D30). Whether an ability's conditions are met in the fiction is judged by the AI, with the engine's facts in hand.
 - **Stances:** the engine checks stance triggers (conditions), applies keep / resolved / override, and writes overrides to the relationship tracks.
 - **Objectives** are checked after every step and at the end of every combat.
+- **The table read** (`src/engine/table.js`): plans committed against the expected length, every roll and any streak, the failure consequences that landed, interruptions, and the player's last three messages. Facts, no verdicts; only the world call gets it.
 
 ## 8. Condition language (D17)
 JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, preconditions (`requires`), triggers, rule guards, stance triggers, meter decay and `until`. Shapes: `schemas/defs.js`.

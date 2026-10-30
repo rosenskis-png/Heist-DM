@@ -20,14 +20,15 @@ Don't design from `legacy/`. Use `legacy/README.md` to find what to port and wha
 | The exact shape of a packet, card or call output | `schemas/`; the spec links to it |
 | Encounter design theory | `docs/design/encounter-craft.md` |
 | How to play the companions (tone, romance, table behaviour) | `docs/design/companion-craft.md` |
-| Game data | `content/` |
+| Game data, including encounter packets | `content/` |
+| The game page | `app/`; the logic it draws lives in `src/game/` |
 | Prompt text | `prompts/<call>.md` |
 | A worked example or test fixture | `fixtures/` |
 
 ## Rules
 - **One home per fact.** Link to it; don't restate it.
 - **Specs describe only the current design.** No version numbers in filenames, no "previously" or "removed" text. History goes in `docs/decisions.md`; old text is in git.
-- **One name per AI call everywhere:** `docs/spec/calls/<call>.md`, `schemas/calls/<call>.js`, `prompts/<call>.md`, and later `src/calls/<call>.js` and its tests.
+- **One name per AI call everywhere:** `docs/spec/calls/<call>.md`, `schemas/calls/<call>.js`, `prompts/<call>.md` and `src/calls/<call>.js`.
 - **`node --test` passes before every commit.**
 - **Never edit an old decision.** Supersede it with a new one.
 - **The roster is open** (D8). Engine code and prompts never name a companion id. A companion is one file in `content/companions/` plus one line in its `index.js`.

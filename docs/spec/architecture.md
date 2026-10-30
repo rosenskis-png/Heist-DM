@@ -31,7 +31,7 @@ The plan side is split into several small sequential calls (decide → validate 
 1. **World turn.** The engine applies pending ticks and schedules. The world call decides NPC reactions and arrivals; the narration call describes the situation.
 2. **Huddle** (time paused). The player talks with the companions. Their stances go onto the draft card as pending.
 3. **Moments** (optional). Questions, checks, conversations and fights (`docs/spec/calls/moment.md`). Actions are redirected to the draft card.
-4. **Commit.** The player writes the plan, with any timing and conditions (D35), and decides each pending stance (keep / resolved / override). Only the player writes plan content.
+4. **Commit.** The player writes the plan, with any timing and conditions (D35), and decides each pending stance (keep / resolved / override). Only the player writes plan content. Any time spent in moments passes first, as a world turn (D66).
 5. **Card.** The step call, engine validation and the pricing call. Every step is priced as the party expects the world to be; the card warns about nothing (D36). The player confirms or edits.
 6. **Execute.** The engine resolves the card step by step (`docs/spec/engine.md` §6). Narration covers everything up to the end of the plan or the first stop.
 7. **Stop, interruption or finish.** A failed risk can stop the plan. Reality can interrupt it: something the party didn't foresee, a step that can't happen as they expected. Either way, go back to step 1 from that moment. The engine checks the objective after every step, and the encounter ends when it's met.
@@ -46,10 +46,10 @@ Ticks exist only in encounters. Schedules are written in ticks when the packet i
 | Waiting in a plan (`when`) | 1 per tick waited |
 | Extra-time consequence | as stated |
 | Check | 1 (added to pending) |
-| Conversation | 1 when it ends |
-| Combat | 1 on rounds 2, 4, 6, … |
+| Conversation | 1 when it ends: the player turns to someone else, a check happens, or a card is made (D70) |
+| Combat round | 1 on rounds 2, 4, 6, … |
 | Question, huddle, card review | 0 |
 
 **A step takes place in the tick it starts in** (D16). A committed plan's first step happens on the current beat, and the tick advances when the step ends. The engine projects every later step's tick from that.
 
-Pending ticks are applied one at a time at the next world turn, checking for arrivals after each.
+Pending ticks are applied one at a time at the next world turn, checking for arrivals after each. That world turn comes before a card is made, so a plan is always priced from the real current tick (D66).

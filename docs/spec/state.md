@@ -26,7 +26,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Known flags:** what the party has perceived or learned, including routines and events (marked `known` in the packet, or revealed in play). These drive the map, the companions' view, and which observers a card foresees (D36).
 - **Canon added:** texture introduced after the opening (anything narrated is real once said) and **rulings** ("rats can drag the ring, slowly, and it scrapes"). Append-only; later calls may not contradict them.
 - **Event log:** one line per resolved card, roll, fight or conversation. The engine writes it from structured results. The only AI-written lines are the Moment AI's "learned" facts.
-- **Table read:** plans committed vs. expected length, roll outcomes and any streak, consequences that landed, and the player's last 2–3 messages word for word. Facts only, no verdicts. Sent only to the world call.
+- **Table read:** plans committed vs. expected length, roll outcomes and any streak, consequences that landed, and the player's last 2–3 messages word for word. Facts only, no verdicts. Sent only to the world call (`docs/spec/engine.md` §7).
 - **Draft card:** the plan the player is writing, plus steps the Moment AI has redirected and pending companion stances. Everyone at the table sees it, companions included (D40). Once committed and priced, it becomes the card.
 - **Objective status,** e.g. "in the archway: 0 of 3".
 
@@ -63,7 +63,7 @@ When an encounter ends, the engine writes a hand-off object, and the next packet
 Only the hand-off, memories and commitments cross between encounters (principle 4). Nothing is summarized.
 
 ## Saves (D11)
-A save is a snapshot of campaign state plus the current encounter's packet and state, including its event log. Saves are stored per player in the artifact's `db`, with JSON export and import. Loading a save never calls an AI.
+A save is a snapshot of campaign state plus the current encounter's state, including its event log, and what the table said: every feed, the draft card and its stances, any open conversation (D74). The packet and the sheets come back from content by id. Saves are three slots per player in the artifact's `db`, under the player's own private path, with JSON export and import. Loading a save never calls an AI. Code: `src/game/session.js`, `app/store.js`.
 
 ## Replay (D60)
 The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, campaign values, seed) plus every action in order: validated AI outputs, committed cards, ticks passing. Applying it again gives deep-equal state. It's a test and debugging tool, never a save (D11).
