@@ -16,7 +16,7 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 - **Routing on the zone graph:** routes and travel time in ticks; whether a zone is reachable given the current connection flags; which side a barrier can be operated from.
 - **Observers per step:** every NPC who, at the step's tick, is in a zone on the step's route, sees one, or hears one at the step's noise level or louder (`silent` < `quiet` < `speech` < `loud`). Senses come from the NPC's sheet or current beat, edited by meters. Example: at Suspicion 1, Snag can see the far cell's back corner. The route is every zone an actor or moved thing occupies during the step.
 - **The perceivable set:** what the party can perceive right now, pooled across party members (the whisper rings make sharing free). This is what the companions and the map are given, and what a plan's conditions are checked against (D39). Each member:
-  - **sees** their own zone and any zone joined to it by a `see_through` connection or an open one, if that zone isn't `dark` (or the member has the `sees_in_dark` trait);
+  - **sees** their own zone, any zone joined to it by a `see_through` connection or an open one, and any zone its `sees` list names (the cells look down the corridor into the guardroom), if that zone isn't `dark` (or the member has the `sees_in_dark` trait);
   - **hears** their own zone, and speech or louder in any zone joined to it by a connection (with `hears_through_walls`, any zone that shares a wall with theirs);
   - perceives an NPC's beat if they can see the NPC or hear its cue.
 - **What the party knows:** everything it has perceived or learned, plus the routines and events marked `known` in the packet or revealed in play. Foreseen observers on the card come from this (§6).
@@ -67,11 +67,12 @@ The card prices the plan the party expects; reality interrupts it (D36).
    - if the step has a `when` that doesn't hold yet, the actors wait: the tick passes and the line above repeats. If `max_wait` runs out first, the plan is interrupted (`wait_expired`);
    - evaluate its `if`; when it's false, apply `otherwise`: skip the step, stop the plan, or run the alternative instead;
    - a `when` or `if` is checked only if someone in the party can perceive what it's about at that tick (§2). If no one can, the plan is interrupted (`cant_perceive`) instead of guessing;
-   - **interrupt before the step begins** if something the card didn't foresee would perceive it, a trigger has fired that changes the situation, or an internal check reveals a hidden fact. For an arrival, roll the warning: on a success, the party's next plan gets one step before it lands (the arrival resolves at the end of that tick instead of the start); on a failure, it lands as the scene opens. An arrival the card never projected (the world changed mid-plan) rolls at Medium;
+   - **interrupt before the step begins** if the party can already see that it won't go as planned, if something the card didn't foresee would perceive it, a trigger has fired that changes the situation, or an internal check reveals a hidden fact. For an arrival, roll the warning: on a success, the party's next plan gets one step before it lands (the arrival resolves at the end of that tick instead of the start); on a failure, it lands as the scene opens. An arrival the card never projected (the world changed mid-plan) rolls at Medium;
    - skip risks whose conditions no longer hold;
    - roll the remaining risks;
    - apply the consequences of failed risks: their operations, minus the step effects they `cancel`;
-   - apply the step's effects in order. **An effect that can't happen interrupts the plan there:** the earlier effects stand, and the fact behind it becomes known (the peg is empty);
+   - apply the step's effects in order;
+   - **an interruption happens at the first instant anyone in the party could recognize it** (D46), not when a character runs into it. The engine checks before the step begins and as the actors enter each zone of the route: the moment a party member can see or hear that something isn't as the plan expects (the peg is empty, a guard is coming), the plan stops there. Moves already made stand, and what they noticed becomes known. If no one could notice it until the effect itself, it interrupts at that effect;
    - run triggers; stop if a failed risk had `stops_plan`;
    - check the objective, any combat start, kept stance triggers and player checkpoints.
 6. **Log every result as structured data** for the narration call, including each interrupt and its warning roll.

@@ -39,6 +39,18 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 - Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `planning` block predicts more often (D38, D40), and her three candidates are genuinely different takes.
 - Model tiers are chosen (D15).
 
+**How to run this phase** (guidance from the design thread that shaped D35–D46)
+- **This phase tests judgment, not code.** Build only the bench page. The engine's facts are written by hand; don't start the engine or the UI.
+- **A prompt holds the judgment its call owns, and nothing else.** Before adding any instruction, ask whether structure already handles it (what the call sees, what the schema allows, what the engine validates). If a failure tempts you to add a rule, find its cause first (`docs/principles.md`, "Reflexes to resist"). Keep each prompt short enough to read in one go, and test whether an instruction earns its place by removing it.
+- **Worked examples are the main tool for feel.** Write them as carefully as content, tag them by act, and never send `fixtures/cells/walkthrough.md` §5 to Acts 1–3.
+- **Try to break the new rules on purpose:**
+  - the step call must keep a plan's mistakes: a plan with no timing stays literal, and it never adds waits or conditions (D35);
+  - the pricing call must price each action as itself (`as_if`, D42) and never let something the party doesn't foresee into a band or a reason (D36);
+  - narration must give an interruption its moment, at the instant someone could notice, and keep hidden things out (D46);
+  - companions must give three genuinely different takes, catch a flawed plan's holes only some of the time, and still sound like Gravenhold's companions, romance floor included (D27, D38, D40).
+- **The designer judges feel; the bench shows evidence.** Show every call's assembled input and raw output, and the prompt size. When something feels wrong, record what happened and its cause here before changing anything.
+- **Don't reopen a decision without reading its "why".** To change one, add a new entry that supersedes it.
+
 **Open questions**
 1. **Companion baseline.** *Recommendation:* judge them against their profiles in `content/`. If the designer can export 2–3 Gravenhold transcripts with strong companion scenes, they make a better baseline.
 2. **Prompt shape.** *Recommendation:* one `prompts/<call>.md` per call: the role, the judgment it owns, a style guide shared across calls, and worked examples tagged by act. No rules about rules. Phase 2 is where these get written and tested.

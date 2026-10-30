@@ -127,7 +127,7 @@ The card doesn't say that the keys are on Snag's belt during step 2, or that he'
 
 That's Card 2, below.
 
-**Exchange 2, path B: the player commits card 1.** Fern changes on the Drink beat. On the Pace beat she runs the corridor (Easy, rolled 40: success) and reaches the peg. It's empty: the keys jingle on Snag's belt as he walks past. **The plan is interrupted there** (`card1.results.json`). It isn't a failure. Fern is a rat in the guardroom at tick 2, Snag is sitting back down, and the keys go back on the peg behind him as he does. The world turn picks up at that moment, and the player plans from a better position than they started in. The next card can be card 2's steps 3–5, on the same beats: the interruption cost the player an exchange, not time.
+**Exchange 2, path B: the player commits card 1.** Fern changes on the Drink beat. As the Pace beat begins, Snag lifts the ring off the peg and clips it to his belt, and everyone in the cells can see the peg from their bars. **The plan is interrupted right there, before Fern sets off** (D46; `card1.results.json`): nobody runs for a peg they can see is empty. It isn't a failure. Fern is a rat in her cell at tick 1, Snag is pacing, and on his next Sit the keys go back on the peg. The player plans from that moment, and the next card can be card 2's steps 2–5 on the same beats: the interruption cost an exchange, not time.
 
 **Card 2: the edited plan**
 

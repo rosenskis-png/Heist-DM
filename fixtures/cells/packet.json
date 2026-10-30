@@ -124,10 +124,10 @@
   "map": {
     "zones": [
       { "id": "cell_far_back", "name": "Far cell, back corner", "purpose": "The one spot in the block the stool can't see: out of the torchlight, behind the bench.", "light": "dark", "rects": [[0, 0, 1, 1]] },
-      { "id": "cell_far", "name": "Far cell", "purpose": "Where the Maw keeps tribute until it's sorted. The dark end of the block.", "light": "dark", "rects": [[1, 0, 1, 1], [0, 1, 2, 1]] },
-      { "id": "cell_middle", "name": "Middle cell", "purpose": "Where the Maw keeps tribute until it's sorted.", "light": "dim", "rects": [[2, 0, 2, 2]] },
-      { "id": "cell_near", "name": "Near cell", "purpose": "Where the Maw keeps tribute until it's sorted. Its back wall is the guardroom's.", "light": "dim", "rects": [[4, 0, 2, 2]] },
-      { "id": "cell_brannoc", "name": "Brannoc's cell", "purpose": "Where the Maw keeps the miner it caught digging near the spring.", "light": "dim", "rects": [[2, 4, 2, 2]] },
+      { "id": "cell_far", "sees": ["guardroom"], "name": "Far cell", "purpose": "Where the Maw keeps tribute until it's sorted. The dark end of the block.", "light": "dark", "rects": [[1, 0, 1, 1], [0, 1, 2, 1]] },
+      { "id": "cell_middle", "sees": ["guardroom"], "name": "Middle cell", "purpose": "Where the Maw keeps tribute until it's sorted.", "light": "dim", "rects": [[2, 0, 2, 2]] },
+      { "id": "cell_near", "sees": ["guardroom"], "name": "Near cell", "purpose": "Where the Maw keeps tribute until it's sorted. Its back wall is the guardroom's.", "light": "dim", "rects": [[4, 0, 2, 2]] },
+      { "id": "cell_brannoc", "sees": ["guardroom"], "name": "Brannoc's cell", "purpose": "Where the Maw keeps the miner it caught digging near the spring.", "light": "dim", "rects": [[2, 4, 2, 2]] },
       { "id": "corridor", "name": "Corridor", "purpose": "Snag's beat. One torch hangs at the guardroom end; the far end is dark, its floor cracked and mossy where the gutter seeps.", "light": "dim", "rects": [[0, 2, 6, 2]] },
       { "id": "guardroom", "name": "Guardroom", "purpose": "Where the jailers eat, dice and drink between rounds; the drain takes the gutter to the midden.", "light": "bright", "rects": [[6, 0, 4, 5]] },
       { "id": "stair", "name": "Stair", "purpose": "The only way up to the Warrens, and the way Uzga comes down.", "light": "dim", "rects": [[10, 0, 2, 2]] },
