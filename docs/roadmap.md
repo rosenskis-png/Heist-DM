@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 1 (Contracts),** built and awaiting the designer's review.
+**Current phase: 2 (Judgment test bench).** Phase 1 was reviewed and approved.
 
 ---
 
@@ -36,13 +36,13 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 **Exit:**
 - The Cells tests in `fixtures/cells/walkthrough.md` pass in 5 of 5 runs: a card on turn one; Card 1 priced as the party expects, with nothing the party doesn't foresee leaking into its bands or reasons; Card 2 about two Easy rolls, with the player's timing kept and none added.
 - Three plans the docs never mention (the bench-nail lockpick, bending the bars, bribing Snag through Brannoc) get fair prices.
-- Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `planning` block predicts more often (D38, D40), and her three candidates are genuinely different takes.
-- Model tiers are chosen (D15).
+- Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `hunch` points at more often and the ones her `misses` describes less often (D38, D40, D50), and her three candidates are genuinely different takes.
+- Each call's tier at each position of the speed and quality setting is chosen (D48).
 
 **How to run this phase** (guidance from the design thread that shaped D35–D46)
 - **This phase tests judgment, not code.** Build only the bench page. The engine's facts are written by hand; don't start the engine or the UI.
 - **A prompt holds the judgment its call owns, and nothing else.** Before adding any instruction, ask whether structure already handles it (what the call sees, what the schema allows, what the engine validates). If a failure tempts you to add a rule, find its cause first (`docs/principles.md`, "Reflexes to resist"). Keep each prompt short enough to read in one go, and test whether an instruction earns its place by removing it.
-- **Worked examples are the main tool for feel.** Write them as carefully as content, tag them by act, and never send `fixtures/cells/walkthrough.md` §5 to Acts 1–3.
+- **Worked examples are the main tool for feel.** Write them as carefully as content, tag them by act, and never send `fixtures/cells/walkthrough.md` §5 to Acts 1–3. Never use the encounter under test as a worked example: the bench would grade a memorized answer.
 - **Try to break the new rules on purpose:**
   - the step call must keep a plan's mistakes: a plan with no timing stays literal, and it never adds waits or conditions (D35);
   - the pricing call must price each action as itself (`as_if`, D42) and never let something the party doesn't foresee into a band or a reason (D36);
@@ -54,6 +54,7 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 **Open questions**
 1. **Companion baseline.** *Recommendation:* judge them against their profiles in `content/`. If the designer can export 2–3 Gravenhold transcripts with strong companion scenes, they make a better baseline.
 2. **Prompt shape.** *Recommendation:* one `prompts/<call>.md` per call: the role, the judgment it owns, a style guide shared across calls, and worked examples tagged by act. No rules about rules. Phase 2 is where these get written and tested.
+3. **Companion thinking time.** A first instinct is the bias D50 wants, and a model that deliberates audits. *Recommendation:* compare `quick` and `default` for the huddle on the bench, judging voice and how often each catches holes.
 
 ## Phase 3: Engine core (Node)
 

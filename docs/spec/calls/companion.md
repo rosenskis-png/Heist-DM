@@ -10,6 +10,6 @@
 - Optional **tagged reactions** to something that just happened (D20; `docs/spec/companions.md` §5).
 
 ## Thinking about plans
-She reasons about a plan through her `planning` block (`docs/spec/companions.md` §2): quick and biased, often imperfect, occasionally right, never an audit. Because one of three candidates is picked at random, whether she catches a given hole is a matter of chance, weighted by her biases. The craft: `docs/design/companion-craft.md` §6.
+She reasons about a plan from her `hunch` and `reaches_for` (`docs/spec/companions.md` §2), as a first instinct: quick and biased, often imperfect, occasionally right, never an audit. Her call never sees what she tends to miss (D50): the bias is steered, not described. Because one of three candidates is picked at random, whether she catches a given hole is a matter of chance, weighted by her biases. The craft: `docs/design/companion-craft.md` §6.
 
 Companions take only the actions on the card. Only the player writes plan content.

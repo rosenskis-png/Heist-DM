@@ -26,7 +26,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
-| Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
+| Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first), `hunch` (a belief about the situation, phrased as a hint, that steers what her call attends to). Her call gets `hunch` and `reaches_for` only; `sees` and `misses` describe her bias for the designer and the bench (D50). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
 | Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
 | Special cases | currently inline, e.g. Nadia's `emberVoice` and `emberLook`, and Lisa's `sisterNote` and `variants`. Phase 5 turns these into declared data (§6). |
 
@@ -43,6 +43,7 @@ Gravenhold revealed parts of a profile as the relationship grew. Keep that, as e
 | `deep`, `dark` | after the payoff, or intimacy ≥ 5, or lean ≥ 3 |
 | `payoff.scene` | heat within 2 of `payoff.at`, before the payoff |
 | `quest` | from the act before `questAct` |
+| `planning.sees`, `planning.misses` | never (D50) |
 | everything else in the profile | always |
 
 **Don't port Gravenhold's instruction prose** (`compBlock`, legacy lines 1851–1970). It mixes character data with "floor" rules. Two kinds need separating (D27):

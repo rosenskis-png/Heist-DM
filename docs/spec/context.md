@@ -61,4 +61,5 @@ An invariant or worked example can carry an act gate: the first act it applies i
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same state and plan get the same ruling, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
+- **Tiers are a player setting** (D48). The table gives the middle position; each position of the setting maps every call to a tier.
 - **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`.

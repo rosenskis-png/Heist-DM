@@ -55,11 +55,13 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The worked example, the Cells packet and cards as data, and the engine's first acceptance test |
 | `content/` | Game data: companions, pairs, classes, rules, setting. The source of truth for content. |
-| `prompts/` | One prompt per AI call (from Phase 2) |
+| `prompts/` | One prompt per AI call, plus the shared style guide |
+| `bench/` | The Phase 2 judgment test bench: an artifact page that runs the real prompts on hand-written inputs |
+| `fixtures/bench/` | The bench's test cases beyond the Cells cards |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
 The design before this layout (specs v3 and v4, the engine brief) is preserved on branch `design-archive` (commit `53a65be`).
 
 ## Status
 
-**Phase 1: Contracts,** built and awaiting review. See `docs/roadmap.md`.
+**Phase 2: Judgment test bench,** in progress: the prompts in `prompts/` and the bench page in `bench/`. See `docs/roadmap.md`.

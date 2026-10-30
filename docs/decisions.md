@@ -221,3 +221,18 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 ### D47. An interruption needs a step the party can tell will fail
 **Decided:** Clarifies D46. The plan stops only when what the party perceives, plus what it knows (learned routines, known events), shows that a *remaining step* won't work. Seeing something different from a snapshot isn't enough. If the plan takes the keys on Snag's Drink and Lyra sees the peg empty during his Pace, nothing stops: the party knows the keys go back on the peg before then. If the step takes them during that Pace, it stops. If the party doesn't know the routine, an empty peg does stop a plan that needs those keys, because from what they know, the plan is broken.
 **Why:** D46's wording ("isn't as the plan expects") could stop a well-timed plan at a moment the party fully expected. Recognition means recognizing the plan is in trouble, using everything the party knows.
+
+### D48. Speed against quality is a player setting
+**Decided:** Partly supersedes D15. The player chooses, in the game's settings, how to trade speed and cost against quality. Each position of the setting maps every call to one of the runtime's tiers (`quick`, `default`, `complex`). Phase 2 picks that map, call by call, from measured misses on the bench; D15's starting tiers are the middle position until then.
+**Why:** Every call is charged to the player's own usage (D2), so how much a smarter DM is worth is their call, not ours. A fixed tier per call would make that choice for every player at once.
+**Rules out:** One fixed tier per call for every player.
+
+### D49. Narration paints the scene; precision lives in the map and in answers
+**Decided:** Narration, the opening description included, gives the player an intuitive picture of the scene: who is where, what they're doing, what draws the eye, the rhythm of the place. It doesn't inventory it (dimensions, exact placements, every object). Exact details live in the structure: the map shows the layout (D9), and the Moment call answers any question about it straight (`docs/spec/calls/moment.md`).
+**Why:** Gravenhold's narration surveyed rooms in feet and lists to stay consistent, and the scene became hard to picture. That consistency now comes from structure, not prose, so the prose is free to do what prose is good at. A detail the narration leaves out is still there, and the player can ask about it.
+**Rules out:** Narration as the record of the layout; measurements and inventories in narration.
+
+### D50. A companion's bias is steered, not described
+**Decided:** Refines D38. Each companion's `planning` block gains a `hunch`: a belief about the situation, written the way a hint would be ("the way through usually runs through something alive"). Her call is given her `hunch` and `reaches_for`. It is never given `misses` or `sees`: those stay in her file as the designer's description of her bias, and the bench measures her against them. She is asked for her first instinct, not an analysis.
+**Why:** Telling a model what a character tends to miss points its attention straight at that thing, so a described blind spot defeats itself. Steering what the model attends to makes it actually miss things in the way she would, rather than acting out a bias it can see past. The aim is to bias the AI's response the way the character is biased, not to have it simulate a biased character.
+**Rules out:** Sending `misses` (or any description of her blind spots) to any call; numbers or rolls for how often she is right.
