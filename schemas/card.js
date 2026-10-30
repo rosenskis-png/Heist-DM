@@ -25,6 +25,8 @@ export const cardSchema = withDefs({
         decision: { enum: ["keep", "resolved", "override"] },
       }),
     ),
+    // Player checkpoints: the plan pauses after each of these steps, so the player can plan again (D68).
+    checkpoints: list({ type: "integer", minimum: 1 }),
     step_call: stepOutput,
     // Each step is projected as if the earlier steps went as planned (D36).
     facts: list(

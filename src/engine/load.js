@@ -94,6 +94,10 @@ export function load({ packet, party, slack = 0, seed = 1 }) {
     exceptions: [],
     log: [],
     combat: null,
+    fights: [],
+    promises: [],
+    // For the table read: plans committed, every roll, and the failure consequences that landed.
+    history: { plans: 0, rolls: [], landed: [], interrupts: 0 },
     ended: null,
   };
   for (const p of people) s.at[p.id] = p.position;

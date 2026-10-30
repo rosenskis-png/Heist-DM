@@ -38,6 +38,8 @@ export const resultsSchema = withDefs({
           }),
         ),
         triggers: list(r("id")),
+        // The plan paused here at a player checkpoint (D68).
+        checkpoint: { const: true },
         // A companion's stance tripped on this step: kept stops the plan before it; overridden is logged (engine.md §7).
         stance: obj(["companion", "decision"], { companion: r("id"), decision: { enum: ["keep", "override"] } }),
       }),

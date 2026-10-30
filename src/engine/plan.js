@@ -451,7 +451,10 @@ export function execute(s, card) {
     if (stops) r.outcome = "stopped";
     done(r);
     fight = !!s.combat;
-    const last = i === steps.length - 1 || stops || s.ended || s.combat;
+    // A player checkpoint pauses the plan after its step (D68).
+    const pause = !stops && (card.checkpoints ?? []).includes(step.n);
+    if (pause) r.checkpoint = true;
+    const last = i === steps.length - 1 || stops || s.ended || s.combat || pause;
     if (last) {
       nextTick(s);
       return finish();

@@ -1,8 +1,9 @@
 // State-change operations (docs/spec/engine.md §9). Each mutates the working copy of state that `apply` owns.
 // Validation happens before an operation gets here; these only do what they say.
-import { bind, sheet, carried, conn } from "./world.js";
+import { bind, sheet, carried, conn, person } from "./world.js";
 import { test } from "./cond.js";
 import { crossings, route, unlocksInPassing } from "./map.js";
+import { enemyTiers } from "../../content/rules.js";
 
 export function run(s, ops, ctx = {}) {
   for (const op of ops ?? []) one(s, op, ctx);
@@ -95,12 +96,17 @@ function one(s, op, ctx) {
     case "add_ticks":
       s.pending += v.ticks;
       return;
+    // Enemies join a fight with their HP: the sheet's, or their tier's (content/rules.js).
     case "start_combat":
-      s.combat ??= { enemies: [], since: s.tick };
-      for (const e of v.enemies) if (!s.combat.enemies.includes(e)) s.combat.enemies.push(e);
+      s.combat ??= { enemies: [], since: s.tick, round: 0, hp: {}, out: [] };
+      for (const e of v.enemies) {
+        if (!s.combat.enemies.includes(e)) s.combat.enemies.push(e);
+        s.combat.hp[e] ??= person(s, e)?.hp ?? enemyTiers[person(s, e)?.tier]?.hp ?? 1;
+      }
       return;
     case "damage":
-      s.hp[v.actor] = Math.max(0, (s.hp[v.actor] ?? 0) - v.amount);
+      if (s.combat?.hp[v.actor] !== undefined) s.combat.hp[v.actor] = Math.max(0, s.combat.hp[v.actor] - v.amount);
+      else s.hp[v.actor] = Math.max(0, (s.hp[v.actor] ?? 0) - v.amount);
       return;
     case "end_encounter":
       s.ended ??= { outcome: v.outcome, tick: s.tick };
