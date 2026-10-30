@@ -119,7 +119,7 @@ export function mapView(s) {
     }));
   // Who and what the party can see: themselves, perceived people, and placed things in zones they see.
   const tokens = [];
-  for (const p of s.party) tokens.push({ id: p.id, name: p.id === "player" ? "You" : p.name, party: true, zone: zoneOf(s, p.id), rat: s.flags[p.id]?.size === "tiny", down: s.flags[p.id]?.down === true });
+  for (const p of s.party) tokens.push({ id: p.id, name: p.id === "player" ? "You" : p.name, party: true, zone: zoneOf(s, p.id), rat: s.flags[p.id]?.size === "tiny" || s.flags[p.id]?.form === "animal", down: s.flags[p.id]?.down === true });
   for (const p of s.packet.people) {
     const z = s.at[p.id];
     if (z && seen.has(z)) tokens.push({ id: p.id, name: p.name.split(",")[0], zone: z, down: s.flags[p.id]?.down === true });
@@ -151,11 +151,29 @@ export function mapView(s) {
   };
 }
 
+// A ruled card (D75) in the same shape as `cardView`: each step's tick, the beats the party knows at that tick,
+// how long it takes, and its roll.
+export function ruledCardView(s, card, { brief = false } = {}) {
+  const routines = s.packet.people.filter((p) => knownRoutine(s, p) && !s.offRoutine?.includes(p.id));
+  const steps = card.steps.map((st) => {
+    const out = {
+      n: st.n,
+      summary: st.summary,
+      risks: st.roll ? [{ band: BAND[st.roll.band], reason: st.roll.reason, fails: st.roll.fails, stops: st.roll.stops }] : [],
+    };
+    if (brief) return out;
+    const beats = routines.map((p) => `${short(s, p.id)}: ${cap(beatOf(s, p.id, st.at)?.id ?? "")}`);
+    return { ...out, on: [`Tick ${st.at}`, ...beats, st.takes ? `${st.takes} tick${st.takes > 1 ? "s" : ""}` : "No time"], mitigations: [] };
+  });
+  return brief ? { plan: card.plan, steps } : { plan: card.plan, steps, rulings: card.rulings.map((r) => r.text), stances: card.stances ?? [] };
+}
+
 // The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, and events it knows are coming.
 export function clockView(s) {
   const beats = s.packet.people
     .filter((p) => knownRoutine(s, p) && s.at[p.id] != null)
     .map((p) => {
+      if (s.offRoutine?.includes(p.id)) return { who: short(s, p.id), beat: "Off routine", does: "Not following the routine you know", cue: "" };
       const b = beatOf(s, p.id);
       return b && { who: short(s, p.id), beat: cap(b.id), does: b.label, cue: b.cue };
     })

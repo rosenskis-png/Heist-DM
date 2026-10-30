@@ -192,3 +192,74 @@ test("the map draws known zones only, and the clock shows known routines and eve
   assert.equal(c.beats[0].beat, "Drink");
   assert.deepEqual(c.coming.map((e) => e.at), [21]);
 });
+
+// ---- Ruled mode (D75) ----
+import { ruledCard, ruledCommit, ruledScene } from "../src/game/ruled.js";
+const { card: ratCard, played: ratPlayed } = JSON.parse(file("fixtures/cells/ruled.json"));
+
+const RULED = { "# Adjudicate call": "adjudicate", "# Resolve call": "resolve", "# Scene call": "scene" };
+function ruledSample(script) {
+  const seen = [];
+  return {
+    seen,
+    json: async (input, opts) => {
+      const text = typeof input === "string" ? input : input[0].content;
+      const call = Object.entries(RULED).find(([h]) => text.includes(h))?.[1] ?? callOf(input);
+      seen.push({ call, opts, input: text });
+      const next = script[call]?.shift();
+      if (next === undefined) throw new Error(`no recorded ${call} output`);
+      return structuredClone(next);
+    },
+  };
+}
+
+test("ruled mode: the rat plan is one card, and the party is out at exchange 1", async () => {
+  const sample = ruledSample({ adjudicate: [ratCard], resolve: [ratPlayed], narration: [told("Up the stair, all of you.")] });
+  const io = { sample };
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, seed: 7, mode: "ruled" });
+  session.draft.plan = card2.plan;
+  await ruledCard(session, io, prompts);
+  const view = shown(session);
+  assert.deepEqual(view.steps.map((st) => st.risks.map((r) => r.band)), [[], ["Medium"], ["Easy"], []]);
+  assert.ok(view.steps[1].on.includes("Snag: Sit"));
+  await ruledCommit(session, io, prompts, { rolls: [10, 10] });
+  assert.equal(session.state.ended?.outcome, "escaped");
+  assert.equal(session.counts.out, 1);
+  // The card is priced from the routines the party knows; the DM plays it out seeing everything.
+  const card = sample.seen.find((x) => x.call === "adjudicate").input;
+  const played = sample.seen.find((x) => x.call === "resolve").input;
+  assert.ok(played.includes('"result":"succeeded"') && !played.includes('"roll":10'));
+  assert.ok(card.includes("What the party expects next") && played.includes("What is really happening"));
+});
+
+test("ruled mode: a failed resolve keeps its dice, so trying again can't reroll them", async () => {
+  const bad = { steps: [], ends_at: 0 };
+  const sample = ruledSample({ adjudicate: [ratCard], resolve: [bad, bad, ratPlayed], narration: [told("Out.")] });
+  const io = { sample };
+  const session = newSession({ packet, player: { name: "", class: "rogue" }, mode: "ruled" });
+  session.draft.plan = "The rat plan.";
+  await ruledCard(session, io, prompts);
+  await assert.rejects(ruledCommit(session, io, prompts, { rolls: [10, 10] }));
+  const dice = session.card.dice;
+  await ruledCommit(session, io, prompts, { rolls: [99, 99] });
+  assert.deepEqual(session.state.resolved.rolls, dice);
+  assert.equal(session.counts.exchanges, 1);
+});
+
+test("ruled mode: a scene rolls its checks, records the ruling and lets time pass", async () => {
+  const out = {
+    reply: "You lean on the bars and call him a coward.",
+    checks: [{ who: "player", band: "medium", reason: "He hates being mocked by prisoners.", success: { text: "He storms over to your bars.", changes: { moves: [{ who: "snag", to: "corridor" }] } }, failure: { text: "He ignores you.", changes: {} } }],
+    changes: { facts: [{ id: "snag_mocked", text: "Jim has been mocking Snag through the bars.", about: ["snag", "player"] }] },
+    ticks: 1,
+  };
+  const sample = ruledSample({ scene: [out] });
+  const session = newSession({ packet, player: { name: "Jim", class: "rogue" }, mode: "ruled" });
+  await ruledScene(session, { sample }, prompts, { to: "snag", text: "Oi, coward!", rolls: [5] });
+  assert.equal(session.state.at.snag, "corridor");
+  assert.equal(session.state.tick, 1);
+  assert.ok(session.state.facts.some((f) => f.id === "snag_mocked"));
+  assert.deepEqual(session.feeds.moment.map((e) => e.kind ?? "player"), ["player", "reply", "check", "time"]);
+  const back = restore(serialize(session), packet);
+  assert.deepEqual(back.state, session.state);
+});

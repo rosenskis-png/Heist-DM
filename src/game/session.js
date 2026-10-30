@@ -15,15 +15,17 @@ export function playerSheet(player) {
 export const companionIds = (packet) => Object.keys(packet.start.positions).filter((id) => id !== "player" && roster[id]);
 export const partyFor = (player, packet) => [playerSheet(player), ...companionIds(packet).map((id) => roster[id])];
 
-export function newSession({ packet, player, seed = 1, slack = 0, act = packet.act ?? 1 }) {
+// `mode` is who rules: "engine" (Phase 4's pipeline) or "ruled" (the DM rules, the engine keeps the books, D75).
+export function newSession({ packet, player, seed = 1, slack = 0, act = packet.act ?? 1, mode = "engine" }) {
   const party = partyFor(player, packet);
-  const state = load({ packet, party, slack, seed });
+  const state = load({ packet, party, slack, seed, ruled: mode === "ruled" });
   const session = {
     v: 1,
+    mode,
     player,
     act,
     slack,
-    start: { packet: packet.id, seed, slack },
+    start: { packet: packet.id, seed, slack, ...(mode === "ruled" ? { ruled: true } : {}) },
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
     state,
@@ -60,6 +62,9 @@ export function envFor(session, prompts) {
   return {
     packet,
     party,
+    get state() {
+      return session.state;
+    },
     act: session.act,
     prompts,
     companions: party.slice(1),

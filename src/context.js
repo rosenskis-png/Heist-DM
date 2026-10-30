@@ -124,8 +124,29 @@ export function stateFor(s, { party = false } = {}) {
   };
   if (!party) Object.assign(out, { pending_ticks: s.pending, meters: s.meters, dispositions: s.disposition, revealed: s.known.revealed, promises: s.promises });
   if (s.combat) out.fight = { round: s.combat.round, enemies: s.combat.enemies.map((e) => ({ id: e, hp: s.combat.hp[e], out: s.combat.out.includes(e) })) };
+  // Ruled mode (D75): the DM's facts (the party's view keeps the ones it knows), who's off their routine, and
+  // NPC hurt. Meters don't run there.
+  if (s.ruled) {
+    delete out.meters;
+    out.facts = (party ? s.facts.filter((f) => f.known) : s.facts).map(({ id, text, about }) => ({ id, text, ...(about.length ? { about } : {}) }));
+    if (!party) Object.assign(out, { off_routine: s.offRoutine, hurt: entries(s.hp, (id) => !partyIds.includes(id)) });
+  }
   if (s.ended) out.ended = s.ended.outcome;
   return out;
+}
+
+// What's coming, tick by tick: each routine's beat for the people still following it, and the events due.
+// The party's version has only the routines and events it knows.
+export function timelineFor(s, { ticks = 12, party = false } = {}) {
+  const knows = (id) => s.known.revealed.includes(id);
+  const people = s.packet.people.filter((p) => p.schedule && s.at[p.id] != null && !s.offRoutine?.includes(p.id) && (!party || p.schedule.known || knows(p.schedule.id)));
+  const events = s.packet.clock.events.filter((e) => !s.fired.includes(e.id) && s.due[e.id] !== undefined && (!party || e.known || knows(e.id)));
+  return Array.from({ length: ticks }, (_, i) => {
+    const t = s.tick + i;
+    const beats = Object.fromEntries(people.map((p) => [p.id, ((b) => `${b.id}: ${b.label} (${b.position})`)(beatOf(s, p.id, t))]));
+    const due = events.filter((e) => s.due[e.id] === t).map((e) => e.id);
+    return { tick: t, ...(people.length ? { beats } : {}), ...(due.length ? { events: due } : {}) };
+  });
 }
 
 // What each party member sees and hears now, and what an ordinary person would from each zone the party knows:
@@ -369,4 +390,78 @@ export function rulingInput(env, { who, connection, by, canon = [] }) {
   ]
     .filter(Boolean)
     .join("\n\n");
+}
+
+// ---- Ruled mode (D75) ----
+
+// The encounter as the ruling DM reads it. The packet's triggers and meters don't run in ruled mode; they're
+// notes on how people react, for the DM to apply. With `party`, routines the party doesn't know are left off.
+// The map without size categories: openings in rough real dimensions, as the ruling call gets them (D57).
+function ruledMap(packet) {
+  const m = mapFor(packet);
+  const opening = (c) => GAP[c.kind] ?? `about ${SPAN[c.fits]}`;
+  return {
+    ...m,
+    connections: m.connections.map(({ fits, fits_unlocked, ...c }) => ({ ...c, ...(fits ? { opening: opening({ ...c, fits }) } : {}), ...(fits_unlocked ? { opening_unlocked: `about ${SPAN[fits_unlocked]}` } : {}) })),
+    things: m.things.map(({ size, ...t }) => t),
+  };
+}
+
+function ruledEncounter(env, { intent = true, party = false } = {}) {
+  const { packet } = env;
+  const known = (sch) => sch.known || env.state.known.revealed.includes(sch.id);
+  const people = packet.people.map(({ schedule, ...p }) => (schedule && (!party || known(schedule)) ? { ...p, schedule } : p));
+  return [
+    block("The encounter", {
+      ...(intent ? { intent: packet.intent } : {}),
+      people,
+      how_they_react: { reactions: packet.clock.triggers, meters: packet.clock.meters },
+      map: ruledMap(packet),
+    }),
+    block("Opening description", packet.opening),
+  ];
+}
+
+export function adjudicateInput(env, c, schema) {
+  return compose([
+    ...campaign(env, "adjudicate", schema),
+    block("Characters", sheets(env)),
+    ...ruledEncounter(env, { party: true }),
+    block("The ledger now", c.now),
+    block("What the party expects next (the routines and events it knows)", c.timeline),
+    c.stances?.length ? block("Stances the player has decided", c.stances) : null,
+    c.recent?.length ? block("Recent exchanges", c.recent) : null,
+    block("The plan, in the player's words", c.plan),
+    "Rule on this plan and make its card.",
+  ]);
+}
+
+export function resolveInput(env, c, schema) {
+  return compose([
+    ...campaign(env, "resolve", schema),
+    block("Characters", sheets(env)),
+    ...ruledEncounter(env),
+    block("The ledger now", c.now),
+    block("What is really happening, tick by tick", c.timeline),
+    block("The plan, in the player's words", c.plan),
+    block("The card", c.card),
+    block("The dice", c.dice),
+    c.stances?.length ? block("Stances the player decided", c.stances) : null,
+    "Play the card out and record what happened.",
+  ]);
+}
+
+export function sceneInput(env, c, schema) {
+  return compose([
+    ...campaign(env, "scene", schema),
+    block("Characters", sheets(env)),
+    ...ruledEncounter(env, { intent: false }),
+    block("The ledger now", c.now),
+    block("What is really happening, tick by tick", c.timeline),
+    block("What the party could see and hear (from the engine)", c.perception),
+    c.draft ? block("The plan the player is drafting", c.draft) : null,
+    c.recent?.length ? block("Recent exchanges", c.recent) : null,
+    block(c.to === "dm" ? "The player asks the DM" : `The player is talking to ${c.to}`, c.conversation),
+    "Answer the player.",
+  ]);
 }

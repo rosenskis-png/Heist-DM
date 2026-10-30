@@ -59,7 +59,7 @@ export function apply(state, action) {
       break;
     case "ops":
       run(s, action.ops, action.ctx ?? {});
-      triggers(s);
+      if (!s.ruled) triggers(s);
       objectives(s);
       break;
     case "ruling":

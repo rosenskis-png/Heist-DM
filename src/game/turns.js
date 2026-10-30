@@ -13,30 +13,30 @@ import { momentCall } from "../calls/moment.js";
 import { companionCall } from "../calls/companion.js";
 import { rulingCall } from "../calls/ruling.js";
 import { post, act, envFor } from "./session.js";
-import { cardView } from "./view.js";
+import { cardView, ruledCardView } from "./view.js";
 
-const all = (session) => Object.values(session.feeds).flatMap((f) => (Array.isArray(f) ? f : Object.values(f).flat()));
-const last = (list, n) => list.slice(Math.max(0, list.length - n));
+export const all = (session) => Object.values(session.feeds).flatMap((f) => (Array.isArray(f) ? f : Object.values(f).flat()));
+export const last = (list, n) => list.slice(Math.max(0, list.length - n));
 
 // The player's own last few words, from any interface, for the table read.
-const said = (session) => all(session).filter((e) => e.who === "player").sort((a, b) => a.at - b.at).map((e) => e.text);
+export const said = (session) => all(session).filter((e) => e.who === "player").sort((a, b) => a.at - b.at).map((e) => e.text);
 
 // The DM's recent narration, which the whole party witnessed.
-const narrated = (session, n = 3) => last(session.feeds.plan.filter((e) => e.kind === "narration").map((e) => e.text), n);
+export const narrated = (session, n = 3) => last(session.feeds.plan.filter((e) => e.kind === "narration").map((e) => e.text), n);
 
-const exchange = (session) => {
+export const exchange = (session) => {
   session.counts.exchanges += 1;
 };
 
 // Phase 4's exit test counts the exchange by which every party member has left where they started.
-function markOut(session) {
+export function markOut(session) {
   const s = session.state;
   if (session.counts.out !== null) return;
   if (s.party.every((p) => zoneOf(s, p.id) !== s.packet.start.positions[p.id])) session.counts.out = session.counts.exchanges;
 }
 
 // The draft as everyone at the table sees it: the plan being written and the stances waiting on the player (D40).
-const draftView = (session) =>
+export const draftView = (session) =>
   session.draft.plan || session.draft.stances.length ? { plan: session.draft.plan, stances: session.draft.stances.map(({ companion, kind, text, decision }) => ({ companion, kind, text, decision })) } : null;
 
 // One of three candidates, picked at random (D40), from the session's own seeded generator.
@@ -89,7 +89,7 @@ function closeConversation(session) {
 }
 
 // The current conversation: the moment feed since the player last turned to someone else.
-function conversation(session, to) {
+export function conversation(session, to) {
   const feed = session.feeds.moment;
   let i = feed.length;
   while (i > 0 && (feed[i - 1].to ?? to) === to) i--;
@@ -239,4 +239,4 @@ export async function worldTurn(session, io, prompts, { card, results }) {
 }
 
 // The card's steps for review, with what's internal stripped (D36).
-export const shown = (session) => (session.card ? cardView(session.state, shownCard(session.card.card)) : null);
+export const shown = (session) => (!session.card ? null : session.card.ruled ? ruledCardView(session.state, session.card.card) : cardView(session.state, shownCard(session.card.card)));

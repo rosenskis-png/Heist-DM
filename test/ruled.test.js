@@ -13,26 +13,8 @@ const packet = JSON.parse(readFileSync(new URL("../content/encounters/cells.json
 const party = [{ id: "player", name: "Rogue", ...classes.rogue }, fern, lyra];
 const start = { packet, party, ruled: true, seed: 5 };
 
-// The rat plan as a DM would rule it: four steps, two rolls, small things cost no time.
-export const ratCard = {
-  steps: [
-    { n: 1, summary: "While Snag drinks, Fern becomes a rat and slips down the grate.", who: ["fern"], at: 0, takes: 1 },
-    { n: 2, summary: "Brannoc pays the rats in crusts; when Snag sits, they lift the ring off the peg behind him.", who: ["fern", "brannoc"], at: 2, takes: 0, roll: { band: "medium", reason: "The peg is a few feet behind a bored jailer.", fails: "The ring clinks; Snag turns and clips it to his belt.", stops: true } },
-    { n: 3, summary: "On his next drink the rats bring the ring to Lyra, and Fern gnaws the drumhead.", who: ["fern", "lyra"], at: 3, takes: 1, roll: { band: "easy", reason: "His back is turned and he's humming.", fails: "The ring scrapes and Snag looks round before the drum is done.", stops: false } },
-    { n: 4, summary: "Lyra unlocks every door and everyone goes up the stair, Brannoc too.", who: ["lyra", "player", "brannoc", "fern"], at: 4, takes: 1 },
-  ],
-  rulings: [{ id: "rats_carry_ring", text: "A pack of gutter rats can carry the key ring if they're paid in bread.", about: ["keyring", "gutter_rats"] }],
-};
-const everyoneUp = ["player", "lyra", "fern", "brannoc"].map((who) => ({ who, to: "stair_top" }));
-export const ratPlayed = {
-  steps: [
-    { n: 1, happened: "yes", what: "Fern is a rat in the gutter.", changes: { flags: [{ on: "fern", key: "form", value: "animal" }], moves: [{ who: "fern", to: "gutter" }] } },
-    { n: 2, happened: "yes", what: "The rats have the ring.", changes: { holds: [{ item: "crusts", by: "gutter_rats" }, { item: "keyring", by: "fern" }], moves: [{ who: "fern", to: "guardroom" }] } },
-    { n: 3, happened: "yes", what: "Lyra has the ring; the drum is ruined.", changes: { holds: [{ item: "keyring", by: "lyra" }], flags: [{ on: "drum", key: "gnawed", value: true }] } },
-    { n: 4, happened: "yes", what: "Everyone is up the stair.", changes: { flags: ["bars_near", "bars_middle", "bars_far", "bars_brannoc"].map((on) => ({ on, key: "locked", value: false })), moves: everyoneUp } },
-  ],
-  ends_at: 5,
-};
+// The rat plan as a DM would rule it and play it out: four steps, two rolls, small things cost no time.
+const { card: ratCard, played: ratPlayed } = JSON.parse(readFileSync(new URL("../fixtures/cells/ruled.json", import.meta.url), "utf8"));
 
 test("the recorded outputs fit their contracts", () => {
   assert.deepEqual(validate(adjudicateSchema, ratCard), []);
