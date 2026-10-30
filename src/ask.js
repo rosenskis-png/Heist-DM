@@ -29,8 +29,9 @@ const pause = (ms, signal) =>
     signal?.addEventListener?.("abort", () => (clearTimeout(t), reject(signal.reason)), { once: true });
   });
 
-// `io` is the runtime: `sample`, the `speed` setting, an abort `signal`, and `onCall`, which gets every call's
-// input and raw output for the developer view (held in memory only, D10).
+// `io` is the runtime: `sample`, the `speed` setting, an abort `signal`, `onStart` (which call is running, for
+// the page's status line) and `onCall`, which gets every call's input and raw output for the developer view
+// (held in memory only, D10).
 export async function ask(io, { call, input, schema, check = () => [] }) {
   const tier = tierFor(call, io.speed);
   const record = { call, tier, at: Date.now(), input, size: new TextEncoder().encode(input).length };
@@ -48,6 +49,7 @@ export async function ask(io, { call, input, schema, check = () => [] }) {
     return e.length ? e : check(out);
   };
   const t0 = Date.now();
+  io.onStart?.(call);
   try {
     let out = await send(input);
     let errors = errorsOf(out);

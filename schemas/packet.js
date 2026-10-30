@@ -151,6 +151,8 @@ export const packetSchema = withDefs({
   additionalProperties: false,
   properties: {
     id: r("id"),
+    // What the player sees it called.
+    name: r("text"),
     mode: { enum: ["encounter", "room"] },
     act: { type: "integer", minimum: 1 },
     intent: obj(["purpose"], {

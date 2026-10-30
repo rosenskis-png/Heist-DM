@@ -1,5 +1,6 @@
 {
   "id": "cells",
+  "name": "The Cells",
   "mode": "encounter",
   "act": 1,
   "intent": {
