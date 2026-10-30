@@ -950,10 +950,9 @@
       ],
       "effects": [
        {
-        "set_flag": {
-         "entity": "player",
-         "key": "has_nail",
-         "value": true
+        "add_canon": {
+         "kind": "texture",
+         "text": "The rogue has pried a long nail out of the bench."
         }
        }
       ],
@@ -1071,8 +1070,14 @@
        {
         "set_flag": {
          "entity": "bars_near",
-         "key": "bent",
-         "value": true
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "add_canon": {
+         "kind": "texture",
+         "text": "Two of the near cell's bars are bent apart, wide enough to slip through."
         }
        },
        {
@@ -1423,7 +1428,60 @@
      "fern.form": "animal"
     }
    },
-   "look_for": "The interruption gets its moment: the instant the party sees the peg go empty, how it lands, where everyone is. A picture, not a survey. No hidden things."
+   "look_for": "The interruption gets its moment: the instant the party sees the peg go empty, how it lands, where everyone is. A picture, not a survey. No hidden things.",
+   "steps": [
+    {
+     "n": 1,
+     "summary": "Fern changes into a rat.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 2,
+     "summary": "Fern slips through her bars, runs to the guardroom and takes the keys off the peg.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 3,
+     "summary": "Fern drags the ring down the corridor to the far cell.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 4,
+     "summary": "The rogue unlocks the far door through the bars, steps out and lets everyone out, Brannoc too.",
+     "actors": [
+      "player",
+      "fern",
+      "lyra",
+      "brannoc"
+     ]
+    },
+    {
+     "n": 5,
+     "summary": "Everyone goes through the guardroom to the foot of the stair.",
+     "actors": [
+      "player",
+      "fern",
+      "lyra",
+      "brannoc"
+     ]
+    },
+    {
+     "n": 6,
+     "summary": "Up the stair and through the heavy door.",
+     "actors": [
+      "player",
+      "fern",
+      "lyra",
+      "brannoc"
+     ]
+    }
+   ]
   },
   {
    "id": "card2_done",
@@ -1515,7 +1573,45 @@
      "fern.form": "animal"
     }
    },
-   "look_for": "A short, vivid montage of five steps, then Snag. Easy to picture. No crawl, no cistern."
+   "look_for": "A short, vivid montage of five steps, then Snag. Easy to picture. No crawl, no cistern.",
+   "steps": [
+    {
+     "n": 1,
+     "summary": "Fern changes into a rat at the back of her cell.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 2,
+     "summary": "Fern goes down the gutter to the guardroom drain.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 3,
+     "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
+     "actors": [
+      "brannoc",
+      "fern"
+     ]
+    },
+    {
+     "n": 4,
+     "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
+     "actors": [
+      "fern"
+     ]
+    },
+    {
+     "n": 5,
+     "summary": "Lyra unlocks her door through the bars, steps out, and unlocks the other three.",
+     "actors": [
+      "lyra"
+     ]
+    }
+   ]
   }
  ],
  "huddle": [
@@ -1566,7 +1662,7 @@
     },
     {
      "id": "walkout",
-     "text": "Walking out means passing Snag, who will see the open doors and go for the war drum.",
+     "text": "The plan walks everyone out down the corridor while Snag can see it; he'll spot open doors and go for the war drum. (Only this escape past Snag counts, not whether to take Brannoc.)",
      "hunch_of": [
       "lyra"
      ],

@@ -236,3 +236,18 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 **Decided:** Refines D38. Each companion's `planning` block gains a `hunch`: a belief about the situation, written the way a hint would be ("the way through usually runs through something alive"). Her call is given her `hunch` and `reaches_for`. It is never given `misses` or `sees`: those stay in her file as the designer's description of her bias, and the bench measures her against them. She is asked for her first instinct, not an analysis.
 **Why:** Telling a model what a character tends to miss points its attention straight at that thing, so a described blind spot defeats itself. Steering what the model attends to makes it actually miss things in the way she would, rather than acting out a bias it can see past. The aim is to bias the AI's response the way the character is biased, not to have it simulate a biased character.
 **Rules out:** Sending `misses` (or any description of her blind spots) to any call; numbers or rolls for how often she is right.
+
+### D51. A move's path names the zones it enters
+**Decided:** Each entry in a `move` or `give` path is one crossing, named by the zone it enters, or by the connection crossed where two connections join the same zones. The last entry is the destination. The engine resolves each crossing to its connection and checks that it exists and that everything crossing it fits (`docs/spec/engine.md` §2). A path has at most two entries; without a path, the destination must be the current zone or next to it.
+**Why:** On the bench, all five step calls wrote paths as the zones Fern passed through ("gutter", "guardroom"), never as connection ids. The contract said "id" without saying which kind. The AI's judgment is which way to go; finding the door between two zones is the engine's job (principle 2).
+**Rules out:** Requiring connection ids where the zones already say which way.
+
+### D52. State uses the packet's words; anything else is canon
+**Decided:** A `set_flag` from any call must use a flag key the packet or a character sheet already uses (in a thing's or connection's flags, a condition, a rule, or a declared ability). The engine rejects any other key and sends it back. A new fact the engine has no word for ("the bars are bent apart") is written as canon with `add_canon`, where the AIs read it. An NPC action that changes nothing the engine tracks (he calls out an offer) has empty `ops`; its `because` says what he does.
+**Why:** On the bench, the world call invented flags in every run (`offering_deal`, `with_party`, `wants_deal`) to give an action something to change. Nothing in the engine reads them, so they're invisible state that looks meaningful. Flags only mean something when a condition reads them.
+**Rules out:** Free-form flag keys; empty-looking state written to make an action feel concrete.
+
+### D53. A lockable connection has a second size for when it's unlocked
+**Decided:** A connection with a `locked` flag can give `fits_unlocked`: the biggest size that passes once it's unlocked. While it's locked, `fits` applies. A barred cell door `fits` small (a rat slips between the bars) and `fits_unlocked` medium (a person walks out).
+**Why:** The bench's fit check found that the Cells packet's cell doors let a rat through and never a person, even unlocked: one size can't describe both the gaps in a door and the doorway.
+**Rules out:** Treating an unlocked door as having no size limit.

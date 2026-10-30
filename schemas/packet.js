@@ -44,6 +44,8 @@ const connection = obj(["id", "kind", "between", "fits", "operated_from"], {
   wall: { type: "array", items: point, minItems: 2, maxItems: 2 },
   square: point,
   fits: r("size"),
+  // What passes once a lockable connection is unlocked; `fits` applies while it's locked (D53).
+  fits_unlocked: r("size"),
   see_through: { type: "boolean" },
   flags: { type: "object", additionalProperties: { type: ["string", "number", "boolean"] } },
   operated_from: { anyOf: [r("id"), { const: "both" }] },

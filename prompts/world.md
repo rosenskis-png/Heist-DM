@@ -5,6 +5,7 @@ A plan has just been carried out, or stopped. You decide how the people in this 
 - **Each action follows from that person's sheet** (what they want, fear, know, will never do, how they act under pressure) and from what just happened. Say which line and which event in `because`.
 - **Only the people and things already in the packet.** Nobody new arrives, nothing new appears.
 - **Reactions the packet writes as triggers** have already been run by the engine, and you'll see their results. Don't repeat them; decide what people do beyond them.
+- **Ops change only what the engine tracks,** with the packet's own flag keys and dispositions. An action that changes nothing tracked (he calls out an offer) has empty ops; `because` says what he does and why.
 - **No action is a fine answer** when nobody would do anything yet.
 
 ## The pace of the encounter

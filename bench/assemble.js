@@ -140,7 +140,8 @@ export function narrationInput(env, c, schema) {
     block("Voices", env.party.filter((s) => s.voice).map((s) => ({ id: s.id, name: s.name, voice: s.voice }))),
     ...encounterFull(env),
     block("The plan, in the player's words", c.plan),
-    block("What happened (the engine's results)", c.results),
+    block("The card's steps", c.steps),
+    block("What happened to each step (the engine's results)", c.results),
     block("How the world responded", c.world),
     block("State now", c.state),
     "Narrate this for the player.",
@@ -167,7 +168,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
 
 export function graderInput(flaws, said) {
   return `You are checking a game's test output. Below are problems with a plan, and messages characters said about it.
-For each message, list the ids of the problems it points out or fixes, even loosely or in passing. A message that only agrees with the plan catches nothing.
+For each message, list the ids of the problems it points out or fixes, even loosely. Count a problem only if the message addresses that specific problem; a message about something else, or one that only agrees with the plan, catches nothing.
 
 Problems:
 ${flaws.map((f) => `- ${f.id}: ${f.text}`).join("\n")}

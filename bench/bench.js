@@ -80,6 +80,7 @@ async function load() {
     people: new Set(people.map((p) => p.id)),
     hiddenTerms: cases.hidden_terms,
     beatAt: (t) => (sched ? { [people.find((p) => p.schedule).id]: sched.beats[(t + sched.phase) % sched.period].id } : {}),
+    ...C.engineFacts(packet, party),
     pairFor: (a, others) => others.map((b) => pairs[`${a}|${b}`] ?? pairs[`${b}|${a}`]).find(Boolean) ?? null,
   };
 }
@@ -100,14 +101,18 @@ async function slot(fn) {
 }
 
 // One call, with the one retry on validation errors (D13). Never retries a runtime error.
-async function ask(input, schema, tier) {
+// `engine` adds the engine's own validation (moves, flags), which also goes back for the one retry.
+async function ask(input, schema, tier, engine = () => []) {
   const opts = () => ({ modelTier: tier, cache: false, signal: controller.signal });
   return slot(async () => {
     const t0 = performance.now();
     let out = await sample.json(input, opts());
     let errors = validate(schema, out);
+    if (!errors.length) errors = engine(out);
     let retried = false;
+    let first = null;
     if (errors.length) {
+      first = errors;
       retried = true;
       const turns = [
         { role: "user", content: input },
@@ -116,8 +121,9 @@ async function ask(input, schema, tier) {
       ];
       out = await sample.json(turns, opts());
       errors = validate(schema, out);
+      if (!errors.length) errors = engine(out);
     }
-    return { out, errors, retried, ms: Math.round(performance.now() - t0), inputChars: input.length };
+    return { out, errors, retried, first, ms: Math.round(performance.now() - t0), inputChars: input.length };
   });
 }
 
@@ -130,12 +136,18 @@ async function runOne(kind, c) {
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
     const input = A[`${kind}Input`](env, c, k.schema);
-    const r = await ask(input, k.schema, tier);
+    const engine =
+      kind === "step"
+        ? (o) => [...C.moveProblems(o.steps, env), ...C.unknownFlags(o.steps, env).map((f) => `unknown flag ${f}`)]
+        : kind === "world"
+          ? (o) => C.unknownFlags(o.actions, env).map((f) => `unknown flag ${f}`)
+          : undefined;
+    const r = await ask(input, k.schema, tier, engine);
     Object.assign(run, r, { input });
-    if (r.errors.length) run.checks = [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }];
+    if (r.errors.length) run.checks = [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }];
     else if (kind === "pricing") Object.assign(run, C.pricingChecks(r.out, c, env));
     else run.checks = C[`${kind}Checks`](r.out, c, env);
-    if (!r.errors.length) run.checks.unshift({ name: "Matches the schema", ok: r.retried ? "near" : true, detail: r.retried ? "after one retry" : "" });
+    run.checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
   } catch (e) {
     run.error = errorText(e);
   }

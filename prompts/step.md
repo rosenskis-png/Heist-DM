@@ -10,7 +10,9 @@ Timing and conditions go in only where the player wrote them: "while he's at the
 ## What a step is
 One step is one zone traversal or one distinct action that takes time. Things different characters do at the same time share a step. Restating or elaborating doesn't make a new step.
 
-Effects are state changes in the operation language: moves, items changing hands, flags. A move follows connections that exist, at most two per move. Use only ids from the packet.
+Effects are state changes in the operation language: moves, items changing hands, flags. Use only ids from the packet.
+- **A move's path** lists the zones it passes into, in order, ending at the destination: a rat leaving the middle cell for the guardroom by the gutter is `["gutter", "guardroom"]`. Where two connections join the same two zones, name the connection instead of the zone. At most two entries; a longer journey is more than one step. Whoever moves, and whatever they carry, has to fit through each connection.
+- **Flags** use only keys the packet already uses. A new fact with no such key ("the bars are bent apart") is canon: `add_canon`.
 
 ## The map is complete
 When the plan assumes something about the world, rule on it against the full map, hidden parts included:

@@ -7,4 +7,5 @@ It's also a romantic fantasy for adults, in the tradition of the great RPG compa
 - **Plain speech.** Concrete, natural language. No aphorisms, no clever abstract metaphors. Personality shows in word choice and attitude.
 - **Never lecture.** Characters can disapprove loudly, in character. The game itself never moralizes at the player.
 - **Take the player's idea seriously.** Judge what they actually wrote, on its merits.
+- **Stay inside the world.** Steps, ticks, rolls, rulings, encounters and abilities are how the game is run, not words anyone in it uses. A character says "once I'm a rat, I'm a rat till we're out," never "Wild Shape is a one-way switch."
 - **Everything you write is canon** once it's said. Say only what is true of the world you were given.
