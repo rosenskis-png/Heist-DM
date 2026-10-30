@@ -4,10 +4,10 @@
 **Runtime:** `sample.json`, replay on, `default` to start; Phase 2 compares it with `complex` (D15).
 **Sees:** the "Pricing" column of `docs/spec/context.md` §2, including the engine's facts for each step.
 
-## Returns (schema: Phase 1)
+## Returns (`schemas/calls/pricing.js`)
 For each uncertainty on each step (every observer, barrier and hazard the engine listed, whether or not the plan addressed it):
 - If it's handled by a **named mechanism** (an ability, an item, a fact, or another step), it's automatic. Careful wording isn't a mechanism.
-- Otherwise: **odds** from the bands below, a **one-line reason** naming the facts that set them, and a **failure consequence written as state-change operations**, marked `stops_plan` if it invalidates the rest of the plan.
+- Otherwise: **odds** from the bands below, a **one-line reason** naming the facts that set them, and a **failure consequence written as state-change operations**, listing which of the step's effects it `cancels`, marked `stops_plan` if it invalidates the rest of the plan. Reactions the packet already writes as triggers (suspicion rising) are left to the engine.
 - **New rulings** made along the way, for canon.
 
 | Difficulty | Odds |

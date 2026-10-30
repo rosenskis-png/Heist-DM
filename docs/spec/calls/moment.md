@@ -12,7 +12,7 @@
 - **Never** advances time, applies consequences for delay, or introduces threats.
 - **Combat:** one call per round. It narrates the last round's engine results, sets each enemy's intent for this round from its sheet, and gives odds for any unusual action the player declared. The engine does all the math and decides when combat ends. The player commands the whole party; kept stances still apply.
 
-## Returns (schema: Phase 1)
+## Returns (`schemas/calls/moment.js`)
 The reply, plus, when relevant: facts the party just learned (one line each), disposition shifts, promises made, new texture, and any check.
 
 This call returns prose and structure together, an accepted exception to principle 3: the engine applies only the structured fields, and a check's two narrations are both written before the roll, so prose never decides state.

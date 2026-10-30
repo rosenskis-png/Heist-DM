@@ -15,6 +15,8 @@ Gravenhold's defining failure was its opening cell-block escape. The player's fi
 
 ## 1. The packet
 
+As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with card 2's expected results in `card2.results.json`. Sample outputs for the other calls: `calls.json`.
+
 **Intent**
 - **Objective:** `party_all_in: [stair_top]`.
 - **Alternate objective:** `party_all_in: [cistern]`, reached through a hidden crawl.
@@ -29,7 +31,7 @@ Gravenhold's defining failure was its opening cell-block escape. The player's fi
 | NPC | Wants | Fears | Knows | Will never |
 |---|---|---|---|---|
 | **Snag**, goblin jailer | a quiet shift, his ale, to win at bones against himself | Sergeant Uzga, and above all being blamed | the ale crawl behind the cask; which key fits which cell | go upstairs to report a problem himself; fight loose prisoners alone (he goes for the drum, and if the drum is useless, he bargains) |
-| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 12 for Fern |
+| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 18 for Fern |
 | **Brannoc**, human miner in the cell opposite | out | being left behind | Snag's routine (a week of watching); where the occupiers dig at the sacred spring; that Snag comes back from his breaks smelling of wet stone | keep quiet if they leave him: "Take me, or I tell the sergeant everything I saw." He also has a hoard of crusts |
 
 **Snag's cycle.** One plan step is one tick, and the cycle repeats every three ticks.
@@ -58,7 +60,7 @@ Gravenhold's defining failure was its opening cell-block escape. The player's fi
 **Bringing suspicion back down.**
 - Suspicion drops by 1 after a full cycle (three ticks) in which Snag notices nothing odd and every prisoner he can see is lying still. Pretending to sleep counts.
 - It can't drop while something he knows is wrong is still wrong, such as an empty peg or a torn drum.
-- Lying low costs three ticks of the twelve before Uzga arrives, so it trades safety for time.
+- Lying low costs three of the eighteen ticks before Uzga arrives, so it trades safety for time.
 
 **Map, written as relationships**
 - **Cells (far, middle, near):** "where the Maw keeps tribute until it's sorted."
@@ -121,11 +123,11 @@ This one card teaches the player the whole cycle, through the card rather than t
 
 | # | Step | Snag's beat | Risk | Odds | If it fails |
 |---|---|---|---|---|---|
-| 1 | Fern changes in her back corner | Drink | — | automatic | — |
+| 1 | Fern changes at the back of her cell | Drink | — | automatic | — |
 | 2 | Fern goes down the gutter to the guardroom drain | Pace | — | automatic | — |
 | 3 | Brannoc tosses his crusts; Fern and the rats lift the ring off the peg | Sit, with the peg behind him | iron clinking behind him in a quiet room | Easy, 80% | He swats the rats and clips the ring to his belt. Suspicion 1. The plan stops. |
 | 4 | The rats carry the ring to Lyra; Fern gnaws the drumhead | Drink | gnawing hide ten feet behind him | Easy, 80% | He kicks the rat off his drum (Fern loses 1 HP). Suspicion 1. The drum still works. The plan continues. |
-| 5 | Lyra unlocks all four doors | Pace: **he reaches for the empty peg** | none (she sees in the dark, and a key is a key) | automatic | — |
+| 5 | Lyra unlocks all four doors | Pace: **he reaches for the empty peg** | none: he sees the doors open, but the drum is already gnawed (step 4), and a key is a key | automatic | — |
 
 - **Lyra's stance** is resolved, because the plan frees Brannoc.
 - **The cost:** two dice, both Easy, across five steps on one card.
@@ -133,31 +135,31 @@ This one card teaches the player the whole cycle, through the card rather than t
 **Exchange 3: execution.**
 - **Step 3** rolls 34: success.
 - **Step 4** rolls 52: success.
-- **Step 5:** at tick 6, the doors swing open just as Snag reaches for an empty peg. He comes down the corridor with his club, finds three loose prisoners and a miner, and spins for the drum. Its head is in tatters.
+- **Step 5:** at tick 4, the doors swing open just as Snag reaches for an empty peg. He comes down the corridor with his club, finds three loose prisoners and a miner, and spins for the drum. Its head is in tatters.
 
 That's the plan done. On the world turn, Snag acts from his sheet. The drum is useless, so he bargains: "Uzga'll skin me either way."
 
-**If step 3 had failed,** the ring would be on Snag's belt and his Suspicion at 1. He's still drinking, but the keys stay on him until his Suspicion is back to 0. The party can lie still for a cycle to bring it down and try again on the next Sit. That costs three of the eight ticks left before Uzga.
+**If step 3 had failed,** the ring would be on Snag's belt and his Suspicion at 1. He's still drinking, but the keys stay on him until his Suspicion is back to 0. The party can lie still for a cycle to bring it down and try again on the next Sit. That costs three of the fifteen ticks left before Uzga.
 
-**If step 4 had failed,** the same moment at tick 6 has Snag diving for the drumstick. A fight starts, with the Warrens one beat away from being alerted.
+**If step 4 had failed,** the same moment at tick 4 has Snag diving for the drumstick. A fight starts, with the Warrens one beat away from being alerted.
 
 ## 3. Where the encounter really is: the doorway
 
 Every option here comes from state that's already in the packet:
 
 - **Kill Snag.** He's aware, so the rogue can't backstab him; it would be a fight. The step is tagged `lethal`, which trips Fern's conditional stance ("won't kill needlessly"). Overriding her costs relationship.
-- **Tie him up.** This costs a step. Uzga finds him at tick 12, and he talks.
+- **Tie him up.** This costs a step. Uzga finds him at tick 18, and he talks.
 - **Take his deal.** The Maw's faction rules say bribes work and loyalty doesn't.
   - The deal: they tie him up so it looks like he fought, and in exchange he shows them the crawl behind the cask.
   - The crawl is the hidden exit. It's a surprise placed at design time, and it only helps.
   - Getting the deal is a social check. His loyalty lasts exactly as long as staying loyal is safer than betraying them.
 - **Get the gear.** The sack is under the table: one step to grab, and it slows them afterward.
 - **Deal with Brannoc.** He's slow and weak, but he knows where the spring diggings are, and that's Fern's personal quest.
-- **Watch the clock.** It's tick 6, and Uzga comes at tick 12.
+- **Watch the clock.** It's tick 5, and Uzga comes at tick 18. That's room for one thing here to go wrong and be recovered (D31).
 
 ## 4. What carries into the Warrens
 
-- **Alert:** none (drum gnawed, Snag dealt with), low (Uzga finds the cells empty at tick 12), or high (the drum was beaten).
+- **Alert:** none (drum gnawed, Snag dealt with), low (Uzga finds the cells empty at tick 18), or high (the drum was beaten).
 - **Gear:** recovered or not.
 - **Snag:** dead (and Fern sees the player differently), tied up and talking, or an ally of convenience who knows the ale crawls through the Warrens.
 - **Brannoc:** with them, or left behind to tell Uzga which way they went.

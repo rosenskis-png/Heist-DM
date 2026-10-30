@@ -10,4 +10,4 @@ objective and people → zones and geometry → things → clock → alarm ladde
 
 A packet that fails the consistency checks is regenerated, with the errors listed. Quality checks only warn. The generator's private "a route exists" check is thrown away and never stored.
 
-If it can't produce exact geometry reliably, generated packets ship without a map (D9).
+It writes topology and approximate sizes, never coordinates; code lays them out on the grid (D28). The format of that sketch is Phase 7's. If layout fails, the packet ships without a map (D9).

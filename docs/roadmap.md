@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 1 (Contracts).** Phase 0 is done except one check that needs a person (below).
+**Current phase: 1 (Contracts),** built and awaiting the designer's review.
 
 ---
 
@@ -13,7 +13,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 - [x] Fix inconsistencies in the Cells walkthrough: Card 1's timing (D16) and the horn vs. war drum mix-up.
 - [x] Extract the content into `content/` and verify it against the original (D6).
 - [x] Add a readable copy of Gravenhold's code and a map of it in `legacy/README.md`.
-- [ ] **Runtime check** (D12): a multi-file artifact loads ES modules and data files, and `sample.json` works. A check page is published at https://claude.ai/artifact/NagBL673dCymHK5NLdZkBM (private to the owner). Open it signed in and press "Run the Claude call"; all four rows should read Passed.
+- [x] **Runtime check** (D12): a multi-file artifact loads ES modules and data files, and `sample.json` works. All four rows passed on the check page (https://claude.ai/artifact/NagBL673dCymHK5NLdZkBM).
 
 **Exit:** every fact has one home; nothing in `docs/` contradicts `docs/spec/`; content matches the original.
 
@@ -21,18 +21,13 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 Write down what each part promises, precisely enough to build against.
 
-- An output schema and validation rules for each of the 8 calls (`docs/spec/calls/`). v3's schemas (card, execution, moment, companion; on branch `design-archive`) are useful starting points; strip anything D4 removed.
-- The condition language and the state-change operations (D17; drafts in `docs/spec/engine.md`).
-- The schedule, meter and reaction formats.
-- The geometry format (D9).
-- The Cells packet as data: `fixtures/cells/packet.json`.
+- [x] An output schema and validation rules for each of the 8 calls: `schemas/calls/`, linked from `docs/spec/calls/` (D32).
+- [x] The condition language and the state-change operations: `schemas/defs.js`, `docs/spec/engine.md` §8–9.
+- [x] The schedule, meter and reaction formats: `schemas/packet.js`, `docs/spec/packet.md` §4.
+- [x] The geometry format (D28).
+- [x] The Cells packet as data: `fixtures/cells/packet.json`, with both cards and card 2's expected results.
 
-**Exit:** the Cells packet, both of its cards and its expected results can be written without free-text escape hatches, except in the fields meant for judgment.
-
-**Open questions**
-1. **Geometry format.** *Recommendation:* a 5-ft grid. Each zone is a list of rectangles; walls are implicit at zone edges; each connection is a segment on the wall two zones share; each thing sits in a square. The engine checks that zones don't overlap, that each connection lies on its two zones' shared wall, and that each thing is inside its zone. It derives sizes, distances along connections, and adjacency. Levels are separate floors joined by stair connections.
-2. **Sense links and geometry.** *Recommendation:* sense links stay authored, because attention, light and beats matter more than raw line of sight. Later, the engine can warn when an authored "sees" link has no plausible line through open connections. Not for v1.
-3. **Card schema shape.** *Recommendation:* steps hold effects (operations), tags and actors. Risks hold odds, a reason, a failure consequence (operations plus `stops_plan`) and the observer or barrier ids the engine listed. Internal checks live in a separate block the UI never renders.
+**Exit:** the Cells packet, both of its cards and its expected results can be written without free-text escape hatches, except in the fields meant for judgment. Checked by `node --test` (`test/contracts.test.js`).
 
 ## Phase 2: Judgment test bench (an artifact)
 
@@ -50,7 +45,7 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 
 ## Phase 3: Engine core (Node)
 
-Pure ES modules tested with `node --test`, with a seeded random number generator.
+Pure ES modules tested with `node --test`, with a seeded random number generator. Validation against the contracts already exists (`src/validate.js`); the engine adds the consistency checks in `docs/spec/packet.md` and everything in `docs/spec/engine.md`.
 
 **Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly.
 
@@ -70,7 +65,7 @@ The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 
 ## Phase 5: Companions ported
 
-All 8 companions, the relationship model, configurations, the campfire, and the special cases as declared data (D8).
+All 8 companions, the relationship model, configurations, the campfire, and the special cases as declared data (D8). Every remaining ability gets its `declared` block (D30).
 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
@@ -96,9 +91,11 @@ Built in stages, each validated by the engine before the next: objective and peo
 **Exit:** generated packets pass validation within one retry, and play comparably to the hand-authored Act 1 packets.
 
 **Open questions**
-1. **Can it write exact geometry?** If not reliably, generated encounters ship without a map (D9).
+1. **Layout from a sketch.** *Recommendation:* the generator writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28). A layout step in code snaps that to the grid and validates it. Settle the sketch format here. If layout fails, the encounter ships without a map (D9).
 2. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, until playtests show which ones predict a bad encounter. A generator can satisfy a count like "every element connects to two others" without being good.
 
 ## Later
 
 Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
+
+- **Improvised structure** (D29). If playtests show players wanting to find features the packet doesn't have, revisit with the player-initiated version first: the DM judges the feature against the zone's purpose line and fixed facts, a "maybe" becomes a search check, and an `add_connection` operation places it.

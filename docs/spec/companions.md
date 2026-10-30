@@ -26,7 +26,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
-| Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. |
+| Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
 | Special cases | currently inline, e.g. Nadia's `emberVoice` and `emberLook`, and Lisa's `sisterNote` and `variants`. Phase 5 turns these into declared data (§6). |
 
 Text inside profiles may mention other companions by name (Fern's rule about Lisa and her sister). That's fine: it's characterization, not code.

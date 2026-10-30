@@ -1,0 +1,32 @@
+// The engine's record of executing a card, and what a fixture expects of it. Feeds the narration call
+// and the event log. Example: fixtures/cells/card2.results.json.
+import { withDefs } from "./defs.js";
+import { r, list, obj } from "./shape.js";
+
+export const resultsSchema = withDefs({
+  $id: "results",
+  ...obj(["card", "rolls", "steps", "expect"], {
+    card: r("text"),
+    // Forced d100 results, in order, for fixtures. In play the seeded generator supplies them.
+    rolls: list({ type: "integer", minimum: 1, maximum: 100 }),
+    steps: list(
+      obj(["n", "tick", "outcome", "rolls"], {
+        n: { type: "integer", minimum: 1 },
+        tick: { type: "integer", minimum: 0 },
+        outcome: { enum: ["done", "stopped", "skipped", "revealed"] },
+        rolls: list(
+          obj(["risk", "odds", "roll", "success"], {
+            risk: r("id"),
+            odds: r("odds"),
+            roll: { type: "integer", minimum: 1, maximum: 100 },
+            success: { type: "boolean" },
+          }),
+        ),
+        triggers: list(r("id")),
+      }),
+      1,
+    ),
+    // Must hold once the card has run and the engine's triggers have settled.
+    expect: r("condition"),
+  }),
+});

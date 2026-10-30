@@ -46,12 +46,14 @@ export const classes = {
         name: "Backstab",
         uses: "at will",
         effect: `Kill one enemy from behind who is unaware of your location. If any other enemy is within hearing distance, roll Stealth on the kill to see whether they hear.`,
+        declared: { uses: null, effects: [] },
       },
       noncombat: {
         id: "sleight",
         name: "Sleight",
         uses: "at will",
         effect: `Pick mundane locks, lift or plant small items, and disarm simple mechanisms, as long as no one is directly watching your hands. Warded or magical locks: no.`,
+        declared: { uses: null, effects: [] },
       },
       limits: [
         "Can't win a straight fight against an aware, armed enemy",

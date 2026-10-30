@@ -4,7 +4,7 @@
 **Runtime:** `sample.json`, replay on, `default` to start; Phase 2 compares it with `complex` (D15).
 **Sees:** the "World" column of `docs/spec/context.md` §2: resolution results, current state, people, intent, and the table read.
 
-## Returns (schema: Phase 1)
+## Returns (`schemas/calls/world.js`)
 NPC actions and reactions as state-change operations: moves, disposition shifts, a fight starting, an alarm raised.
 - Each must follow from an NPC's sheet and from what just happened.
 - No new entities or threats beyond those placed in the packet (principle 8).

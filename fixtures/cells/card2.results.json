@@ -1,0 +1,71 @@
+[
+  {
+    "card": "card2.json: both rolls succeed (the walkthrough's run)",
+    "rolls": [34, 52],
+    "steps": [
+      { "n": 1, "tick": 0, "outcome": "done", "rolls": [] },
+      { "n": 2, "tick": 1, "outcome": "done", "rolls": [] },
+      { "n": 3, "tick": 2, "outcome": "done", "rolls": [{ "risk": "ring_lift", "odds": 80, "roll": 34, "success": true }] },
+      { "n": 4, "tick": 3, "outcome": "done", "rolls": [{ "risk": "drum_gnaw", "odds": 80, "roll": 52, "success": true }] },
+      { "n": 5, "tick": 4, "outcome": "done", "rolls": [], "triggers": ["peg_empty", "prisoner_loose"] }
+    ],
+    "expect": {
+      "all": [
+        { "tick": ["=", 5] },
+        { "holds": ["lyra", "keyring"] },
+        { "flag": ["drum", "gnawed", true] },
+        { "flag": ["bars_far", "locked", false] },
+        { "flag": ["bars_middle", "locked", false] },
+        { "flag": ["bars_near", "locked", false] },
+        { "flag": ["bars_brannoc", "locked", false] },
+        { "in_zone": ["lyra", "corridor"] },
+        { "in_zone": ["fern", "guardroom"] },
+        { "flag": ["fern", "form", "animal"] },
+        { "disposition": ["snag", "bargaining"] },
+        { "meter": ["suspicion", "=", 0] }
+      ]
+    }
+  },
+  {
+    "card": "card2.json: step 3 fails, and the plan stops",
+    "rolls": [95],
+    "steps": [
+      { "n": 1, "tick": 0, "outcome": "done", "rolls": [] },
+      { "n": 2, "tick": 1, "outcome": "done", "rolls": [] },
+      { "n": 3, "tick": 2, "outcome": "stopped", "rolls": [{ "risk": "ring_lift", "odds": 80, "roll": 95, "success": false }], "triggers": ["noise_heard", "keys_touched"] }
+    ],
+    "expect": {
+      "all": [
+        { "tick": ["=", 3] },
+        { "holds": ["snag", "keyring"] },
+        { "not": { "holds": ["brannoc", "crusts"] } },
+        { "meter": ["suspicion", "=", 1] },
+        { "flag": ["snag", "keys_on_belt", true] },
+        { "in_zone": ["fern", "guardroom"] },
+        { "flag": ["bars_far", "locked", true] }
+      ]
+    }
+  },
+  {
+    "card": "card2.json: step 4 fails, and the plan continues",
+    "rolls": [34, 95],
+    "steps": [
+      { "n": 1, "tick": 0, "outcome": "done", "rolls": [] },
+      { "n": 2, "tick": 1, "outcome": "done", "rolls": [] },
+      { "n": 3, "tick": 2, "outcome": "done", "rolls": [{ "risk": "ring_lift", "odds": 80, "roll": 34, "success": true }] },
+      { "n": 4, "tick": 3, "outcome": "done", "rolls": [{ "risk": "drum_gnaw", "odds": 80, "roll": 95, "success": false }], "triggers": ["noise_heard"] },
+      { "n": 5, "tick": 4, "outcome": "done", "rolls": [], "triggers": ["peg_empty", "prisoner_loose"] }
+    ],
+    "expect": {
+      "all": [
+        { "tick": ["=", 5] },
+        { "holds": ["lyra", "keyring"] },
+        { "not": { "flag": ["drum", "gnawed", true] } },
+        { "hp_below": ["fern", 4] },
+        { "meter": ["suspicion", "=", 1] },
+        { "flag": ["bars_far", "locked", false] },
+        { "disposition": ["snag", "going_for_drum"] }
+      ]
+    }
+  }
+]

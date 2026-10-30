@@ -48,9 +48,12 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/roadmap.md` | Phases, exit tests, and **every open question** with a recommendation |
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
 | `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
+| `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
+| `src/` | Code. So far the contract validator |
+| `test/` | `node --test` suites |
 | `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
-| `fixtures/cells/` | The worked example and the engine's first acceptance test |
+| `fixtures/cells/` | The worked example, the Cells packet and cards as data, and the engine's first acceptance test |
 | `content/` | Game data: companions, pairs, classes, rules, setting. The source of truth for content. |
 | `prompts/` | One prompt per AI call (from Phase 2) |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
@@ -59,4 +62,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 1: Contracts.** See `docs/roadmap.md`.
+**Phase 1: Contracts,** built and awaiting review. See `docs/roadmap.md`.

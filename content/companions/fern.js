@@ -66,6 +66,7 @@ export default {
       uses: "once per encounter",
       perRest: 3,
       effect: `Roots and vines hold up to two enemies in place for a few moments. Needs soil, moss or cracked stone; useless on worked floors or iron.`,
+      declared: { uses: { encounter: 1, rest: 3 }, effects: [] },
     },
     noncombat: {
       id: "wildshape",
@@ -73,6 +74,16 @@ export default {
       uses: "once per encounter",
       perRest: 3,
       effect: `She turns into any animal she has seen during the campaign (at the start, only the prison rats) and stays in that form until the encounter ends: a one-way switch with no turning back. In animal form she can't speak aloud (the rings still carry her thoughts) and can talk with animals.`,
+      // What the engine tracks (D30); the effect text above is what the AIs judge from.
+      declared: {
+        uses: { encounter: 1, rest: 3 },
+        effects: [
+          { set_flag: { entity: "@self", key: "form", value: "animal" } },
+          // The prison rat, the only animal she has seen at the start. Other forms wait for Phase 5.
+          { set_flag: { entity: "@self", key: "size", value: "tiny" } },
+        ],
+        one_way: true,
+      },
     },
     limits: [
       "Her magic can't affect iron",

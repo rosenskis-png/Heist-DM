@@ -37,7 +37,7 @@ The engine validates every write against the map and state before committing it.
 
 | Source | Writes |
 |---|---|
-| Step call | Effects, tags, canon features, internal checks |
+| Step call | Effects, tags, rulings, internal checks |
 | Pricing call | Odds, consequences, rulings |
 | World call | NPC actions and reactions |
 | Narration call | Texture (canon) |

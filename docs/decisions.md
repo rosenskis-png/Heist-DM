@@ -117,3 +117,31 @@ The design as it stood before the restructure (specs v3 and v4, the engine brief
 **Decided:** A companion always plays her fantasy, per her `pursuit`, in every scene, and a dominant companion leads the conversation and the romance. This governs how she talks and pursues, never the plan or the world. "Push the scene forward", "sometimes just act" and "never hand him the floor" stay banned. The craft lives in `docs/design/companion-craft.md`.
 **Why:** Gravenhold's prompt put both kinds under the word "floor", and the restructure banned them together. Only the second kind caused the stalls; the first is part of why the companions worked (D23).
 **Rules out:** Companions acting outside the card or pushing the party to act, and companions who wait passively for the player to start every romantic beat (unless waiting is her declared nature, as with Fern).
+
+### D28. Geometry: exact where it's load-bearing, judged everywhere else
+**Decided:** The map has three layers of exactness.
+- **Topology is exact:** zones, connections and their attributes, which side a barrier is operated from, sense links, travel ticks. The engine's rules run on this.
+- **Footprints are exact on a 5-ft grid:** each zone is a list of rectangles, each connection a segment on the wall two zones share (or one square, between levels). This exists so the map is never wrong and the sizes stay consistent. The engine derives sizes and distances from it as facts; nothing is decided from coordinates.
+- **Placement inside a zone is exact only where it matters** (the peg 5 ft behind the stool) or where the map should show it. Everything else just sits in its zone, and the AI DM owns the rest as texture and rulings.
+
+Seeing and hearing stay authored per observer and beat. There is no ray casting. The AIs never read or write coordinates: the generator will write topology and approximate sizes, and code lays them out on the grid (roadmap, Phase 7). Sizes and distances reach the player through the same derived facts the AIs get. Format: `docs/spec/packet.md` §3.
+**Why:** Gravenhold's map failed because the prose was the layout, not for lack of precision. A grid keeps the map honest and gives the DM fair distances to judge with. Computing perception from it would turn the game into a stealth video game.
+**Rules out:** Engine-computed line of sight; coordinates in any AI context or AI output.
+
+### D29. The map is complete: no improvised structure
+**Decided:** No AI call can add a zone, a connection or a hidden thing during play. A feature the packet doesn't have doesn't exist: the step call rules it out ("is there a coal chute?" "No."). A hidden feature the packet does have is used and revealed normally. Texture (a candelabra) and rulings about existing things ("one rat can drag the ring") are unchanged.
+**Why:** The designer's call (2026-10-30): start with none, and loosen it later for player-initiated or DM-initiated features if playtests want it. It keeps the map fixed while the loop is proven.
+**Rules out:** An `add_connection` or `add_zone` operation, for now.
+
+### D30. Abilities declare what the engine tracks
+**Decided:** Each ability keeps its prose `effect` for the AIs and gains a `declared` block for the engine: uses per encounter and per rest (null for at will), the state-change operations it applies, whether it's one-way, and traits. So far: Fern, Lyra and the rogue. The rest come with the Phase 5 port.
+**Why:** The engine can't check that a rat fits the gutter if Wild Shape is only prose.
+**Expected to change** in playtesting. This goes beyond D6's mechanical extraction on purpose.
+
+### D31. Encounter clocks leave room for one recovered failure
+**Decided:** An encounter's deadline should fit some exploring plus a plan in which one key roll fails and the recovery is handled well. Two careless failures shouldn't fit. The Cells start at tick 0 on Snag's Drink beat, and Uzga arrives at tick 18 (a starting value; playtests move it).
+**Why:** Half of the heist fantasy is the mid-heist adjustment, or the smooth recovery from something that almost blew it. A deadline only perfect play can meet is a puzzle. The old numbers also implied the encounter started at tick 2 without saying so.
+
+### D32. Contracts are schema files, checked by `node --test`
+**Decided:** Every contract is a JSON Schema in `schemas/`: the packet, the card, execution results, the shared condition language and operations, and one file per call in `schemas/calls/`. The same files go to `sample.json` and to the engine's validator (`src/validate.js`, dependency-free). `test/contracts.test.js` runs the Cells packet, both cards and their expected results through them. The narration call moves to `sample.json` so its texture comes back as a separate field.
+**Why:** "No free-text escape hatches" is easy to fool yourself about in prose. Writing the contracts this way also caught a fixture error: card 2's step 5 happens on Snag's Pace beat, in the corridor he's watching, so he is an observer there, covered by step 4 (the drum is gnawed). The walkthrough and acceptance test now say so.

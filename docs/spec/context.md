@@ -53,7 +53,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Step | `sample.json` | on | `default` |
 | Pricing | `sample.json` | on | `default` |
 | World | `sample.json` | on | `default` |
-| Narration | `sample` | off | `default` |
+| Narration | `sample.json` | off | `default` |
 | Moment | `sample.json` | off | `default` |
 | Companion | `sample.json` | off | `default` |
 | Campfire | `sample.json` | off | `complex` |
