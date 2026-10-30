@@ -11,7 +11,7 @@ import { record } from "./table.js";
 
 export { load, checkPacket, deadlineTick } from "./load.js";
 export { checkSteps, splitLongMoves, project, checkPricing, shownCard } from "./plan.js";
-export { partyPerceives, whoPerceives } from "./perceive.js";
+export { partyPerceives, whoPerceives, memberPerceives } from "./perceive.js";
 export { layoutFacts } from "./map.js";
 export { handoff } from "./handoff.js";
 export { checkMoment, checkWorld, checkOps, fighting } from "./moment.js";

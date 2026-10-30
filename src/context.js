@@ -1,7 +1,10 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the bench page and, from Phase 4, the game.
 import { layoutFacts } from "./engine/map.js";
+import { beatOf } from "./engine/clock.js";
+import { partyPerceives, memberPerceives } from "./engine/perceive.js";
 import { invariants } from "../content/setting.js";
+import { combatRule, strike } from "../content/rules.js";
 
 // Strip coordinates (D9) and, for the party's view, everything hidden. The layout comes as facts the engine
 // derived from geometry: sizes and distances (D28).
@@ -85,6 +88,58 @@ function knownClock(clock) {
 // Compact JSON: indentation would cost about a third more input on every call.
 const block = (title, body) => `## ${title}\n\n${typeof body === "string" ? body : "```json\n" + JSON.stringify(body) + "\n```"}`;
 
+// ---- Live state, as the AIs read it ----
+
+const entries = (o, keep) => Object.fromEntries(Object.entries(o).filter(([k]) => keep(k)));
+
+// The event log, one entry per line. The party's view leaves out the engine's own bookkeeping: trigger ids and
+// events the party doesn't know about.
+function logFor(s, party) {
+  const knownEvent = (id) => s.packet.clock.events.find((e) => e.id === id && (e.known || s.known.revealed.includes(id)));
+  return s.log.filter((l) => !party || (!l.trigger && (!l.event || knownEvent(l.event)))).slice(-40);
+}
+
+// Where everyone and everything is, flags, meters, dispositions, canon and the event log, for the plan calls
+// and the Moment AI. With `party`, only what the party perceives or knows (the companions' view, D40).
+export function stateFor(s, { party = false } = {}) {
+  const partyIds = s.party.map((p) => p.id);
+  const { seen } = partyPerceives(s);
+  const hidden = new Set(["zones", "connections", "things", "facts"].flatMap((k) => s.packet.map[k]).filter((x) => x.hidden && !s.known.revealed.includes(x.id)).map((x) => x.id));
+  const visible = (id) => partyIds.includes(id) || (seen.has(s.at[id]) && !hidden.has(id)) || partyIds.includes(s.holder[id]);
+  const beats = Object.fromEntries(
+    s.packet.people
+      .filter((p) => p.schedule && (!party || p.schedule.known || s.known.revealed.includes(p.schedule.id)))
+      .map((p) => [p.id, beatOf(s, p.id)?.id])
+      .filter(([, b]) => b),
+  );
+  const out = {
+    tick: s.tick,
+    beats,
+    positions: entries(s.at, (id) => s.at[id] != null && (!party || visible(id))),
+    held: entries(s.holder, (id) => !party || visible(id) || visible(s.holder[id])),
+    flags: party ? entries(s.flags, (id) => partyIds.includes(id) || (!hidden.has(id) && s.packet.map.connections.some((c) => c.id === id))) : s.flags,
+    hp: entries(s.hp, (id) => partyIds.includes(id)),
+    canon: s.canon,
+    log: logFor(s, party),
+  };
+  if (!party) Object.assign(out, { pending_ticks: s.pending, meters: s.meters, dispositions: s.disposition, revealed: s.known.revealed, promises: s.promises });
+  if (s.combat) out.fight = { round: s.combat.round, enemies: s.combat.enemies.map((e) => ({ id: e, hp: s.combat.hp[e], out: s.combat.out.includes(e) })) };
+  if (s.ended) out.ended = s.ended.outcome;
+  return out;
+}
+
+// What each party member sees and hears now, and what an ordinary person would from each zone the party knows:
+// the facts behind "could she see that from there?" (D39). Members' own traits apply only where they stand.
+export function perceptionFor(s) {
+  const person = s.party[0].id;
+  const zones = s.packet.map.zones.filter((z) => !z.hidden || s.known.revealed.includes(z.id));
+  const view = (p) => ({ sees: p.seen, hears_speech_from: p.heard });
+  return {
+    now: Object.fromEntries(s.party.map((m) => [m.id, view(memberPerceives(s, m.id))])),
+    from_each_zone: Object.fromEntries(zones.map((z) => [z.id, view(memberPerceives(s, person, z.id))])),
+  };
+}
+
 // The schema as compact type notation: the same contract at about a quarter of the size of JSON Schema.
 // `T[]` is a list, `a?` is optional, `|` separates alternatives; named types are defined below the root.
 export function shapeText(schema) {
@@ -165,7 +220,8 @@ export function stepInput(env, c, schema) {
     ...campaign(env, "step", schema),
     block("Characters", sheets(env)),
     ...encounterFull(env),
-    block("Right now", { tick: c.tick, beat: env.beatAt(c.tick), positions: env.packet.start.positions, canon: [] }),
+    block("Right now", c.now ?? { tick: c.tick, beat: env.beatAt(c.tick), positions: env.packet.start.positions, canon: [] }),
+    c.recent?.length ? block("Recent exchanges", c.recent) : null,
     block("Stances the player has decided", c.stances),
     block("The plan, in the player's words", c.plan),
     "Turn this plan into steps.",
@@ -179,6 +235,7 @@ export function pricingInput(env, c, schema) {
     ...campaign(env, "pricing", schema),
     block("Characters", sheets(env)),
     ...encounterFull(env),
+    c.now ? block("Right now", c.now) : null,
     block("The plan, in the player's words", c.plan),
     block("The steps", c.step_call.steps),
     block("What the party foresees for each step (from the engine)", facts),
@@ -227,25 +284,49 @@ export function narrationInput(env, c, schema) {
     block("What happened to each step (the engine's results)", c.results),
     block("How the world responded", c.world),
     block("State now", c.state),
+    c.recent?.length ? block("Recent exchanges", c.recent) : null,
     "Narrate this for the player.",
   ]);
 }
 
 export function companionInput(env, c, self, others, huddle, schema) {
-  const rel = { heat: 0, intimacy: 0, regard: 0, lean: 0, payoff: false, config: "open" };
+  const rel = env.rel?.[self.id] ?? { heat: 0, intimacy: 0, regard: 0, lean: 0, payoff: false, config: "open" };
   const { opening, people, clock } = env.packet;
   const pair = env.pairFor(self.id, others.map((o) => o.id));
+  const privately = c.channel === "private";
   return compose([
     ...campaign(env, "companion", schema),
     block("You are", ownProfile(self, rel, env.act)),
-    block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...others.map(publicProfile)]),
+    block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...others.map(publicProfile)]),
     block("What the party knows", { map: partyMap(env.packet), people: learnedPeople(people), clock: knownClock(clock) }),
     block("Opening description", opening),
+    c.now ? block("What the party can see right now", c.now) : null,
+    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
     block("Your relationship with the player", rel),
     pair ? block("You and the other companion", pair) : null,
-    block("The huddle so far", huddle),
+    block(privately ? "Just you and the player, through your ring (the other companion can't hear this)" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
-    `It's your turn in the huddle, as ${self.name}.`,
+    c.card ? block("The plan as the card shows it", c.card) : null,
+    privately ? `The player is talking to you alone. It's your turn, as ${self.name}.` : `It's your turn in the huddle, as ${self.name}.`,
+  ]);
+}
+
+// The Moment AI: the full packet with hidden things marked, live state, the engine's perception facts, and the
+// current conversation (docs/spec/context.md §2). No intent: it answers and plays people, it doesn't pace.
+export function momentInput(env, c, schema) {
+  const { people, clock, opening } = env.packet;
+  return compose([
+    ...campaign(env, "moment", schema),
+    block("Characters", sheets(env)),
+    block("The encounter", { people, clock, map: mapFor(env.packet) }),
+    block("Opening description", opening),
+    block("Right now", c.now),
+    block("What the party could see and hear (from the engine)", c.perception),
+    c.fight ? block("The fight", { rule: combatRule, strike: strike.effect, ...c.fight }) : null,
+    c.draft ? block("The plan the player is drafting", c.draft) : null,
+    c.recent?.length ? block("Recent exchanges", c.recent) : null,
+    block(c.to === "dm" ? "The player asks the DM" : `The player is talking to ${c.to}`, c.conversation),
+    c.fight ? "Run this round of the fight." : "Answer the player.",
   ]);
 }
 
@@ -270,7 +351,7 @@ const GAP = {
   grate: "an iron grate with gaps about three inches across",
   drain: "a drain opening about three inches across",
 };
-export function rulingInput(env, { who, connection, by }) {
+export function rulingInput(env, { who, connection, by, canon = [] }) {
   const { things, zones } = env.packet.map;
   const sheet = (id) => {
     const t = things.find((x) => x.id === id);
@@ -284,7 +365,7 @@ export function rulingInput(env, { who, connection, by }) {
     block("The thing", sheet(who)),
     block("The opening", { name: c.name ?? c.kind, between: c.between.map(zone), roughly: GAP[c.kind] ?? `an opening about ${SPAN[c.fits]}` }),
     by && by !== who ? block("Who's doing it", sheet(by)) : null,
-    block("Canon so far", []),
+    block("Canon so far", canon),
   ]
     .filter(Boolean)
     .join("\n\n");
