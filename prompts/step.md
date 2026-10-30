@@ -11,7 +11,7 @@ Timing and conditions go in only where the player wrote them: "while he's at the
 One step is one zone traversal or one distinct action that takes time. Things different characters do at the same time share a step. Restating or elaborating doesn't make a new step.
 
 Effects are state changes in the operation language: moves, items changing hands, flags. Use only ids from the packet.
-- **A move's path** lists the zones it passes into, in order, ending at the destination: a rat leaving the middle cell for the guardroom by the gutter is `["gutter", "guardroom"]`. Where two connections join the same two zones, name the connection instead of the zone. At most two entries; a longer journey is more than one step. Whoever moves, and whatever they carry, has to fit through each connection.
+- **Which way is the player's call.** Give a move or hand-off a `path` only when the player said which way: "down the gutter" from the middle cell to the guardroom is `["gutter", "guardroom"]`, the zones entered in order. Otherwise leave the path out, and the engine finds a way that fits.
 - **Flags** use only keys the packet already uses. A new fact with no such key ("the bars are bent apart") is canon: `add_canon`.
 
 ## The map is complete

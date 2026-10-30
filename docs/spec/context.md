@@ -57,6 +57,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Moment | `sample.json` | off | `default` |
 | Companion | `sample.json` | off | `default` |
 | Campfire | `sample.json` | off | `complex` |
+| Ruling | `sample.json` | on | `quick` |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same state and plan get the same ruling, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.

@@ -251,3 +251,13 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 **Decided:** A connection with a `locked` flag can give `fits_unlocked`: the biggest size that passes once it's unlocked. While it's locked, `fits` applies. A barred cell door `fits` small (a rat slips between the bars) and `fits_unlocked` medium (a person walks out).
 **Why:** The bench's fit check found that the Cells packet's cell doors let a rat through and never a person, even unlocked: one size can't describe both the gaps in a door and the doorway.
 **Rules out:** Treating an unlocked door as having no size limit.
+
+### D54. The engine finds the way unless the player names it
+**Decided:** Refines D51. A step's move or hand-off carries a `path` only when the player said which way ("down the gutter"). Otherwise the step call leaves it out, and the engine takes the shortest route that everyone moving, and everything they carry, fits through. A route longer than two crossings is more than one step, and goes back to the step call.
+**Why:** On the bench, when the plan didn't say which way, the step call routed the iron key ring through the rat-sized gutter in most runs, and its retries split the plan into eleven steps. Finding a route that fits is computation (principle 2); which way to go is the player's call (D35).
+**Rules out:** The step call choosing routes the player didn't.
+
+### D55. When a named route doesn't fit, the DM rules on it
+**Decided:** When a route the player named fails the engine's size check, the engine asks the ruling call one neutral question: can this thing pass through that connection, in this case? It sees the two descriptions, the sizes, who is doing it and the canon so far, and nothing about the plan. A yes becomes a canon ruling, and the engine lets that thing through that connection from then on. A no leaves the step as written, and reality interrupts it when it's reached (D36).
+**Why:** Sizes are four coarse categories, and the fiction is finer (a sack of gear can be passed through bars an item at a time). Asking the plan's own calls invites motivated reasoning; a question with no plan attached doesn't. The thing's own description still wins: the Cells' key ring is written as too big for the gutter.
+**Rules out:** Treating the size categories as the last word; letting the step or pricing call overrule them.

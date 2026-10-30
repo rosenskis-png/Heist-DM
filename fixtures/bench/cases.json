@@ -1639,7 +1639,6 @@
    "draft": {
     "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go."
    },
-   "runs": 10,
    "look_for": "Each catches holes only some of the time, the ones her hunch points at more often.",
    "flaws": [
     {
@@ -1669,6 +1668,26 @@
      "misses_of": []
     }
    ]
+  }
+ ],
+ "ruling": [
+  {
+   "id": "keyring_drain",
+   "title": "The key ring through the drain",
+   "who": "keyring",
+   "connection": "drain",
+   "by": "gutter_rats",
+   "look_for": "The ring's own description says it's too big for the gutter, so this should be no.",
+   "expect": "no"
+  },
+  {
+   "id": "sack_bars",
+   "title": "The gear sack through the bars",
+   "who": "gear_sack",
+   "connection": "bars_near",
+   "by": "lyra",
+   "look_for": "A sack of gear can be emptied and passed through bars an item at a time, so the size categories are too coarse here: expect yes.",
+   "expect": "yes"
   }
  ]
 }

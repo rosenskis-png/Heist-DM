@@ -56,6 +56,41 @@ function knownClock(clock) {
 // Compact JSON: indentation would cost about a third more input on every call.
 const block = (title, body) => `## ${title}\n\n${typeof body === "string" ? body : "```json\n" + JSON.stringify(body) + "\n```"}`;
 
+// The schema as compact type notation: the same contract at about a quarter of the size of JSON Schema.
+// `T[]` is a list, `a?` is optional, `|` separates alternatives; named types are defined below the root.
+export function shapeText(schema) {
+  const { $defs = {}, ...root } = schema;
+  const named = { id: "a lowercase id like cell_far", ref: "an id, or @self or @step_zone", text: "a non-empty string" };
+  const queue = [];
+  const t = (s) => {
+    if (s.$ref) {
+      const n = s.$ref.replace("#/$defs/", "");
+      if (!queue.includes(n)) queue.push(n);
+      return n;
+    }
+    if (s.const !== undefined) return JSON.stringify(s.const);
+    if (s.enum) return s.enum.map((v) => JSON.stringify(v)).join(" | ");
+    if (s.oneOf || s.anyOf) return (s.oneOf ?? s.anyOf).map(t).join(" | ");
+    if (s.prefixItems) return `[${s.prefixItems.map(t).join(", ")}]`;
+    if (s.type === "array") {
+      const inner = t(s.items);
+      const range = s.maxItems ? ` (${s.minItems ?? 0}–${s.maxItems})` : s.minItems ? ` (at least ${s.minItems})` : "";
+      return `${/[ |]/.test(inner) && !/^[{[]/.test(inner) ? `(${inner})` : inner}[]${range}`;
+    }
+    if (s.type === "object" && s.properties)
+      return `{ ${Object.entries(s.properties).map(([k, v]) => `${k}${s.required?.includes(k) ? "" : "?"}: ${t(v)}`).join(", ")} }`;
+    if (s.type === "integer") return s.minimum != null ? `integer ≥ ${s.minimum}${s.maximum != null ? ` and ≤ ${s.maximum}` : ""}` : "integer";
+    if (Array.isArray(s.type)) return s.type.join(" | ");
+    return s.type ?? "any";
+  };
+  const lines = [`The answer: ${t(root)}`];
+  for (let i = 0; i < queue.length; i++) {
+    const n = queue[i];
+    lines.push(`${n} = ${named[n] ?? t($defs[n])}`);
+  }
+  return "`T[]` is a list of T, `key?` is optional, `|` separates alternatives. No other keys are allowed.\n\n" + lines.join("\n");
+}
+
 // Keep only the $defs a schema actually reaches, so a call isn't sent definitions it can't use.
 export function pruned(schema) {
   const { $defs, ...root } = schema;
@@ -84,7 +119,7 @@ function campaign(env, call, schema) {
   return [
     block("How this game is written", env.prompts.style),
     block("Your job", promptFor(env.prompts[call], env.act)),
-    block("Output format (JSON Schema)", pruned(schema)),
+    block("Output format", shapeText(schema)),
   ];
 }
 
@@ -177,4 +212,26 @@ Messages:
 ${said.map((m, i) => `[${i}] ${m ?? "(says nothing)"}`).join("\n")}
 
 Return only JSON: {"caught": [[ids for message 0], [ids for message 1], ...]}, one list per message, in order.`;
+}
+
+// One neutral question about fit (D55): the two things involved and canon, never the plan.
+export function rulingInput(env, { who, connection, by }) {
+  const { things, zones } = env.packet.map;
+  const sheet = (id) => {
+    const t = things.find((x) => x.id === id);
+    if (t) return { id, name: t.name, size: t.size, description: t.properties };
+    const p = env.party.find((x) => x.id === id);
+    return { id, name: p?.name ?? id, size: "medium" };
+  };
+  const c = env.connections.get(connection);
+  const zone = (id) => zones.find((z) => z.id === id)?.name ?? id;
+  return [
+    env.prompts.ruling,
+    block("The thing", sheet(who)),
+    block("The connection", { id: c.id, name: c.name ?? c.kind, kind: c.kind, between: c.between.map(zone), fits: c.fits }),
+    by && by !== who ? block("Who's doing it", sheet(by)) : null,
+    block("Canon so far", []),
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }

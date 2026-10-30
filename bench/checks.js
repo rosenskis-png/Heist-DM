@@ -33,32 +33,54 @@ function leaks(node, terms) {
 
 const SIZES = ["tiny", "small", "medium", "large"];
 
-// Plays a plan's moves and handoffs forward from the packet's start, the way the engine will (D51,
-// engine.md §2): each path entry is one crossing, named by the zone entered or by the connection.
-export function moveProblems(steps, env) {
-  const pos = new Map(Object.entries(env.positions));
+// Plays a plan's moves and hand-offs forward from the packet's start, the way the engine will. A path the player
+// named is followed and checked for fit (D51); without one, the shortest route everything fits through is taken
+// (D54). Returns problems as {text, fit}: `fit` marks a named route that failed only on size, which goes to the
+// ruling call (D55) rather than back to the step call.
+export function moveProblems(steps, env, exceptions = new Set()) {
+  const pos = new Map([...env.thingZone, ...Object.entries(env.positions)]);
   const holder = new Map(env.holders);
   const size = new Map();
   const locked = new Map([...env.connections].map(([id, c]) => [id, c.flags?.locked === true]));
   const fitsOf = (c) => (!locked.get(c.id) && c.fits_unlocked ? c.fits_unlocked : c.fits);
-  const zoneOf = (id) => pos.get(id) ?? env.thingZone.get(id) ?? (holder.has(id) ? zoneOf(holder.get(id)) : undefined);
+  const zoneOf = (id) => (holder.has(id) ? zoneOf(holder.get(id)) : pos.get(id));
   const sizeOf = (id) => size.get(id) ?? env.thingSize.get(id) ?? "medium";
   const carried = (id) => [...holder].filter(([, h]) => h === id).map(([item]) => item);
+  const passes = (m, c) => SIZES.indexOf(sizeOf(m)) <= SIZES.indexOf(fitsOf(c)) || exceptions.has(`${m}|${c.id}`);
   const problems = [];
-  const cross = (label, from, path, to, movers) => {
-    if (path.length > 2) problems.push(`${label}: ${path.length} crossings in one move`);
+  const route = (from, to, movers) => {
+    const seen = new Map([[from, []]]);
+    const queue = [from];
+    while (queue.length) {
+      const here = queue.shift();
+      if (here === to) return seen.get(here);
+      for (const c of env.connections.values()) {
+        if (!c.between.includes(here) || !movers.every((m) => passes(m, c))) continue;
+        const next = c.between.find((z) => z !== here);
+        if (!seen.has(next)) seen.set(next, [...seen.get(here), c.id]), queue.push(next);
+      }
+    }
+    return null;
+  };
+  const go = (label, from, path, to, movers) => {
+    if (!path) {
+      const found = route(from, to, movers);
+      if (!found) return problems.push({ text: `${label}: no way from ${from} to ${to} that ${movers.join(" and ")} fit through` });
+      if (found.length > 2) problems.push({ text: `${label}: ${from} to ${to} is ${found.length} crossings; one step covers at most two` });
+      return;
+    }
+    if (path.length > 2) problems.push({ text: `${label}: ${path.length} crossings in one move` });
     let here = from;
     for (const p of path) {
-      const named = env.connections.get(p);
-      const conn = named ?? env.connectionBetween(here, p);
-      if (!conn || !conn.between.includes(here)) return problems.push(`${label}: no way from ${here} into ${p}`);
+      if (p === here) continue; // a connection followed by the zone it leads into names one crossing twice
+      const conn = env.connections.get(p) ?? env.connectionBetween(here, p);
+      if (!conn || !conn.between.includes(here)) return problems.push({ text: `${label}: no way from ${here} into ${p}` });
       for (const m of movers)
-        if (SIZES.indexOf(sizeOf(m)) > SIZES.indexOf(fitsOf(conn)))
-          problems.push(`${label}: ${m} (${sizeOf(m)}) doesn't fit through ${conn.id} (${fitsOf(conn)})`);
-      here = named ? conn.between.find((z) => z !== here) : p;
+        if (!passes(m, conn))
+          problems.push({ text: `${label}: ${m} (${sizeOf(m)}) doesn't fit through ${conn.id} (${fitsOf(conn)})`, fit: { who: m, connection: conn.id, by: movers[0] } });
+      here = conn.between.find((z) => z !== here);
     }
-    if (path.length && here !== to) problems.push(`${label}: the path ends in ${here}, not ${to}`);
-    if (!path.length && from !== to && !env.connectionBetween(from, to)) problems.push(`${label}: ${to} isn't next to ${from}`);
+    if (here !== to) problems.push({ text: `${label}: the path ends in ${here}, not ${to}` });
   };
   for (const s of steps)
     for (const op of s.effects ?? []) {
@@ -68,12 +90,13 @@ export function moveProblems(steps, env) {
       if (k === "set_flag" && v.key === "size") size.set(v.entity, v.value);
       if (k === "set_flag" && v.key === "locked" && locked.has(v.entity)) locked.set(v.entity, v.value === true);
       if (k === "move" && pos.has(v.entity)) {
-        cross(`step ${s.n}, ${v.entity}`, pos.get(v.entity), v.path ?? [], v.to, [v.entity, ...carried(v.entity)]);
+        go(`step ${s.n}, ${v.entity}`, pos.get(v.entity), v.path, v.to, [v.entity, ...carried(v.entity)]);
         pos.set(v.entity, v.to);
       }
       if (k === "give") {
         const from = zoneOf(v.item);
-        if (v.path && from) cross(`step ${s.n}, ${v.item}`, from, v.path, zoneOf(v.to) ?? v.to, [v.item]);
+        const dest = zoneOf(v.to) ?? v.to;
+        if (from && from !== dest) go(`step ${s.n}, ${v.item}`, from, v.path, dest, [v.item]);
         holder.set(v.item, v.to);
       }
     }
@@ -100,7 +123,7 @@ export function stepChecks(out, c, env) {
   const ifs = steps.filter((s) => s.if).length;
   const [lo, hi] = c.expect.steps;
   const badIds = unknownIds(steps, env.ids);
-  const badMoves = moveProblems(steps, env);
+  const badMoves = moveProblems(steps, env, env.exceptions).map((p) => p.text);
   const badFlags = unknownFlags(steps, env);
   return [
     check("Timing kept as written", whens === c.expect.whens ? true : false, `${whens} timed steps; the player wrote ${c.expect.whens}`),
@@ -218,4 +241,8 @@ export function engineFacts(packet, party) {
       return [a?.combat, a?.noncombat].find((x) => x?.id === ability)?.declared?.effects ?? [];
     },
   };
+}
+
+export function rulingChecks(out, c) {
+  return [{ name: "Ruled as expected", ok: out.answer === c.expect ? true : false, detail: `${out.answer} (expected ${c.expect})` }];
 }

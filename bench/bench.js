@@ -2,7 +2,7 @@
 // cases in fixtures/bench/cases.json through `sample`, shows each call's input and output, and saves every
 // run and note to the artifact's db so the design thread can read them.
 import { validate } from "../src/validate.js";
-import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema } from "../schemas/index.js";
+import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, rulingSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import * as A from "./assemble.js";
@@ -41,15 +41,16 @@ const KINDS = [
   { id: "world", label: "World", schema: worldSchema },
   { id: "narration", label: "Narration", schema: narrationSchema },
   { id: "huddle", label: "Huddle", schema: companionSchema, call: "companion" },
+  { id: "ruling", label: "Rulings", schema: rulingSchema },
 ];
+const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling"];
 const TIERS = ["quick", "default", "complex"];
-const settings = store.get("bench.settings", {
-  runs: 5,
-  tiers: { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", grader: "quick" },
-});
+const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", ruling: "quick", grader: "quick" };
+const settings = store.get("bench.settings", { runs: 3, tiers: {} });
+settings.tiers = { ...DEFAULT_TIERS, ...settings.tiers };
 const saveSettings = () => store.set("bench.settings", settings);
 
-let env, sample, db;
+let env, sample, db, version;
 const results = {}; // case key -> runs, newest first
 let controller = new AbortController();
 
@@ -57,11 +58,14 @@ let controller = new AbortController();
 
 async function load() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-  const [packet, cases, ...prompts] = await Promise.all([
-    text("fixtures/cells/packet.json").then(JSON.parse),
-    text("fixtures/bench/cases.json").then(JSON.parse),
-    ...["style", "step", "pricing", "world", "narration", "companion"].map((n) => text(`prompts/${n}.md`)),
-  ]);
+  const sources = ["fixtures/cells/packet.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
+  const code = ["bench/assemble.js", "bench/checks.js"];
+  const texts = await Promise.all([...sources, ...code].map(text));
+  const [packet, cases] = texts.slice(0, 2).map(JSON.parse);
+  const prompts = texts.slice(2, sources.length);
+  // The bench version: a fingerprint of every prompt, case and check, so runs from older versions can be told apart.
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(texts.join("\0")));
+  version = [...new Uint8Array(digest).slice(0, 4)].map((b) => b.toString(16).padStart(2, "0")).join("");
   const cls = classes[cases.player_class];
   const party = [{ id: "player", name: cls.name, role: "The player", skills: cls.mods, abilities: cls.abilities }];
   for (const id of cases.party.filter((p) => p !== "player"))
@@ -74,7 +78,8 @@ async function load() {
     act: cases.act,
     party,
     companions: party.slice(1),
-    prompts: Object.fromEntries(["style", "step", "pricing", "world", "narration", "companion"].map((n, i) => [n, prompts[i]])),
+    prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])),
+    exceptions: new Set(),
     ids: new Set([...map.zones, ...map.connections, ...map.things, ...map.facts, ...people, ...party].map((x) => x.id).concat("party")),
     connections: new Map(map.connections.map((c) => [c.id, c])),
     people: new Set(people.map((p) => p.id)),
@@ -106,7 +111,14 @@ async function ask(input, schema, tier, engine = () => []) {
   const opts = () => ({ modelTier: tier, cache: false, signal: controller.signal });
   return slot(async () => {
     const t0 = performance.now();
-    let out = await sample.json(input, opts());
+    // One backoff on rate_limited, never a loop.
+    const call = (x) =>
+      sample.json(x, opts()).catch(async (e) => {
+        if (e?.code !== "rate_limited") throw e;
+        await new Promise((r) => setTimeout(r, 15000));
+        return sample.json(x, opts());
+      });
+    let out = await call(input);
     let errors = validate(schema, out);
     if (!errors.length) errors = engine(out);
     let retried = false;
@@ -117,9 +129,9 @@ async function ask(input, schema, tier, engine = () => []) {
       const turns = [
         { role: "user", content: input },
         { role: "assistant", content: JSON.stringify(out) },
-        { role: "user", content: `That doesn't match the schema:\n${errors.slice(0, 20).join("\n")}\nReturn the corrected JSON object only.` },
+        { role: "user", content: `That has problems:\n${errors.slice(0, 20).join("\n")}\nReturn the corrected JSON object only.` },
       ];
-      out = await sample.json(turns, opts());
+      out = await call(turns);
       errors = validate(schema, out);
       if (!errors.length) errors = engine(out);
     }
@@ -132,26 +144,50 @@ const errorText = (e) => (e?.code ? `${e.code}: ${e.message}` : String(e?.messag
 async function runOne(kind, c) {
   const k = KINDS.find((x) => x.id === kind);
   const tier = settings.tiers[k.call ?? kind];
-  const run = { kind, case: c.id, tier, at: Date.now() };
+  const run = { kind, case: c.id, tier, at: Date.now(), version };
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
     const input = A[`${kind}Input`](env, c, k.schema);
+    // A named route that fails only on size goes to the ruling call (D55), not back to the step call.
     const engine =
       kind === "step"
-        ? (o) => [...C.moveProblems(o.steps, env), ...C.unknownFlags(o.steps, env).map((f) => `unknown flag ${f}`)]
+        ? (o) => [
+            ...C.moveProblems(o.steps, env).filter((p) => !p.fit).map((p) => p.text),
+            ...C.unknownFlags(o.steps, env).map((f) => `unknown flag ${f}`),
+          ]
         : kind === "world"
           ? (o) => C.unknownFlags(o.actions, env).map((f) => `unknown flag ${f}`)
           : undefined;
     const r = await ask(input, k.schema, tier, engine);
     Object.assign(run, r, { input });
+    if (kind === "step" && !r.errors.length) run.rulings = await rule(C.moveProblems(r.out.steps, env).filter((p) => p.fit));
     if (r.errors.length) run.checks = [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }];
     else if (kind === "pricing") Object.assign(run, C.pricingChecks(r.out, c, env));
     else run.checks = C[`${kind}Checks`](r.out, c, env);
+    for (const x of run.rulings ?? []) run.checks.push({ name: `Ruling: ${x.who} through ${x.connection}`, ok: "info", detail: `${x.answer}: ${x.text}` });
     run.checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
   } catch (e) {
     run.error = errorText(e);
   }
   return run;
+}
+
+// Size conflicts on named routes, each put to the ruling call as one neutral question (D55).
+async function rule(fits) {
+  const seen = new Set();
+  const out = [];
+  for (const { fit } of fits) {
+    const key = `${fit.who}|${fit.connection}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    try {
+      const r = await ask(A.rulingInput(env, fit), rulingSchema, settings.tiers.ruling);
+      out.push({ ...fit, ...r.out });
+    } catch (e) {
+      out.push({ ...fit, answer: "error", text: errorText(e) });
+    }
+  }
+  return out;
 }
 
 // The huddle: each companion in turn sees the one candidate picked for the companion before her (D40).
@@ -336,6 +372,7 @@ function readable(kind, c, run) {
   }
   if (kind === "world")
     return h("ul", { class: "acts" }, (o.actions ?? []).length ? o.actions.map((a) => h("li", {}, h("b", {}, a.npc), ` ${a.because}`, h("code", {}, JSON.stringify(a.ops)))) : h("li", {}, "Nobody acts."));
+  if (kind === "ruling") return h("p", { class: "prose" }, h("b", {}, `${o.answer}: `), o.text);
   if (kind === "narration")
     return h("div", { class: "prose" }, (o.text ?? "").split(/\n+/).map((p) => h("p", {}, p)), o.texture?.length ? h("p", { class: "texture" }, `Texture: ${o.texture.join(" · ")}`) : null);
   return null;
@@ -365,8 +402,10 @@ function huddleView(c, run) {
 
 function renderRuns(kind, c, ui) {
   const runs = results[`${kind}-${c.id}`] ?? [];
-  ui.summary.replaceChildren(...summarize(runs));
-  const table = c.flaws ? flawTable(c, runs) : null;
+  // Only runs from this version of the bench count; older ones stay visible, dimmed.
+  const now = runs.filter((r) => r.version === version);
+  ui.summary.replaceChildren(...summarize(now), ...(now.length < runs.length ? [h("span", { class: "status" }, `${runs.length - now.length} from older versions`)] : []));
+  const table = c.flaws ? flawTable(c, now) : null;
   ui.flaws.replaceChildren(...(table ? [table] : []));
   ui.runs.replaceChildren(
     ...runs.map((run, i) => {
@@ -374,7 +413,7 @@ function renderRuns(kind, c, ui) {
         "summary",
         {},
         h("span", { class: "rn" }, `#${runs.length - i}`),
-        h("span", { class: "meta" }, `${run.tier} · ${run.ms ? (run.ms / 1000).toFixed(0) + "s" : "–"} · ${run.inputChars ? (run.inputChars / 1024).toFixed(0) + " KB in" : ""}${run.saved ? " · saved" : ""}`),
+        h("span", { class: "meta" }, `${run.tier} · ${run.ms ? (run.ms / 1000).toFixed(0) + "s" : "–"} · ${run.inputChars ? (run.inputChars / 1024).toFixed(0) + " KB in" : ""}${run.version !== version ? " · older version" : ""}`),
         run.error ? chip(false, "error") : h("span", { class: "dots" }, (run.checks ?? []).filter((x) => x.ok !== "info").map((x) => h("i", { class: x.ok === true ? "ok" : x.ok === "near" ? "near" : "bad", title: x.name }))),
       );
       const body = run.error
@@ -388,20 +427,20 @@ function renderRuns(kind, c, ui) {
             run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
             run.out ? fold("Raw output", json(run.out)) : null,
           );
-      return h("details", { class: "run", open: i === 0 && !run.saved }, head, body);
+      return h("details", { class: `run${run.version !== version ? " old" : ""}`, open: i === 0 && !run.saved }, head, body);
     }),
   );
 }
 
 function caseCard(kind, c) {
-  const n = c.runs ?? settings.runs;
+  const n = settings.runs;
   const ui = {
     status: h("span", { class: "status" }),
     summary: h("div", { class: "summary" }),
     flaws: h("div"),
     runs: h("div", { class: "runs" }),
   };
-  ui.button = h("button", { class: "run-btn", onclick: () => runCase(kind, c, c.runs ?? settings.runs, ui) }, `Run ×${n}`);
+  ui.button = h("button", { class: "run-btn", onclick: () => runCase(kind, c, settings.runs, ui) }, `Run ×${n}`);
   const notes = h("textarea", { id: `note-${kind}-${c.id}`, rows: 2, placeholder: "Notes for the design thread (saved)" });
   let t;
   notes.addEventListener("input", () => {
