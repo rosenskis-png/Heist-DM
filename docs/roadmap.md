@@ -8,7 +8,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 ## Phase 0: Restructure (no game code)
 
-- [x] Tag the old layout `design-archive`.
+- [x] Preserve the old layout on branch `design-archive` (commit `53a65be`).
 - [x] Move every fact to a single home: `docs/principles.md`, `docs/decisions.md`, `docs/spec/`, `docs/design/`, `fixtures/`, `content/`.
 - [x] Fix inconsistencies in the Cells walkthrough: Card 1's timing (D16) and the horn vs. war drum mix-up.
 - [x] Extract the content into `content/` and verify it against the original (D6).
@@ -21,7 +21,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 Write down what each part promises, precisely enough to build against.
 
-- An output schema and validation rules for each of the 8 calls (`docs/spec/calls/`). v3's schemas (card, execution, moment, companion; at tag `design-archive`) are useful starting points; strip anything D4 removed.
+- An output schema and validation rules for each of the 8 calls (`docs/spec/calls/`). v3's schemas (card, execution, moment, companion; on branch `design-archive`) are useful starting points; strip anything D4 removed.
 - The condition language and the state-change operations (D17; drafts in `docs/spec/engine.md`).
 - The schedule, meter and reaction formats.
 - The geometry format (D9).

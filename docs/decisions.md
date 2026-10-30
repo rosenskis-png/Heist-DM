@@ -4,7 +4,7 @@ An append-only log of settled decisions. Each entry says what was decided, why, 
 
 When a decision is made, the spec is updated in the same commit. Open questions live in `docs/roadmap.md`, never here.
 
-The design as it stood before the restructure (specs v3 and v4, the engine brief, the original encounter design guide) is preserved at git tag `design-archive`.
+The design as it stood before the restructure (specs v3 and v4, the engine brief, the original encounter design guide) is preserved on branch `design-archive` (commit `53a65be`).
 
 ---
 

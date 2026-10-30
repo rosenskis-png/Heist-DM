@@ -54,7 +54,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `prompts/` | One prompt per AI call (from Phase 2) |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
-The design before this layout (specs v3 and v4, the engine brief) is preserved at git tag `design-archive`.
+The design before this layout (specs v3 and v4, the engine brief) is preserved on branch `design-archive` (commit `53a65be`).
 
 ## Status
 
