@@ -13,7 +13,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 - [x] Fix inconsistencies in the Cells walkthrough: Card 1's timing (D16) and the horn vs. war drum mix-up.
 - [x] Extract the content into `content/` and verify it against the original (D6).
 - [x] Add a readable copy of Gravenhold's code and a map of it in `legacy/README.md`.
-- [ ] **Runtime check** (D12): a multi-file artifact loads ES modules and data files, and `sample.json` works. A check page has been published; it needs one click from someone signed in to claude.ai.
+- [ ] **Runtime check** (D12): a multi-file artifact loads ES modules and data files, and `sample.json` works. A check page is published at https://claude.ai/artifact/NagBL673dCymHK5NLdZkBM (private to the owner). Open it signed in and press "Run the Claude call"; all four rows should read Passed.
 
 **Exit:** every fact has one home; nothing in `docs/` contradicts `docs/spec/`; content matches the original.
 
