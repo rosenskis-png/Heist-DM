@@ -28,7 +28,7 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 - **One-time events:** fire at a given tick, or when a condition is met.
 - **Projection:** the state at any future tick, as it will really be and as the party expects it to be. The card needs both (§6).
 - **Edits:** meters and triggers can change schedules. At Suspicion 2, Snag's Drink beat is dropped.
-- **Slack** (D41): when a packet is loaded, each event marked `deadline` moves by 10% of its tick per point of the campaign's slack (−2 to +2), rounded to the nearest tick. When an encounter with a deadline ends, slack goes up by 1 after the fail-forward ending or with 15% or less of the deadline to spare, and down by 1 with 50% or more to spare. Nothing moves during an encounter, and the player never sees slack.
+- **Slack** (D41): when a packet is loaded, each event marked `deadline` moves by 2% of its tick per point of the campaign's slack (−10 to +10, so at most ±20%), rounded once to the nearest tick. When an encounter with a deadline ends, slack goes up by 1 after the fail-forward ending or with 15% or less of the deadline to spare, and down by 1 with 50% or more to spare. Nothing moves during an encounter, and the player never sees slack.
 
 ## 4. Meters
 - **A meter has** a scope (one NPC, the encounter, or the campaign), a current value, and a ladder.

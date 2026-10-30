@@ -201,3 +201,7 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 ### D42. A step is priced as if its own preconditions hold
 **Decided:** When a step's preconditions won't hold at its tick (the key ring is on Snag's belt, not the peg), the engine tells the pricing call to price the action as if they did ("as if: the key ring is on the peg"), in an internal `as_if` list on the step's facts. "Fern, as a rat, pulls the key ring off the peg" is priced as exactly that. The impossibility shows up only in execution, as an interruption (D36).
 **Why:** The price is for the action. A band that says "impossible" because of something the card doesn't otherwise mention would be a warning in disguise.
+
+### D43. Slack runs from −10 to +10, in 2% steps
+**Decided:** Supersedes the numbers in D41 (its rules stay). Slack runs from −10 to +10, each point moves a deadline by 2% of its tick (at most ±20%), and the total is rounded once to the nearest tick. It still changes by 1 per encounter, so reaching either end takes many encounters.
+**Why:** Finer steps and a slower drift, so one good or bad heist nudges the next without a visible swing.

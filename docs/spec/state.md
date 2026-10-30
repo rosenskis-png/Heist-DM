@@ -8,7 +8,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Act,** and the act history.
 - **Invariants:** world facts that never change once they're in play. Each can carry an **act gate**, the first act it applies in (`docs/spec/context.md`). Data: `content/setting.js`.
 - **Two campaign clocks:** alert and days (D21).
-- **Slack:** a hidden −2..+2 that moves the next encounter's deadlines (D41). Never shown.
+- **Slack:** a hidden −10..+10 that moves the next encounter's deadlines (D41). Never shown.
 - **Character sheets:** class or companion abilities with their exact effects, conditions and limits; HP and conditions; ability uses per encounter and per rest. Abilities are exact, conditional and limited, and they're the main way a plan handles a risk.
 - **Companions:** which two are in the party, their relationship state, the pair value, memories and commitments (`docs/spec/companions.md`).
 - **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
