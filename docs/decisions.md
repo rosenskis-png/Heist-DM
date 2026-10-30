@@ -112,3 +112,8 @@ The design as it stood before the restructure (specs v3 and v4, the engine brief
 
 ### D26. Encounter size ceiling
 **Decided:** The engine measures each serialized packet and warns above twice the size of the Cells. An encounter that big is split at a doorway.
+
+### D27. The romance floor stays; the stall floors stay banned
+**Decided:** A companion always plays her fantasy, per her `pursuit`, in every scene, and a dominant companion leads the conversation and the romance. This governs how she talks and pursues, never the plan or the world. "Push the scene forward", "sometimes just act" and "never hand him the floor" stay banned. The craft lives in `docs/design/companion-craft.md`.
+**Why:** Gravenhold's prompt put both kinds under the word "floor", and the restructure banned them together. Only the second kind caused the stalls; the first is part of why the companions worked (D23).
+**Rules out:** Companions acting outside the card or pushing the party to act, and companions who wait passively for the player to start every romantic beat (unless waiting is her declared nature, as with Fern).

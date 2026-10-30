@@ -18,6 +18,7 @@ Don't design from `legacy/`. Use `legacy/README.md` to find what to port and wha
 | A settled decision | A new entry in `docs/decisions.md`, plus the spec change, in the same commit |
 | How the game works now | `docs/spec/`, one home per fact |
 | Encounter design theory | `docs/design/encounter-craft.md` |
+| How to play the companions (tone, romance, table behaviour) | `docs/design/companion-craft.md` |
 | Game data | `content/` |
 | Prompt text | `prompts/<call>.md` |
 | A worked example or test fixture | `fixtures/` |

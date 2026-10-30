@@ -44,7 +44,11 @@ Gravenhold revealed parts of a profile as the relationship grew. Keep that, as e
 | `quest` | from the act before `questAct` |
 | everything else in the profile | always |
 
-**Don't port Gravenhold's instruction prose** (`compBlock`, legacy lines 1851–1970). It mixes character data with "floor" rules ("PURSUIT (her floor, every scene)", "they push the scene forward", "dominant characters take control of scenes"), which are among the rules that caused the stalls. Port the fields; write the judgment fresh in `prompts/companion.md`.
+**Don't port Gravenhold's instruction prose** (`compBlock`, legacy lines 1851–1970). It mixes character data with "floor" rules. Two kinds need separating (D27):
+- **Banned:** "they push the scene forward" and "never hand him the floor". These are among the rules that caused the stalls.
+- **Kept, narrowed:** "PURSUIT (her floor, every scene)" and "dominant characters take control of scenes". She always plays her fantasy, and a dominant companion leads the conversation and the romance, never the plan or the world.
+
+Port the fields; write the judgment fresh in `prompts/companion.md`, drawing on `docs/design/companion-craft.md`.
 
 ## 4. Relationship model
 
