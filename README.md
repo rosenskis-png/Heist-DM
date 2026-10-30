@@ -64,4 +64,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 2: Judgment test bench,** in progress: the prompts in `prompts/` and the bench page in `bench/`. See `docs/roadmap.md`.
+**Phase 2: Judgment test bench,** done: the prompts in `prompts/` and the bench page in `bench/`. **Phase 3: Engine core** is next. See `docs/roadmap.md`.
