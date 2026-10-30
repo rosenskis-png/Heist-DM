@@ -5,7 +5,7 @@
 **Sees:** the "Pricing" column of `docs/spec/context.md` §2, including the engine's facts for each step: the foreseen ones it prices, and, separately, the projected arrivals the party doesn't foresee.
 
 ## Price the plan the party expects (D36)
-Each step is priced at its own honest odds, **as the party expects the world to be**: against the observers, barriers and hazards the party foresees, and as if the step's preconditions hold. "She picks the vault lock" is priced as picking the lock, even if a guard the party doesn't know about is about to walk in. That guard interrupts the plan during execution; he never changes the price.
+Each step is priced at its own honest odds, **as the party expects the world to be**: against the observers, barriers and hazards the party foresees, and as if the step's preconditions hold. Where they won't, the engine says what to assume in the step's `as_if` (D42): "Fern, as a rat, pulls the key ring off the peg" is priced as exactly that, as if the ring were on the peg, even though at that tick it's on Snag's belt. "She picks the vault lock" is priced as picking the lock, even if a guard the party doesn't know about is about to walk in. That guard interrupts the plan during execution; he never changes the price.
 
 The card never tells the player a plan will go wrong. A bad plan shows up as honest bands on the dangers the party can see, and as interruptions when it meets the ones it can't.
 

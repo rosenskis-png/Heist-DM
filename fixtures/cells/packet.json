@@ -10,7 +10,7 @@
     "fail_forward": {
       "id": "fern_taken",
       "label": "Uzga takes Fern upstairs at the watch change; Act 2 opens as a rescue",
-      "condition": { "all": [{ "tick": [">=", 21] }, { "in_zone": ["fern", "cell_middle"] }] }
+      "condition": { "all": [{ "flag": ["uzga", "arrived", true] }, { "in_zone": ["fern", "cell_middle"] }] }
     },
     "optional": [
       { "id": "gear", "label": "Recover the gear sack", "condition": { "holds": ["party", "gear_sack"] } }
@@ -174,7 +174,7 @@
   },
   "clock": {
     "events": [
-      { "id": "uzga_arrives", "known": true, "at_tick": 21, "do": [{ "then": [{ "move": { "entity": "uzga", "to": "guardroom" } }] }] }
+      { "id": "uzga_arrives", "known": true, "deadline": true, "at_tick": 21, "do": [{ "then": [{ "move": { "entity": "uzga", "to": "guardroom" } }, { "set_flag": { "entity": "uzga", "key": "arrived", "value": true } }] }] }
     ],
     "meters": [
       {

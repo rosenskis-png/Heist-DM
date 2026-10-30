@@ -24,13 +24,13 @@ export const stepSchema = withDefs({
         n: { type: "integer", minimum: 1 },
         ...action,
         // Timing and conditions come only from the player's words (D35). Without `when`, a step happens
-        // right after the previous one.
+        // right after the previous one. A party member must be able to perceive a condition when it's checked (D39).
         when: obj(["until"], {
-          until: r("condition"),
+          until: r("plan_condition"),
           // The longest the actors wait before the plan stops. The engine's default applies if absent.
           max_wait: { type: "integer", minimum: 1 },
         }),
-        if: r("condition"),
+        if: r("plan_condition"),
         // What happens when `if` is false at the step's tick: nothing, the plan stops, or another action.
         otherwise: { oneOf: [{ enum: ["skip", "stop"] }, obj(actionFields, action)] },
       }),

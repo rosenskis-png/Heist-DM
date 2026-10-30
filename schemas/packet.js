@@ -104,6 +104,8 @@ const event = obj(["id", "do"], {
   id: r("id"),
   // Whether the party knows it's coming (Uzga's arrival is announced in the opening).
   known: { type: "boolean" },
+  // A deadline: its tick moves with the campaign's slack before the encounter starts (D41).
+  deadline: { type: "boolean" },
   at_tick: { type: "integer", minimum: 0 },
   when: r("condition"),
   do: list(r("rule"), 1),

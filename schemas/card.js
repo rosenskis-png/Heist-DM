@@ -39,12 +39,26 @@ export const cardSchema = withDefs({
         observers: list(r("id")),
         barriers: list(r("id")),
         hazards: list(r("id")),
+        // Internal, never shown: the step's own preconditions the pricing call must assume hold ("the key ring
+        // is on the peg"), because the price is for the action, not for whether it's possible (D42).
+        as_if: list(r("text")),
         // Internal, never shown: where reality is projected to differ from what the party expects. During
         // execution the plan stops there (docs/spec/engine.md §6).
         interrupts: list(
           obj(["code", "detail"], {
             code: {
-              enum: ["arrival", "not_there", "too_big", "locked", "requires_failed", "ability_spent", "trigger_fires", "hidden_fact", "wait_expired"],
+              enum: [
+                "arrival",
+                "not_there",
+                "too_big",
+                "locked",
+                "requires_failed",
+                "ability_spent",
+                "trigger_fires",
+                "hidden_fact",
+                "wait_expired",
+                "cant_perceive",
+              ],
             },
             // The step effect it stops at; absent when it stops the step before it begins.
             effect: { type: "integer", minimum: 0 },

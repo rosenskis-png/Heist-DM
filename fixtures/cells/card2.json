@@ -74,11 +74,11 @@
     "internal_checks": []
   },
   "facts": [
-    { "n": 1, "tick": 0, "beats": { "snag": "drink" }, "route": ["cell_middle"], "observers": [], "barriers": [], "hazards": [], "interrupts": [] },
-    { "n": 2, "tick": 1, "beats": { "snag": "pace" }, "route": ["cell_middle", "gutter", "guardroom"], "observers": [], "barriers": [], "hazards": [], "interrupts": [] },
-    { "n": 3, "tick": 2, "beats": { "snag": "sit" }, "route": ["cell_brannoc", "guardroom"], "observers": ["snag"], "barriers": [], "hazards": [], "interrupts": [] },
-    { "n": 4, "tick": 3, "beats": { "snag": "drink" }, "route": ["guardroom", "corridor", "cell_near"], "observers": ["snag"], "barriers": [], "hazards": [], "interrupts": [] },
-    { "n": 5, "tick": 4, "beats": { "snag": "pace" }, "route": ["cell_near", "corridor"], "observers": ["snag"], "barriers": ["bars_near", "bars_middle", "bars_far", "bars_brannoc"], "hazards": [], "interrupts": [] }
+    { "n": 1, "tick": 0, "beats": { "snag": "drink" }, "route": ["cell_middle"], "observers": [], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 2, "tick": 1, "beats": { "snag": "pace" }, "route": ["cell_middle", "gutter", "guardroom"], "observers": [], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 3, "tick": 2, "beats": { "snag": "sit" }, "route": ["cell_brannoc", "guardroom"], "observers": ["snag"], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 4, "tick": 3, "beats": { "snag": "drink" }, "route": ["guardroom", "corridor", "cell_near"], "observers": ["snag"], "barriers": [], "hazards": [], "as_if": [], "interrupts": [] },
+    { "n": 5, "tick": 4, "beats": { "snag": "pace" }, "route": ["cell_near", "corridor"], "observers": ["snag"], "barriers": ["bars_near", "bars_middle", "bars_far", "bars_brannoc"], "hazards": [], "as_if": [], "interrupts": [] }
   ],
   "pricing_call": {
     "steps": [

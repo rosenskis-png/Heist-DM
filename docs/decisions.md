@@ -178,3 +178,26 @@ Seeing and hearing stay authored per observer and beat. There is no ray casting.
 **Decided:** The companion call no longer receives the draft card. Companions react to a plan only when it comes up in the huddle. Each companion file has a `planning` block: what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Her ideas come quickly and through that bias: often imperfect, occasionally right, never an audit. The craft is in `docs/design/companion-craft.md` §6.
 **Why:** A model given the draft card and the facts will catch nearly every hole, which makes the companions a filtered oracle and turns the huddle into a free plan-checker. The fun of the huddle is talking through imperfect plans together, with everyone pointing out flaws and improving them.
 **Rules out:** Sending the draft card to companion calls; companions as advisors who always know best, and as foils who are always wrong.
+
+### D39. Someone in the party has to perceive a condition
+**Decided:** A plan's `when` or `if` is checked only if a party member can see or hear what it's about at that moment. The whisper rings make sharing free, so it can be anyone in the party. If no one can, the plan is interrupted there (`cant_perceive`): "I can't see into the vault. Can anyone?" The player can prevent that by asking the Moment AI first ("from the doorway, could she see into the vault?"), which answers from the map's sight facts, free and without a roll. Plan conditions can't name things no one could ever perceive (meters, the engine's own bookkeeping); the schema rules them out (`plan_condition`). Party perception rules: `docs/spec/engine.md` §2.
+**Why:** Evaluating conditions against the true state let characters act on things nobody could see. Settles the Phase 3 question raised with D35.
+
+### D40. Companions see what the player sees, and say one of three things
+**Decided:** Supersedes the part of D38 that kept the draft card from companions. Companions see everything the player sees: the DM's narration, the draft card (the plan being written, with redirected steps and pending stances) and the card as shown once it's priced. In the huddle, the companion call returns three genuinely different things she might say, each with any stance it takes, and the engine picks one at random. A pass can be one of the three. Her `planning` block (D38) still shapes all three.
+**Why:** Since D36 the shown card holds only what the party foresees, so seeing it no longer makes her an oracle. What made her too reliable was being asked for her single best answer. Picking one of three makes whether she catches a given hole a matter of chance, weighted by her biases, the way it is with a real friend at the table. The occasional perfect idea still turns up, as one of the three.
+**Rules out:** Hiding from companions anything the player can see.
+
+### D41. Hidden slack moves deadlines between encounters
+**Decided:** The campaign keeps a hidden `slack` value from −2 (tight) to +2 (loose), starting at 0. When an encounter with a deadline ends, the engine compares the ticks to spare with the deadline:
+- the fail-forward ending, or 15% or less to spare: slack +1;
+- 50% or more to spare: slack −1;
+- anything in between: no change.
+
+When the next packet is loaded, each event marked `deadline` moves by 10% of its tick per point of slack, rounded to the nearest tick. Nothing moves once an encounter has started. All thresholds are starting values.
+**Why:** A well-run heist earns a tighter next one, and a rough one a little more room, without either running away. It's applied before play, so every deadline is still written down before the encounter starts (`docs/design/encounter-craft.md` §4.5). It's code computing a number between encounters, not a pacing rule inside one.
+**Rules out:** Moving a deadline during an encounter; showing slack to the player.
+
+### D42. A step is priced as if its own preconditions hold
+**Decided:** When a step's preconditions won't hold at its tick (the key ring is on Snag's belt, not the peg), the engine tells the pricing call to price the action as if they did ("as if: the key ring is on the peg"), in an internal `as_if` list on the step's facts. "Fern, as a rat, pulls the key ring off the peg" is priced as exactly that. The impossibility shows up only in execution, as an interruption (D36).
+**Why:** The price is for the action. A band that says "impossible" because of something the card doesn't otherwise mention would be a warning in disguise.

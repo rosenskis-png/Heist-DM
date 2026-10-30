@@ -15,7 +15,10 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 - **Fit:** an actor or thing crosses a connection only if its size (`tiny` < `small` < `medium` < `large`) is no bigger than the connection's `fits`. People are `medium` unless a flag says otherwise (Fern as a rat is `tiny`).
 - **Routing on the zone graph:** routes and travel time in ticks; whether a zone is reachable given the current connection flags; which side a barrier can be operated from.
 - **Observers per step:** every NPC who, at the step's tick, is in a zone on the step's route, sees one, or hears one at the step's noise level or louder (`silent` < `quiet` < `speech` < `loud`). Senses come from the NPC's sheet or current beat, edited by meters. Example: at Suspicion 1, Snag can see the far cell's back corner. The route is every zone an actor or moved thing occupies during the step.
-- **The perceivable set:** what the party can perceive right now. This is what the companions and the map are given.
+- **The perceivable set:** what the party can perceive right now, pooled across party members (the whisper rings make sharing free). This is what the companions and the map are given, and what a plan's conditions are checked against (D39). Each member:
+  - **sees** their own zone and any zone joined to it by a `see_through` connection or an open one, if that zone isn't `dark` (or the member has the `sees_in_dark` trait);
+  - **hears** their own zone, and speech or louder in any zone joined to it by a connection (with `hears_through_walls`, any zone that shares a wall with theirs);
+  - perceives an NPC's beat if they can see the NPC or hear its cue.
 - **What the party knows:** everything it has perceived or learned, plus the routines and events marked `known` in the packet or revealed in play. Foreseen observers on the card come from this (§6).
 
 ## 3. Time and schedules
@@ -25,6 +28,7 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 - **One-time events:** fire at a given tick, or when a condition is met.
 - **Projection:** the state at any future tick, as it will really be and as the party expects it to be. The card needs both (§6).
 - **Edits:** meters and triggers can change schedules. At Suspicion 2, Snag's Drink beat is dropped.
+- **Slack** (D41): when a packet is loaded, each event marked `deadline` moves by 10% of its tick per point of the campaign's slack (−2 to +2), rounded to the nearest tick. When an encounter with a deadline ends, slack goes up by 1 after the fail-forward ending or with 15% or less of the deadline to spare, and down by 1 with 50% or more to spare. Nothing moves during an encounter, and the player never sees slack.
 
 ## 4. Meters
 - **A meter has** a scope (one NPC, the encounter, or the campaign), a current value, and a ladder.
@@ -45,22 +49,24 @@ The card prices the plan the party expects; reality interrupts it (D36).
 1. **Validate the step call's output:**
    - every move follows a connection;
    - every id is real;
-   - every `when` and `if` refers only to things the party knows, including learned routines (D35).
+   - every `when` and `if` is a `plan_condition` (only things someone could perceive, D39) and refers only to things the party knows, including learned routines (D35).
 2. **Project each step.** Each step is projected as if the earlier steps went as planned:
    - **its tick:** right after the previous step, or, with a `when`, the first tick its condition holds, waiting at most `max_wait` ticks (default 6);
    - **its route,** and the barriers it crosses;
+   - **`as_if`** (internal): the step's own preconditions that won't hold at that tick, written as what the pricing call should assume instead ("the key ring is on the peg"; D42);
    - **foreseen observers and hazards:** those the party knows will be there at that tick (NPCs it knows of, on routines and events it knows). Observers include anyone who perceives the actors while they wait;
-   - **interrupts** (internal): where reality is projected to differ from what the party expects. An NPC the party didn't foresee would see or hear the step (`arrival`); an effect can't happen at that tick (the keys aren't on the peg, the ring is too big for the gutter); a hidden fact defeats it; a trigger fires first; a wait runs out.
+   - **interrupts** (internal): where reality is projected to differ from what the party expects. An NPC the party didn't foresee would see or hear the step (`arrival`); an effect can't happen at that tick (the keys aren't on the peg, the ring is too big for the gutter); a hidden fact defeats it; a trigger fires first; a wait runs out; no one can perceive a `when` or `if` when it's checked.
 3. **Check the pricing call's output.**
-   - Every step is priced, including steps with interrupts, as if their preconditions held.
+   - Every step is priced, including steps with interrupts, as if their preconditions held (`as_if`).
    - Every foreseen observer, barrier and hazard has a priced risk or a named mitigation, and nothing else is priced. Anything uncovered is sent back.
    - Every `arrival` has a warning band.
    - A shown reason or failure summary that names something the party doesn't know is sent back.
-4. **Strip the internal fields** (interrupts, internal checks, warnings) before the card is shown.
+4. **Strip the internal fields** (`as_if`, interrupts, internal checks, warnings) before the card is shown.
 5. **Execute each step in order:**
    - apply the tick's schedules (each beat's `on_start` rules), meters and triggers;
    - if the step has a `when` that doesn't hold yet, the actors wait: the tick passes and the line above repeats. If `max_wait` runs out first, the plan is interrupted (`wait_expired`);
    - evaluate its `if`; when it's false, apply `otherwise`: skip the step, stop the plan, or run the alternative instead;
+   - a `when` or `if` is checked only if someone in the party can perceive what it's about at that tick (§2). If no one can, the plan is interrupted (`cant_perceive`) instead of guessing;
    - **interrupt before the step begins** if something the card didn't foresee would perceive it, a trigger has fired that changes the situation, or an internal check reveals a hidden fact. For an arrival, roll the warning: on a success, the party's next plan gets one step before it lands (the arrival resolves at the end of that tick instead of the start); on a failure, it lands as the scene opens. An arrival the card never projected (the world changed mid-plan) rolls at Medium;
    - skip risks whose conditions no longer hold;
    - roll the remaining risks;

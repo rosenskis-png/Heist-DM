@@ -64,6 +64,14 @@ test("timing on the cards refers only to routines the party knows", () => {
   }
 });
 
+test("a plan's conditions can't name what no one could perceive", () => {
+  const card = load("card2.json");
+  const bad = structuredClone(card.step_call);
+  bad.steps[0].when = { until: { meter: ["suspicion", "=", 0] } };
+  assert.notDeepEqual(validate(schemas.stepSchema, bad), []);
+  valid(schemas.stepSchema, card.step_call);
+});
+
 test("the expected results are valid", () => {
   for (const file of ["card1.results.json", "card2.results.json"]) for (const run of load(file)) valid(schemas.resultsSchema, run);
 });

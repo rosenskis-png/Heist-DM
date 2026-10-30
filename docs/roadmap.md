@@ -36,7 +36,7 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 **Exit:**
 - The Cells tests in `fixtures/cells/walkthrough.md` pass in 5 of 5 runs: a card on turn one; Card 1 priced as the party expects, with nothing the party doesn't foresee leaking into its bands or reasons; Card 2 about two Easy rolls, with the player's timing kept and none added.
 - Three plans the docs never mention (the bench-nail lockpick, bending the bars, bribing Snag through Brannoc) get fair prices.
-- Fern and Lyra read like Gravenhold's companions, and in a huddle about a plan each catches some holes and misses others, the way her `planning` block predicts (D38).
+- Fern and Lyra read like Gravenhold's companions. Shown the same flawed plan ten times, each catches its holes some of the time, the ones her `planning` block predicts more often (D38, D40), and her three candidates are genuinely different takes.
 - Model tiers are chosen (D15).
 
 **Open questions**
@@ -48,9 +48,6 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 Pure ES modules tested with `node --test`, with a seeded random number generator. Validation against the contracts already exists (`src/validate.js`); the engine adds the consistency checks in `docs/spec/packet.md` and everything in `docs/spec/engine.md`.
 
 **Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly.
-
-**Open questions**
-1. **Whose eyes a condition is checked with.** A `when` or `if` ("if the vault is empty") is evaluated against the true state, and the step call may only write conditions about what the party knows (D35). But the acting character may not be able to see the thing at that moment. *Recommendation:* keep the true state for now; if playtests show characters acting on things they couldn't see, evaluate a condition only when its subject is in the actor's perceivable set, and treat it as false otherwise.
 
 ## Phase 4: The Cells, playable
 

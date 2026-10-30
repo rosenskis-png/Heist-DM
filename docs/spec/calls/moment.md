@@ -6,6 +6,7 @@
 
 ## Behaviour
 - **Searching a specific spot always rolls,** whether or not anything is there, so a roll is never a tell.
+- **"Could she see that from there?"** Questions about what a character could see or hear from a place are answered from the engine's perception facts (`docs/spec/engine.md` §2), straight, with no roll and no time. That's how a player makes sure a plan's conditions will be perceivable (D39).
 - **Checks in one call:** the check (skill, difficulty band, reason) comes back with both the success and the failure narration, and the engine shows the one that matches the roll.
 - **Plays NPCs** from their sheets. Uncertain persuasion, deception or intimidation becomes a check.
 - **Redirects** any action that moves the party or changes the world to the draft card.

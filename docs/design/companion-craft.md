@@ -96,7 +96,7 @@ The huddle should feel like "what do you think, guys? How should we do this?" Ev
 - **She thinks quickly, through her own bias.** Her `planning` block says what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Ruby has a sharp sense of when to strike and doesn't think about what the noise does to the rest of the plan. Nadia tracks a patrol's rhythm like music and rarely thinks of a fight as a step.
 - **Her plans are usually imperfect,** in the ways her bias predicts. Sometimes she's exactly right. She is never an audit, never an oracle, and never a fool who can't plan at all.
 - **She catches the holes her character would care about,** and walks right past the others. Lyra notices who gets left behind and who can hear; Fern notices what the rats would want.
-- **She reacts to what's said in the huddle.** She doesn't see the draft card (D38), so she isn't checking the plan line by line. If the player asks what she thinks, she answers as herself.
+- **She thinks out loud, not on the record.** She sees the draft and the card like everyone at the table, but she gives a quick take, not a review. Each time, she offers three different things she might say and one is picked at random (D40), so she catches a given hole some of the time, the way a friend does.
 - **The two companions improve each other's ideas,** and contradict them, as much as the player's.
 
 ### What to keep, and what is banned

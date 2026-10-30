@@ -26,8 +26,8 @@ Prompts are always ordered campaign → encounter → live. `sample` gives no pr
 | State, canon, event log | full | full | full | full | full | known only |
 | Engine route and observer facts | — | ✓, foreseen and unforeseen kept apart (D36) | — | — | — | — |
 | Table read | — | — | ✓ | — | — | — |
-| Card | plan + decided stances | validated steps (internal facts kept apart) | results | results + world actions | draft | pending stances only (D38) |
-| Recent raw exchanges | few | — | — | few | current conversation | visible huddle this encounter |
+| Card | plan + decided stances | validated steps (internal facts kept apart) | results | results + world actions | draft | draft and card as shown (D40) |
+| Recent raw exchanges | few | — | — | few | current conversation | visible huddle this encounter, plus recent narration the party witnessed |
 | Huddle content | — | — | — | — | — | own channels |
 | Companion secrets and relationships | — | — | — | — | — | own only, gated (`docs/spec/companions.md`) |
 

@@ -31,7 +31,7 @@ As data: `packet.json`. The two cards below: `card1.json` and `card2.json`, with
 | NPC | Wants | Fears | Knows | Will never |
 |---|---|---|---|---|
 | **Snag**, goblin jailer | a quiet shift, his ale, to win at bones against himself | Sergeant Uzga, and above all being blamed | the ale crawl behind the cask; which key fits which cell | go upstairs to report a problem himself; fight loose prisoners alone (he goes for the drum, and if the drum is useless, he bargains) |
-| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 21 for Fern |
+| **Uzga**, hobgoblin sergeant | tribute delivered on time | Warchief Grizzak | — | tolerate a sloppy jailer. **Schedule:** comes down at tick 21 for Fern (before slack, D41) |
 | **Brannoc**, human miner in the cell opposite | out | being left behind | Snag's routine (a week of watching); where the occupiers dig at the sacred spring; that Snag comes back from his breaks smelling of wet stone | keep quiet if they leave him: "Take me, or I tell the sergeant everything I saw." He also has a hoard of crusts |
 
 **Snag's cycle.** One plan step is one tick, and the cycle repeats every three ticks.

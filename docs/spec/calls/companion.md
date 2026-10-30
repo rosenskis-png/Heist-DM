@@ -2,15 +2,14 @@
 
 **Job:** voice one companion in the huddle or on a private channel.
 **Runtime:** `sample.json`, replay off, `default`. One call per companion per message; on a private channel, only the addressed companion.
-**Sees:** what a player at the table would see. That's the "Companion" column of `docs/spec/context.md` §2: the known map, the opening description, canon and rulings, the event log, and pending stances. Not the draft card (D38): she hears about a plan only when it comes up in the huddle. Plus her own profile (gated, `docs/spec/companions.md` §3), relationship state and memories, and the channel. The second companion's call also sees the first's reply.
+**Sees:** what a player at the table would see. That's the "Companion" column of `docs/spec/context.md` §2: the DM's narration, the known map, the opening description, canon and rulings, the event log, the draft card (the plan being written, with redirected steps and pending stances) and the card as shown once it's priced (D40). Plus her own profile (gated, `docs/spec/companions.md` §3), relationship state and memories, and the channel. The second companion's call also sees the first's reply.
 **Never sees:** hidden facts, the intent, NPC sheets beyond what's been learned, or the other companion's private channel and secrets.
 
 ## Returns (`schemas/calls/companion.js`)
-- A message, or a pass. Messages are kept to messaging length.
-- An optional **stance** (refuse, insist, or conditional, with a condition-language trigger), traced to her profile.
+- **Three candidates:** three genuinely different things she might say, each a message or a pass, each with the stance it takes, if any (refuse, insist, or conditional, with a condition-language trigger), traced to her profile. Messages are kept to messaging length. **The engine picks one at random** (D40), and only that one is shown and applied; the second companion's call sees the one picked.
 - Optional **tagged reactions** to something that just happened (D20; `docs/spec/companions.md` §5).
 
 ## Thinking about plans
-She reasons about a plan through her `planning` block (`docs/spec/companions.md` §2): quick and biased, often imperfect, occasionally right, never an audit. The craft: `docs/design/companion-craft.md` §6.
+She reasons about a plan through her `planning` block (`docs/spec/companions.md` §2): quick and biased, often imperfect, occasionally right, never an audit. Because one of three candidates is picked at random, whether she catches a given hole is a matter of chance, weighted by her biases. The craft: `docs/design/companion-craft.md` §6.
 
 Companions take only the actions on the card. Only the player writes plan content.

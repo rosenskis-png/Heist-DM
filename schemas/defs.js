@@ -39,6 +39,25 @@ const condition = {
   ],
 };
 
+// The conditions a player can write into a plan (D35, D39): only things a party member could see or hear,
+// plus the time. Meters, `noticed_by` and step tags are the engine's own bookkeeping and can't be perceived.
+const planCondition = {
+  oneOf: [
+    atom("all", { type: "array", minItems: 1, items: { $ref: "#/$defs/plan_condition" } }),
+    atom("any", { type: "array", minItems: 1, items: { $ref: "#/$defs/plan_condition" } }),
+    atom("not", { $ref: "#/$defs/plan_condition" }),
+    atom("in_zone", tuple(ref, id)),
+    atom("party_all_in", id),
+    atom("holds", tuple(ref, id)),
+    atom("flag", tuple(ref, id, scalar)),
+    atom("tick", tuple(compare, { type: "integer" })),
+    atom("beat", tuple(id, id)),
+    atom("revealed", id),
+    atom("hp_below", tuple(ref, { type: "integer" })),
+    atom("disposition", tuple(id, id)),
+  ],
+};
+
 const op = (name, required, properties) =>
   atom(name, { type: "object", required, additionalProperties: false, properties });
 
@@ -134,6 +153,7 @@ export const defs = {
   ref,
   text,
   condition,
+  plan_condition: planCondition,
   operation,
   rule,
   hearing,

@@ -312,6 +312,7 @@
       "observers": [],
       "barriers": [],
       "hazards": [],
+      "as_if": [],
       "interrupts": []
     },
     {
@@ -330,6 +331,9 @@
       ],
       "barriers": [],
       "hazards": [],
+      "as_if": [
+        "The key ring is on the peg."
+      ],
       "interrupts": [
         {
           "code": "not_there",
@@ -355,6 +359,7 @@
       ],
       "barriers": [],
       "hazards": [],
+      "as_if": [],
       "interrupts": []
     },
     {
@@ -378,6 +383,7 @@
         "bars_brannoc"
       ],
       "hazards": [],
+      "as_if": [],
       "interrupts": []
     },
     {
@@ -396,6 +402,7 @@
       ],
       "barriers": [],
       "hazards": [],
+      "as_if": [],
       "interrupts": [
         {
           "code": "trigger_fires",
@@ -417,6 +424,7 @@
       "observers": [],
       "barriers": [],
       "hazards": [],
+      "as_if": [],
       "interrupts": []
     }
   ],
