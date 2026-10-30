@@ -10,7 +10,7 @@ Most of it comes from Gravenhold's DM prompt (`RULES`, legacy lines 1640–1720)
 
 ## 1. Tone, for every call
 
-Until Phase 2 writes the shared style guide, this section is its seed.
+This section is the source of the shared style guide, `prompts/style.md`.
 
 - **What the game is.** A wish-fulfilment romantic fantasy in the tradition of the great RPG companion romances, as emotionally intense and satisfying as possible. It sits on top of genuinely challenging, logical gameplay where the party depends on each other.
 - **Who the companions are.** Fully realised adult women with their own agendas.

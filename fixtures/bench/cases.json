@@ -1,0 +1,1578 @@
+{
+ "about": "Phase 2 bench cases (docs/roadmap.md). Plans, hand-computed engine facts, scenes and what to look for. The bench runs the real prompts on these.",
+ "packet": "cells",
+ "act": 1,
+ "party": [
+  "player",
+  "fern",
+  "lyra"
+ ],
+ "player_class": "rogue",
+ "hidden_terms": [
+  "crawl",
+  "cistern"
+ ],
+ "step": [
+  {
+   "id": "card1",
+   "title": "The rat plan, as written",
+   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
+   "stances": [
+    {
+     "companion": "lyra",
+     "kind": "insist",
+     "text": "We take the miner with us.",
+     "decision": "resolved"
+    },
+    {
+     "companion": "fern",
+     "kind": "conditional",
+     "text": "I won't help kill anyone who doesn't need killing.",
+     "trigger": {
+      "step_tagged": "lethal"
+     },
+     "decision": "keep"
+    }
+   ],
+   "tick": 0,
+   "look_for": "A literal translation: no timing, no waits, no conditions. The hole stays in.",
+   "expect": {
+    "whens": 0,
+    "ifs": 0,
+    "steps": [
+     4,
+     7
+    ]
+   }
+  },
+  {
+   "id": "card2",
+   "title": "The rat plan, with the player's timing",
+   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
+   "stances": [
+    {
+     "companion": "lyra",
+     "kind": "insist",
+     "text": "We take the miner with us.",
+     "decision": "resolved"
+    },
+    {
+     "companion": "fern",
+     "kind": "conditional",
+     "text": "I won't help kill anyone who doesn't need killing.",
+     "trigger": {
+      "step_tagged": "lethal"
+     },
+     "decision": "keep"
+    }
+   ],
+   "tick": 0,
+   "look_for": "Exactly the player's three timings (his drink, his sit, his next drink), nothing added.",
+   "expect": {
+    "whens": 3,
+    "ifs": 0,
+    "steps": [
+     4,
+     6
+    ]
+   }
+  },
+  {
+   "id": "nail",
+   "title": "Bench-nail lockpick",
+   "plan": "While Snag is at the cask, I pry a nail out of the bench. The next time he's at the cask, I pick my lock with it.",
+   "stances": [
+    {
+     "companion": "lyra",
+     "kind": "insist",
+     "text": "We take the miner with us.",
+     "decision": "resolved"
+    },
+    {
+     "companion": "fern",
+     "kind": "conditional",
+     "text": "I won't help kill anyone who doesn't need killing.",
+     "trigger": {
+      "step_tagged": "lethal"
+     },
+     "decision": "keep"
+    }
+   ],
+   "tick": 0,
+   "expect": {
+    "whens": 2,
+    "ifs": 0,
+    "steps": [
+     2,
+     2
+    ]
+   }
+  },
+  {
+   "id": "bars",
+   "title": "Bending the bars",
+   "plan": "While Snag's at the cask, Lyra puts her back to the wall and her boots to the bars, and bends two of them apart far enough to slip out.",
+   "stances": [
+    {
+     "companion": "lyra",
+     "kind": "insist",
+     "text": "We take the miner with us.",
+     "decision": "resolved"
+    },
+    {
+     "companion": "fern",
+     "kind": "conditional",
+     "text": "I won't help kill anyone who doesn't need killing.",
+     "trigger": {
+      "step_tagged": "lethal"
+     },
+     "decision": "keep"
+    }
+   ],
+   "tick": 0,
+   "expect": {
+    "whens": 1,
+    "ifs": 0,
+    "steps": [
+     1,
+     2
+    ]
+   }
+  },
+  {
+   "id": "bribe",
+   "title": "Bribing Snag through Brannoc",
+   "plan": "When Snag sits down, Brannoc calls him over and makes him an offer: let us out, and we'll tie him up so it looks like we overpowered him. Uzga can't blame him for that.",
+   "stances": [
+    {
+     "companion": "lyra",
+     "kind": "insist",
+     "text": "We take the miner with us.",
+     "decision": "resolved"
+    },
+    {
+     "companion": "fern",
+     "kind": "conditional",
+     "text": "I won't help kill anyone who doesn't need killing.",
+     "trigger": {
+      "step_tagged": "lethal"
+     },
+     "decision": "keep"
+    }
+   ],
+   "tick": 0,
+   "expect": {
+    "whens": 1,
+    "ifs": 0,
+    "steps": [
+     1,
+     2
+    ]
+   }
+  }
+ ],
+ "pricing": [
+  {
+   "id": "card1",
+   "title": "Card 1: the rat plan, as written",
+   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
+   "step_call": {
+    "steps": [
+     {
+      "n": 1,
+      "summary": "Fern changes into a rat.",
+      "actors": [
+       "fern"
+      ],
+      "zone": "cell_middle",
+      "noise": "silent",
+      "uses": [
+       {
+        "kind": "ability",
+        "id": "wildshape",
+        "actor": "fern"
+       }
+      ],
+      "effects": [
+       {
+        "use_ability": {
+         "actor": "fern",
+         "ability": "wildshape"
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 2,
+      "summary": "Fern slips through her bars, runs to the guardroom and takes the keys off the peg.",
+      "actors": [
+       "fern"
+      ],
+      "zone": "guardroom",
+      "noise": "quiet",
+      "effects": [
+       {
+        "move": {
+         "entity": "fern",
+         "to": "guardroom",
+         "path": [
+          "bars_middle",
+          "doorway"
+         ]
+        }
+       },
+       {
+        "give": {
+         "item": "keyring",
+         "to": "fern"
+        }
+       }
+      ],
+      "tags": [
+       "theft"
+      ]
+     },
+     {
+      "n": 3,
+      "summary": "Fern drags the ring down the corridor to the far cell.",
+      "actors": [
+       "fern"
+      ],
+      "zone": "cell_far",
+      "noise": "speech",
+      "effects": [
+       {
+        "move": {
+         "entity": "fern",
+         "to": "cell_far",
+         "path": [
+          "doorway",
+          "bars_far"
+         ]
+        }
+       },
+       {
+        "give": {
+         "item": "keyring",
+         "to": "player"
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 4,
+      "summary": "The rogue unlocks the far door through the bars, steps out and lets everyone out, Brannoc too.",
+      "actors": [
+       "player",
+       "fern",
+       "lyra",
+       "brannoc"
+      ],
+      "zone": "corridor",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "keyring"
+       }
+      ],
+      "effects": [
+       {
+        "set_flag": {
+         "entity": "bars_far",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "move": {
+         "entity": "player",
+         "to": "corridor",
+         "path": [
+          "bars_far"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "fern",
+         "to": "corridor",
+         "path": [
+          "bars_far"
+         ]
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_middle",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_near",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_brannoc",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "move": {
+         "entity": "lyra",
+         "to": "corridor",
+         "path": [
+          "bars_near"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "brannoc",
+         "to": "corridor",
+         "path": [
+          "bars_brannoc"
+         ]
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 5,
+      "summary": "Everyone goes through the guardroom to the foot of the stair.",
+      "actors": [
+       "player",
+       "fern",
+       "lyra",
+       "brannoc"
+      ],
+      "zone": "stair",
+      "noise": "quiet",
+      "effects": [
+       {
+        "move": {
+         "entity": "player",
+         "to": "stair",
+         "path": [
+          "doorway",
+          "stair_foot"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "fern",
+         "to": "stair",
+         "path": [
+          "doorway",
+          "stair_foot"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "lyra",
+         "to": "stair",
+         "path": [
+          "doorway",
+          "stair_foot"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "brannoc",
+         "to": "stair",
+         "path": [
+          "doorway",
+          "stair_foot"
+         ]
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 6,
+      "summary": "Up the stair and through the heavy door.",
+      "actors": [
+       "player",
+       "fern",
+       "lyra",
+       "brannoc"
+      ],
+      "zone": "stair_top",
+      "noise": "quiet",
+      "effects": [
+       {
+        "move": {
+         "entity": "player",
+         "to": "stair_top",
+         "path": [
+          "stair_flight"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "fern",
+         "to": "stair_top",
+         "path": [
+          "stair_flight"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "lyra",
+         "to": "stair_top",
+         "path": [
+          "stair_flight"
+         ]
+        }
+       },
+       {
+        "move": {
+         "entity": "brannoc",
+         "to": "stair_top",
+         "path": [
+          "stair_flight"
+         ]
+        }
+       }
+      ],
+      "tags": []
+     }
+    ],
+    "rulings": [],
+    "internal_checks": []
+   },
+   "facts": [
+    {
+     "n": 1,
+     "tick": 0,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_middle"
+     ],
+     "observers": [],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "beats": {
+      "snag": "pace"
+     },
+     "route": [
+      "cell_middle",
+      "corridor",
+      "guardroom"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [
+      "The key ring is on the peg."
+     ],
+     "interrupts": [
+      {
+       "code": "not_there",
+       "id": "keyring",
+       "detail": "At the start of tick 1 (Snag's Pace beat) he lifts the key ring off the peg and clips it to his belt, in plain view of the cells. The party sees the peg is empty before Fern sets off."
+      }
+     ]
+    },
+    {
+     "n": 3,
+     "tick": 2,
+     "beats": {
+      "snag": "sit"
+     },
+     "route": [
+      "guardroom",
+      "corridor",
+      "cell_far"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 4,
+     "tick": 3,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_far",
+      "corridor",
+      "cell_middle",
+      "cell_near",
+      "cell_brannoc"
+     ],
+     "observers": [],
+     "barriers": [
+      "bars_far",
+      "bars_middle",
+      "bars_near",
+      "bars_brannoc"
+     ],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 5,
+     "tick": 4,
+     "beats": {
+      "snag": "pace"
+     },
+     "route": [
+      "corridor",
+      "guardroom",
+      "stair"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": [
+      {
+       "code": "trigger_fires",
+       "id": "snag",
+       "detail": "At the start of tick 4 Snag walks the corridor and sees the open doors (prisoner_loose). The drum is whole, so he goes for it and a fight starts before anyone moves."
+      }
+     ]
+    },
+    {
+     "n": 6,
+     "tick": 5,
+     "beats": {
+      "snag": "sit"
+     },
+     "route": [
+      "stair",
+      "stair_top"
+     ],
+     "observers": [],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    }
+   ],
+   "look_for": "Priced as the party expects: step 2 as if the keys were on the peg. No reason mentions his belt or an empty peg.",
+   "expect": {
+    "bands": [
+     "automatic",
+     "easy",
+     "very_hard",
+     "automatic",
+     "near_impossible",
+     "automatic"
+    ],
+    "leak_terms": {
+     "2": [
+      "belt",
+      "empty",
+      "not on the peg"
+     ],
+     "5": [
+      "drum is whole",
+      "drum still works"
+     ]
+    }
+   }
+  },
+  {
+   "id": "card2",
+   "title": "Card 2: the edited plan",
+   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
+   "step_call": {
+    "steps": [
+     {
+      "n": 1,
+      "summary": "Fern changes into a rat at the back of her cell.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "drink"
+        ]
+       }
+      },
+      "actors": [
+       "fern"
+      ],
+      "zone": "cell_middle",
+      "noise": "silent",
+      "uses": [
+       {
+        "kind": "ability",
+        "id": "wildshape",
+        "actor": "fern"
+       }
+      ],
+      "effects": [
+       {
+        "use_ability": {
+         "actor": "fern",
+         "ability": "wildshape"
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 2,
+      "summary": "Fern goes down the gutter to the guardroom drain.",
+      "actors": [
+       "fern"
+      ],
+      "zone": "guardroom",
+      "noise": "quiet",
+      "effects": [
+       {
+        "move": {
+         "entity": "fern",
+         "to": "guardroom",
+         "path": [
+          "grate_middle",
+          "drain"
+         ]
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 3,
+      "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "sit"
+        ]
+       }
+      },
+      "actors": [
+       "brannoc",
+       "fern"
+      ],
+      "zone": "guardroom",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "crusts"
+       },
+       {
+        "kind": "thing",
+        "id": "gutter_rats"
+       }
+      ],
+      "effects": [
+       {
+        "consume": {
+         "item": "crusts"
+        }
+       },
+       {
+        "give": {
+         "item": "keyring",
+         "to": "fern"
+        }
+       }
+      ],
+      "tags": [
+       "theft"
+      ]
+     },
+     {
+      "n": 4,
+      "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "drink"
+        ]
+       }
+      },
+      "actors": [
+       "fern"
+      ],
+      "zone": "guardroom",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "gutter_rats"
+       }
+      ],
+      "effects": [
+       {
+        "give": {
+         "item": "keyring",
+         "to": "lyra",
+         "path": [
+          "doorway",
+          "bars_near"
+         ]
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "drum",
+         "key": "gnawed",
+         "value": true
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 5,
+      "summary": "Lyra unlocks her door through the bars, steps out, and unlocks the other three.",
+      "actors": [
+       "lyra"
+      ],
+      "zone": "corridor",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "keyring"
+       }
+      ],
+      "effects": [
+       {
+        "set_flag": {
+         "entity": "bars_near",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "move": {
+         "entity": "lyra",
+         "to": "corridor",
+         "path": [
+          "bars_near"
+         ]
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_middle",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_far",
+         "key": "locked",
+         "value": false
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "bars_brannoc",
+         "key": "locked",
+         "value": false
+        }
+       }
+      ],
+      "tags": []
+     }
+    ],
+    "rulings": [],
+    "internal_checks": []
+   },
+   "facts": [
+    {
+     "n": 1,
+     "tick": 0,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_middle"
+     ],
+     "observers": [],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "beats": {
+      "snag": "pace"
+     },
+     "route": [
+      "cell_middle",
+      "gutter",
+      "guardroom"
+     ],
+     "observers": [],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 3,
+     "tick": 2,
+     "beats": {
+      "snag": "sit"
+     },
+     "route": [
+      "cell_brannoc",
+      "guardroom"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 4,
+     "tick": 3,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "guardroom",
+      "corridor",
+      "cell_near"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 5,
+     "tick": 4,
+     "beats": {
+      "snag": "pace"
+     },
+     "route": [
+      "cell_near",
+      "corridor"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [
+      "bars_near",
+      "bars_middle",
+      "bars_far",
+      "bars_brannoc"
+     ],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    }
+   ],
+   "look_for": "About two Easy rolls (steps 3 and 4); step 5 automatic because the drum is gnawed.",
+   "expect": {
+    "bands": [
+     "automatic",
+     "automatic",
+     "easy",
+     "easy",
+     "automatic"
+    ],
+    "leak_terms": {}
+   }
+  },
+  {
+   "id": "nail",
+   "title": "Bench-nail lockpick",
+   "plan": "While Snag is at the cask, I pry a nail out of the bench. The next time he's at the cask, I pick my lock with it.",
+   "step_call": {
+    "steps": [
+     {
+      "n": 1,
+      "summary": "The rogue pries a nail out of the bench.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "drink"
+        ]
+       }
+      },
+      "actors": [
+       "player"
+      ],
+      "zone": "cell_far",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "bench_far"
+       }
+      ],
+      "effects": [
+       {
+        "set_flag": {
+         "entity": "player",
+         "key": "has_nail",
+         "value": true
+        }
+       }
+      ],
+      "tags": []
+     },
+     {
+      "n": 2,
+      "summary": "The rogue reaches through the bars and picks the far cell's lock with the nail.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "drink"
+        ]
+       }
+      },
+      "actors": [
+       "player"
+      ],
+      "zone": "cell_far",
+      "noise": "quiet",
+      "uses": [
+       {
+        "kind": "thing",
+        "id": "bench_far"
+       }
+      ],
+      "effects": [
+       {
+        "set_flag": {
+         "entity": "bars_far",
+         "key": "locked",
+         "value": false
+        }
+       }
+      ],
+      "tags": []
+     }
+    ],
+    "rulings": [
+     {
+      "question": "Can a bench nail pick the cell lock?",
+      "answer": "ruling",
+      "text": "A nail from the bench makes a passable lockpick."
+     }
+    ],
+    "internal_checks": []
+   },
+   "facts": [
+    {
+     "n": 1,
+     "tick": 0,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_far"
+     ],
+     "observers": [],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    },
+    {
+     "n": 2,
+     "tick": 3,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_far"
+     ],
+     "observers": [],
+     "barriers": [
+      "bars_far"
+     ],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    }
+   ],
+   "look_for": "A rogue picking a lock with a nail, unwatched: the designer's gut is about 60% (Medium).",
+   "expect": {
+    "bands": [
+     "automatic",
+     "medium"
+    ],
+    "leak_terms": {}
+   }
+  },
+  {
+   "id": "bars",
+   "title": "Bending the bars",
+   "plan": "While Snag's at the cask, Lyra puts her back to the wall and her boots to the bars, and bends two of them apart far enough to slip out.",
+   "step_call": {
+    "steps": [
+     {
+      "n": 1,
+      "summary": "Lyra braces against the wall and forces two of her bars apart, then slips out into the corridor.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "drink"
+        ]
+       }
+      },
+      "actors": [
+       "lyra"
+      ],
+      "zone": "corridor",
+      "noise": "loud",
+      "effects": [
+       {
+        "set_flag": {
+         "entity": "bars_near",
+         "key": "bent",
+         "value": true
+        }
+       },
+       {
+        "move": {
+         "entity": "lyra",
+         "to": "corridor",
+         "path": [
+          "bars_near"
+         ]
+        }
+       }
+      ],
+      "tags": [
+       "loud"
+      ]
+     }
+    ],
+    "rulings": [],
+    "internal_checks": []
+   },
+   "facts": [
+    {
+     "n": 1,
+     "tick": 0,
+     "beats": {
+      "snag": "drink"
+     },
+     "route": [
+      "cell_near",
+      "corridor"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [
+      "bars_near"
+     ],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    }
+   ],
+   "look_for": "Lyra isn't especially strong, and bending iron is loud with Snag in earshot. The gut for a strong character is about 50% (Hard), so expect harder here.",
+   "expect": {
+    "bands": [
+     "very_hard"
+    ],
+    "leak_terms": {}
+   }
+  },
+  {
+   "id": "bribe",
+   "title": "Bribing Snag through Brannoc",
+   "plan": "When Snag sits down, Brannoc calls him over and makes him an offer: let us out, and we'll tie him up so it looks like we overpowered him. Uzga can't blame him for that.",
+   "step_call": {
+    "steps": [
+     {
+      "n": 1,
+      "summary": "Brannoc calls Snag over to his bars and offers him a deal: open the doors, and the prisoners tie him up so it looks like he was overpowered.",
+      "when": {
+       "until": {
+        "beat": [
+         "snag",
+         "sit"
+        ]
+       }
+      },
+      "actors": [
+       "brannoc"
+      ],
+      "zone": "cell_brannoc",
+      "noise": "speech",
+      "effects": [
+       {
+        "set_disposition": {
+         "npc": "snag",
+         "value": "dealing"
+        }
+       }
+      ],
+      "tags": []
+     }
+    ],
+    "rulings": [],
+    "internal_checks": []
+   },
+   "facts": [
+    {
+     "n": 1,
+     "tick": 2,
+     "beats": {
+      "snag": "sit"
+     },
+     "route": [
+      "cell_brannoc"
+     ],
+     "observers": [
+      "snag"
+     ],
+     "barriers": [],
+     "hazards": [],
+     "as_if": [],
+     "interrupts": []
+    }
+   ],
+   "look_for": "The offer speaks to what Snag fears most (blame), but it's a prisoner talking. The gut for a charismatic character is about 70% (Medium).",
+   "expect": {
+    "bands": [
+     "medium"
+    ],
+    "leak_terms": {}
+   }
+  }
+ ],
+ "world": [
+  {
+   "id": "card2_done",
+   "title": "After card 2 succeeds",
+   "results": [
+    {
+     "n": 1,
+     "tick": 0,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 3,
+     "tick": 2,
+     "outcome": "done",
+     "rolls": [
+      {
+       "risk": "ring_lift",
+       "odds": 80,
+       "roll": 34,
+       "success": true
+      }
+     ]
+    },
+    {
+     "n": 4,
+     "tick": 3,
+     "outcome": "done",
+     "rolls": [
+      {
+       "risk": "drum_gnaw",
+       "odds": 80,
+       "roll": 52,
+       "success": true
+      }
+     ]
+    },
+    {
+     "n": 5,
+     "tick": 4,
+     "outcome": "done",
+     "rolls": [],
+     "triggers": [
+      "peg_empty",
+      "prisoner_loose"
+     ]
+    }
+   ],
+   "state": {
+    "tick": 5,
+    "beat": {
+     "snag": "sit"
+    },
+    "positions": {
+     "player": "corridor",
+     "fern": "guardroom",
+     "lyra": "corridor",
+     "brannoc": "corridor",
+     "snag": "corridor"
+    },
+    "held": {
+     "keyring": "lyra",
+     "crusts": null
+    },
+    "flags": {
+     "drum.gnawed": true,
+     "fern.form": "animal",
+     "bars_far.locked": false,
+     "bars_middle.locked": false,
+     "bars_near.locked": false,
+     "bars_brannoc.locked": false
+    },
+    "meters": {
+     "suspicion": 0
+    },
+    "dispositions": {
+     "snag": "bargaining"
+    },
+    "triggers_fired": [
+     "peg_empty",
+     "prisoner_loose"
+    ]
+   },
+   "table": {
+    "plans_committed": 1,
+    "expected_plans": [
+     1,
+     3
+    ],
+    "rolls": [
+     "easy: success",
+     "easy: success"
+    ],
+    "landed": [],
+    "player_said": [
+     "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too."
+    ]
+   },
+   "look_for": "Snag acts from his sheet: the drum is useless, so he bargains. Nothing and nobody new."
+  },
+  {
+   "id": "card2_step3_failed",
+   "title": "After card 2's step 3 fails",
+   "results": [
+    {
+     "n": 1,
+     "tick": 0,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 3,
+     "tick": 2,
+     "outcome": "stopped",
+     "rolls": [
+      {
+       "risk": "ring_lift",
+       "odds": 80,
+       "roll": 95,
+       "success": false
+      }
+     ],
+     "triggers": [
+      "noise_heard",
+      "keys_touched"
+     ]
+    }
+   ],
+   "state": {
+    "tick": 3,
+    "beat": {
+     "snag": "drink"
+    },
+    "positions": {
+     "player": "cell_far",
+     "fern": "guardroom",
+     "lyra": "cell_near",
+     "brannoc": "cell_brannoc",
+     "snag": "guardroom"
+    },
+    "held": {
+     "keyring": "snag",
+     "crusts": "brannoc"
+    },
+    "flags": {
+     "fern.form": "animal",
+     "snag.keys_on_belt": true
+    },
+    "meters": {
+     "suspicion": 1
+    },
+    "dispositions": {
+     "snag": "bored"
+    },
+    "triggers_fired": [
+     "noise_heard",
+     "keys_touched"
+    ]
+   },
+   "table": {
+    "plans_committed": 1,
+    "expected_plans": [
+     1,
+     3
+    ],
+    "rolls": [
+     "easy: failure"
+    ],
+    "landed": [
+     "Snag swatted the rats and clipped the ring to his belt."
+    ],
+    "player_said": [
+     "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too."
+    ]
+   },
+   "look_for": "A believable response from a lazy, now slightly suspicious jailer. The triggers already ran; nothing new appears."
+  }
+ ],
+ "narration": [
+  {
+   "id": "card1_interrupted",
+   "title": "Card 1 is interrupted (the empty peg)",
+   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
+   "results": [
+    {
+     "n": 1,
+     "tick": 0,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "outcome": "interrupted",
+     "rolls": [],
+     "interrupt": {
+      "code": "not_there",
+      "id": "keyring",
+      "detail": "Snag lifts the ring off the peg and clips it to his belt as he starts his round. Everyone in the cells sees the peg go empty."
+     }
+    }
+   ],
+   "world": {
+    "actions": []
+   },
+   "state": {
+    "tick": 1,
+    "beat": {
+     "snag": "pace"
+    },
+    "positions": {
+     "player": "cell_far",
+     "fern": "cell_middle",
+     "lyra": "cell_near",
+     "brannoc": "cell_brannoc",
+     "snag": "corridor"
+    },
+    "held": {
+     "keyring": "snag"
+    },
+    "flags": {
+     "fern.form": "animal"
+    }
+   },
+   "look_for": "The interruption gets its moment: the instant the party sees the peg go empty, how it lands, where everyone is. A picture, not a survey. No hidden things."
+  },
+  {
+   "id": "card2_done",
+   "title": "Card 2 succeeds and Snag bargains",
+   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
+   "results": [
+    {
+     "n": 1,
+     "tick": 0,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 2,
+     "tick": 1,
+     "outcome": "done",
+     "rolls": []
+    },
+    {
+     "n": 3,
+     "tick": 2,
+     "outcome": "done",
+     "rolls": [
+      {
+       "risk": "ring_lift",
+       "odds": 80,
+       "roll": 34,
+       "success": true
+      }
+     ]
+    },
+    {
+     "n": 4,
+     "tick": 3,
+     "outcome": "done",
+     "rolls": [
+      {
+       "risk": "drum_gnaw",
+       "odds": 80,
+       "roll": 52,
+       "success": true
+      }
+     ]
+    },
+    {
+     "n": 5,
+     "tick": 4,
+     "outcome": "done",
+     "rolls": [],
+     "triggers": [
+      "peg_empty",
+      "prisoner_loose"
+     ]
+    }
+   ],
+   "world": {
+    "actions": [
+     {
+      "npc": "snag",
+      "because": "Under pressure he bargains once the drum is useless, and he fears being blamed more than anything.",
+      "ops": [
+       {
+        "set_disposition": {
+         "npc": "snag",
+         "value": "bargaining"
+        }
+       }
+      ]
+     }
+    ]
+   },
+   "state": {
+    "tick": 5,
+    "beat": {
+     "snag": "sit"
+    },
+    "positions": {
+     "player": "corridor",
+     "fern": "guardroom",
+     "lyra": "corridor",
+     "brannoc": "corridor",
+     "snag": "corridor"
+    },
+    "held": {
+     "keyring": "lyra"
+    },
+    "flags": {
+     "drum.gnawed": true,
+     "fern.form": "animal"
+    }
+   },
+   "look_for": "A short, vivid montage of five steps, then Snag. Easy to picture. No crawl, no cistern."
+  }
+ ],
+ "huddle": [
+  {
+   "id": "opening",
+   "title": "First huddle: any ideas?",
+   "huddle": [
+    {
+     "from": "player",
+     "text": "Okay. We need to get out of here. Ideas?"
+    }
+   ],
+   "draft": null,
+   "look_for": "Gravenhold's companions, in their own voices: Lyra on what she can hear, Fern on the rats, both flirting in their own registers. Three different takes each."
+  },
+  {
+   "id": "flawed",
+   "title": "The flawed rat plan",
+   "huddle": [
+    {
+     "from": "player",
+     "text": "Here's my plan: Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go. Thoughts?"
+    }
+   ],
+   "draft": {
+    "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go."
+   },
+   "runs": 10,
+   "look_for": "Each catches holes only some of the time, the ones her hunch points at more often.",
+   "flaws": [
+    {
+     "id": "timing",
+     "text": "The plan has no timing. The keys are only on the peg while Snag sits or drinks; while he paces they're on his belt.",
+     "hunch_of": [
+      "lyra"
+     ],
+     "misses_of": [
+      "fern"
+     ]
+    },
+    {
+     "id": "one_rat",
+     "text": "One rat can't move an iron key ring quietly; it scrapes on the stone. The gutter rats could help, for bread.",
+     "hunch_of": [
+      "fern"
+     ],
+     "misses_of": []
+    },
+    {
+     "id": "walkout",
+     "text": "Walking out means passing Snag, who will see the open doors and go for the war drum.",
+     "hunch_of": [
+      "lyra"
+     ],
+     "misses_of": []
+    }
+   ]
+  }
+ ]
+}

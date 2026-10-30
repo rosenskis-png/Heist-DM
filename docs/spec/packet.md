@@ -56,6 +56,7 @@ Written from the map after the map is final. Stored word for word and sent with 
 - Every observer says what it can see and hear.
 - Every zone has a purpose line.
 - The geometry agrees with the relationships: zones don't overlap, each connection lies on the wall its two zones share, and each thing sits inside its zone.
+- No visible text names a hidden thing. A hidden zone, connection, thing or fact is described only in hidden entries and in the parts of the packet the party never sees (the intent, NPC sheets), so the party's view of the map gives nothing away.
 - No route-like fields. The schema allows no unknown fields, so a `routes` field anywhere is rejected.
 
 ### Quality: warnings only, tuned after playtests (roadmap, Phase 7)

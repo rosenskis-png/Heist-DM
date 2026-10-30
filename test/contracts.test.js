@@ -94,3 +94,11 @@ test("declared ability blocks are valid", () => {
     }
   }
 });
+
+test("no visible text in the Cells packet names a hidden thing", () => {
+  const { zones, connections, things, facts } = packet.map;
+  const all = [...zones, ...connections, ...things, ...facts];
+  const terms = all.filter((x) => x.hidden).flatMap((x) => [x.id, ...(x.name ? [x.name] : [])]).map((t) => t.toLowerCase());
+  const visible = [...all.filter((x) => !x.hidden).map((x) => JSON.stringify(x)), packet.opening].map((t) => t.toLowerCase());
+  for (const text of visible) for (const t of terms) assert.ok(!text.includes(t), `"${t}" in: ${text.slice(0, 80)}`);
+});
