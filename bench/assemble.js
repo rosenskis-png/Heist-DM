@@ -214,21 +214,27 @@ ${said.map((m, i) => `[${i}] ${m ?? "(says nothing)"}`).join("\n")}
 Return only JSON: {"caught": [[ids for message 0], [ids for message 1], ...]}, one list per message, in order.`;
 }
 
-// One neutral question about fit (D55): the two things involved and canon, never the plan.
+// One neutral question about fit (D55): the two things involved, in rough real dimensions rather than the game's
+// size categories (D57), and canon. Never the plan.
+const SPAN = { tiny: "three inches across", small: "a foot across", medium: "a person's width", large: "a wide doorway" };
+const GAP = {
+  bars: "iron bars about five inches apart",
+  grate: "an iron grate with gaps about three inches across",
+  drain: "a drain opening about three inches across",
+};
 export function rulingInput(env, { who, connection, by }) {
   const { things, zones } = env.packet.map;
   const sheet = (id) => {
     const t = things.find((x) => x.id === id);
-    if (t) return { id, name: t.name, size: t.size, description: t.properties };
-    const p = env.party.find((x) => x.id === id);
-    return { id, name: p?.name ?? id, size: "medium" };
+    if (t) return { name: t.name, description: t.properties };
+    return { name: env.party.find((x) => x.id === id)?.name ?? id, description: "a person" };
   };
   const c = env.connections.get(connection);
   const zone = (id) => zones.find((z) => z.id === id)?.name ?? id;
   return [
     env.prompts.ruling,
     block("The thing", sheet(who)),
-    block("The connection", { id: c.id, name: c.name ?? c.kind, kind: c.kind, between: c.between.map(zone), fits: c.fits }),
+    block("The opening", { name: c.name ?? c.kind, between: c.between.map(zone), roughly: GAP[c.kind] ?? `an opening about ${SPAN[c.fits]}` }),
     by && by !== who ? block("Who's doing it", sheet(by)) : null,
     block("Canon so far", []),
   ]

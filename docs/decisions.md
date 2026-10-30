@@ -261,3 +261,12 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 **Decided:** When a route the player named fails the engine's size check, the engine asks the ruling call one neutral question: can this thing pass through that connection, in this case? It sees the two descriptions, the sizes, who is doing it and the canon so far, and nothing about the plan. A yes becomes a canon ruling, and the engine lets that thing through that connection from then on. A no leaves the step as written, and reality interrupts it when it's reached (D36).
 **Why:** Sizes are four coarse categories, and the fiction is finer (a sack of gear can be passed through bars an item at a time). Asking the plan's own calls invites motivated reasoning; a question with no plan attached doesn't. The thing's own description still wins: the Cells' key ring is written as too big for the gutter.
 **Rules out:** Treating the size categories as the last word; letting the step or pricing call overrule them.
+
+### D56. The engine opens doors with keys and splits long moves
+**Decided:** Someone carrying a connection's `key` unlocks it as they pass through, without a separate effect. A move longer than two crossings is split by the engine into consecutive steps, each inheriting the step's actors, noise and timing, instead of going back to the step call.
+**Why:** On the bench, every card 1 run went back for a retry over one of these: "the rogue unlocks the doors" written without the unlock, and "we go" spanning three crossings. Both are bookkeeping, and a retry costs a whole second call.
+**Rules out:** Sending mechanical gaps back to the AI when code can close them.
+
+### D57. The ruling call judges the physical situation, not the size categories
+**Decided:** Refines D55. The ruling call gets the objects' descriptions and rough real dimensions (a rat-sized grate is about three inches across; cell bars are about five inches apart), never the size categories or "fits" labels, and returns how it would be done when the answer is yes.
+**Why:** Given the categories, it repeated them: in three of three runs it ruled the gear sack "too large for bars that only admit small items." The question is whether it would really work, which the categories can't answer.

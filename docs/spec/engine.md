@@ -12,7 +12,7 @@ The acceptance test is `fixtures/cells/acceptance.md`.
 
 ## 2. Map and perception
 - **From geometry** (D9, D28): zone sizes, distances along connections, distances between placed things, and adjacency. These go to the AIs as facts.
-- **Routes** (D54): a move without a `path` takes the shortest route that everything moving fits through. A route the player named that fails the fit check goes to the ruling call (D55); an exception it grants is kept for that thing and connection.
+- **Routes** (D54): a move without a `path` takes the shortest route that everything moving fits through. A route the player named that fails the fit check goes to the ruling call (D55); an exception it grants is kept for that thing and connection. A move longer than two crossings is split into consecutive steps, and someone carrying a connection's `key` unlocks it in passing (D56).
 - **Fit:** an actor or thing crosses a connection only if its size (`tiny` < `small` < `medium` < `large`) is no bigger than the connection's `fits`, or its `fits_unlocked` once it's unlocked (D53). People are `medium` unless a flag says otherwise (Fern as a rat is `tiny`).
 - **Routing on the zone graph:** routes and travel time in ticks; whether a zone is reachable given the current connection flags; which side a barrier can be operated from.
 - **Observers per step:** every NPC who, at the step's tick, is in a zone on the step's route, sees one, or hears one at the step's noise level or louder (`silent` < `quiet` < `speech` < `loud`). Senses come from the NPC's sheet or current beat, edited by meters. Example: at Suspicion 1, Snag can see the far cell's back corner. The route is every zone an actor or moved thing occupies during the step.

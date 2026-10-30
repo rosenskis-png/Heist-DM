@@ -42,11 +42,13 @@ export function moveProblems(steps, env, exceptions = new Set()) {
   const holder = new Map(env.holders);
   const size = new Map();
   const locked = new Map([...env.connections].map(([id, c]) => [id, c.flags?.locked === true]));
-  const fitsOf = (c) => (!locked.get(c.id) && c.fits_unlocked ? c.fits_unlocked : c.fits);
+  // Someone carrying a connection's key opens it in passing (D56).
+  const hasKey = (c, movers) => c.key && movers.some((m) => m === c.key || carried(m).includes(c.key));
+  const fitsOf = (c, movers = []) => ((!locked.get(c.id) || hasKey(c, movers)) && c.fits_unlocked ? c.fits_unlocked : c.fits);
   const zoneOf = (id) => (holder.has(id) ? zoneOf(holder.get(id)) : pos.get(id));
   const sizeOf = (id) => size.get(id) ?? env.thingSize.get(id) ?? "medium";
   const carried = (id) => [...holder].filter(([, h]) => h === id).map(([item]) => item);
-  const passes = (m, c) => SIZES.indexOf(sizeOf(m)) <= SIZES.indexOf(fitsOf(c)) || exceptions.has(`${m}|${c.id}`);
+  const passes = (m, c, movers) => SIZES.indexOf(sizeOf(m)) <= SIZES.indexOf(fitsOf(c, movers)) || exceptions.has(`${m}|${c.id}`);
   const problems = [];
   const route = (from, to, movers) => {
     const seen = new Map([[from, []]]);
@@ -55,7 +57,7 @@ export function moveProblems(steps, env, exceptions = new Set()) {
       const here = queue.shift();
       if (here === to) return seen.get(here);
       for (const c of env.connections.values()) {
-        if (!c.between.includes(here) || !movers.every((m) => passes(m, c))) continue;
+        if (!c.between.includes(here) || !movers.every((m) => passes(m, c, movers))) continue;
         const next = c.between.find((z) => z !== here);
         if (!seen.has(next)) seen.set(next, [...seen.get(here), c.id]), queue.push(next);
       }
@@ -66,18 +68,19 @@ export function moveProblems(steps, env, exceptions = new Set()) {
     if (!path) {
       const found = route(from, to, movers);
       if (!found) return problems.push({ text: `${label}: no way from ${from} to ${to} that ${movers.join(" and ")} fit through` });
-      if (found.length > 2) problems.push({ text: `${label}: ${from} to ${to} is ${found.length} crossings; one step covers at most two` });
+      // Longer than two crossings: the engine splits it into steps (D56), so it isn't a problem.
+      for (const id of found) if (hasKey(env.connections.get(id), movers)) locked.set(id, false);
       return;
     }
-    if (path.length > 2) problems.push({ text: `${label}: ${path.length} crossings in one move` });
     let here = from;
     for (const p of path) {
       if (p === here) continue; // a connection followed by the zone it leads into names one crossing twice
       const conn = env.connections.get(p) ?? env.connectionBetween(here, p);
       if (!conn || !conn.between.includes(here)) return problems.push({ text: `${label}: no way from ${here} into ${p}` });
       for (const m of movers)
-        if (!passes(m, conn))
-          problems.push({ text: `${label}: ${m} (${sizeOf(m)}) doesn't fit through ${conn.id} (${fitsOf(conn)})`, fit: { who: m, connection: conn.id, by: movers[0] } });
+        if (!passes(m, conn, movers))
+          problems.push({ text: `${label}: ${m} (${sizeOf(m)}) doesn't fit through ${conn.id} (${fitsOf(conn, movers)})`, fit: { who: m, connection: conn.id, by: movers[0] } });
+      if (hasKey(conn, movers)) locked.set(conn.id, false);
       here = conn.between.find((z) => z !== here);
     }
     if (here !== to) problems.push({ text: `${label}: the path ends in ${here}, not ${to}` });
