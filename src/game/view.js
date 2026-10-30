@@ -165,7 +165,7 @@ export function ruledCardView(s, card, { brief = false } = {}) {
     const beats = routines.map((p) => `${short(s, p.id)}: ${cap(beatOf(s, p.id, st.at)?.id ?? "")}`);
     return { ...out, on: [`Tick ${st.at}`, ...beats, st.takes ? `${st.takes} tick${st.takes > 1 ? "s" : ""}` : "No time"], mitigations: [] };
   });
-  return brief ? { plan: card.plan, steps } : { plan: card.plan, steps, rulings: card.rulings.map((r) => r.text), stances: card.stances ?? [] };
+  return brief ? { plan: card.plan, steps } : { plan: card.plan, steps, rulings: card.rulings.map((r) => r.text), stances: card.stances ?? [], ruled: true };
 }
 
 // The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, and events it knows are coming.

@@ -5,11 +5,12 @@ import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor } from "../src/game/session.js";
 import { huddle, moment, makeCard, commit, shown } from "../src/game/turns.js";
+import { ruledCard, ruledCommit, ruledScene } from "../src/game/ruled.js";
 import { mapView, clockView, partyView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 
-const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment"];
+const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment", "adjudicate", "resolve", "scene"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -19,7 +20,22 @@ const STATUS = {
   narration: "The DM tells what happens…",
   moment: "The DM considers…",
   companion: "Your companions are thinking…",
+  adjudicate: "The DM rules on your plan…",
+  resolve: "The dice are down. The DM plays it out…",
+  scene: "The DM considers…",
 };
+
+// Who rules (D75): the DM, with the engine keeping the books, or Phase 4's engine pipeline.
+const MODES = [
+  ["ruled", "The DM rules", "The DM decides what your plan takes, what needs a roll and what happens. The game keeps track of every ruling so it stays true."],
+  ["engine", "The engine rules", "Phase 4: the engine checks routes, sizes, sight and timing, and the AI prices what's left."],
+];
+// The loop for each mode: making the card, running it, and one Moment exchange.
+const LOOP = {
+  ruled: { card: ruledCard, run: ruledCommit, talk: ruledScene },
+  engine: { card: makeCard, run: commit, talk: moment },
+};
+const loopOf = (session) => LOOP[session.mode ?? "engine"];
 const SPEED = [
   ["faster", "Faster", "Quicker, cheaper calls. The DM misses more."],
   ["balanced", "Balanced", "The tiers the bench settled on."],
@@ -109,10 +125,11 @@ function Title({ env, onNew, onLoad }) {
 
 function Setup({ env, slot, onBack, onBegin }) {
   const [name, setName] = useState("");
+  const [mode, setMode] = useState("ruled");
   const party = partyFor({ name: name.trim(), class: "rogue" }, env.packet);
   const begin = () => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
-    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, seed }));
+    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, seed, mode }));
   };
   return html`<main className="setup gutter">
     <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onBack}>Back</button>
@@ -121,6 +138,9 @@ function Setup({ env, slot, onBack, onBegin }) {
     <p className="muted">The Cells are built for this party. Choosing your class and companions comes later.</p>
     <div className="party">
       ${party.map((p) => html`<div key=${p.id} className="who" style=${{ "--cc": p.color ?? "var(--gold)" }}><strong>${p.id === "player" ? p.name : p.name}</strong><span>${p.id === "player" ? "You, a rogue" : p.role}</span><span>${p.blurb}</span></div>`)}
+    </div>
+    <div className="field" style=${{ maxWidth: "none" }}><span>Who rules</span>
+      <div className="modes">${MODES.map(([id, label, note]) => html`<button key=${id} className="who mode" aria-pressed=${mode === id} onClick=${() => setMode(id)}><strong>${label}</strong><span>${note}</span></button>`)}</div>
     </div>
     <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample}>Wake up in the cells</button>
   </main>`;
@@ -155,7 +175,7 @@ function Game({ env, slot, initial, onQuit }) {
 
   const save = async () => {
     try {
-      const where = await env.store.save(slot, { name: session.player.name || "The rogue", summary: `${s.packet.name ?? s.packet.id}, tick ${session.state.tick}${session.ended ? ", finished" : ""}` }, serialize(session));
+      const where = await env.store.save(slot, { name: session.player.name || "The rogue", summary: `${s.packet.name ?? s.packet.id}, ${session.mode === "ruled" ? "the DM rules" : "the engine rules"}, tick ${session.state.tick}${session.ended ? ", finished" : ""}` }, serialize(session));
       setSaved(where === "db" ? "Saved." : "Saved in this browser only.");
     } catch (e) {
       setSaved(errorText(e));
@@ -267,9 +287,9 @@ function PlanTab({ session, env, io, run, busy, error, refresh, onQuit }) {
       : s.combat
         ? html`<p className="check">You're in a fight. Say what everyone does in the Moment tab, a round at a time.</p>`
         : showCard
-          ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setEditing(true)} onRun=${(checkpoints) => run("plan", () => commit(session, io, env.prompts, { checkpoints }))} />`
+          ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setEditing(true)} onRun=${(checkpoints) => run("plan", () => loopOf(session).run(session, io, env.prompts, { checkpoints }))} />`
           : html`<${Draft} session=${session} busy=${busy} error=${error} refresh=${refresh} editing=${!!session.card} onCancel=${() => setEditing(false)}
-              onMake=${() => run("plan", async () => (await makeCard(session, io, env.prompts), setEditing(false)))} />`}
+              onMake=${() => run("plan", async () => (await loopOf(session).card(session, io, env.prompts), setEditing(false)))} />`}
   </section>`;
 }
 
@@ -324,7 +344,7 @@ function CardBody({ view, checkpoints, toggle }) {
           </div>
           ${st.risks.map((r, i) => html`<div key=${i} className="risk"><span><span className=${`pill ${r.band === "Easy" ? "ok" : r.band === "Medium" ? "gold" : "bad"}`}>${r.band}</span> ${r.reason}</span><span className="fails">If it fails: ${r.fails}${r.stops ? " The plan stops there." : ""}</span></div>`)}
           ${(st.mitigations ?? []).map((m, i) => html`<span key=${"m" + i} className="covered">Covered: ${m}</span>`)}
-          ${!st.risks.length && !(st.mitigations ?? []).length ? html`<span className="covered">No risk the party can see.</span>` : null}
+          ${!st.risks.length && !(st.mitigations ?? []).length ? html`<span className="covered">${view.ruled ? "No roll." : "No risk the party can see."}</span>` : null}
           ${toggle && st.n < view.steps.length ? html`<label className="pause"><input id=${`pause-${st.n}`} type="checkbox" checked=${checkpoints.has(st.n)} onChange=${() => toggle(st.n)} /> Pause after this step</label>` : null}
         </div>
       </li>`)}
@@ -377,7 +397,7 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
     const t = text.trim();
     if (!t) return;
     setText("");
-    run("moment", () => moment(session, io, env.prompts, { to: target, text: t }));
+    run("moment", () => loopOf(session).talk(session, io, env.prompts, { to: target, text: t }));
   };
   const addToPlan = (e) => {
     session.draft.plan = `${session.draft.plan.trim()}${session.draft.plan.trim() ? "\n" : ""}${e.text}`;
@@ -386,7 +406,11 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
   };
   const who = (id) => (id === "dm" ? "DM" : id === "player" ? "You" : nameOf(s, id));
   return html`<section className="feed" aria-label="Moment">
-    ${!session.feeds.moment.length ? html`<p className="muted">Ask the DM anything about where you are, or talk to someone you can see or hear. Questions are free; checks and conversations take a little time. Anything that moves someone or changes the world goes on the plan.</p>` : null}
+    ${!session.feeds.moment.length
+      ? html`<p className="muted">${session.mode === "ruled"
+          ? "Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A plan of several steps goes on the card."
+          : "Ask the DM anything about where you are, or talk to someone you can see or hear. Questions are free; checks and conversations take a little time. Anything that moves someone or changes the world goes on the plan."}</p>`
+      : null}
     ${session.feeds.moment.map((e) => {
       if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">You${e.to && e.to !== "dm" ? ` to ${who(e.to)}` : ""}</span><span className="text">${e.text}</span></div>`;
       if (e.kind === "check" || e.kind === "action")
@@ -394,6 +418,7 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
       if (e.kind === "redirect")
         return html`<div key=${e.at} className="redirect"><span className="small muted">For the plan:</span><q>${e.text}</q>${e.added ? html`<span className="small muted">Added to your draft.</span>` : html`<button className="ghost" onClick=${() => addToPlan(e)}>Add to the plan</button>`}</div>`;
       if (e.kind === "hits" || e.kind === "over") return html`<p key=${e.at} className="system">${e.text}</p>`;
+      if (e.kind === "time") return html`<p key=${e.at} className="small muted">${e.text}</p>`;
       return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span></div>`;
     })}
     <div className="composer">
@@ -463,7 +488,7 @@ function DevView({ session, calls, onExport }) {
       <button className="ghost" onClick=${() => onExport(`heist-dm-replay-tick${session.state.tick}.json`, replay())}>Export this session's replay log</button>
     </div>
     ${session.reactions.length ? html`<details><summary>Companion reactions (recorded, not scored yet): ${session.reactions.length}</summary><pre>${JSON.stringify(session.reactions, null, 1)}</pre></details>` : null}
-    <details><summary>State, canon and event log</summary><pre>${JSON.stringify({ tick: session.state.tick, pending: session.state.pending, flags: session.state.flags, meters: session.state.meters, dispositions: session.state.disposition, revealed: session.state.known.revealed, canon: session.state.canon, log: session.state.log }, null, 1)}</pre></details>
+    <details><summary>State, canon and event log</summary><pre>${JSON.stringify({ tick: session.state.tick, pending: session.state.pending, facts: session.state.facts, off_routine: session.state.offRoutine, flags: session.state.flags, meters: session.state.meters, dispositions: session.state.disposition, revealed: session.state.known.revealed, canon: session.state.canon, log: session.state.log }, null, 1)}</pre></details>
     ${calls.map((r, i) => html`<details key=${r.at + "-" + i}>
       <summary><b>${r.call}</b><span>${r.tier}</span><span>${(r.size / 1024).toFixed(1)} KB</span><span>${r.ms ?? "…"} ms</span>${r.firstErrors ? html`<span className="pill gold">retried</span>` : null}${r.errors?.length || r.error ? html`<span className="pill bad">failed</span>` : null}</summary>
       ${r.error ? html`<p className="error">${r.error}</p>` : null}
