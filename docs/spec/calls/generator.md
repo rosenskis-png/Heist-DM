@@ -8,6 +8,10 @@
 Built in stages, each validated by the engine before the next:
 objective and people → zones and geometry → things → clock → alarm ladder → opening description.
 
+It must also:
+- mark which routines and events the party knows from the start (`known`), and which events are deadlines that slack can move (`deadline`, D41), with any condition that depends on a deadline testing a flag the event sets, not its tick;
+- make everything a plan could depend on perceivable or learnable before the player commits (`docs/design/encounter-craft.md` §4.3), since the card never warns (D36).
+
 A packet that fails the consistency checks is regenerated, with the errors listed. Quality checks only warn. The generator's private "a route exists" check is thrown away and never stored.
 
 It writes topology and approximate sizes, never coordinates; code lays them out on the grid (D28). The format of that sketch is Phase 7's. If layout fails, the packet ships without a map (D9).

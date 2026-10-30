@@ -30,6 +30,8 @@ const zone = obj(["id", "name", "purpose", "light", "rects"], {
   light: { enum: ["dark", "dim", "bright"] },
   level: { type: "integer" },
   rects: list(rect, 1),
+  // Zones visible from here beyond the ones joined to it (a long straight corridor). Party perception: engine §2.
+  sees: list(r("id")),
   hidden: { type: "boolean" },
 });
 

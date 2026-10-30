@@ -1,9 +1,7 @@
 [
   {
-    "card": "card1.json: the rat run succeeds, and the plan is interrupted at the empty peg",
-    "rolls": [
-      40
-    ],
+    "card": "card1.json: the party sees the peg go empty, and the plan is interrupted before Fern runs",
+    "rolls": [],
     "steps": [
       {
         "n": 1,
@@ -15,19 +13,11 @@
         "n": 2,
         "tick": 1,
         "outcome": "interrupted",
-        "rolls": [
-          {
-            "risk": "rat_run",
-            "odds": 80,
-            "roll": 40,
-            "success": true
-          }
-        ],
+        "rolls": [],
         "interrupt": {
           "code": "not_there",
-          "effect": 1,
           "id": "keyring",
-          "detail": "Fern reaches the peg and it's empty: the keys jingle on Snag's belt as he walks the corridor."
+          "detail": "Snag lifts the ring off the peg and clips it to his belt as he starts his round. Everyone in the cells sees the peg go empty."
         }
       }
     ],
@@ -36,13 +26,13 @@
         {
           "tick": [
             "=",
-            2
+            1
           ]
         },
         {
           "in_zone": [
             "fern",
-            "guardroom"
+            "cell_middle"
           ]
         },
         {
@@ -53,25 +43,16 @@
           ]
         },
         {
-          "not": {
-            "holds": [
-              "fern",
-              "keyring"
-            ]
-          }
+          "holds": [
+            "snag",
+            "keyring"
+          ]
         },
         {
           "meter": [
             "suspicion",
             "=",
             0
-          ]
-        },
-        {
-          "flag": [
-            "bars_far",
-            "locked",
-            true
           ]
         }
       ]

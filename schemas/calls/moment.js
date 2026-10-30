@@ -16,6 +16,8 @@ export const momentSchema = withDefs({
   ...obj(["reply"], {
     reply: r("text"),
     learned: list(r("text")),
+    // Hidden things, routines or events the party now knows from this exchange, outside any check (D44).
+    reveals: list(r("id")),
     dispositions: list(obj(["npc", "value"], { npc: r("id"), value: r("id") })),
     promises: list(obj(["by", "to", "text"], { by: r("id"), to: r("id"), text: r("text") })),
     texture: list(r("text")),

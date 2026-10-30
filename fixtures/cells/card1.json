@@ -337,9 +337,8 @@
       "interrupts": [
         {
           "code": "not_there",
-          "effect": 1,
           "id": "keyring",
-          "detail": "At tick 1 (Snag's Pace beat) the key ring is on Snag's belt, not on the peg. Fern reaches the peg and finds it empty."
+          "detail": "At the start of tick 1 (Snag's Pace beat) he lifts the key ring off the peg and clips it to his belt, in plain view of the cells. The party sees the peg is empty before Fern sets off."
         }
       ]
     },

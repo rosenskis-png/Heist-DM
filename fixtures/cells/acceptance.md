@@ -9,7 +9,7 @@ The engine's first fixture (roadmap, Phase 3). It runs against `fixtures/cells/p
    - step 1, Fern's change, has no observer, so it's automatic;
    - every step is priced, each as if the earlier steps went as planned: the drag past the stool as if Fern had the ring;
    - record, internally and unshown, that the keys aren't on the peg during the Pace step, and that leaving on the next Pace sets off the drum;
-   - **execute card 1** with the roll in `fixtures/cells/card1.results.json`: the plan is interrupted at the empty peg, after Fern's run, and the end state matches.
+   - **execute card 1** per `fixtures/cells/card1.results.json`: the party sees the peg go empty as the Pace beat begins, so the plan is interrupted before Fern's run (D46), and the end state matches.
 3. **List the observers per step for the second card,** matching the table in `fixtures/cells/walkthrough.md` §2: none on steps 1 and 2; Snag behind the peg on step 3; Snag at the cask on step 4; Snag in the corridor on step 5, covered by step 4 (the drum is gnawed).
 4. **Roll steps 3 and 4,** apply the stated failure consequences, and stop the plan on step 3's failure but not on step 4's. The three runs and their end states are in `fixtures/cells/card2.results.json`.
 5. **Run the suspicion ladder:**

@@ -100,6 +100,36 @@
         "text": "\"Nice try.\" He shifts his grip on the club.",
         "ops": []
       }
-    }
+    },
+    "reveals": []
+  },
+  "campfire": {
+    "segments": [
+      {
+        "speaker": "narrator",
+        "text": "Lyra sits with her back to the warm cistern wall and pats the stone beside her. The dripping water keeps a slow time of its own."
+      },
+      {
+        "speaker": "self",
+        "text": "You kept your nerve in there. Sit. I want to look at you when it isn't dark."
+      },
+      {
+        "speaker": "narrator",
+        "text": "She takes your hand and turns it over, checking the scrapes from the bars, her thumb lingering."
+      }
+    ],
+    "changes": [
+      {
+        "track": "intimacy",
+        "by": 1,
+        "reason": "He let her look after him."
+      }
+    ],
+    "memories": [
+      "The first quiet hour after the cells, her thumb on his scraped knuckles."
+    ],
+    "secrets": [],
+    "commitments": [],
+    "beats": []
   }
 }

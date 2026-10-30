@@ -82,6 +82,7 @@ test("sample outputs fit their call schemas", () => {
   valid(schemas.worldSchema, calls.world);
   valid(schemas.narrationSchema, calls.narration);
   valid(schemas.momentSchema, calls.moment);
+  valid(schemas.campfireSchema, calls.campfire);
 });
 
 test("declared ability blocks are valid", () => {
