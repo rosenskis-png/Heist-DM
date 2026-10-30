@@ -286,3 +286,8 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 The huddle keeps everything a player at the table has, including the map, her look and outfit, and the other companions' abilities (D40).
 **Why:** Building by exclusion sent Lisa's full variant text (about 12 KB) on every call, and would send any field added later. The world call was paying for rules that had already run.
 **Rules out:** Sending a profile or packet slice "minus a few fields".
+
+### D60. The engine is a reducer, and a replay log is its list of actions
+**Decided:** The engine is one pure function, `apply(state, action) → state`. Everything that changes encounter state comes in as an action: loading a packet, a validated AI output, a committed card, ticks passing. State is plain data and includes the random generator's position, so no roll depends on anything outside it. A replay log is what started the encounter (packet, party, campaign values, seed) plus the ordered actions. Applying them again gives deep-equal state, with no AI call. Fixtures may force rolls instead of using the seed.
+**Why:** It's how a playtest bug gets diagnosed: a replay shows whether an AI made a bad call or the engine's bookkeeping went wrong, without calling an AI again. The event log (`docs/spec/state.md`) is one line per result, written for the AIs, and can't be replayed. D11 already keeps replays out of saves; this defines what they are.
+**Rules out:** State held outside the state object (module variables, the system clock, `Math.random`); a replay that calls an AI.

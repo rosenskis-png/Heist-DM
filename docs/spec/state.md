@@ -64,3 +64,6 @@ Only the hand-off, memories and commitments cross between encounters (principle 
 
 ## Saves (D11)
 A save is a snapshot of campaign state plus the current encounter's packet and state, including its event log. Saves are stored per player in the artifact's `db`, with JSON export and import. Loading a save never calls an AI.
+
+## Replay (D60)
+The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, campaign values, seed) plus every action in order: validated AI outputs, committed cards, ticks passing. Applying it again gives deep-equal state. It's a test and debugging tool, never a save (D11).

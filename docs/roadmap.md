@@ -72,7 +72,9 @@ A bare artifact page that takes a hand-written packet and hand-computed engine f
 
 Pure ES modules tested with `node --test`, with a seeded random number generator. Validation against the contracts already exists (`src/validate.js`); the engine adds the consistency checks in `docs/spec/packet.md` and everything in `docs/spec/engine.md`.
 
-**Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly.
+**Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly (D60).
+
+**Scope.** Code lives in `src/engine/`, one module per section of `docs/spec/engine.md`. Context assembly is pure and acceptance items 10–11 test it, so it moves from `bench/assemble.js` to `src/`. The bench's move, fit and flag checks become calls to the engine, and the bench keeps only its grading. Abilities, stances and objectives are built in general form from the `declared` blocks. Combat is built only as far as the Cells need (`start_combat` records that a fight has begun); its rounds wait for Phase 4.
 
 ## Phase 4: The Cells, playable
 
