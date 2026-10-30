@@ -32,7 +32,7 @@ Prompts are always ordered campaign → encounter → live. `sample` gives no pr
 | Companion secrets and relationships | — | — | — | — | — | own only, gated (`docs/spec/companions.md`) |
 
 - **Allowlists** (D59): each column above is built from an explicit list. Abilities go without their `declared` blocks; the party's map has no size categories; the world call gets only the people present, routines as labels, and the ids of the engine's reactions, with no prose style guide.
-- **Coordinates never go to any call** (D9). The map block is relationships plus facts the engine derived from geometry.
+- **Coordinates never go to any call** (D9). The map block is relationships plus `layout`: facts the engine derives from geometry (each zone's size, how far apart its connections and placed things are). Code: `src/context.js`.
 - **Hidden things** go only to the plan calls and the Moment AI, marked hidden.
 - **Companions** see only what the party knows, plus their own data.
 - The generator and campfire calls are described in `docs/spec/calls/`.

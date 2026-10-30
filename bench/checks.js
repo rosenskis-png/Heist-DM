@@ -1,9 +1,11 @@
-// The bench's automatic checks: a subset of the engine's validation (docs/spec/engine.md §6) plus the
-// Phase 2 exit tests that code can see. Each check is {name, ok: true | false | "near", detail}.
+// The bench's automatic checks: the engine's validation (docs/spec/engine.md §6) plus the Phase 2 exit
+// tests that code can see. Each check is {name, ok: true | false | "near", detail}.
 // The designer judges feel; these only point at evidence.
 
-export const BANDS = ["automatic", "easy", "medium", "hard", "very_hard", "near_impossible"];
-const ODDS = { automatic: 100, easy: 80, medium: 65, hard: 45, very_hard: 25, near_impossible: 10 }; // engine.md §7
+import { flagKeys } from "../src/engine/plan.js";
+import { ODDS } from "../src/engine/rng.js";
+
+export const BANDS = Object.keys(ODDS);
 
 const check = (name, ok, detail = "") => ({ name, ok, detail });
 
@@ -31,84 +33,9 @@ function leaks(node, terms) {
   return terms.filter((term) => t.includes(term.toLowerCase()));
 }
 
-const SIZES = ["tiny", "small", "medium", "large"];
-
-// Plays a plan's moves and hand-offs forward from the packet's start, the way the engine will. A path the player
-// named is followed and checked for fit (D51); without one, the shortest route everything fits through is taken
-// (D54). Returns problems as {text, fit}: `fit` marks a named route that failed only on size, which goes to the
-// ruling call (D55) rather than back to the step call.
-export function moveProblems(steps, env, exceptions = new Set()) {
-  const pos = new Map([...env.thingZone, ...Object.entries(env.positions)]);
-  const holder = new Map(env.holders);
-  const size = new Map();
-  const locked = new Map([...env.connections].map(([id, c]) => [id, c.flags?.locked === true]));
-  // Someone carrying a connection's key opens it in passing (D56).
-  const hasKey = (c, movers) => c.key && movers.some((m) => m === c.key || carried(m).includes(c.key));
-  const fitsOf = (c, movers = []) => ((!locked.get(c.id) || hasKey(c, movers)) && c.fits_unlocked ? c.fits_unlocked : c.fits);
-  const zoneOf = (id) => (holder.has(id) ? zoneOf(holder.get(id)) : pos.get(id));
-  const sizeOf = (id) => size.get(id) ?? env.thingSize.get(id) ?? "medium";
-  const carried = (id) => [...holder].filter(([, h]) => h === id).map(([item]) => item);
-  const passes = (m, c, movers) => SIZES.indexOf(sizeOf(m)) <= SIZES.indexOf(fitsOf(c, movers)) || exceptions.has(`${m}|${c.id}`);
-  const problems = [];
-  const route = (from, to, movers) => {
-    const seen = new Map([[from, []]]);
-    const queue = [from];
-    while (queue.length) {
-      const here = queue.shift();
-      if (here === to) return seen.get(here);
-      for (const c of env.connections.values()) {
-        if (!c.between.includes(here) || !movers.every((m) => passes(m, c, movers))) continue;
-        const next = c.between.find((z) => z !== here);
-        if (!seen.has(next)) seen.set(next, [...seen.get(here), c.id]), queue.push(next);
-      }
-    }
-    return null;
-  };
-  const go = (label, from, path, to, movers) => {
-    if (!path) {
-      const found = route(from, to, movers);
-      if (!found) return problems.push({ text: `${label}: no way from ${from} to ${to} that ${movers.join(" and ")} fit through` });
-      // Longer than two crossings: the engine splits it into steps (D56), so it isn't a problem.
-      for (const id of found) if (hasKey(env.connections.get(id), movers)) locked.set(id, false);
-      return;
-    }
-    let here = from;
-    for (const p of path) {
-      if (p === here) continue; // a connection followed by the zone it leads into names one crossing twice
-      const conn = env.connections.get(p) ?? env.connectionBetween(here, p);
-      if (!conn || !conn.between.includes(here)) return problems.push({ text: `${label}: no way from ${here} into ${p}` });
-      for (const m of movers)
-        if (!passes(m, conn, movers))
-          problems.push({ text: `${label}: ${m} (${sizeOf(m)}) doesn't fit through ${conn.id} (${fitsOf(conn, movers)})`, fit: { who: m, connection: conn.id, by: movers[0] } });
-      if (hasKey(conn, movers)) locked.set(conn.id, false);
-      here = conn.between.find((z) => z !== here);
-    }
-    if (here !== to) problems.push({ text: `${label}: the path ends in ${here}, not ${to}` });
-  };
-  for (const s of steps)
-    for (const op of s.effects ?? []) {
-      const [k, v] = Object.entries(op)[0];
-      if (k === "use_ability")
-        for (const e of env.abilityEffects(v.actor, v.ability)) if (e.set_flag?.key === "size") size.set(v.actor, e.set_flag.value);
-      if (k === "set_flag" && v.key === "size") size.set(v.entity, v.value);
-      if (k === "set_flag" && v.key === "locked" && locked.has(v.entity)) locked.set(v.entity, v.value === true);
-      if (k === "move" && pos.has(v.entity)) {
-        go(`step ${s.n}, ${v.entity}`, pos.get(v.entity), v.path, v.to, [v.entity, ...carried(v.entity)]);
-        pos.set(v.entity, v.to);
-      }
-      if (k === "give") {
-        const from = zoneOf(v.item);
-        const dest = zoneOf(v.to) ?? v.to;
-        if (from && from !== dest) go(`step ${s.n}, ${v.item}`, from, v.path, dest, [v.item]);
-        holder.set(v.item, v.to);
-      }
-    }
-  return problems;
-}
-
-// Flag keys the engine knows: the packet's and the sheets' own (D52).
-export function unknownFlags(node, env) {
-  return [...new Set(flagKeysSet(node))].filter((k) => !env.flagKeys.has(k));
+// Flag keys the engine doesn't know (D52). The engine's own check is `checkSteps`; this is for world actions.
+export function unknownFlags(node, keys) {
+  return [...new Set(flagKeysSet(node))].filter((k) => !keys.has(k));
 }
 
 function flagKeysSet(node, out = []) {
@@ -125,9 +52,11 @@ export function stepChecks(out, c, env) {
   const whens = steps.filter((s) => s.when).length;
   const ifs = steps.filter((s) => s.if).length;
   const [lo, hi] = c.expect.steps;
-  const badIds = unknownIds(steps, env.ids);
-  const badMoves = moveProblems(steps, env, env.exceptions).map((p) => p.text);
-  const badFlags = unknownFlags(steps, env);
+  // Ids, moves, fit and flags are the engine's checks (docs/spec/engine.md §6).
+  const { errors } = env.engineSteps(out);
+  const badIds = errors.filter((e) => e.includes("unknown id"));
+  const badFlags = errors.filter((e) => e.includes("flag"));
+  const badMoves = errors.filter((e) => !badIds.includes(e) && !badFlags.includes(e));
   return [
     check("Timing kept as written", whens === c.expect.whens ? true : false, `${whens} timed steps; the player wrote ${c.expect.whens}`),
     check("No conditions added", ifs === c.expect.ifs, `${ifs} conditions; the player wrote ${c.expect.ifs}`),
@@ -185,7 +114,7 @@ export function worldChecks(out, c, env) {
   const actions = out.actions ?? [];
   const npcs = actions.map((a) => a.npc).filter((id) => !env.people.has(id));
   const badIds = unknownIds(actions.map((a) => a.ops), env.ids);
-  const badFlags = unknownFlags(actions, env);
+  const badFlags = unknownFlags(actions, flagKeys(env.state));
   return [
     check("Only packet people act", npcs.length === 0, npcs.join(", ")),
     check("No new entities", badIds.length === 0, badIds.join(", ")),
@@ -216,34 +145,6 @@ export function companionChecks(out) {
     check("Three different takes", distinct === 3 ? true : false, `${distinct} distinct`),
     check("Messaging length", longest <= 450 ? true : "near", `longest ${longest} characters`),
   ];
-}
-
-// What the checks need to know about the packet, worked out once.
-export function engineFacts(packet, party) {
-  const { map, people, start } = packet;
-  const positions = { ...Object.fromEntries(people.filter((p) => p.position).map((p) => [p.id, p.position])), ...start.positions };
-  const holders = map.things.filter((t) => t.location?.holder).map((t) => [t.id, t.location.holder]);
-  const flagKeys = new Set(flagKeysSet([packet, party.map((s) => s.abilities)]));
-  const walk = (node) => {
-    if (Array.isArray(node)) return node.forEach(walk);
-    if (!node || typeof node !== "object") return;
-    if (Array.isArray(node.flag)) flagKeys.add(node.flag[1]);
-    if (node.flags && typeof node.flags === "object" && !Array.isArray(node.flags)) Object.keys(node.flags).forEach((k) => flagKeys.add(k));
-    Object.values(node).forEach(walk);
-  };
-  walk(packet);
-  return {
-    positions,
-    holders,
-    flagKeys,
-    thingZone: new Map(map.things.filter((t) => t.location?.zone).map((t) => [t.id, t.location.zone])),
-    thingSize: new Map(map.things.map((t) => [t.id, t.size])),
-    connectionBetween: (a, b) => map.connections.find((c) => c.between.includes(a) && c.between.includes(b)),
-    abilityEffects: (actor, ability) => {
-      const a = party.find((s) => s.id === actor)?.abilities;
-      return [a?.combat, a?.noncombat].find((x) => x?.id === ability)?.declared?.effects ?? [];
-    },
-  };
 }
 
 export function rulingChecks(out, c) {

@@ -5,7 +5,9 @@ import { validate } from "../src/validate.js";
 import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, rulingSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
-import * as A from "./assemble.js";
+import * as A from "../src/context.js";
+import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
+import { flagKeys } from "../src/engine/plan.js";
 import * as C from "./checks.js";
 
 const url = (p) => new URL(`../${p}`, import.meta.url);
@@ -59,7 +61,7 @@ let controller = new AbortController();
 async function load() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
   const sources = ["fixtures/cells/packet.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
-  const code = ["bench/assemble.js", "bench/checks.js"];
+  const code = ["src/context.js", "bench/checks.js"];
   const texts = await Promise.all([...sources, ...code].map(text));
   const [packet, cases] = texts.slice(0, 2).map(JSON.parse);
   const prompts = texts.slice(2, sources.length);
@@ -85,7 +87,7 @@ async function load() {
     people: new Set(people.map((p) => p.id)),
     hiddenTerms: cases.hidden_terms,
     beatAt: (t) => (sched ? { [people.find((p) => p.schedule).id]: sched.beats[(t + sched.phase) % sched.period].id } : {}),
-    ...C.engineFacts(packet, party),
+    state: loadEncounter({ packet, party }),
     pairFor: (a, others) => others.map((b) => pairs[`${a}|${b}`] ?? pairs[`${b}|${a}`]).find(Boolean) ?? null,
   };
 }
@@ -151,19 +153,16 @@ async function runOne(kind, c) {
     // A named route that fails only on size goes to the ruling call (D55), not back to the step call.
     const engine =
       kind === "step"
-        ? (o) => [
-            ...C.moveProblems(o.steps, env).filter((p) => !p.fit).map((p) => p.text),
-            ...C.unknownFlags(o.steps, env).map((f) => `unknown flag ${f}`),
-          ]
+        ? (o) => engineSteps(o).errors
         : kind === "world"
-          ? (o) => C.unknownFlags(o.actions, env).map((f) => `unknown flag ${f}`)
+          ? (o) => C.unknownFlags(o.actions, flagKeys(env.state)).map((f) => `unknown flag ${f}`)
           : undefined;
     const r = await ask(input, k.schema, tier, engine);
     Object.assign(run, r, { input });
-    if (kind === "step" && !r.errors.length) run.rulings = await rule(C.moveProblems(r.out.steps, env).filter((p) => p.fit));
+    if (kind === "step" && !r.errors.length) run.rulings = await rule(engineSteps(r.out).fits);
     if (r.errors.length) run.checks = [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }];
     else if (kind === "pricing") Object.assign(run, C.pricingChecks(r.out, c, env));
-    else run.checks = C[`${kind}Checks`](r.out, c, env);
+    else run.checks = C[`${kind}Checks`](r.out, c, { ...env, engineSteps });
     for (const x of run.rulings ?? []) run.checks.push({ name: `Ruling: ${x.who} through ${x.connection}`, ok: "info", detail: `${x.answer}: ${x.text}` });
     run.checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
   } catch (e) {
@@ -172,11 +171,14 @@ async function runOne(kind, c) {
   return run;
 }
 
+// The engine's check of a step call's output, with the rulings granted so far (D55).
+const engineSteps = (out) => checkSteps({ ...env.state, exceptions: [...env.exceptions] }, out);
+
 // Size conflicts on named routes, each put to the ruling call as one neutral question (D55).
 async function rule(fits) {
   const seen = new Set();
   const out = [];
-  for (const { fit } of fits) {
+  for (const fit of fits) {
     const key = `${fit.who}|${fit.connection}`;
     if (seen.has(key)) continue;
     seen.add(key);

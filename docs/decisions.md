@@ -291,3 +291,17 @@ The huddle keeps everything a player at the table has, including the map, her lo
 **Decided:** The engine is one pure function, `apply(state, action) → state`. Everything that changes encounter state comes in as an action: loading a packet, a validated AI output, a committed card, ticks passing. State is plain data and includes the random generator's position, so no roll depends on anything outside it. A replay log is what started the encounter (packet, party, campaign values, seed) plus the ordered actions. Applying them again gives deep-equal state, with no AI call. Fixtures may force rolls instead of using the seed.
 **Why:** It's how a playtest bug gets diagnosed: a replay shows whether an AI made a bad call or the engine's bookkeeping went wrong, without calling an AI again. The event log (`docs/spec/state.md`) is one line per result, written for the AIs, and can't be replayed. D11 already keeps replays out of saves; this defines what they are.
 **Rules out:** State held outside the state object (module variables, the system clock, `Math.random`); a replay that calls an AI.
+
+### D61. NPCs taking part in a plan don't watch it
+**Decided:** A step's observers are the NPCs who would see or hear it, except NPCs who act in any step of the same plan. They're with the party for this plan, so they aren't risks the card prices. An NPC the plan leaves out is an observer like any other, and the pricing call judges whether he's a risk.
+**Why:** The Cells fixtures never list Brannoc as an observer, though from his cell he sees the corridor Fern runs down. Both cards give him a step (the crusts, walking out). Leaving him off by tier or disposition would be a rule about people; this is a fact about the plan.
+**Rules out:** Pricing a plan's own participants as watchers; a packet field that marks NPCs as harmless.
+
+### D62. Recognizing a broken plan takes something seen, not something foreseeable
+**Decided:** Clarifies D46 and D47. Before each step and each effect, the engine checks every remaining step that takes an item from where the party last saw it. The plan stops there only if all three hold: the party can see the spot where the item should be; it isn't there; and the routines and events the party knows don't put it back by that step's tick. A problem that's only foreseeable doesn't stop the plan before anyone sees it. Card 1 runs Fern's change on the Drink, even though the party knows the keys go on Snag's belt on his Pace. A problem nobody can see stops the plan at the effect itself.
+**Why:** Read literally, D47 would stop card 1 before step 1, because the party knows the routine. But the player committed the plan knowing it too, and D35 keeps a plan's mistakes. The fixture's moment (`card1.results.json`) is when the peg is seen empty. Seeing is what turns a mistake into a recognized one.
+**Rules out:** Interrupting a plan for a mistake the party could have deduced but hasn't yet seen; the engine catching a player's mistakes at commit time.
+
+### D63. A key opens a door in passing only when someone needs it open
+**Decided:** Refines D56. Someone carrying a connection's key unlocks it as they pass only if something moving with them doesn't fit through it while it's locked. A rat dragging the key ring between the bars leaves the door locked.
+**Why:** Unlocking on every pass let Fern unlock the far cell's door while delivering the ring, which set off Snag's `prisoner_loose` trigger a step early. An unlock nobody wrote, and nobody needed, is the step call's job to write, not the engine's.

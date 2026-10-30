@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 3 (Engine core).** Phases 1 and 2 are done.
+**Current phase: 4 (The Cells, playable).** Phases 0–3 are done.
 
 ---
 
@@ -75,6 +75,14 @@ Pure ES modules tested with `node --test`, with a seeded random number generator
 **Exit:** `fixtures/cells/acceptance.md` passes in full, and replaying a recorded log reproduces state exactly (D60).
 
 **Scope.** Code lives in `src/engine/`, one module per section of `docs/spec/engine.md`. Context assembly is pure and acceptance items 10–11 test it, so it moves from `bench/assemble.js` to `src/`. The bench's move, fit and flag checks become calls to the engine, and the bench keeps only its grading. Abilities, stances and objectives are built in general form from the `declared` blocks. Combat is built only as far as the Cells need (`start_combat` records that a fight has begun); its rounds wait for Phase 4.
+
+**Result.** Every item in `fixtures/cells/acceptance.md` passes in `test/engine.test.js`, and a recorded log replays to deep-equal state. Building it settled D61–D63 and corrected two fixtures: card 1's step 4 route listed a cell nobody stands in, and the acceptance test's slack example contradicted D43's arithmetic (at ±3, rounding once gives 22 and 20, not 21).
+
+**Carried into Phase 4:**
+- **Pricing leaks the engine can't see.** It sends back a shown reason that names a hidden thing or an NPC the party doesn't foresee. It can't catch one that describes an unforeseen fact in plain words ("he's got them on his belt"). The likeliest source is the `as_if` line the pricing call is sent (D42). *Recommendation:* watch for it in playtests before adding anything.
+- **Hazards** are always empty: the packet format has nothing that is one. The Cells don't need any.
+- **Combat rounds** (`content/rules.js`): `start_combat` only records the fight.
+- **The bench page now loads `src/`** (the engine and `src/context.js`), so republishing it needs those files.
 
 ## Phase 4: The Cells, playable
 

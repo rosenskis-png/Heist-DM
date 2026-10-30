@@ -22,7 +22,7 @@ The engine's first fixture (roadmap, Phase 3). It runs against `fixtures/cells/p
    - **Timing:** a step whose `when` never holds is interrupted after `max_wait` ticks (`wait_expired`); a `when` or `if` that names an unknown routine is rejected.
    - **Perception:** with the party in their cells, a step "when he sits down" is checked through Lyra, who hears his bones clicking through the guardroom wall (`hears_through_walls`). With Lyra moved out of earshot and no one else able to see or hear him, the plan is interrupted there (`cant_perceive`, D39).
    - **Recognition** (D47): with card 2 running, Lyra sees Snag pace the corridor with the ring on his belt before the lift on his Sit; the plan is not interrupted, because the known routine puts the ring back on the peg in time. Card 1, whose step takes the ring during that same Pace, is interrupted.
-   - **Slack:** with slack at −10 and +10, Uzga's arrival loads at ticks 17 and 25; at ±3 it still loads at tick 21 (the 2% steps are rounded once, not per point); the fail-forward ending still fires when she arrives, because it tests her `arrived` flag; and a run that ends at tick 8 lowers slack by 1 (D41).
+   - **Slack:** with slack at −10 and +10, Uzga's arrival loads at ticks 17 and 25; at +3 it loads at tick 22 and at −3 at tick 20 (the 2% steps are rounded once: rounding per point would leave it at 21); the fail-forward ending still fires when she arrives, because it tests her `arrived` flag; and a run that ends at tick 8 lowers slack by 1 (D41).
 7. **Change Snag's reaction from "go for the drum" to "bargain"** when the drum is flagged as gnawed.
 8. **End Fern's Wild Shape** when the party reaches the stair top, and check the objective.
 9. **Trip Fern's stance** on a step tagged `lethal`.

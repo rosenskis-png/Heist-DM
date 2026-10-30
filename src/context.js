@@ -1,10 +1,15 @@
-// Context assembly for the Phase 2 bench: what each call sees (docs/spec/context.md §1–2), built from
-// hand-written cases. Pure functions; the page does the fetching and the calling.
+// Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
+// fetching and the calling. Used by the bench page and, from Phase 4, the game.
+import { layoutFacts } from "./engine/map.js";
+import { invariants } from "../content/setting.js";
 
-// Strip coordinates (D9) and, for the party's view, everything hidden.
-export function mapFor(map, { knownOnly = false } = {}) {
+// Strip coordinates (D9) and, for the party's view, everything hidden. The layout comes as facts the engine
+// derived from geometry: sizes and distances (D28).
+export function mapFor(packet, { knownOnly = false } = {}) {
+  const { map } = packet;
   const keep = (x) => !(knownOnly && x.hidden);
   return {
+    layout: layoutFacts(packet, { knownOnly }),
     zones: map.zones.filter(keep).map(({ rects, ...z }) => z),
     connections: map.connections.filter(keep).map(({ wall, square, ...c }) => c),
     things: map.things.filter(keep).map(({ location, ...t }) => {
@@ -16,8 +21,8 @@ export function mapFor(map, { knownOnly = false } = {}) {
 }
 
 // The party's map: no size categories, which players never see and which mislead judgment (D57, D59).
-function partyMap(map) {
-  const m = mapFor(map, { knownOnly: true });
+function partyMap(packet) {
+  const m = mapFor(packet, { knownOnly: true });
   return { ...m, connections: m.connections.map(({ fits, fits_unlocked, ...c }) => c), things: m.things.map(({ size, ...t }) => t) };
 }
 
@@ -27,6 +32,9 @@ export function promptFor(text, act) {
     act >= Number(from) ? body.trim() : "",
   );
 }
+
+// Invariants in play this act: a gated one is absent before its act, not forbidden (docs/spec/context.md §3).
+export const invariantsFor = (act, list = invariants) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
 
 // Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59).
 const abilitiesFor = ({ combat, noncombat, ...rest }) => {
@@ -141,12 +149,13 @@ function campaign(env, call, schema) {
     block("How this game is written", env.prompts.style),
     block("Your job", promptFor(env.prompts[call], env.act)),
     block("Output format", shapeText(schema)),
+    invariantsFor(env.act).length ? block("World facts that never change", invariantsFor(env.act)) : null,
   ];
 }
 
 function encounterFull(env) {
   const { intent, people, clock, opening } = env.packet;
-  return [block("The encounter", { intent, people, clock, map: mapFor(env.packet.map) }), block("Opening description", opening)];
+  return [block("The encounter", { intent, people, clock, map: mapFor(env.packet) }), block("Opening description", opening)];
 }
 
 const sheets = (env) => env.party.map(playSheet);
@@ -190,7 +199,7 @@ function worldEncounter(env) {
   const coming = clock.events.map(({ id, at_tick }) => ({ id, at_tick }));
   const meters = clock.meters.map(({ id, name, max }) => ({ id, name, max }));
   return [
-    block("The encounter", { intent, people: present, coming, meters, reactions_the_engine_runs: clock.triggers.map((t) => t.id), map: mapFor(env.packet.map) }),
+    block("The encounter", { intent, people: present, coming, meters, reactions_the_engine_runs: clock.triggers.map((t) => t.id), map: mapFor(env.packet) }),
     block("Opening description", opening),
   ];
 }
@@ -230,7 +239,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
     ...campaign(env, "companion", schema),
     block("You are", ownProfile(self, rel, env.act)),
     block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...others.map(publicProfile)]),
-    block("What the party knows", { map: partyMap(env.packet.map), people: learnedPeople(people), clock: knownClock(clock) }),
+    block("What the party knows", { map: partyMap(env.packet), people: learnedPeople(people), clock: knownClock(clock) }),
     block("Opening description", opening),
     block("Your relationship with the player", rel),
     pair ? block("You and the other companion", pair) : null,
