@@ -95,7 +95,7 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
 **Open questions**
-1. **Shapes for the special cases.** *Recommendation:* see the table in `docs/spec/companions.md`.
+1. **Shapes for the special cases.** Until they're declared, they're on no allowlist and never reach a prompt (D59); the engine resolves the active variant (Lisa's) and sends only that. *Recommendation:* see the table in `docs/spec/companions.md`.
 2. **Caps on relationship changes.** *Recommendation:* start from Gravenhold's caps (per-turn changes clamped; heat and intimacy gains capped at +4 per encounter) and tune after playtests.
 3. **Companion-driven events** (personal quests). *Recommendation:* each quest is placed in a packet at generation, as hidden things and an optional objective. The companion knows about it through her own data. Nothing fires unless it was placed.
 4. **Pairs with no written dynamic.** *Recommendation:* the pair starts at 0. Each companion's call already sees the other's public profile (name, role, blurb, voice) and judges the dynamic from her own beliefs, admires and despises.

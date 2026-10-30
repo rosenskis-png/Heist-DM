@@ -15,6 +15,12 @@ export function mapFor(map, { knownOnly = false } = {}) {
   };
 }
 
+// The party's map: no size categories, which players never see and which mislead judgment (D57, D59).
+function partyMap(map) {
+  const m = mapFor(map, { knownOnly: true });
+  return { ...m, connections: m.connections.map(({ fits, fits_unlocked, ...c }) => c), things: m.things.map(({ size, ...t }) => t) };
+}
+
 // Act-tagged worked examples: kept only from their act on (docs/spec/context.md §3).
 export function promptFor(text, act) {
   return text.replace(/<!-- example act:(\d+) -->([\s\S]*?)<!-- \/example -->/g, (_, from, body) =>
@@ -22,14 +28,29 @@ export function promptFor(text, act) {
   );
 }
 
+// Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59).
+const abilitiesFor = ({ combat, noncombat, ...rest }) => {
+  const strip = (a) => a && (({ declared, ...x }) => x)(a);
+  return { ...rest, combat: strip(combat), noncombat: strip(noncombat) };
+};
+
 // The rules-facing part of a sheet: who they are and what they can do.
-const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skills, abilities: s.abilities });
+const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skills, abilities: abilitiesFor(s.abilities) });
+
+// A companion's huddle profile is an allowlist (D59): fields not named here, including UI and engine data
+// and special cases not yet declared (Phase 5), never reach a prompt.
+const HUDDLE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
+  "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
+  "suppressed", "darkTriggers"];
 
 // A companion's own profile, gated by relationship and act (docs/spec/companions.md §3) and by D50:
 // she gets her hunch and the plan she reaches for, never her blind spots.
 export function ownProfile(c, rel, act) {
-  const { hidden, deep, dark, payoff, quest, questAct, planning, react, ...rest } = c;
-  const out = { ...rest, planning: { reaches_for: planning.reaches_for, hunch: planning.hunch } };
+  const { hidden, deep, dark, payoff, quest, questAct, planning, react } = c;
+  const out = Object.fromEntries(HUDDLE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
+  out.abilities = abilitiesFor(c.abilities);
+  out.planning = { reaches_for: planning.reaches_for, hunch: planning.hunch };
+  if ((rel.turn ?? 0) < 8) Object.assign(out, { first: c.first, why: c.why });
   if (rel.intimacy >= 2 || rel.payoff) out.hidden = hidden;
   if (rel.payoff || rel.intimacy >= 5 || rel.lean >= 3) Object.assign(out, { deep, dark });
   if (!rel.payoff && rel.heat >= payoff.at - 2) out.payoff_scene = payoff.scene;
@@ -38,7 +59,7 @@ export function ownProfile(c, rel, act) {
   return out;
 }
 
-const publicProfile = (c) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, abilities: c.abilities });
+const publicProfile = (c) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, abilities: abilitiesFor(c.abilities) });
 
 // What the party knows about the people: names, known routines, and what's been learned.
 function learnedPeople(people) {
@@ -157,11 +178,29 @@ export function pricingInput(env, c, schema) {
   ]);
 }
 
+// The world call returns structure only, and the engine has already run triggers, senses and beat rules,
+// so it gets none of those, no prose style guide, and only the people who are present (D59).
+function worldEncounter(env) {
+  const { intent, people, clock, opening } = env.packet;
+  const present = people
+    .filter((p) => p.position)
+    .map(({ schedule, senses, ...p }) =>
+      schedule ? { ...p, routine: schedule.beats.map((b) => ({ beat: b.id, does: b.label, at: b.position })) } : p,
+    );
+  const coming = clock.events.map(({ id, at_tick }) => ({ id, at_tick }));
+  const meters = clock.meters.map(({ id, name, max }) => ({ id, name, max }));
+  return [
+    block("The encounter", { intent, people: present, coming, meters, reactions_the_engine_runs: clock.triggers.map((t) => t.id), map: mapFor(env.packet.map) }),
+    block("Opening description", opening),
+  ];
+}
+
 export function worldInput(env, c, schema) {
   return compose([
-    ...campaign(env, "world", schema),
+    block("Your job", promptFor(env.prompts.world, env.act)),
+    block("Output format", shapeText(schema)),
     block("Characters", env.party.map((s) => ({ id: s.id, name: s.name, hp: s.abilities.hp }))),
-    ...encounterFull(env),
+    ...worldEncounter(env),
     block("What just happened (the engine's results)", c.results),
     block("State now", c.state),
     block("How the encounter has gone (table read)", c.table),
@@ -191,7 +230,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
     ...campaign(env, "companion", schema),
     block("You are", ownProfile(self, rel, env.act)),
     block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...others.map(publicProfile)]),
-    block("What the party knows", { map: mapFor(env.packet.map, { knownOnly: true }), people: learnedPeople(people), clock: knownClock(clock) }),
+    block("What the party knows", { map: partyMap(env.packet.map), people: learnedPeople(people), clock: knownClock(clock) }),
     block("Opening description", opening),
     block("Your relationship with the player", rel),
     pair ? block("You and the other companion", pair) : null,

@@ -275,3 +275,14 @@ When the next packet is loaded, each event marked `deadline` moves by 10% of its
 **Decided:** Supersedes D15 for the companion call and settles the middle position of the speed and quality setting (D48). Rulings and the companion huddle run on `quick`. Steps, pricing, world and narration run on `default`. The generator and campfire keep `complex` (D15). The faster and smarter positions move every call one tier down or one tier up from this; Phase 4 tunes them from playtests.
 **Why:** On the bench the huddle on `quick` kept the companions' voices, said nothing about game mechanics, and offered the timing hole among a companion's three candidates in every run, so deliberating longer buys nothing a first instinct doesn't (D50). A ruling is one small question. Nothing in the step, pricing, world or narration runs showed a miss that a higher tier was needed for, so none moves up (D15's rule). Pricing, world and narration were not compared against `complex`, and the generator and campfire weren't run at all.
 **Rules out:** Moving a call up a tier without a measured miss it fixes.
+
+### D59. Each call's context is an allowlist
+**Decided:** Every call is built from an explicit list of what it gets, never by removing a few fields and sending the rest.
+- **Companion profiles:** each channel names the profile fields it sends (`docs/spec/companions.md` §3). Fields not on the list never reach a prompt: UI and engine data (`color`, `rate`, `leanFromHeat`) and special cases not yet declared (Lisa's `variants`, Nadia's Ember fields), until Phase 5 resolves the active variant in the engine.
+- **Abilities** go to every call as their effect text, without the engine's `declared` blocks (D30).
+- **The party's map** has no size categories, which players never see (D57).
+- **The world call** gets only the people present, routines as labels, and the ids of the reactions the engine runs, not their rules, senses or beat rules, which the engine has already applied. It returns structure only, so it gets no prose style guide.
+
+The huddle keeps everything a player at the table has, including the map, her look and outfit, and the other companions' abilities (D40).
+**Why:** Building by exclusion sent Lisa's full variant text (about 12 KB) on every call, and would send any field added later. The world call was paying for rules that had already run.
+**Rules out:** Sending a profile or packet slice "minus a few fields".
