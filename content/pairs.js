@@ -1,13 +1,14 @@
 // Extracted from Gravenhold (legacy/gravenhold.html). See docs/spec/companions.md.
 // Optional dynamics between two companions, keyed "a|b" in either order.
-// `start` is the pair's starting value; a missing pair falls back to the two profiles.
+// `start` is where both start, or each one's own starting view of the other, keyed by id (D73).
+// A missing pair falls back to the two profiles.
 export const pairs = {
   "vesper|nadia": {
     start: 0,
     dynamic: `Vesper can taste Ember's hunger and finds it fascinating; Nadia finds Vesper exhausting.`,
   },
   "vesper|ruby": {
-    start: -2,
+    start: { vesper: 1, ruby: -4 },
     dynamic: `Vesper finds Ruby's devotion delicious and teases it; Ruby wants to stab her.`,
   },
   "vesper|fern": {
@@ -36,7 +37,7 @@ export const pairs = {
   },
   "nadia|lyra": {
     start: 1,
-    dynamic: `Mutual respect between two women of grace; Lyra finds the djinn unsettling at first.`,
+    dynamic: `Mutual respect between two women of grace; Lyra finds Ember unsettling at first.`,
   },
   "nadia|serena": {
     start: 0,
@@ -48,19 +49,19 @@ export const pairs = {
     dynamic: "Morgana wants Ember as a tool; Nadia will never allow it.",
   },
   "ruby|fern": {
-    start: 0,
+    start: { ruby: -1, fern: 2 },
     dynamic: `Fern keeps trying to hug Ruby; Ruby doesn't know what to do with kindness that isn't his.`,
   },
   "ruby|lyra": {
-    start: -1,
+    start: { ruby: -3, lyra: -1 },
     dynamic: `Lyra sees Ruby as a danger to him; Ruby sees Lyra as the rival she most fears.`,
   },
   "ruby|serena": {
-    start: -2,
+    start: { ruby: -4, serena: 1 },
     dynamic: "Serena teases Ruby for sport; Ruby takes it very badly.",
   },
   "ruby|morgana": {
-    start: -2,
+    start: { ruby: -3, morgana: 0 },
     dynamic: "Morgana treats Ruby as a feral pet; Ruby hates being handled.",
   },
   "fern|lyra": {

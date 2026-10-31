@@ -32,12 +32,15 @@ export const newRel = () => ({
 // The party's relationship state: one entry per companion, plus the pair. `members` are the two companions.
 export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
   const [a, b] = members.map((c) => c.id);
+  // A pair's `start` is one number for both, or each one's own view keyed by id (D73).
   const start = b ? pairEntry(pairs, a, b)?.start ?? 0 : 0;
+  const startOf = (id) => (typeof start === "number" ? start : start[id] ?? 0);
+  const views = members.map((c) => startOf(c.id));
   return {
     turn,
     act,
-    rel: Object.fromEntries(members.map((c) => [c.id, { ...newRel(), towardOther: start }])),
-    pair: { value: start },
+    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), towardOther: views[i] }])),
+    pair: { value: Math.round(views.reduce((x, y) => x + y, 0) / (views.length || 1)) },
     knows: false,
     shared: false,
     wardrobe: newWardrobe(members),
@@ -47,11 +50,15 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
 // Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D70).
 export const speakingOrder = (rom, ids) => (rom.turn % 2 ? [...ids].reverse() : [...ids]);
 
-// What gates read: her tracks and flags, plus the campaign's turn and act and two distances.
+// What gates read: her tracks and flags, how the other companion feels about her, the campaign's turn and act,
+// and two distances.
 export function view(rom, c) {
   const rel = rom.rel[c.id];
+  const other = Object.keys(rom.rel).find((id) => id !== c.id);
   return {
     ...rel,
+    // How the other companion feels about her.
+    fromOther: other ? rom.rel[other].towardOther : 0,
     turn: rom.turn,
     act: rom.act,
     toPayoff: c.payoff.at - rel.heat,

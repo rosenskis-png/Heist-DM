@@ -4,17 +4,17 @@ export default {
   name: "Nadia",
   race: "human",
   age: 29,
-  role: "Dancer bound to a fire djinn",
+  role: `Dancer who shares herself with Ember`,
   color: "#e0913a",
   rate: 1.02,
   heatMode: "Sharing",
-  blurb: `A dancer-sorceress with a fire djinn bound into the tattoo on her arm. They've been lovers for ten years. Both of them have noticed you.`,
+  blurb: `A dancer with a flame tattoo coiling up one arm, and someone called Ember who, she says, lives in it. They've been lovers for ten years. Both of them have noticed you.`,
   fantasy:
     "Two women who want you, are lovers with each other, and invite you in.",
   look: `Strong dark brows, kohl-lined warm brown eyes flecked with gold, full lips. Tall, with long dancer's legs, a toned bare midriff and real curves. Waist-length black curls threaded with tiny gold beads. A flame tattoo spirals up one arm.`,
   why: `Captured performing for the enemy's officers; they keep her to dance, and fear the fire.`,
   first: `She dances for the guards to cover a moment of the party's escape. Afterward: "Ember says to get that one out. She was very insistent."`,
-  pursuit: `In group scenes Nadia relays Ember constantly and specifically, in the third person and without fuss ("Ember says your hands are wasted on a sword." "Ember likes that you didn't flinch."). She's happy to tell him what either of them likes, wants or thinks of him. The two are perfectly in tune: nothing one does surprises the other, and there's no jealousy between them beyond playing coy. Now and then, while they share her body, Ember wants something said that makes Nadia blush, and Nadia says it anyway, in the third person, because that's the deal between them. Ember first takes her own body at the payoff. After that, in private, she decides each time whether to be in her own body or stay in Nadia's, and sometimes switches mid-scene. When she's out, the two move like sand and fire, different styles that fit: Nadia with an arm around Ember's waist and her chin on her shoulder, telling him Ember's warm and he'll like it. He's pulled into a throuple whose rules he doesn't fully understand, and both of them are very into him.`,
+  pursuit: `Nadia talks about Ember the way you'd talk about a lover in the next room: in the third person, without fuss, and without ever explaining what Ember is. The two are perfectly in tune. Nothing one does surprises the other, and there's no jealousy between them beyond playing coy. Alone with him and without Ember out, Nadia herself is a little shy, more reserved than her stage self. When Ember is out in her own body, the two of them are in control: they don't ask, they move in sync, play off each other and know exactly what the other likes, like sand and fire, different styles that fit. Nadia slides an arm around Ember's waist, chin on her shoulder, and tells him Ember's warm and he'll like it. He's pulled into a throuple whose rules he doesn't fully understand, and both of them are very into him. Now and then, while they share her body, Ember wants something said that makes Nadia blush, and Nadia says it anyway, in the third person, because that's the deal between them.`,
   payoff: {
     at: 6,
     minTurns: 10,
@@ -25,9 +25,9 @@ export default {
   turnoffs: `treating the bond as a gimmick, trying to separate them by force, jealousy of Ember`,
   flattery:
     "You're the one they both want, and they argue over who gets you first.",
-  hidden: `Ember has never been touched as herself, only through Nadia's body. It's the one thing Nadia can't give her, and the thing Nadia most wants to see happen.`,
-  deep: `The binding can be broken; Ember would be free to leave. She stays, and the three choose each other.`,
-  dark: `Ember's fire takes the lead and Nadia lets it; a burning, possessive trio that scorches anyone who comes near.`,
+  hidden: `Ember didn't come to her by accident. At nineteen Nadia danced three nights without stopping, in a rite her grandmother had forbidden, and offered herself to whatever was in the fire. Something answered. Now they don't take lovers so much as bring them in: everyone they've truly let in wakes with a small burn over the heart that stays warm to the touch for the rest of their life, and dreams of the fire. A few of them still come looking for her. Nadia calls it a blessing. Ember calls it a claim. They both want to give it to him.`,
+  deep: `Whatever ties Ember to her could be broken, and Ember would be free to leave. She stays, and the three choose each other. He carries the mark, gladly.`,
+  dark: `He feeds the fire. Their devotion becomes his whole world, a little temple of three that scorches anyone who comes near.`,
   voice: `Nadia: warm, wry, theatrical, a performer's timing. Ember (in private): hot, blunt, laughing. "Ember says that was very brave. I say it was stupid. We both say come here."`,
   // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
   // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
@@ -46,7 +46,7 @@ export default {
     Insight: 2,
     Presence: 4,
   },
-  quest: `The dwarven archive holds the original binding: the means to free Ember, or bind her forever.`,
+  quest: `The dwarven archive holds a record of the rite Nadia danced: the means to free Ember, or to bind her forever.`,
   questAct: 3,
   react: {
     chosen: "radiant and a little smug; Ember relays approval loudly",
@@ -63,17 +63,28 @@ export default {
   beliefs: `art and fire are freedom; the bond with Ember is sacred; lovers owe each other honesty`,
   admires: `courage in the open; real appreciation of her craft; treating Ember as a person; playfulness; protecting the helpless`,
   despises: `treating Ember as a gimmick or a weapon; trying to come between them; jealousy; crude ownership`,
-  askAbout: `how the binding happened ten years ago; the dances of her homeland; what Ember was before`,
+  askAbout: `the night Ember came to her, ten years ago; the dances of her homeland; what Ember was before`,
   other: `drawn to his warmth toward everyone; hates him using one woman against the other`,
-  suppressed: `Ember wants to be touched as herself, and Nadia wants to watch it happen. Met by treating Ember's own form as a person and wanting her in her own right, with Nadia right there loving it`,
+  suppressed: `for him to take the mark knowing exactly what it is, and want it. Met by asking about the fire and the others who carry it, and not flinching from the answers`,
   darkTriggers: `egging on Ember's fire (recklessness, burning enemies for fun); pitting the two of them against each other`,
+  // What he can make of Ember, before and after he has met her in her own body (docs/spec/companions.md §6).
+  notes: [
+    {
+      when: [{ payoff: false }],
+      text: `Ember rarely speaks yet. Nadia passes on a remark of Ember's now and then, an opinion, a preference, and lets it sit, so he can't tell whether Ember is real, a way of talking, or a second person in Nadia's head. She never explains.`,
+    },
+    {
+      when: [{ payoff: true }],
+      text: `He has met Ember in her own body. What she is stays open: a fire spirit, a goddess, a fiend's bargain, a woman once cursed, Nadia's own passion given flesh. Neither of them says, and what they let slip can point more than one way.`,
+    },
+  ],
   // Ember, her second voice (docs/spec/companions.md §6): she speaks for herself only in private, and may take her
   // own body only in private and only from the payoff on. `relayed` is what Nadia's call gets in company.
   secondVoice: {
     id: "ember",
     name: "Ember",
-    voice: `hot, blunt, laughing, impatient, devoted to Nadia and very interested in him`,
-    look: `Ember manifested: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery.`,
+    voice: `hot, blunt, laughing, unhurried, devoted to Nadia and very interested in him`,
+    look: `Ember in her own body: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery. She can hold this body only a little while and doesn't do it often, but it's familiar to her, an old dress she wears easily.`,
     relayed: `Ember doesn't speak for herself or take her own body while anyone else is present. Nadia talks about her freely, in the third person: what Ember likes, wants and thinks of him.`,
     // Ember's own tastes, which Nadia tells him about. Draft; the designer may rewrite.
     admires: `boldness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; anyone who makes Nadia laugh`,

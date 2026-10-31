@@ -69,7 +69,7 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 - `lean` 0–10: toward her dark branch.
 - Flags: `payoff`, `vuln`, `deep`, `bond`, `hurt`, `manifest`, plus the memory of what she leaves unsaid.
 
-**Per companion, toward the other:** how she feels about the other companion (−10..10, starting from the pair's `start` in `content/pairs.js`, moved at most 2 a scene by the campfire, D73).
+**Per companion, toward the other:** how she feels about the other companion (−10..10, starting from the pair's `start` in `content/pairs.js`, which is one number for both or each one's own view keyed by id, moved at most 2 a scene by the campfire, D73).
 
 **Party-level:** the pair value, the average of the two views; `knows` (the other companion knows about an involvement); `shared` (all three are openly together); the campaign `turn` (one per exchange with the player) and act.
 
@@ -118,7 +118,7 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 | `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter?, beat }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private she may take her own body (`look`); whether she does is the scene's call (D72). With the optional `manifestsAfter`, she can only once that flag is set or ready. `beat` is reported the first time she does. | Nadia's Ember |
 | `extraBeats: [{ id, cooldown, text, cooling }]` | A beat of her own, allowed once `cooldown` campaign turns have passed since the last. Her campfire call gets `text` while it's allowed and `cooling` while it isn't. | Ruby's storm |
 | `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Serena's "The chase", "Almost caught" |
-| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
+| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, `towardOther`, `fromOther` (how the other feels about her), `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
 ## 7. Wardrobe (D71)
 

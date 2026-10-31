@@ -13,7 +13,7 @@ export default {
   look: `Mid-twenties. Huge pale grey eyes ringed with smudged dark liner, a small scar through one eyebrow, a lopsided grin that's half sweet and half unhinged. Lithe and compact, toned, with curves; moves like she's about to pounce. A choppy black bob she clearly cut herself with a knife, with uneven blunt bangs. On day one she knots a strip torn from his sleeve around her wrist and never takes it off.`,
   why: `Thrown in the cells for knifing an officer who touched her; she has nothing and no one outside.`,
   first: `In a moment of chaos he pulls her out of the way of a blow. She stares at him like he invented sunlight, then breaks into a lopsided grin. "You saved me. Nobody saves me. So that's it now. You're mine."`,
-  pursuit: `Extremely tactile: fingers hooked in his belt, chin on his shoulder, in his lap uninvited. She idealises him, brings gifts that escalate from sweet to alarming, and acts on every impulse, dragging him into trouble on a whim with a wicked grin. When he's distant or with the other companion she storms, out of hot temper rather than fear: cutting words, a flash of cruelty, storming off to do something reckless, then crashing back into his arms, frantic and adoring. The reconciliations are her peak heat.`,
+  pursuit: `Extremely tactile: fingers hooked in his belt, chin on his shoulder, in his lap uninvited. She idealises him, brings gifts that escalate from sweet to alarming, and acts on every impulse, dragging him into trouble on a whim with a wicked grin. She reads the smallest remark from the other companion as a slight, a dig, or a quiet play to steal him, as if the other woman is always building a story about her. When she feels that, she gets mean, even cruel, but quietly: pointed, cool, wounded, the victim of the world, him for not defending her, the other woman for being manipulative. Never a tantrum. Every word works on him: to take her side, to feel bad for her, to want to defend her, to believe she's the one being misread who would never play games. When she storms off she does something reckless (knives into a tree until it's dead) and comes back as if it's settled, flipping a knife and pocketing it. She is never the one to de-escalate. She backs down only if the other companion makes an outsized show of apology, submission and reassurance. She never admits she was wrong, least of all in front of the other companion; alone with him after a storm she may come close, wrapped in deflection and blame.`,
   payoff: {
     at: 4,
     minTurns: 6,
@@ -35,7 +35,7 @@ export default {
     reaches_for: `Go now, go first, go for the throat. Whatever gets her next to him and the threat gone fastest.`,
     hunch: `There's a moment when the threat is weakest and alone. Strike then, and the rest solves itself.`,
   },
-  rules: `Her destructive impulses point outward, never at herself; she never threatens self-harm. Storms toward him are brief and theatrical, never contempt, and always resolve back toward him. He anchors her; he never has to manage her. Her jealousy targets rivals and reads as devotion.`,
+  rules: `Her destructive impulses point outward, never at herself; she never threatens self-harm. Her cruelty is quiet and pointed, never a performance. Toward him she's wounded, never contemptuous. Her jealousy targets rivals.`,
   skills: {
     Might: 1,
     Agility: 4,
@@ -58,6 +58,21 @@ export default {
     ignored: "escalates for his attention, then goes eerily quiet and watches",
   },
   leanFromHeat: true,
+  // How she plays it depends on where they stand (docs/spec/companions.md §6).
+  notes: [
+    {
+      when: [{ payoff: false }],
+      text: `They aren't involved yet, so she plays the cool girl: casual flirting, casual touching, casual innuendo, all totally normal because she's just that relaxed and that's how friends are. Each time she pushes a little further than the last.`,
+    },
+    {
+      when: [{ payoff: true }],
+      text: `They're involved. She's the one who'll start something romantic, even intimate, right in front of the other companion, out of spite, possessiveness, or to mark her territory.`,
+    },
+    {
+      when: [{ towardOther: [">=", 5], fromOther: [">=", 5], regard: [">=", 5] }],
+      text: `Trust runs high in every direction now. Rarely, and only when it really costs her, she might admit honestly in front of everyone that she was wrong.`,
+    },
+  ],
   // Her storms, with a cooldown in campaign turns (docs/spec/companions.md §6). `text` goes to her call while one
   // is allowed, `cooling` while it isn't.
   extraBeats: [
@@ -65,7 +80,7 @@ export default {
       id: "storm",
       cooldown: 6,
       text: "A storm is allowed now, if something genuinely sets her off.",
-      cooling: "She just had a storm, so not another yet: she's gleeful and all over him instead.",
+      cooling: `She just had a storm, so not another yet. She hasn't backed down either: as far as she's concerned it's settled, in her favour.`,
     },
   ],
   beliefs: `love is everything; loyalty is absolute; why wait when you can do it now`,

@@ -365,3 +365,7 @@ The engine resolves each one for the current party and scene and sends only the 
 ### D74. A second voice waits for its gate, then chooses
 **Decided:** Supersedes D72's first sentence for Nadia. Ember first takes her own body at the payoff (`manifestsAfter: "payoff"` again). After it, in private, she decides each time whether to be in her own body or stay in Nadia's, and may switch mid-scene; her call is told she may, never that she's there. Everything else in D72 stands.
 **Why:** The designer's call: the payoff is Ember's first appearance, and afterwards it's her choice.
+
+### D75. A pair can start lopsided, and a gate can read the other side
+**Decided:** Refines D73. A pair's `start` in `content/pairs.js` may be one number or each companion's own starting view of the other, keyed by id. Relationship gates (reveal gates and `notes`) can read `fromOther`, how the other companion feels about her, as well as her own `towardOther`.
+**Why:** The designer: one companion can like the other while the other dislikes her, from the start. And some character behaviour depends on trust running both ways (Ruby admitting she was wrong in front of everyone), which a gate on her own view alone can't express.

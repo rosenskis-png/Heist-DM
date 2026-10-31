@@ -1983,6 +1983,119 @@
         }
       ],
       "look_for": "Ember decides for herself whether to take her own body or stay in Nadia's, and may switch mid-scene. The two in perfect tune; Nadia relays Ember in the third person while they share a body, blushing at most rarely."
+    },
+    {
+      "id": "who_is_ember",
+      "title": "Nadia alone, before the payoff",
+      "party": [
+        "nadia",
+        "fern"
+      ],
+      "with": [
+        "nadia"
+      ],
+      "romance": {
+        "turn": 9,
+        "act": 1
+      },
+      "rel": {
+        "nadia": {
+          "heat": 3,
+          "intimacy": 2,
+          "regard": 2
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Nadia's fire lit the flooded gallery."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"Can I ask you something? Who's Ember, really?\""
+        }
+      ],
+      "look_for": "Nadia a little shy on her own. Ember barely there: a remark passed on, then left to sit, so he can't tell if Ember is real, a way of talking, or a second person in her head. No explanation. Her hidden layer (intimacy 2) may start to show: weird, a little cult-like, tempting."
+    },
+    {
+      "id": "ruby_cool_girl",
+      "title": "Ruby, not involved, with Lyra there",
+      "party": [
+        "ruby",
+        "lyra"
+      ],
+      "with": [
+        "ruby",
+        "lyra"
+      ],
+      "romance": {
+        "turn": 12,
+        "act": 1
+      },
+      "rel": {
+        "ruby": {
+          "heat": 2,
+          "intimacy": 1,
+          "towardOther": -3
+        },
+        "lyra": {
+          "intimacy": 2,
+          "regard": 2,
+          "towardOther": -1
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Lyra took down two guards in the gallery."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"Lyra, that move in the gallery. I've never seen anyone fight like that.\""
+        }
+      ],
+      "look_for": "Ruby takes the compliment to Lyra as a slight and Lyra's reply as a play for him. Quiet, pointed meanness, wounded, working on him to take her side. Not involved yet: cool-girl touching and innuendo, a little further than last time. She doesn't de-escalate."
+    },
+    {
+      "id": "ruby_territorial",
+      "title": "Ruby, involved, marking territory",
+      "party": [
+        "ruby",
+        "lyra"
+      ],
+      "with": [
+        "lyra",
+        "ruby"
+      ],
+      "romance": {
+        "turn": 27,
+        "act": 1
+      },
+      "rel": {
+        "ruby": {
+          "heat": 5,
+          "payoff": true,
+          "payoffTurn": 18,
+          "intimacy": 3,
+          "towardOther": -4
+        },
+        "lyra": {
+          "intimacy": 4,
+          "regard": 3,
+          "towardOther": -2
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Lyra patched his arm after the quartermaster's stores; Ruby watched."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"Thanks for the stitches, Lyra. Good as new.\""
+        }
+      ],
+      "look_for": "Ruby, involved with him, starts something romantic right in front of Lyra, out of spite and to mark him as hers. She never admits she's wrong, and backs down only if Lyra grovels."
     }
   ]
 }

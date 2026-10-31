@@ -393,3 +393,12 @@ test("a second voice's own tastes reach her call in company and in private", { s
   const rings = A.companionInput(env(), { channel: "private" }, voiced, [o], [], companionSchema);
   for (const input of [huddle(voiced, o), rings]) assert.ok(input.includes(JSON.stringify(sv.admires)) && input.includes(JSON.stringify(sv.despises)));
 });
+
+test("a pair can start lopsided, and a gate can read how the other companion feels about her", () => {
+  const s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: -4 }, dynamic: "x" } });
+  assert.deepEqual([s.rel[P.id].towardOther, s.rel[Q.id].towardOther, s.pair.value], [2, -4, -1]);
+  assert.equal(Rel.view(s, P).fromOther, -4);
+  assert.ok(Rel.holds(Rel.view(s, Q), [{ fromOther: [">=", 2], towardOther: ["<", 0] }]));
+  const lopsided = Object.values(pairs).filter((p) => typeof p.start === "object");
+  for (const p of lopsided) for (const v of Object.values(p.start)) assert.ok(Number.isInteger(v) && v >= -10 && v <= 10);
+});
