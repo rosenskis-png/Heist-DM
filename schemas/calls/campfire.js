@@ -5,16 +5,17 @@ import { r, list, obj } from "../shape.js";
 // Every field is about the companion whose call this is (D45); she never writes for the other one.
 export const campfireSchema = withDefs({
   $id: "campfire",
-  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit"], {
+  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit", "believes", "storm", "risk"], {
     // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
     // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
-    // them anywhere else.
-    segments: list(obj(["speaker", "text"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text") }), 1),
+    // them anywhere else. An `aside` is meant for the player alone: the other companion's call never sees it,
+    // though she may catch it (D80).
+    segments: list(obj(["speaker", "text", "aside"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text"), aside: { type: "boolean" } }), 1),
     changes: list(
       obj(["track", "by", "reason"], {
-        // `pair` is how she feels about the other companion, `read` how she thinks the other feels about her; each
-        // moves at most 2 a scene (D73, D76).
-        track: { enum: ["heat", "intimacy", "regard", "lean", "pair", "read"] },
+        // `affection`, `respect` and `trust` are how she feels about the other companion; `read_*` how she thinks
+        // the other feels about her on each. Each moves at most 2 an answer (D77, D76).
+        track: { enum: ["heat", "intimacy", "regard", "lean", "affection", "respect", "trust", "read_affection", "read_respect", "read_trust"] },
         by: { type: "integer", minimum: -3, maximum: 3 },
         reason: r("text"),
       }),
@@ -29,5 +30,11 @@ export const campfireSchema = withDefs({
     advances: { oneOf: [r("text"), { type: "null" }] },
     // The id of an outfit she owns that she changes into on the page, or null (docs/spec/companions.md §7).
     outfit: { oneOf: [r("id"), { type: "null" }] },
+    // What she now believes about him and the other companion, if this scene changed it, or null (D81). It can be wrong.
+    believes: { oneOf: [obj(["past", "current"], { past: { type: "boolean" }, current: { type: "boolean" } }), { type: "null" }] },
+    // Her storm level after this answer, if she has one, or null (D82). It can fall only one level an answer.
+    storm: { oneOf: [{ type: "integer", minimum: 0, maximum: 5 }, { type: "null" }] },
+    // How likely her asides are to be caught, if she made any, or null (D80).
+    risk: { oneOf: [{ enum: ["low", "medium", "high"] }, { type: "null" }] },
   }),
 });

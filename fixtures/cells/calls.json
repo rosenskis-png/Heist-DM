@@ -107,15 +107,18 @@
     "segments": [
       {
         "speaker": "narrator",
-        "text": "Lyra sits with her back to the warm cistern wall and pats the stone beside her. The dripping water keeps a slow time of its own."
+        "text": "Lyra sits with her back to the warm cistern wall and pats the stone beside her. The dripping water keeps a slow time of its own.",
+        "aside": false
       },
       {
         "speaker": "self",
-        "text": "You kept your nerve in there. Sit. I want to look at you when it isn't dark."
+        "text": "You kept your nerve in there. Sit. I want to look at you when it isn't dark.",
+        "aside": false
       },
       {
         "speaker": "narrator",
-        "text": "She takes your hand and turns it over, checking the scrapes from the bars, her thumb lingering."
+        "text": "She takes your hand and turns it over, checking the scrapes from the bars, her thumb lingering.",
+        "aside": false
       }
     ],
     "changes": [
@@ -132,6 +135,9 @@
     "commitments": [],
     "beats": [],
     "advances": "She asks him to let her look after him.",
-    "outfit": null
+    "outfit": null,
+    "believes": null,
+    "storm": null,
+    "risk": null
   }
 }

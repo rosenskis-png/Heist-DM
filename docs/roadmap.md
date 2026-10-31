@@ -131,6 +131,10 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 17. **Nadia's talk of Ember follows the relationship:** rare and vague far from the payoff, more frequent and grounded near it, plainly real after it, withdrawn if she's hurt. Her secret is now the Hearth, a burned cult whose fire Ember came out of, which grows on devotion and marks everyone it takes in; the dark path is giving in to it, the deep path finding Ember another way to be whole.
 18. **Ruby is hot and cold:** manic and dangerous or quiet and wounded, always knives, always hypersexual. With the other companion: cool girl when it's good, quiet manipulation when she's hurt, a real tantrum when slighted and the other won't back down. Alone with him: storms, then always crashes back adoring and a little ashamed. Her blind spot (a submissive rival plus a steady player) and her pull toward him when he's less steady are in her file.
 
+19. **Feelings didn't drive behaviour** (sixth round). At −10 regard, or −10 toward the other companion, they played neutral and warmed to niceness; wrong reads never surprised anyone. Cause: the numbers reached the call bare, and one pair number was too thin. Fix: D77, D78, D79.
+20. **Whispers, triangles, storms, Ember in company, Lisa's grudge, Vesper's shamelessness:** D80 to D84. Vesper's pursuit is now shameless, sexual and a little desperate, a performance; her deep path is self-respect while staying a succubus.
+21. **Serena, Morgana and Lyra will be replaced.** Open: three new companions, designed against what the five keepers leave out (who withholds, who judges, who lies, Ruby's quick friend, Fern's frustration). Each new companion also needs a sister entry in Lisa's file.
+
 **Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
 
 **Carried into Phase 4:**

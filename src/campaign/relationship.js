@@ -4,6 +4,7 @@
 import * as R from "../../content/relationship.js";
 import { pairEntry } from "./roster.js";
 import { newWardrobe, equip } from "./wardrobe.js";
+import { d100 } from "../engine/rng.js";
 
 const clamp = (v, [lo, hi]) => Math.max(lo, Math.min(hi, v));
 const copy = (x) => structuredClone(x);
@@ -20,33 +21,68 @@ export const newRel = () => ({
   bond: false,
   hurt: false,
   manifest: false,
+  // Whether they're lovers now (the payoff starts it, a breakup ends it, D81).
+  involved: false,
+  // What she believes about him and the other companion: ever involved, and involved now (D81).
+  believes: { past: false, current: false },
+  // A declared escalation's level, 0 when calm (D82).
+  storm: 0,
+  // Asides of the other's she caught, which her next call sees once (D80).
+  noticed: [],
   gain: { heat: 0, intimacy: 0 },
   beatTurns: {},
   memories: [],
   commitments: [],
   revealed: [],
-  // How she feels about the other companion (D73), and how she thinks the other feels about her (D76).
-  towardOther: 0,
-  readOfOther: 0,
+  // How she feels about the other companion, and how she thinks the other feels about her (D76), on each axis (D77).
+  toward: axes(0),
+  read: axes(0),
 });
 
+// A view on the three axes: one number sets affection only.
+export function axes(v) {
+  const o = typeof v === "number" ? { affection: v } : v ?? {};
+  return Object.fromEntries(R.axes.map((k) => [k, o[k] ?? 0]));
+}
+
 // The party's relationship state: one entry per companion, plus the pair. `members` are the two companions.
-export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
+// A pair's `start` is one number for both, or each one's own view keyed by id (D73), and a view is one number
+// (affection) or the three axes (D77). A tie's `start` and `partnerStart` give both views for her and her partner.
+// Her first read of the other is right (D76), unless the other declares a `mask`: then her read starts at the mask.
+export function newRomance(members, pairs = {}, { turn = 0, act = 1, seed = 1 } = {}) {
   const [a, b] = members.map((c) => c.id);
-  // A pair's `start` is one number for both, or each one's own view keyed by id (D73).
   const start = b ? pairEntry(pairs, a, b)?.start ?? 0 : 0;
-  const startOf = (id) => (typeof start === "number" ? start : start[id] ?? 0);
-  const views = members.map((c) => startOf(c.id));
+  const tied = members.find((c, i) => c.tie && members[1 - i] && (c.tie.start || c.tie.partnerStart));
+  const startOf = (c) => {
+    if (tied) return axes(c === tied ? tied.tie.start : tied.tie.partnerStart);
+    return axes(typeof start === "number" ? start : start[c.id] ?? 0);
+  };
+  const views = members.map(startOf);
+  const shown = members.map((c, i) => (c.mask ?? c.tie?.mask ? axes(c.mask ?? c.tie.mask) : views[i]));
   return {
     turn,
     act,
-    // Her first read of the other is right; after that only her own judgment moves it (D76).
-    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), towardOther: views[i], readOfOther: views[1 - i] ?? 0 }])),
-    pair: { value: Math.round(views.reduce((x, y) => x + y, 0) / (views.length || 1)) },
-    knows: false,
+    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), toward: axes(views[i]), read: axes(shown[1 - i] ?? 0) }])),
+    open: false,
     shared: false,
+    rng: seed >>> 0,
     wardrobe: newWardrobe(members),
   };
+}
+
+// The limits on her view of the other: her own `limits`, and her tie's toward her partner until its `until` beat
+// has happened (D77). Each is { <axis>: [lo, hi], perScene }.
+export function limitsFor(rom, c, members) {
+  const out = { perScene: R.pair.perScene, ...Object.fromEntries(R.axes.map((k) => [k, R.pair.range])) };
+  const o = members.find((m) => m.id !== c.id);
+  const tie = c.tie?.limits && o && (c.tie.withId === o.id || c.tie.by?.[o.id]) ? c.tie.limits : null;
+  const lifted = tie?.until && rom.rel[c.id].beatTurns[tie.until] != null;
+  for (const l of [c.limits, lifted ? null : tie]) {
+    if (!l) continue;
+    for (const k of R.axes) if (l[k]) out[k] = [Math.max(out[k][0], l[k][0]), Math.min(out[k][1], l[k][1])];
+    if (l.perScene != null) out.perScene = Math.min(out.perScene, l.perScene);
+  }
+  return out;
 }
 
 // Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D70).
@@ -55,9 +91,15 @@ export const speakingOrder = (rom, ids) => (rom.turn % 2 ? [...ids].reverse() : 
 // What gates read: her tracks and flags (including her read of the other, never the other's real feelings, D76),
 // the campaign's turn and act, and two distances.
 export function view(rom, c) {
-  const rel = rom.rel[c.id];
+  const { toward, read, believes, ...rel } = rom.rel[c.id];
+  const cap = (k) => k[0].toUpperCase() + k.slice(1);
   return {
     ...rel,
+    ...toward,
+    ...Object.fromEntries(Object.entries(read).map(([k, v]) => [`read${cap(k)}`, v])),
+    believesPast: believes.past,
+    believesCurrent: believes.current,
+    open: rom.open,
     turn: rom.turn,
     act: rom.act,
     toPayoff: c.payoff.at - rel.heat,
@@ -84,13 +126,14 @@ export function ready(rom, c) {
 }
 
 // Her second voice is heard only in private, and may take her own body only in person, and, if she declares
-// `manifestsAfter`, once that flag is set or about to be. Whether she does is the scene's call.
+// `manifestsAfter`, once that flag is set or about to be. Whether she does is the scene's call. In company in
+// person, she may do both once the gate `inCompany` holds (D83).
 export function secondVoiceState(rom, c, scene = {}) {
   const sv = c.secondVoice;
   if (!sv) return null;
-  if (!scene.private) return { speaks: false };
   const after = sv.manifestsAfter;
   const due = !after || rom.rel[c.id][after] || ready(rom, c).includes(after);
+  if (!scene.private) return scene.inPerson && due && sv.inCompany && holds(view(rom, c), sv.inCompany) ? { speaks: true, canAppear: true, inCompany: true } : { speaks: false };
   return { speaks: true, canAppear: !!(scene.inPerson && due) };
 }
 
@@ -103,9 +146,18 @@ export function allowedBeats(rom, c, members, scene = {}) {
   const out = ready(rom, c);
   out.push("rupture");
   if (r.hurt) out.push("repair");
-  if (o && !rom.knows && (r.payoff || ro.payoff)) out.push("discovered");
-  if (o && !rom.shared && r.payoff && ro.payoff && members.every((m) => m.tie?.triangle?.shared !== false)) out.push("shared");
-  for (const b of c.extraBeats ?? []) if (rom.turn - (r.beatTurns[b.id] ?? -Infinity) >= b.cooldown) out.push(b.id);
+  if (r.involved) out.push("breakup");
+  if (r.payoff && !r.involved) out.push("rekindle");
+  if (o && !scene.private && !rom.open) out.push("in_the_open");
+  if (o && !rom.shared && r.involved && ro.involved && members.every((m) => m.tie?.triangle?.shared !== false)) out.push("shared");
+  const v = view(rom, c);
+  for (const b of c.extraBeats ?? []) {
+    const last = r.beatTurns[b.id];
+    if (b.once && last != null) continue;
+    if (b.cooldown != null && rom.turn - (last ?? -Infinity) < b.cooldown) continue;
+    if (b.when && !holds(v, b.when)) continue;
+    out.push(b.id);
+  }
   const sv = secondVoiceState(rom, c, scene);
   if (sv?.canAppear && !r.manifest) out.push(c.secondVoice.beat);
   return out;
@@ -118,13 +170,10 @@ export function applyDelta(rom, c, delta) {
   const r = out.rel[c.id];
   const d = Object.fromEntries(Object.entries(R.caps.perTurn).map(([k, range]) => [k, clamp(Math.round(delta[k] ?? 0), range)]));
   if (d.heat > 0) {
-    if (r.payoff) {
-      if (c.leanFromHeat) r.lean = clamp(r.lean + d.heat * R.afterPayoff.heatToLean, R.tracks.lean);
-    } else {
-      const g = Math.min(d.heat, Math.max(0, R.caps.perEncounter.heat - r.gain.heat));
-      r.heat = clamp(r.heat + g, R.tracks.heat);
-      r.gain.heat += g;
-    }
+    const g = Math.min(d.heat, Math.max(0, R.caps.perEncounter.heat - r.gain.heat));
+    r.heat = clamp(r.heat + g, R.tracks.heat);
+    r.gain.heat += g;
+    if (r.payoff && c.leanFromHeat) r.lean = clamp(r.lean + g * R.afterPayoff.heatToLean, R.tracks.lean);
   } else if (d.heat < 0) r.heat = clamp(r.heat + d.heat, R.tracks.heat);
   if (d.intimacy > 0) {
     const g = Math.min(d.intimacy, Math.max(0, R.caps.perEncounter.intimacy - r.gain.intimacy));
@@ -160,13 +209,28 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
       continue;
     }
     const r = out.rel[c.id];
-    if (b === "payoff") Object.assign(r, { payoff: true, payoffTurn: out.turn });
+    const o = members.find((m) => m.id !== c.id);
+    if (b === "payoff") Object.assign(r, { payoff: true, payoffTurn: out.turn, involved: true });
     else if (b === "vulnerability") r.vuln = true;
     else if (b === "deep" || b === "bond") r[b] = true;
     else if (b === "rupture") Object.assign(r, { hurt: true, regard: clamp(r.regard + R.beatEffects.rupture.regard, R.tracks.regard) });
     else if (b === "repair") Object.assign(r, { hurt: false, regard: Math.max(r.regard, 0) + R.beatEffects.repair.regardFloor });
-    else if (b === "discovered") out.knows = true;
-    else if (b === "shared") Object.assign(out, { shared: true, knows: true });
+    else if (b === "breakup") {
+      r.involved = false;
+      if (out.open && o) out.rel[o.id].believes.current = false;
+    } else if (b === "rekindle") {
+      r.involved = true;
+      if (out.open && o) out.rel[o.id].believes = { past: true, current: true };
+    } else if (b === "in_the_open" || b === "shared") {
+      // Out in the open, each knows the truth about the other.
+      out.open = true;
+      if (b === "shared") out.shared = true;
+      for (const m of members) {
+        const t = out.rel[members.find((x) => x.id !== m.id).id];
+        out.rel[m.id].believes = { past: !!t.payoff, current: !!t.involved };
+      }
+      if (b === "in_the_open") r.beatTurns[b] = out.turn;
+    }
     else if (b === c.secondVoice?.beat) r.manifest = true;
     else r.beatTurns[b] = out.turn;
   }
@@ -187,6 +251,9 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
   if (out.segments.some((x) => x.speaker === "second_voice") && !secondVoiceState(rom, c, scene)?.speaks) problems.push("no second voice speaks in this scene");
   if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
+  const top = c.escalation?.tiers.length ?? 0;
+  if (out.storm != null && !c.escalation) problems.push("she has no storm level (storm must be null)");
+  else if (out.storm != null && (out.storm < 0 || out.storm > top)) problems.push(`storm must be 0 to ${top}`);
   return problems;
 }
 
@@ -194,20 +261,31 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
 // companion, beats, memories, revealed secrets, commitments and her outfit. Everything is about her (D45).
 export function applyCampfire(rom, c, members, out, scene = {}) {
   const delta = {};
-  let pairBy = 0;
-  let readBy = 0;
+  const toward = {};
+  const read = {};
   for (const x of out.changes) {
-    if (x.track === "pair") pairBy += x.by;
-    else if (x.track === "read") readBy += x.by;
+    if (R.axes.includes(x.track)) toward[x.track] = (toward[x.track] ?? 0) + x.by;
+    else if (x.track.startsWith("read_")) read[x.track.slice(5)] = (read[x.track.slice(5)] ?? 0) + x.by;
     else delta[x.track] = (delta[x.track] ?? 0) + x.by;
   }
-  let s = applyDelta(rom, c, delta);
+  let s = recover(applyDelta(rom, c, delta), c, delta);
   const own = s.rel[c.id];
-  const step = (v, by) => clamp(v + clamp(by, [-R.pair.perScene, R.pair.perScene]), R.pair.range);
-  own.towardOther = step(own.towardOther, pairBy);
-  own.readOfOther = step(own.readOfOther, readBy);
-  const views = Object.values(s.rel).map((x) => x.towardOther);
-  s.pair.value = Math.round(views.reduce((a, b) => a + b, 0) / views.length);
+  const lim = limitsFor(rom, c, members);
+  const step = (v, by, range) => clamp(v + clamp(by ?? 0, [-lim.perScene, lim.perScene]), range);
+  for (const k of R.axes) {
+    own.toward[k] = step(own.toward[k], toward[k], lim[k]);
+    own.read[k] = step(own.read[k], read[k], R.pair.range);
+  }
+  if (out.believes) own.believes = { past: !!(out.believes.past || out.believes.current), current: !!out.believes.current };
+  if (c.escalation && out.storm != null) own.storm = clamp(Math.max(out.storm, own.storm - 1), [0, c.escalation.tiers.length]);
+  own.noticed = [];
+  // An aside in company: the other companion may catch it (D80).
+  const o = members.find((m) => m.id !== c.id);
+  const asides = out.segments.filter((x) => x.aside).map((x) => x.text);
+  if (o && !scene.private && asides.length) {
+    const caught = rollCatch(s, out.risk ?? "low");
+    if (caught) s.rel[o.id].noticed = [...s.rel[o.id].noticed, ...asides.map((t) => `${c.name}, out of the others' notice: ${t}`)];
+  }
   s = applyBeats(s, c, members, out.beats, scene).state;
   const r = s.rel[c.id];
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);
@@ -216,23 +294,42 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   return out.outfit ? equip(s, c.id, out.outfit) : s;
 }
 
-// The love-triangle state for her (Gravenhold's configOf). A tie can declare how the triangle reads when both
-// are involved with him (`tie.triangle.bothInvolved`), from either companion's side.
+// With no change to a baseline track this answer, a value below the baseline rises toward it (D78).
+export function recover(rom, c, delta) {
+  const out = copy(rom);
+  const r = out.rel[c.id];
+  for (const k of R.baseline.tracks) if (!delta[k] && r[k] < R.baseline.to) r[k] = Math.min(R.baseline.to, r[k] + R.baseline.by);
+  return out;
+}
+
+// Whether an aside is caught, by the speaker's declared risk (D80). Moves the party's seeded roll (D12).
+export function rollCatch(rom, risk = "low") {
+  return d100(rom) <= (R.asideCatch[risk] ?? R.asideCatch.low);
+}
+
+// Something the player says to one companion out of the other's notice: the other may catch it (D80).
+export function playerAside(rom, overhearer, text) {
+  const out = copy(rom);
+  const caught = rollCatch(out, "low");
+  if (caught) out.rel[overhearer].noticed = [...out.rel[overhearer].noticed, `The player, out of your notice: ${text}`];
+  return { state: out, caught };
+}
+
+// The love-triangle state for her (Gravenhold's configOf), from her own involvement and what she believes about
+// him and the other, never the truth about them (D81). Both can be in the dark at once.
 export function config(rom, c, members) {
   const o = members.find((m) => m.id !== c.id);
   const r = rom.rel[c.id];
   const ro = o ? rom.rel[o.id] : null;
-  if (r.payoff && ro?.payoff) {
-    const mine = c.tie?.triangle?.bothInvolved;
-    const theirs = o.tie?.triangle?.bothInvolved;
-    if (mine) return rom.knows ? mine.self.known : mine.self.secret;
-    if (theirs) return theirs.partner;
+  const thinks = !!(o && r.believes?.current);
+  if (r.involved) {
+    if (!thinks) return "chosen";
     if (rom.shared) return "shared";
-    if (rom.knows) return "rivals";
-    return (r.payoffTurn ?? 0) <= (ro.payoffTurn ?? 0) ? "cheatedOn" : "affair";
+    if (rom.open) return "rivals";
+    return (r.payoffTurn ?? 0) <= (ro.payoffTurn ?? Infinity) ? "cheatedOn" : "affair";
   }
-  if (r.payoff) return "chosen";
-  if (ro?.payoff) return r.heat >= c.payoff.at * R.secondFiddleAt ? "secondfiddle" : "thirdwheel";
+  if (r.payoff) return "former";
+  if (thinks) return r.heat >= c.payoff.at * R.secondFiddleAt ? "secondfiddle" : "thirdwheel";
   if (rom.turn >= R.ignored.turn && r.heat < R.ignored.heat && r.intimacy < R.ignored.intimacy) return "ignored";
   return "open";
 }
@@ -245,6 +342,7 @@ export function stage(rel, c) {
   if (rel.deep) return rel.lean >= A.consumed ? L.consumed : L.inLove;
   if (rel.bond) return L.bonded;
   if (rel.vuln) return rel.payoff ? L.loversOpening : L.opening;
+  if (rel.payoff && rel.involved === false) return L.former;
   if (rel.payoff) return rel.lean >= A.indulging ? L.indulging : L.lovers;
   if (rel.heat >= c.payoff.at - A.burningWithin) return L.burning;
   if (rel.heat >= A.drawn) return L.drawn;

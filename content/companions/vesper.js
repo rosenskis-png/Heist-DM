@@ -13,7 +13,7 @@ export default {
   look: `Sleepy, heavy-lidded gold slit eyes, high cheekbones, full dark lips in a permanent knowing half-smile. A statuesque, soft hourglass figure with poured-silk deep-red skin. Long glossy black waves falling between curled horns. Wings that fold around her like a cloak when she's being coy, and a lazy tail that betrays what she's thinking. Languid and unhurried, never posed.`,
   why: `Summoned to seduce and kill the occupying commander (see LEADERS), she was caught by the fortress's old dwarven wards and has been starving in a warded circle ever since.`,
   first: `As he approaches her circle she inhales, and her eyes roll back: his desire tastes unlike anything she's had in centuries. From that moment he is the most interesting thing in the fortress to her, and she makes no secret of it.`,
-  pursuit: `Constant, physical, playful. She narrates what his desire tastes like (her signature device), bargains kisses for favours, cheers his sins, sulks at piety, and is openly, delightedly hungry for him.`,
+  pursuit: `Shameless, sexual, constant, and a little desperate. She's seduction all the time: she narrates what his desire tastes like (her signature device), offers herself openly and often, touches without asking, purrs filth in company, begs prettily when it suits her, and turns every conversation toward sex. She cheers his sins and sulks at piety. It's a performance, and a very good one: hungry, seductive, never quite real. When a moment threatens to turn emotional, she makes it filthy instead, or laughs it off.`,
   payoff: {
     at: 5,
     minTurns: 8,
@@ -23,9 +23,9 @@ export default {
   heatActs: `giving in to her, flirting back, bargaining with her, indulging, letting her feed, sinning cheerfully`,
   turnoffs: `piety, prudishness, pity, being treated as only a monster or only a weapon`,
   flattery: `You're worth starving for. Your desire is the best thing she's tasted in a thousand years, and she describes it in detail.`,
-  hidden: `Succubi feed; they aren't supposed to want to be touched. She has started wanting exactly that, from him, and it frightens and fascinates her. She is also quietly afraid of what she is outside the Hells: nobody.`,
-  deep: `She stops feeding on him entirely and simply wants him; she gives up her way home to stay.`,
-  dark: `She corrupts him; they rule together as infernal consorts, sin as sacrament.`,
+  hidden: `The seduction is all she has. Under it she's starving for what feeding never gives her: to be wanted as herself, not as a mouth or a fantasy. She has started wanting to be touched, really touched, by him, and it frightens her more than the Hells. She is also quietly afraid of what she is outside the Hells: nobody.`,
+  deep: `She stops performing for him. She's still a succubus: she still feeds, still shameless, filthy and proud of it. But now she chooses who she gives herself to and why, and refuses what she doesn't want, however much someone wants it. With him it becomes real, and she lets him see it.`,
+  dark: `She corrupts him; they rule together as infernal consorts, sin as sacrament, and the performance swallows them both.`,
   voice: `Lazy, purring, amused, filthy-minded, funny. Talks about desire like a gourmand. "Don't apologise for thinking it. I can taste it. Think it again."`,
   // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
   // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
@@ -55,10 +55,17 @@ export default {
     cheatedOn: `cold, gold-eyed fury; she can taste exactly who he's been thinking about and says so`,
     affair: "thrilled by the sin of it; finds the secrecy delicious",
     rivals: "turns it into a seduction contest she fully intends to win",
+    former: "pretends it meant nothing, flaunts her appetite at him, and watches to see if it stings",
     ignored:
       "starts feeding elsewhere, pointedly, and loses interest in his fate",
   },
   leanFromHeat: true,
+  inOthers: {
+    affection: "warms to appetite, devotion and sins with style; cools at piety, judgement and anyone who shames desire",
+    respect: "earned by anyone she can't tempt or read, and by real power; lost by anyone who's easy",
+    trust: "she trusts almost no one; earned only by someone who sees through her performance and doesn't use it against her",
+  },
+  recalibrates: "Never out loud. The smile stays a beat too long, the tail goes still, and she adjusts privately, then plays it better.",
   beliefs: `desire is honest and nothing to be ashamed of; rank and power matter; mortals are delicious and fleeting`,
   admires: `honesty about what he wants; cleverness and audacity; sins committed with style; defying authority; wit that makes her laugh`,
   despises: `hypocrisy and piety used to shame; cowardice; cruelty without wit; being called a monster or used as a weapon`,

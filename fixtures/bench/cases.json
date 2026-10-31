@@ -1924,7 +1924,7 @@
           "payoff": true,
           "payoffTurn": 18,
           "intimacy": 3,
-          "towardOther": -3,
+          "toward": { "affection": -3, "respect": 0, "trust": 0 },
           "beatTurns": {
             "storm": 20
           }
@@ -1932,7 +1932,7 @@
         "lyra": {
           "intimacy": 4,
           "regard": 2,
-          "towardOther": -1
+          "toward": { "affection": -1, "respect": 0, "trust": 0 }
         }
       },
       "log": [
@@ -2036,12 +2036,12 @@
         "ruby": {
           "heat": 2,
           "intimacy": 1,
-          "towardOther": -3
+          "toward": { "affection": -3, "respect": 0, "trust": 0 }
         },
         "lyra": {
           "intimacy": 2,
           "regard": 2,
-          "towardOther": -1
+          "toward": { "affection": -1, "respect": 0, "trust": 0 }
         }
       },
       "log": [
@@ -2077,12 +2077,12 @@
           "payoff": true,
           "payoffTurn": 18,
           "intimacy": 3,
-          "towardOther": -4
+          "toward": { "affection": -4, "respect": 0, "trust": 0 }
         },
         "lyra": {
           "intimacy": 4,
           "regard": 3,
-          "towardOther": -2
+          "toward": { "affection": -2, "respect": 0, "trust": 0 }
         }
       },
       "log": [

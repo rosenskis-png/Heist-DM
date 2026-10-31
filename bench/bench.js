@@ -7,6 +7,7 @@ import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import { companions as roster } from "../content/companions/index.js";
 import * as Rel from "../src/campaign/relationship.js";
+import * as Relationship from "../content/relationship.js";
 import { addOutfit, equip, wearing } from "../src/campaign/wardrobe.js";
 import { resolveParty, partyProblems } from "../src/campaign/roster.js";
 import * as A from "../src/context.js";
@@ -239,7 +240,8 @@ async function runHuddle(c, schema, tier) {
 function campfireSetup(c) {
   const members = resolveParty(c.party.map((id) => roster[id]));
   const romance = { ...Rel.newRomance(members, pairs), ...c.romance };
-  for (const [id, r] of Object.entries(c.rel)) romance.rel[id] = { ...Rel.newRel(), ...r };
+  // A case's payoff means they're lovers now unless it says otherwise (D81).
+  for (const [id, r] of Object.entries(c.rel)) romance.rel[id] = { ...Rel.newRel(), ...(r.payoff ? { involved: true } : {}), ...r, toward: Rel.axes(r.toward ?? romance.rel[id]?.toward), read: Rel.axes(r.read ?? romance.rel[id]?.read) };
   let out = romance;
   for (const [who, owned] of Object.entries(c.outfits ?? {})) for (const [id, o] of Object.entries(owned)) out = addOutfit(out, who, id, o);
   return { members, romance: out };
@@ -266,10 +268,11 @@ async function runCampfire(c, schema, tier) {
     if (r.errors.length) break;
     const after = Rel.applyCampfire(romance, self, members, r.out, where);
     const [b, x] = [romance.rel[id], after.rel[id]];
-    turn.tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(x[k] * 10) / 10}`).join(", ") + `; pair ${romance.pair.value}→${after.pair.value}`;
+    turn.tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(x[k] * 10) / 10}`).join(", ") + "; " + ["affection", "respect", "trust"].map((k) => `${k} ${b.toward[k]}→${x.toward[k]}`).join(", ");
     turn.stage = `${Rel.stage(b, self)} → ${Rel.stage(x, self)}`;
     romance = after;
-    scene.push(...r.out.segments.map((g) => ({ from: g.speaker === "narrator" ? "narrator" : id, text: g.text })));
+    // Her asides never reach the other companion's call (D80).
+    scene.push(...r.out.segments.filter((g) => !g.aside).map((g) => ({ from: g.speaker === "narrator" ? "narrator" : id, text: g.text })));
     mustAdvance = !r.out.advances;
   }
   const run = { turns, ms, inputChars, campfire: true };
@@ -451,7 +454,7 @@ function campfireView(run) {
       h(
         "div",
         { class: "prose" },
-        (o.segments ?? []).map((x) => h("p", {}, who[x.speaker] ? h("b", {}, `${who[x.speaker]}: `) : null, x.text)),
+        (o.segments ?? []).map((x) => h("p", { class: x.aside ? "aside" : null }, x.aside ? h("span", { class: "chip info" }, "aside") : null, who[x.speaker] ? h("b", {}, ` ${who[x.speaker]}: `) : null, x.text)),
         (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
         [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
       ),
@@ -642,6 +645,9 @@ async function start() {
 // through the engine's checks and is applied, so the numbers move as the scene does. Kept in this browser only.
 
 const camp = store.get("bench.camp", null) ?? { a: "nadia", b: "fern", with: "both", log: "", romance: null, transcript: [], looks: {} };
+// A relationship state saved before the three axes and beliefs (D77, D81) starts over; the transcript stays.
+if (camp.romance && Object.values(camp.romance.rel ?? {}).some((r) => !r.toward)) camp.romance = null;
+camp.to ??= "all";
 const saveCamp = () => store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
 const campMembers = () => resolveParty([roster[camp.a], roster[camp.b]]);
 function campReset() {
@@ -650,29 +656,41 @@ function campReset() {
   saveCamp();
 }
 
-// What the scene has said so far, as the next call reads it.
-function campScene() {
+// What the scene has said so far, as `viewer`'s next call reads it: never the other's asides, or the player's
+// whispers to the other (D80).
+function campScene(viewer) {
   return camp.transcript.flatMap((t) => {
-    if (t.from === "player") return [{ from: "player", text: t.text }];
+    if (t.from === "player") return t.to && t.to !== viewer ? [] : [{ from: t.to ? "player, whispering to you" : "player", text: t.text }];
     if (!t.out) return [];
     const c = roster[t.from];
-    return t.out.segments.map((g) => ({ from: g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : c.name, text: g.text }));
+    return t.out.segments
+      .filter((g) => !g.aside || t.from === viewer)
+      .map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : c.name) + (g.aside ? " (aside)" : ""), text: g.text }));
   });
 }
 
 async function campSend(text, status) {
   const members = campMembers();
-  const ids = camp.with === "both" ? [camp.a, camp.b] : [camp.with];
-  camp.transcript.push({ from: "player", text });
+  const both = camp.with === "both";
+  const whisper = both && camp.to !== "all" ? camp.to : null;
+  // A whisper goes to one of them, who answers; the other may catch it (D80).
+  const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.with];
+  camp.transcript.push({ from: "player", text, ...(whisper ? { to: whisper } : {}) });
   camp.romance = Rel.nextTurn(camp.romance);
+  if (whisper) {
+    const other = whisper === camp.a ? camp.b : camp.a;
+    const w = Rel.playerAside(camp.romance, other, text);
+    camp.romance = w.state;
+    if (w.caught) camp.transcript.push({ from: "system", text: `${roster[other].name} caught your whisper.` });
+  }
   const order = ids.length > 1 ? Rel.speakingOrder(camp.romance, ids) : ids;
   let mustAdvance = false;
   for (const id of order) {
     status.textContent = `${roster[id].name} is answering…`;
     const self = members.find((m) => m.id === id);
     const other = id === camp.a ? camp.b : camp.a;
-    const where = { private: ids.length === 1, inPerson: true, mustAdvance };
-    const c = { with: ids, scene: campScene(), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
+    const where = { private: !both, inPerson: true, mustAdvance };
+    const c = { with: both ? [camp.a, camp.b] : ids, scene: campScene(id), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
     const input = A.campfireInput({ ...env, romance: camp.romance }, c, roster[id], [roster[other]], campfireSchema);
     try {
       const r = await ask(input, campfireSchema, settings.tiers.campfire, (o) => Rel.campfireProblems(camp.romance, self, members, o, where));
@@ -680,8 +698,10 @@ async function campSend(text, status) {
         camp.transcript.push({ from: id, error: r.errors.slice(0, 5).join("; "), input });
         break;
       }
+      const before = camp.romance.rel[other].noticed.length;
       camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
       camp.transcript.push({ from: id, out: r.out, input, retried: r.retried });
+      if (camp.romance.rel[other].noticed.length > before) camp.transcript.push({ from: "system", text: `${roster[other].name} caught ${self.name}'s aside.` });
       mustAdvance = !r.out.advances;
     } catch (e) {
       camp.transcript.push({ from: id, error: errorText(e), input });
@@ -745,22 +765,36 @@ function campView() {
     h("label", { class: "stack" }, h("span", {}, "The story so far (one event per line)"),
       h("textarea", { id: "camp-log", rows: 2, oninput: (e) => ((camp.log = e.target.value), saveCamp()) }, camp.log)),
   );
-  const TRACKS = [["heat", 0, 12], ["intimacy", 0, 10], ["regard", -10, 10], ["lean", 0, 10], ["towardOther", -10, 10, "feels about the other"], ["readOfOther", -10, 10, "thinks the other feels"]];
+  const TRACKS = [["heat", 0, 12], ["intimacy", 0, 10], ["regard", -10, 10], ["lean", 0, 10]];
+  const AXES = ["affection", "respect", "trust"];
   const cards = members.map((c) => {
     const r = camp.romance.rel[c.id];
+    const other = members.find((m) => m.id !== c.id);
     const set = (k, v) => ((r[k] = v), saveCamp(), rerender());
+    const setIn = (group, k, v) => ((r[group][k] = v), saveCamp(), rerender());
+    const num = (id, lo, hi, v, on) => h("input", { id, type: "number", min: lo, max: hi, step: 1, value: Math.round(v * 10) / 10, onchange: (e) => on(Math.max(lo, Math.min(hi, Number(e.target.value)))) });
     const looks = h("div");
     const owned = camp.romance.wardrobe[c.id];
     return h(
       "section",
       { class: "case" },
       h("div", { class: "case-head" }, h("h2", {}, c.name), h("span", { class: "chip info" }, Rel.stage(r, c))),
+      h("h3", {}, "Toward you"),
       h("div", { class: "grid" },
-        TRACKS.map(([k, lo, hi, label]) =>
-          h("label", { class: "set" }, h("span", {}, label ?? k), h("input", { id: `camp-${c.id}-${k}`, type: "number", min: lo, max: hi, step: 1, value: Math.round(r[k] * 10) / 10, onchange: (e) => set(k, Number(e.target.value)) })))),
+        TRACKS.map(([k, lo, hi]) => h("label", { class: "set" }, h("span", {}, k), num(`camp-${c.id}-${k}`, lo, hi, r[k], (v) => set(k, v)))),
+        c.escalation ? h("label", { class: "set" }, h("span", {}, `${c.escalation.name} level`), num(`camp-${c.id}-storm`, 0, c.escalation.tiers.length, r.storm, (v) => set("storm", v))) : null),
+      h("ul", { class: "sizes" }, ["heat", "intimacy", "regard"].map((k) => h("li", {}, A.stance(Relationship.stances[k], r[k])))),
+      h("h3", {}, `Toward ${other.name}: feels · thinks ${other.name} feels`),
+      h("div", { class: "grid" },
+        AXES.map((k) => h("label", { class: "set" }, h("span", {}, k),
+          h("span", { class: "row" }, num(`camp-${c.id}-${k}`, -10, 10, r.toward[k], (v) => setIn("toward", k, v)), num(`camp-${c.id}-read-${k}`, -10, 10, r.read[k], (v) => setIn("read", k, v)))))),
       h("div", { class: "row" },
-        [["payoff", "payoff happened"], ["vuln", "opened up"], ["hurt", "hurt"], ...(c.secondVoice ? [["manifest", `${c.secondVoice.name} has appeared`]] : [])].map(([k, label]) =>
-          h("label", { class: "check" }, h("input", { id: `camp-${c.id}-${k}`, type: "checkbox", checked: !!r[k], onchange: (e) => set(k, e.target.checked) }), ` ${label}`))),
+        [["payoff", "payoff happened"], ["involved", "lovers now"], ["vuln", "opened up"], ["hurt", "hurt"], ...(c.secondVoice ? [["manifest", `${c.secondVoice.name} has appeared`]] : [])].map(([k, label]) =>
+          h("label", { class: "check" }, h("input", { id: `camp-${c.id}-${k}`, type: "checkbox", checked: !!r[k], onchange: (e) => set(k, e.target.checked) }), ` ${label}`)),
+        [["past", `thinks you and ${other.name} were involved`], ["current", `thinks you and ${other.name} are involved now`]].map(([k, label]) =>
+          h("label", { class: "check" }, h("input", { id: `camp-${c.id}-believes-${k}`, type: "checkbox", checked: !!r.believes[k], onchange: (e) => setIn("believes", k, e.target.checked) }), ` ${label}`))),
+      r.noticed.length ? h("p", { class: "status" }, `Caught, for her next answer: ${r.noticed.join(" · ")}`) : null,
+      h("p", { class: "status" }, `Configuration: ${Rel.config(camp.romance, c, members)} · gained this camp: heat ${r.gain.heat}/${Relationship.caps.perEncounter.heat}, intimacy ${r.gain.intimacy}/${Relationship.caps.perEncounter.intimacy}`),
       h("label", { class: "set" }, h("span", {}, "Wearing"),
         h("select", { id: `camp-${c.id}-outfit`, onchange: (e) => ((camp.romance = equip(camp.romance, c.id, e.target.value)), saveCamp(), rerender()) },
           Object.entries(owned.owned).map(([id, o]) => h("option", { value: id, selected: owned.equipped === id }, o.name)))),
@@ -769,8 +803,19 @@ function campView() {
       h("p", { class: "status" }, `Ready: ${Rel.allowedBeats(camp.romance, c, members, { private: camp.with === c.id, inPerson: true }).join(", ")}`),
     );
   });
+  setup.append(
+    h("div", { class: "row" },
+      [["open", "everything's out in the open"], ["shared", "all three openly together"]].map(([k, label]) =>
+        h("label", { class: "check" }, h("input", { id: `camp-${k}`, type: "checkbox", checked: !!camp.romance[k], onchange: (e) => ((camp.romance[k] = e.target.checked), saveCamp(), rerender()) }), ` ${label}`))),
+    h("button", { class: "run-btn ghost", onclick: () => ((camp.romance = Rel.endEncounter(camp.romance)), saveCamp(), rerender()) }, "New camp (resets the +4 gain caps)"),
+  );
   const status = h("span", { class: "status" });
   const box = h("textarea", { id: "camp-say", rows: 3, placeholder: "What you say or do" });
+  const to = camp.with === "both"
+    ? h("label", { class: "set" }, h("span", {}, "Say it to"),
+      h("select", { id: "camp-to", onchange: (e) => ((camp.to = e.target.value), saveCamp()) },
+        [["all", "Both"], [camp.a, `Whisper to ${roster[camp.a].name}`], [camp.b, `Whisper to ${roster[camp.b].name}`]].map(([v, l]) => h("option", { value: v, selected: camp.to === v }, l))))
+    : null;
   const send = h("button", { class: "run-btn", onclick: async () => {
     const text = box.value.trim();
     if (!text || !sample) return;
@@ -779,16 +824,20 @@ function campView() {
     rerender();
   } }, "Send");
   const lines = camp.transcript.map((t) => {
-    if (t.from === "player") return h("blockquote", {}, t.text);
+    if (t.from === "player") return h("blockquote", {}, t.to ? h("span", { class: "chip info" }, `whisper to ${roster[t.to].name}`) : null, t.to ? " " : null, t.text);
+    if (t.from === "system") return h("p", { class: "status" }, t.text);
     const c = roster[t.from];
     if (t.error) return h("p", { class: "err" }, `${c.name}: ${t.error}`);
     const who = { narrator: null, self: c.name, second_voice: c.secondVoice?.name ?? "second voice" };
     const o = t.out;
     return h("div", { class: "turn" },
-      h("div", { class: "prose" }, o.segments.map((g) => h("p", {}, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
+      h("div", { class: "prose" }, o.segments.map((g) => h("p", { class: g.aside ? "aside" : null }, g.aside ? h("span", { class: "chip info" }, "aside") : null, g.aside ? " " : null, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
       h("p", { class: "texture" }, [
         ...o.changes.map((x) => `${x.track} ${x.by > 0 ? "+" : ""}${x.by} (${x.reason})`),
         o.beats.length ? `beats: ${o.beats.join(", ")}` : null,
+        o.storm != null ? `storm: ${o.storm}` : null,
+        o.believes ? `now believes: ${o.believes.current ? "involved now" : o.believes.past ? "involved once" : "nothing"}` : null,
+        o.risk ? `aside risk: ${o.risk}` : null,
         o.advances ? `moves: ${o.advances}` : null,
         o.outfit ? `changes into: ${o.outfit}` : null,
         t.retried ? "retried once" : null,
@@ -802,6 +851,7 @@ function campView() {
     { class: "case" },
     h("h2", {}, "The scene"),
     lines.length ? lines : h("p", { class: "look" }, "Nothing yet. Say something to start."),
+    to,
     box,
     h("div", { class: "row" }, send, status, sample ? null : h("span", { class: "status" }, "Open on claude.ai to talk.")),
   );

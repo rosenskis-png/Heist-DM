@@ -3,7 +3,7 @@
 // misses a field, or misspells one, fails before it reaches a prompt.
 import { withDefs } from "./defs.js";
 import { r, list, obj } from "./shape.js";
-import { configText, stageLabels, tracks } from "../content/relationship.js";
+import { configText, stageLabels, tracks, axes } from "../content/relationship.js";
 
 const t = r("text");
 const SKILLS = ["Might", "Agility", "Stealth", "Lore", "Insight", "Presence"];
@@ -31,10 +31,17 @@ const tieEntry = obj([], {
   gift: t,
   bond: t,
   partnerReacts: t,
+  // What she holds against or hides from this partner: always in her own call, never in the partner's (D84).
+  secret: t,
   // The parked portrait feature (D24). On no allowlist.
   image: { type: "object", additionalProperties: t },
 });
-const config = { enum: Object.keys(configText) };
+// A view of another companion: one number (affection) or any of the three axes (D77).
+const view = { oneOf: [{ type: "integer", minimum: -10, maximum: 10 }, { ...some(axes, { type: "integer", minimum: -10, maximum: 10 }) }] };
+// Limits on her view of another companion: a range per axis, how far one answer may move it, and the beat that
+// lifts the limits (D77).
+const range = { type: "array", prefixItems: [{ type: "integer" }, { type: "integer" }], minItems: 2, maxItems: 2 };
+const limits = obj([], { ...Object.fromEntries(axes.map((k) => [k, range])), perScene: { type: "integer", minimum: 0 }, until: r("id") });
 
 export const companionFileSchema = withDefs({
   $id: "companion_file",
@@ -80,7 +87,7 @@ export const companionFileSchema = withDefs({
       quest: t,
       questAct: { type: "integer", minimum: 1 },
       // Her reaction to each configuration; "open" (nothing settled) needs none.
-      react: { ...some(Object.keys(configText), t), required: Object.keys(configText).filter((k) => k !== "open") },
+      react: { ...some(Object.keys(configText), t), required: Object.keys(configText).filter((k) => k !== "open" && k !== "former") },
       leanFromHeat: { type: "boolean" },
       beliefs: t,
       admires: t,
@@ -91,6 +98,18 @@ export const companionFileSchema = withDefs({
       darkTriggers: t,
       abilities: obj(["hp", "combat", "noncombat", "limits"], { hp: { type: "integer", minimum: 1 }, combat: ability, noncombat: ability, limits: list(t) }),
 
+      // How she judges the other companion on each axis: what earns it and what wears it down (D79).
+      inOthers: some(axes, t),
+      // How she takes it when her read of the other turns out wrong: out loud, or only inside (D79).
+      recalibrates: t,
+      // Limits on her view of any other companion (D77).
+      limits,
+      // The view the other companion believes she holds, at the start (D84).
+      mask: view,
+      // A state that builds and falls slowly: tiers from mild to worst, what calms it, and the tier from which she may
+      // act on the other companion's body (D82).
+      escalation: obj(["name", "tiers", "calms"], { name: t, tiers: list(t, 1), calms: t, actsOnOther: { type: "integer", minimum: 1 } }),
+
       // Special cases, declared (docs/spec/companions.md §6). All optional.
       tie: obj(["by"], {
         required: { type: "boolean" },
@@ -99,8 +118,15 @@ export const companionFileSchema = withDefs({
         toPartner: t,
         triangle: obj([], {
           shared: { type: "boolean" },
-          bothInvolved: obj(["self", "partner"], { self: obj(["known", "secret"], { known: config, secret: config }), partner: config }),
         }),
+        // Her and her partner's starting views of each other, the view her partner believes she holds, limits on her
+        // view of her partner (D84), and whether she takes up her partner's pursuit once things are in the open.
+        start: view,
+        partnerStart: view,
+        mask: view,
+        limits,
+        mirrorsWhenOpen: t,
+        secret: t,
         by: { type: "object", minProperties: 1, propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: tieEntry },
       }),
       secondVoice: obj(["id", "name", "voice", "look", "relayed", "beat"], {
@@ -114,9 +140,11 @@ export const companionFileSchema = withDefs({
         despises: t,
         // Optional: she can take her own body only once this flag is set or due.
         manifestsAfter: { enum: ["payoff", "vuln", "deep", "bond"] },
+        // Optional: she may speak and take her own body in company, in person, while this gate holds (D83).
+        inCompany: gate,
         beat: r("id"),
       }),
-      extraBeats: list(obj(["id", "cooldown", "text"], { id: r("id"), cooldown: { type: "integer", minimum: 0 }, text: t, cooling: t })),
+      extraBeats: list(obj(["id", "text"], { id: r("id"), cooldown: { type: "integer", minimum: 0 }, once: { type: "boolean" }, when: gate, text: t, cooling: t })),
       stageLabels: some(Object.keys(stageLabels), t),
       notes: list(obj(["when", "text"], { when: gate, text: t })),
       // Outfits she owns from the start besides her `outfit` (docs/spec/companions.md §7).

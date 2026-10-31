@@ -54,7 +54,7 @@ const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skil
 // declared data not resolved below, never reach a prompt.
 const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
   "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
-  "suppressed", "darkTriggers"];
+  "suppressed", "darkTriggers", "inOthers", "recalibrates"];
 // Gated fields, by the gate's name in content/relationship.js `reveal`.
 const GATED = { first: (c) => c.first, why: (c) => c.why, hidden: (c) => c.hidden, deep: (c) => c.deep, dark: (c) => c.dark,
   payoff_scene: (c) => c.payoff.scene, quest: (c) => c.quest };
@@ -77,34 +77,62 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   if (sv) {
     const { name, voice, look, relayed, admires, despises } = c.secondVoice;
     const tastes = { ...(admires ? { admires } : {}), ...(despises ? { despises } : {}) };
-    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.canAppear ? { may_take_her_own_body: look } : {}) } : { name, relayed, ...tastes };
+    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.inCompany ? { in_company: true } : {}), ...(sv.canAppear ? { may_take_her_own_body: look } : {}) } : { name, relayed, ...tastes };
+  }
+  // A declared escalation: where she is on it now, and every tier (D82).
+  if (c.escalation) {
+    const e = c.escalation;
+    const lvl = rom.rel[c.id].storm;
+    out.escalation = { name: e.name, level: lvl, now: lvl ? e.tiers[lvl - 1] : "calm", tiers: e.tiers.map((x, i) => `${i + 1}: ${x}`), what_calms_it: e.calms, ...(e.actsOnOther ? { from_level_she_may_act_on_the_other_companion: e.actsOnOther } : {}) };
   }
   const partner = members.find((m) => m.id !== c.id);
-  if (c.tie && partner) out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift };
+  if (c.tie && partner) {
+    out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift, ...(c.tie.secret ? { your_secret: c.tie.secret } : {}) };
+    if (c.tie.mirrorsWhenOpen && rom.open) out.tie.now_in_the_open = { [`${partner.name}'s pursuit, which you now take up`]: partner.pursuit, how: c.tie.mirrorsWhenOpen };
+  }
   if (partner?.tie?.withId === c.id) {
     const t = partner.tie;
-    out.tie_to_you = { who: partner.name, note: t.toPartner, bond: t.bond, if_you_learn: t.partnerReacts, you_know: rom.knows };
+    out.tie_to_you = { who: partner.name, note: t.toPartner, bond: t.bond, if_you_learn: t.partnerReacts };
   }
   out.react = c.react[Rel.config(rom, c, members)] ?? null;
   return out;
 }
 
+// A number as words, from its bands in content/relationship.js `stances` (D79).
+export function stance(bands, v) {
+  let out = bands[0][1];
+  for (const [at, text] of bands) if (v >= at) out = text;
+  return out;
+}
+
+// How she feels about the other companion, and how she thinks the other feels about her, as words (D77, D79).
+export function pairStance(r) {
+  const S = Relationship.stances;
+  const say = (side, v) => Relationship.axes.map((k) => `${stance(S[k][side], Math.round(v[k]))} (${k} ${Math.round(v[k])})`).join("; ");
+  return { you_feel_about_her: say("own", r.toward), you_think_she_feels_about_you: say("read", r.read) };
+}
+
+// What she believes about him and the other companion (D81).
+const beliefText = (b, other) =>
+  b.current ? `You believe he and ${other} are involved now.` : b.past ? `You believe he and ${other} were involved once, but not now.` : `As far as you know, nothing has happened between him and ${other}.`;
+
 // Her relationship with the player and the other companion, as her call reads it. Lean is shown whole.
 function relationshipFor(c, rom, members) {
   const r = rom.rel[c.id];
   const cfg = Rel.config(rom, c, members);
+  const S = Relationship.stances;
+  const o = members.find((m) => m.id !== c.id);
   return {
     stage: Rel.stage(r, c),
-    heat: r.heat,
+    // What the numbers mean for how she treats him (D79).
+    how_she_feels_about_him: ["heat", "intimacy", "regard"].map((k) => `${stance(S[k], r[k])} (${k} ${Math.round(r[k])})`),
     payoff_at: c.payoff.at,
-    intimacy: r.intimacy,
-    regard: r.regard,
     lean: Math.round(r.lean),
     happened: ["payoff", "vuln", "deep", "bond", "manifest"].filter((k) => r[k]),
+    involved_now: !!r.involved,
     hurt: r.hurt,
     configuration: Relationship.configText[cfg],
-    you_feel_about_the_other_companion: r.towardOther,
-    you_think_she_feels_about_you: r.readOfOther,
+    ...(o ? { about_him_and_the_other: beliefText(r.believes, o.name), ...pairStance(r) } : {}),
     ...(r.memories.length ? { memories: r.memories } : {}),
     ...(r.commitments.length ? { commitments: r.commitments } : {}),
   };
@@ -323,7 +351,8 @@ export function campfireInput(env, c, self, others, schema) {
       ? block("The scene", `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
       : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map(publicProfile) }),
     block("Your relationship with the player", relationshipFor(me, rom, members)),
-    alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), you_feel_about_her: rom.rel[me.id].towardOther, you_think_she_feels_about_you: rom.rel[me.id].readOfOther }),
+    alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
+    rom.rel[me.id].noticed?.length ? block("Something you caught that you weren't meant to (they don't know you saw)", rom.rel[me.id].noticed) : null,
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),

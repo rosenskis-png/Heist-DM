@@ -34,15 +34,18 @@ const newcomer = (over = {}) => {
 };
 const huddle = (self, other, e = env()) => A.companionInput(e, { draft: null }, self, [other], [], companionSchema);
 const camp = (self, other, withIds, e = env()) => A.campfireInput(e, { with: withIds, scene: [] }, self, [other], campfireSchema);
-const rel = (over = {}) => ({ ...Rel.newRel(), ...over });
+// A payoff in a test means they're lovers now, unless the test says otherwise.
+const rel = (over = {}) => ({ ...Rel.newRel(), ...(over.payoff ? { involved: true } : {}), ...over });
 const romance = (members, rels = {}, over = {}) => {
   const r = Rel.newRomance(members, pairs);
   for (const [id, x] of Object.entries(rels)) r.rel[id] = rel(x);
   return { ...r, ...over };
 };
+// A campfire output that does nothing.
+const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: false }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null });
 // Two companions with no declared special cases.
 const plain = () => {
-  const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes);
+  const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation);
   return p.length >= 2 ? p.slice(0, 2) : [newcomer(), newcomer({ id: "ash", name: "Ash" })];
 };
 
@@ -66,7 +69,7 @@ test("a companion who isn't in the roster joins a party with no code change", ()
   const wren = newcomer();
   const other = plain()[1];
   assert.deepEqual(partyProblems([wren, other]), []);
-  assert.equal(Rel.newRomance([wren, other], pairs).pair.value, 0); // no pair entry: starts at 0
+  assert.deepEqual(Rel.newRomance([wren, other], pairs).rel.wren.toward, Rel.axes(0)); // no pair entry: starts at 0
   for (const input of [huddle(wren, other), camp(wren, other, ["wren"]), camp(wren, other, ["wren", other.id])]) assert.ok(input.includes('"name":"Wren"'));
   assert.ok(!huddle(wren, other).includes(`"name":"${all[0].name}"`)); // the file she was copied from is nowhere
   // Every pairing the setup screen offers includes her when she's added to the roster.
@@ -116,17 +119,13 @@ test("a tie resolves for the companion it names, and blocks a party without one"
   if (entry.partnerReacts) assert.ok(!mine.includes(JSON.stringify(entry.partnerReacts)));
 });
 
-test("a tie's triangle overrides the configuration and can rule out sharing", { skip: !tied?.tie.triangle }, () => {
+test("a tie's triangle can rule out sharing", { skip: !tied?.tie.triangle }, () => {
   const partner = companions[Object.keys(tied.tie.by).find((id) => companions[id])];
   const members = resolveParty([tied, partner]);
   const [me, them] = members;
   const both = { [me.id]: { payoff: true, payoffTurn: 5 }, [them.id]: { payoff: true, payoffTurn: 1 } };
   const t = tied.tie.triangle;
-  if (t.bothInvolved) {
-    assert.equal(Rel.config(romance(members, both), me, members), t.bothInvolved.self.secret);
-    assert.equal(Rel.config(romance(members, both, { knows: true }), me, members), t.bothInvolved.self.known);
-    assert.equal(Rel.config(romance(members, both), them, members), t.bothInvolved.partner);
-  }
+  assert.equal(Rel.config(romance(members, both), them, members), "chosen"); // in the dark
   if (t.shared === false) assert.ok(!Rel.allowedBeats(romance(members, both), me, members).includes("shared"));
 });
 
@@ -177,11 +176,11 @@ test("hurt: regard at −5, or intimacy dropping 3 at once; nothing is ready whi
   assert.ok(t.rel[P.id].hurt);
 });
 
-test("after the payoff, heat feeds the dark branch only for a companion who declares it", () => {
+test("after the payoff, heat stays fluid, and also feeds the dark branch only for a companion who declares it (D78)", () => {
   for (const leanFromHeat of [true, false]) {
     const c = { ...P, leanFromHeat };
     const s = Rel.applyDelta(romance([c, Q], { [c.id]: { payoff: true, heat: c.payoff.at } }), c, { heat: 2 });
-    assert.equal(s.rel[c.id].heat, c.payoff.at);
+    assert.equal(s.rel[c.id].heat, c.payoff.at + 2);
     assert.equal(s.rel[c.id].lean, leanFromHeat ? 1.2 : 0);
   }
 });
@@ -204,38 +203,93 @@ test("beats apply in order and only when allowed", () => {
   assert.deepEqual(Rel.campfireProblems(s, P, members, out), ["beat deep isn't allowed now"]);
 });
 
-test("configurations follow Gravenhold's configOf", () => {
-  const cfg = (rels, over) => Rel.config(romance(members, rels, over), P, members);
+test("configurations come from her own involvement and what she believes, never the truth (D81)", () => {
+  const cfg = (rels, over, who = P) => Rel.config(romance(members, rels, over), who, members);
+  const believes = { past: true, current: true };
   assert.equal(cfg({}), "open");
   assert.equal(cfg({ [P.id]: { payoff: true } }), "chosen");
-  assert.equal(cfg({ [Q.id]: { payoff: true } }), "thirdwheel");
-  assert.equal(cfg({ [Q.id]: { payoff: true }, [P.id]: { heat: Math.ceil(P.payoff.at * 0.6) } }), "secondfiddle");
+  assert.equal(cfg({ [P.id]: { payoff: true, involved: false } }), "former");
+  // He's with Q, but P doesn't know: nothing is settled for her.
+  assert.equal(cfg({ [Q.id]: { payoff: true } }), "open");
+  assert.equal(cfg({ [Q.id]: { payoff: true }, [P.id]: { believes } }), "thirdwheel");
+  assert.equal(cfg({ [Q.id]: { payoff: true }, [P.id]: { believes, heat: Math.ceil(P.payoff.at * 0.6) } }), "secondfiddle");
+  // Both involved and both in the dark: each thinks she's chosen.
   const both = { [P.id]: { payoff: true, payoffTurn: 1 }, [Q.id]: { payoff: true, payoffTurn: 5 } };
-  assert.equal(cfg(both), "cheatedOn");
-  assert.equal(Rel.config(romance(members, both), Q, members), "affair");
-  assert.equal(cfg(both, { knows: true }), "rivals");
-  assert.equal(cfg(both, { shared: true, knows: true }), "shared");
+  assert.equal(cfg(both), "chosen");
+  assert.equal(cfg(both, {}, Q), "chosen");
+  // Either side can find out, whoever was first.
+  const knowing = (id) => ({ ...both, [id]: { ...both[id], believes } });
+  assert.equal(cfg(knowing(P.id)), "cheatedOn");
+  assert.equal(cfg(knowing(Q.id), {}, Q), "affair");
+  assert.equal(cfg(knowing(Q.id), {}, P), "chosen");
+  assert.equal(cfg(knowing(P.id), { open: true }), "rivals");
+  assert.equal(cfg(knowing(P.id), { open: true, shared: true }), "shared");
+  // A wrong belief counts the same.
+  assert.equal(cfg({ [P.id]: { payoff: true, believes } }), "cheatedOn");
   assert.equal(cfg({}, { turn: 40 }), "ignored");
 });
 
-test("discovered and shared; each companion's view of the other moves at most 2 a scene, and the pair is their average", () => {
+test("breakup, rekindle, in the open and shared; beliefs only from her own output", () => {
   const both = { [P.id]: { payoff: true }, [Q.id]: { payoff: true } };
   let s = romance(members, both);
-  assert.ok(Rel.allowedBeats(s, P, members).includes("discovered"));
-  s = Rel.applyBeats(s, P, members, ["shared"]).state;
-  assert.ok(s.shared && s.knows);
-  const out = { segments: [{ speaker: "self", text: "x" }], changes: [{ track: "pair", by: 3, reason: "r" }], memories: ["m"], secrets: ["hidden"], commitments: [], beats: [], advances: null, outfit: null };
+  assert.ok(!Rel.allowedBeats(s, P, members, { private: true }).includes("in_the_open"));
+  assert.ok(Rel.allowedBeats(s, P, members).includes("in_the_open"));
+  s = Rel.applyBeats(s, P, members, ["in_the_open"]).state;
+  assert.ok(s.open && s.rel[P.id].believes.current && s.rel[Q.id].believes.current);
+  s = Rel.applyBeats(s, Q, members, ["breakup"]).state;
+  assert.ok(!s.rel[Q.id].involved && !s.rel[P.id].believes.current); // in the open, P knows it's over
+  assert.equal(Rel.config(s, Q, members), "former");
+  assert.ok(Rel.allowedBeats(s, Q, members).includes("rekindle"));
+  s = Rel.applyBeats(s, Q, members, ["rekindle", "shared"]).state;
+  assert.ok(s.rel[Q.id].involved && s.shared);
+  const out = { ...blank(), believes: { past: false, current: false } };
+  s = Rel.applyCampfire(s, P, members, out, { private: true });
+  assert.deepEqual(s.rel[P.id].believes, { past: false, current: false });
+});
+
+test("each companion's view of the other moves on three axes, at most 2 an answer, hers only (D77)", () => {
+  let s = romance(members);
+  const out = { ...blank(), changes: [{ track: "affection", by: 3, reason: "r" }, { track: "trust", by: -2, reason: "r" }, { track: "read_respect", by: 1, reason: "r" }], memories: ["m"], secrets: ["hidden"] };
+  const before = structuredClone(s.rel);
   s = Rel.applyCampfire(s, P, members, out);
-  assert.equal(s.rel[P.id].towardOther, 2);
-  assert.equal(s.rel[Q.id].towardOther, 0); // hers only
-  assert.equal(s.pair.value, 1);
+  assert.equal(s.rel[P.id].toward.affection, before[P.id].toward.affection + 2);
+  assert.equal(s.rel[P.id].toward.trust, before[P.id].toward.trust - 2);
+  assert.equal(s.rel[P.id].read.respect, before[P.id].read.respect + 1);
+  assert.deepEqual(s.rel[Q.id].toward, before[Q.id].toward); // hers only
   assert.deepEqual(s.rel[P.id].memories, ["m"]);
   assert.deepEqual(s.rel[P.id].revealed, ["hidden"]);
-  // Both views start from the pair's written start.
+  // One number in a pair's start is affection; the three axes can be given.
   const fresh = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: -3, dynamic: "x" } });
-  assert.deepEqual([fresh.rel[P.id].towardOther, fresh.rel[Q.id].towardOther, fresh.pair.value], [-3, -3, -3]);
-  // At camp with both, her view of the other reaches her call.
-  assert.ok(camp(P, Q, [P.id, Q.id], env({ romance: s })).includes('"you_feel_about_her":2'));
+  assert.deepEqual(fresh.rel[P.id].toward, { affection: -3, respect: 0, trust: 0 });
+  // At camp with both, her views reach her call as words.
+  const input = camp(P, Q, [P.id, Q.id], env({ romance: s }));
+  assert.ok(input.includes("you_feel_about_her") && input.includes(`(affection ${s.rel[P.id].toward.affection})`));
+});
+
+test("with no change to heat, intimacy or regard, a value below +2 rises toward it, and never falls to it (D78)", () => {
+  let s = romance(members, { [P.id]: { regard: -10, heat: 0, intimacy: 5 } });
+  s = Rel.applyCampfire(s, P, members, blank());
+  assert.deepEqual([s.rel[P.id].regard, s.rel[P.id].heat, s.rel[P.id].intimacy], [-9, 1, 5]);
+  s = Rel.applyCampfire(s, P, members, { ...blank(), changes: [{ track: "regard", by: -1, reason: "r" }] });
+  assert.equal(s.rel[P.id].regard, -10); // a negative answer doesn't recover
+  for (let i = 0; i < 20; i++) s = Rel.applyCampfire(s, P, members, blank());
+  assert.equal(s.rel[P.id].regard, 2);
+});
+
+test("an aside in company is rarely caught; the catcher's next call sees it once (D80)", () => {
+  const out = { ...blank(), segments: [{ speaker: "self", text: "said aloud", aside: false }, { speaker: "self", text: "a hand on his knee", aside: true }], risk: "high" };
+  let s = { ...romance(members), forced: [99] };
+  s = Rel.applyCampfire(s, P, members, out);
+  assert.deepEqual(s.rel[Q.id].noticed, []);
+  s = Rel.applyCampfire({ ...s, forced: [4] }, P, members, out);
+  assert.equal(s.rel[Q.id].noticed.length, 1);
+  assert.ok(s.rel[Q.id].noticed[0].includes("a hand on his knee"));
+  assert.ok(camp(Q, P, [P.id, Q.id], env({ romance: s })).includes("a hand on his knee"));
+  s = Rel.applyCampfire(s, Q, members, blank());
+  assert.deepEqual(s.rel[Q.id].noticed, []);
+  // The player's whispers too.
+  const w = Rel.playerAside({ ...romance(members), forced: [1] }, Q.id, "meet me later");
+  assert.ok(w.caught && w.state.rel[Q.id].noticed[0].includes("meet me later"));
 });
 
 test("stage labels and progress", () => {
@@ -318,19 +372,69 @@ test("a second voice is relayed in company, speaks in private, and may take her 
   assert.deepEqual(Rel.campfireProblems(romance(m), voiced, m, lines, alone), []);
 });
 
-const storming = having("extraBeats");
-test("an extra beat has a cooldown in campaign turns", { skip: !storming }, () => {
-  const o = all.find((c) => c !== storming && !partyProblems([storming, c]).length);
-  const m = [storming, o];
-  const b = storming.extraBeats[0];
+test("an extra beat can have a cooldown in campaign turns, a gate, or happen once", () => {
+  const c = { ...P, extraBeats: [{ id: "flare", cooldown: 3, text: "Flare now.", cooling: "Not yet." }, { id: "truce", once: true, when: [{ trust: [">=", 4] }], text: "Truce now." }] };
+  const m = [c, Q];
   let s = romance(m, {}, { turn: 10 });
-  assert.ok(Rel.allowedBeats(s, storming, m).includes(b.id));
-  s = Rel.applyBeats(s, storming, m, [b.id]).state;
-  assert.ok(!Rel.allowedBeats(s, storming, m).includes(b.id));
-  if (b.cooling) assert.ok(camp(storming, o, [storming.id], env({ romance: s })).includes(JSON.stringify(b.cooling)));
-  for (let i = 0; i < b.cooldown; i++) s = Rel.nextTurn(s);
-  assert.ok(Rel.allowedBeats(s, storming, m).includes(b.id));
-  assert.ok(camp(storming, o, [storming.id], env({ romance: s })).includes(JSON.stringify(b.text)));
+  assert.ok(Rel.allowedBeats(s, c, m).includes("flare") && !Rel.allowedBeats(s, c, m).includes("truce"));
+  s = Rel.applyBeats(s, c, m, ["flare"]).state;
+  assert.ok(!Rel.allowedBeats(s, c, m).includes("flare"));
+  assert.ok(camp(c, Q, [c.id], env({ romance: s })).includes('"Not yet."'));
+  for (let i = 0; i < 3; i++) s = Rel.nextTurn(s);
+  assert.ok(Rel.allowedBeats(s, c, m).includes("flare"));
+  s.rel[c.id].toward.trust = 4;
+  assert.ok(Rel.allowedBeats(s, c, m).includes("truce"));
+  s = Rel.applyBeats(s, c, m, ["truce"]).state;
+  assert.ok(!Rel.allowedBeats(s, c, m).includes("truce"));
+});
+
+const storming = having("escalation");
+test("an escalation rises as fast as the call says and falls one level an answer at most (D82)", { skip: !storming }, () => {
+  const o = all.find((c) => c !== storming && !partyProblems([storming, c]).length);
+  const m = resolveParty([storming, o]);
+  const top = storming.escalation.tiers.length;
+  let s = romance(m);
+  s = Rel.applyCampfire(s, m[0], m, { ...blank(), storm: top });
+  assert.equal(s.rel[storming.id].storm, top);
+  s = Rel.applyCampfire(s, m[0], m, { ...blank(), storm: 0 });
+  assert.equal(s.rel[storming.id].storm, top - 1);
+  assert.ok(camp(m[0], m[1], [storming.id], env({ romance: s })).includes(JSON.stringify(storming.escalation.tiers[top - 2])));
+  assert.deepEqual(Rel.campfireProblems(s, m[0], m, { ...blank(), storm: top + 1 }), [`storm must be 0 to ${top}`]);
+  assert.deepEqual(Rel.campfireProblems(s, m[1], m, { ...blank(), storm: 1 }), ["she has no storm level (storm must be null)"]);
+});
+
+test("limits: a floor on her view of anyone, and a tie's ceiling and pace until its beat (D77, D84)", () => {
+  const floored = { ...P, limits: { affection: [0, 10] } };
+  let s = romance([floored, Q], { [floored.id]: { toward: { affection: 1, respect: 0, trust: 0 } } });
+  s = Rel.applyCampfire(s, floored, [floored, Q], { ...blank(), changes: [{ track: "affection", by: -2, reason: "r" }, { track: "respect", by: -2, reason: "r" }] });
+  assert.deepEqual([s.rel[floored.id].toward.affection, s.rel[floored.id].toward.respect], [0, -2]);
+});
+
+const masked = all.find((c) => c.tie?.mask);
+test("a tie can start both views and mask hers; her partner's read starts at the mask (D84)", { skip: !masked }, () => {
+  const partner = companions[Object.keys(masked.tie.by).find((id) => companions[id])];
+  const m = resolveParty([masked, partner]);
+  let s = Rel.newRomance(m, pairs);
+  assert.deepEqual(s.rel[masked.id].toward, Rel.axes(masked.tie.start));
+  assert.deepEqual(s.rel[partner.id].toward, Rel.axes(masked.tie.partnerStart));
+  assert.deepEqual(s.rel[partner.id].read, Rel.axes(masked.tie.mask));
+  assert.deepEqual(s.rel[masked.id].read, Rel.axes(masked.tie.partnerStart));
+  // Her partner's call never sees her secret; hers always does.
+  const secret = m[0].tie.secret; // campfireInput resolves the party itself, from the files
+  assert.ok(camp(masked, partner, [m[0].id, m[1].id], env({ romance: s })).includes(JSON.stringify(secret)));
+  assert.ok(!camp(partner, masked, [m[0].id, m[1].id], env({ romance: s })).includes(JSON.stringify(secret)));
+  const l = masked.tie.limits;
+  if (l) {
+    const up = { ...blank(), changes: [{ track: "affection", by: 2, reason: "r" }] };
+    s.rel[masked.id].toward.affection = l.affection[1];
+    s = Rel.applyCampfire(s, m[0], m, up);
+    assert.equal(s.rel[masked.id].toward.affection, l.affection[1]); // the ceiling holds
+    if (l.until) {
+      s.rel[masked.id].beatTurns[l.until] = 1;
+      s = Rel.applyCampfire(s, m[0], m, up);
+      assert.equal(s.rel[masked.id].toward.affection, l.affection[1] + Math.min(2, Rel.limitsFor(s, m[0], m).perScene));
+    }
+  }
 });
 
 // ---------- the wardrobe (docs/spec/companions.md §7, D71) ----------
@@ -393,20 +497,30 @@ test("a second voice's own tastes reach her call in company and in private", { s
 });
 
 test("a pair can start lopsided; gates read her perception of the other, which only her own scenes move (D76)", () => {
-  let s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: -4 }, dynamic: "x" } });
-  assert.deepEqual([s.rel[P.id].towardOther, s.rel[Q.id].towardOther, s.pair.value], [2, -4, -1]);
-  assert.deepEqual([s.rel[P.id].readOfOther, s.rel[Q.id].readOfOther], [-4, 2]); // first impressions are right
+  let s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: { affection: -4, trust: -6 } }, dynamic: "x" } });
+  assert.deepEqual([s.rel[P.id].toward.affection, s.rel[Q.id].toward.affection, s.rel[Q.id].toward.trust], [2, -4, -6]);
+  assert.deepEqual([s.rel[P.id].read.affection, s.rel[P.id].read.trust, s.rel[Q.id].read.affection], [-4, -6, 2]); // first impressions are right
   assert.equal(Rel.view(s, P).fromOther, undefined); // never the truth
   // Q warms to P in secret; P's read doesn't move with it.
-  const out = { segments: [{ speaker: "self", text: "x" }], changes: [{ track: "pair", by: 2, reason: "r" }], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null };
+  const out = { ...blank(), changes: [{ track: "affection", by: 2, reason: "r" }] };
   s = Rel.applyCampfire(s, Q, members, out);
-  assert.equal(s.rel[Q.id].towardOther, -2);
-  assert.equal(s.rel[P.id].readOfOther, -4);
-  // P comes to believe she's trusted, rightly or not.
-  s = Rel.applyCampfire(s, P, members, { ...out, changes: [{ track: "read", by: 5, reason: "r" }] });
-  assert.equal(s.rel[P.id].readOfOther, -2);
-  assert.ok(Rel.holds(Rel.view(s, P), [{ readOfOther: [">=", -2] }]));
-  assert.ok(camp(P, Q, [P.id, Q.id], env({ romance: s })).includes('"you_think_she_feels_about_you":-2'));
+  assert.equal(s.rel[Q.id].toward.affection, -2);
+  assert.equal(s.rel[P.id].read.affection, -4);
+  // P comes to believe she's liked, rightly or not.
+  s = Rel.applyCampfire(s, P, members, { ...out, changes: [{ track: "read_affection", by: 5, reason: "r" }] });
+  assert.equal(s.rel[P.id].read.affection, -2);
+  assert.ok(Rel.holds(Rel.view(s, P), [{ readAffection: [">=", -2] }]));
   for (const p of Object.values(pairs).filter((x) => typeof x.start === "object"))
-    for (const v of Object.values(p.start)) assert.ok(Number.isInteger(v) && v >= -10 && v <= 10);
+    for (const v of Object.values(p.start)) for (const n of Object.values(Rel.axes(v))) assert.ok(Number.isInteger(n) && n >= -10 && n <= 10);
+});
+
+test("a second voice can join a scene in company once her gate holds (D83)", { skip: !voiced?.secondVoice.inCompany }, () => {
+  const o = all.find((c) => c !== voiced && !partyProblems([voiced, c]).length);
+  const m = resolveParty([voiced, o]);
+  const both = [voiced.id, o.id];
+  let s = romance(m, { [voiced.id]: { payoff: true } });
+  assert.ok(!camp(m[0], m[1], both, env({ romance: s })).includes('"in_company":true'));
+  s.rel[voiced.id] = { ...s.rel[voiced.id], intimacy: 10, toward: Rel.axes({ affection: 10, respect: 10, trust: 10 }), read: Rel.axes({ affection: 10, respect: 10, trust: 10 }) };
+  const input = camp(m[0], m[1], both, env({ romance: s }));
+  assert.ok(input.includes('"in_company":true') && input.includes(JSON.stringify(voiced.secondVoice.look)));
 });

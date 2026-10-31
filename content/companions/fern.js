@@ -54,9 +54,18 @@ export default {
     shared: "her ideal; she probably suggested it",
     cheatedOn: `not about other lovers (she doesn't care) but about lying: lies are the only betrayal she recognises`,
     affair: "refuses secrecy; she'd rather everyone just be honest",
+    former: "no hard feelings; she'd still share a blanket, and means it",
     rivals: "doesn't understand why anyone's competing",
     ignored: "stays kind and warm, and finds joy elsewhere",
   },
+  inOthers: {
+    affection: "she loves easily and never stops; it doesn't fall below fondness",
+    respect: "earned by honesty and care for others; worn down by cruelty for sport, using people, and feelings performed rather than felt",
+    trust: "earned by openness; worn down by lies and secrecy, the only betrayal she recognises",
+  },
+  recalibrates: "Out loud and gently: \"Oh, I thought we were all right?\"",
+  // Her affection for anyone doesn't fall below fondness; tired and frustrated is as far as she goes (D77).
+  limits: { affection: [0, 10] },
   leanFromHeat: false,
   // She waits for him to show interest (docs/spec/companions.md §6). A note is sent only while its gate holds.
   notes: [

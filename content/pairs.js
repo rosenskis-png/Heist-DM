@@ -1,18 +1,19 @@
 // Extracted from Gravenhold (legacy/gravenhold.html). See docs/spec/companions.md.
 // Optional dynamics between two companions, keyed "a|b" in either order.
-// `start` is where both start, or each one's own starting view of the other, keyed by id (D73).
+// `start` is where both start, or each one's own starting view of the other, keyed by id (D73). A view is one
+// number (affection) or the three axes (D77).
 // A missing pair falls back to the two profiles.
 export const pairs = {
   "vesper|nadia": {
-    start: 0,
+    start: { vesper: { affection: 2, respect: 1, trust: 0 }, nadia: { affection: -1, respect: 0, trust: -2 } },
     dynamic: `Vesper can taste Ember's hunger and finds it fascinating; Nadia finds Vesper exhausting.`,
   },
   "vesper|ruby": {
-    start: { vesper: 1, ruby: -4 },
+    start: { vesper: { affection: 2, respect: -3, trust: -1 }, ruby: { affection: -5, respect: -2, trust: -5 } },
     dynamic: `Vesper finds Ruby's devotion delicious and teases it; Ruby wants to stab her.`,
   },
   "vesper|fern": {
-    start: 1,
+    start: { vesper: { affection: 2, respect: -1, trust: 2 }, fern: { affection: 4, respect: 2, trust: 3 } },
     dynamic: `Two unashamed women; Fern thinks Vesper is lovely, Vesper finds Fern's innocence-without-shame baffling.`,
   },
   "vesper|lyra": {
@@ -28,11 +29,11 @@ export const pairs = {
     dynamic: "Two women used to being in control; a cold war of charm.",
   },
   "nadia|ruby": {
-    start: -1,
+    start: { nadia: { affection: 1, respect: 0, trust: -2 }, ruby: { affection: -2, respect: -1, trust: -3 } },
     dynamic: `Nadia tries to soothe Ruby; Ember thinks Ruby is dangerous and says so.`,
   },
   "nadia|fern": {
-    start: 2,
+    start: { nadia: { affection: 3, respect: 2, trust: 3 }, fern: { affection: 4, respect: 2, trust: 4 } },
     dynamic: "Warm and easy: performers and free spirits; Fern adores Ember.",
   },
   "nadia|lyra": {
@@ -49,7 +50,7 @@ export const pairs = {
     dynamic: "Morgana wants Ember as a tool; Nadia will never allow it.",
   },
   "ruby|fern": {
-    start: { ruby: -1, fern: 2 },
+    start: { ruby: { affection: -1, respect: -2, trust: -1 }, fern: { affection: 3, respect: 1, trust: 2 } },
     dynamic: `Fern keeps trying to hug Ruby; Ruby doesn't know what to do with kindness that isn't his.`,
   },
   "ruby|lyra": {
