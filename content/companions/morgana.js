@@ -74,6 +74,7 @@ export default {
       uses: "once per encounter, only once freed",
       perRest: 2,
       effect: "Strike one enemy blind or mute for a minute.",
+      declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
     },
     noncombat: {
       id: "leverage",
@@ -81,6 +82,7 @@ export default {
       uses: "once per encounter",
       perRest: 3,
       effect: `She knows what everyone in this prison owes, fears or wants, and can call in one favour or threat. Works even from inside her anti-magic cell.`,
+      declared: { uses: { encounter: 1, rest: 3 }, effects: [] },
     },
     limits: [
       "No magic (Curse) until freed from her anti-magic cell",

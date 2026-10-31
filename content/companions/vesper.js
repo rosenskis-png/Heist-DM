@@ -75,12 +75,14 @@ export default {
       uses: "once per encounter",
       perRest: 2,
       effect: `Render one person unconscious with a kiss, if they are willing, enthralled, or held still by someone else.`,
+      declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
     },
     noncombat: {
       id: "temptation",
       name: "Temptation",
       uses: "at will",
       effect: `One person who finds her desirable (most do) obeys a simple request for a minute; the more it goes against their duty, the more it needs a roll. (She can always taste what people want; that is a trait, not this ability.)`,
+      declared: { uses: null, effects: [] },
     },
     limits: [
       `Cannot cross a dwarven-warded threshold unless carried across or the ward is broken`,

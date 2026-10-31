@@ -6,11 +6,14 @@ import { r, list, obj } from "../shape.js";
 export const campfireSchema = withDefs({
   $id: "campfire",
   ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats"], {
-    // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order.
-    segments: list(obj(["speaker", "text"], { speaker: { enum: ["narrator", "self"] }, text: r("text") }), 1),
+    // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
+    // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
+    // them anywhere else.
+    segments: list(obj(["speaker", "text"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text") }), 1),
     changes: list(
       obj(["track", "by", "reason"], {
-        track: { enum: ["heat", "intimacy", "regard", "lean"] },
+        // `pair` is her side of how she and the other companion get on; it moves the pair value at most 1 a scene.
+        track: { enum: ["heat", "intimacy", "regard", "lean", "pair"] },
         by: { type: "integer", minimum: -3, maximum: 3 },
         reason: r("text"),
       }),

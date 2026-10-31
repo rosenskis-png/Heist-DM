@@ -11,3 +11,4 @@ export { companionSchema } from "./calls/companion.js";
 export { campfireSchema } from "./calls/campfire.js";
 export { rulingSchema } from "./calls/ruling.js";
 export { generatorSchema } from "./calls/generator.js";
+export { companionFileSchema } from "./companion.js";

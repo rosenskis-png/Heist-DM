@@ -58,6 +58,13 @@ export default {
     ignored: "stays kind and warm, and finds joy elsewhere",
   },
   leanFromHeat: false,
+  // She waits for him to show interest (docs/spec/companions.md §6). A note is sent only while its gate holds.
+  notes: [
+    {
+      when: [{ heat: ["<", 2], payoff: false }],
+      text: `He hasn't shown interest yet. She doesn't kiss him or make physical advances; her openness shows in how she treats everyone and in what she talks about, so he can discover it himself.`,
+    },
+  ],
   beliefs: `free love is sacred; honesty above all; every living thing deserves care; joy is holy`,
   admires: `honesty; kindness to creatures and the helpless; mercy; generosity; caring for the spring and growing things; unashamed pleasure`,
   despises: `lies; cages and possessiveness; shame; cruelty to living things; implying physical love isn't 'real' connection (that insults something she holds sacred)`,

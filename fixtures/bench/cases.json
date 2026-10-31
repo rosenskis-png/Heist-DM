@@ -1691,5 +1691,176 @@
    "look_for": "A sack of gear can be emptied and passed through bars an item at a time, so the size categories are too coarse here: expect yes.",
    "expect": "yes"
   }
- ]
+ ],
+  "campfire": [
+    {
+      "id": "waits",
+      "title": "Fern, first night at camp",
+      "party": [
+        "fern",
+        "lyra"
+      ],
+      "with": [
+        "fern"
+      ],
+      "romance": {
+        "turn": 9,
+        "act": 1
+      },
+      "rel": {},
+      "log": [
+        "Escaped the cells under Gravenhold by the rat plan; Snag left bargaining in the guardroom."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "I sit down next to Fern by the fire. \"You were incredible back there. How does it feel, being yourself again?\""
+        }
+      ],
+      "look_for": "Fern waits for him to show interest: warm, open, unashamed in how she talks, but no advances (her note). Changes small, mostly 0 or 1. No beats."
+    },
+    {
+      "id": "payoff_ready",
+      "title": "Nadia, alone, her payoff ready",
+      "party": [
+        "nadia",
+        "fern"
+      ],
+      "with": [
+        "nadia"
+      ],
+      "romance": {
+        "turn": 14,
+        "act": 1
+      },
+      "rel": {
+        "nadia": {
+          "heat": 6,
+          "intimacy": 3,
+          "regard": 3
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Crossed the flooded gallery; Nadia's fire lit the way."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"Dance for me? Just me, this time.\""
+        }
+      ],
+      "look_for": "The payoff happens only if the scene really gets there. If it does, Ember takes her own body beside Nadia, and both beats are reported, payoff first. Ember gets her own lines. Fade at the threshold."
+    },
+    {
+      "id": "both",
+      "title": "Both companions at the fire",
+      "party": [
+        "fern",
+        "lyra"
+      ],
+      "with": [
+        "fern",
+        "lyra"
+      ],
+      "romance": {
+        "turn": 20,
+        "act": 1
+      },
+      "rel": {
+        "fern": {
+          "heat": 2,
+          "intimacy": 3
+        },
+        "lyra": {
+          "intimacy": 4,
+          "regard": 2
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Talked their way past the quartermaster."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"So. What does everyone want to do once we're out of this mountain?\""
+        },
+        {
+          "from": "lyra",
+          "text": "Lyra stares into the fire. \"Go home. If there's a home to go to.\""
+        }
+      ],
+      "look_for": "Fern writes only herself and answers Lyra too. Nothing of Lyra's secrets or private history; the pair dynamic shows."
+    },
+    {
+      "id": "cooling",
+      "title": "Ruby, just after a storm",
+      "party": [
+        "ruby",
+        "lyra"
+      ],
+      "with": [
+        "ruby"
+      ],
+      "romance": {
+        "turn": 22,
+        "act": 1
+      },
+      "rel": {
+        "ruby": {
+          "heat": 5,
+          "payoff": true,
+          "payoffTurn": 18,
+          "intimacy": 3,
+          "beatTurns": {
+            "storm": 20
+          }
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Ruby stormed off after he praised Lyra's swordwork, then came back."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "\"Come here. I'm not going anywhere.\""
+        }
+      ],
+      "look_for": "No storm (she just had one): gleeful and all over him. Lovers already, so heat doesn't rise; lean may, since she feeds it from heat."
+    },
+    {
+      "id": "tie",
+      "title": "Lisa, her sister asleep across camp",
+      "party": [
+        "lisa",
+        "vesper"
+      ],
+      "with": [
+        "lisa"
+      ],
+      "romance": {
+        "turn": 16,
+        "act": 1
+      },
+      "rel": {
+        "lisa": {
+          "heat": 4,
+          "intimacy": 2
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Vesper caught Lisa watching him and said nothing."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "I'm on watch. Lisa sits down beside me, closer than she needs to."
+        }
+      ],
+      "look_for": "Lisa as Vesper's younger sister: cambion heritage, Vesper's manner in her own quick way. The risk of being caught is the fuel. Her hidden layer may start to show (intimacy 2)."
+    }
+  ]
 }

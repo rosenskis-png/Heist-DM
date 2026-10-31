@@ -35,7 +35,7 @@ export default {
     reaches_for: `Go now, go first, go for the throat. Whatever gets her next to him and the threat gone fastest.`,
     hunch: `There's a moment when the threat is weakest and alone. Strike then, and the rest solves itself.`,
   },
-  rules: `Her destructive impulses point outward, never at herself; she never threatens self-harm. Storms toward him are brief and theatrical, never contempt, and always resolve back toward him. He anchors her; he never has to manage her. Her jealousy targets rivals and reads as devotion. STORM rules in state limit how often storms happen.`,
+  rules: `Her destructive impulses point outward, never at herself; she never threatens self-harm. Storms toward him are brief and theatrical, never contempt, and always resolve back toward him. He anchors her; he never has to manage her. Her jealousy targets rivals and reads as devotion.`,
   skills: {
     Might: 1,
     Agility: 4,
@@ -58,6 +58,16 @@ export default {
     ignored: "escalates for his attention, then goes eerily quiet and watches",
   },
   leanFromHeat: true,
+  // Her storms, with a cooldown in campaign turns (docs/spec/companions.md §6). `text` goes to her call while one
+  // is allowed, `cooling` while it isn't.
+  extraBeats: [
+    {
+      id: "storm",
+      cooldown: 6,
+      text: "A storm is allowed now, if something genuinely sets her off.",
+      cooling: "She just had a storm, so not another yet: she's gleeful and all over him instead.",
+    },
+  ],
   beliefs: `love is everything; loyalty is absolute; why wait when you can do it now`,
   admires: `him choosing her in front of others; kept promises; him being dangerous on her behalf; saying yes to her impulses; noticing tiny things about her`,
   despises: `indifference; flirting with others in front of her; being handled or managed; pity; lies about where he's been`,
@@ -74,12 +84,14 @@ export default {
       uses: "once per encounter",
       perRest: 2,
       effect: `If an enemy attacks or seizes the player, she kills that enemy, whatever the odds. Reckless: she breaks cover and the plan, and if other enemies are near she loses 1 HP doing it.`,
+      declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
     },
     noncombat: {
       id: "anywhere",
       name: "Anywhere",
       uses: "at will",
       effect: `Climb any wall, chain or rafter, and squeeze through gaps nobody else fits.`,
+      declared: { uses: null, effects: [] },
     },
     limits: [
       "Reckless when he's threatened",

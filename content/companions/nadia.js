@@ -67,8 +67,17 @@ export default {
   other: `drawn to his warmth toward everyone; hates him using one woman against the other`,
   suppressed: `Nadia wants something only hers; Ember wants to be touched as herself. Met by time with each separately, a gift for one alone, treating Ember's own form as a person`,
   darkTriggers: `egging on Ember's fire (recklessness, burning enemies for fun); pitting the two of them against each other`,
-  emberLook: `Ember manifested: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery.`,
-  emberVoice: `hot, blunt, laughing, impatient, possessive of Nadia and very interested in him`,
+  // Ember, her second voice (docs/spec/companions.md §6): heard only in private, and in her own body only in
+  // person once the payoff is due. `relayed` is what Nadia's call gets while anyone else is present.
+  secondVoice: {
+    id: "ember",
+    name: "Ember",
+    voice: `hot, blunt, laughing, impatient, possessive of Nadia and very interested in him`,
+    look: `Ember manifested: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery.`,
+    relayed: `Ember doesn't speak or appear while anyone else is present. Nadia may relay her ("Ember says...", "Ember doesn't like her"), and her eyes flash gold.`,
+    manifestsAfter: "payoff",
+    beat: "manifest",
+  },
   outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles; a fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,
   abilities: {
     hp: 4,
@@ -78,12 +87,14 @@ export default {
       uses: "once per encounter",
       perRest: 2,
       effect: `A blast of fire knocks down and drives back everyone in a small area. Very loud, and sets anything flammable alight.`,
+      declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
     },
     noncombat: {
       id: "flame",
       name: "Ember's Flame",
       uses: "at will",
       effect: `Create and control small fire: burn through rope, wood or cloth, make light, heat metal, light or snuff flames.`,
+      declared: { uses: null, effects: [] },
     },
     limits: [
       "Water or cold smothers Ember's fire",

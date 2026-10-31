@@ -2,9 +2,12 @@
 // cases in fixtures/bench/cases.json through `sample`, shows each call's input and output, and saves every
 // run and note to the artifact's db so the design thread can read them.
 import { validate } from "../src/validate.js";
-import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, rulingSchema } from "../schemas/index.js";
+import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, campfireSchema, rulingSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
+import { companions as roster } from "../content/companions/index.js";
+import * as Rel from "../src/campaign/relationship.js";
+import { resolveParty } from "../src/campaign/roster.js";
 import * as A from "../src/context.js";
 import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
 import { flagKeys } from "../src/engine/plan.js";
@@ -44,10 +47,11 @@ const KINDS = [
   { id: "narration", label: "Narration", schema: narrationSchema },
   { id: "huddle", label: "Huddle", schema: companionSchema, call: "companion" },
   { id: "ruling", label: "Rulings", schema: rulingSchema },
+  { id: "campfire", label: "Campfire", schema: campfireSchema },
 ];
-const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling"];
+const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "campfire"];
 const TIERS = ["quick", "default", "complex"];
-const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", ruling: "quick", grader: "quick" };
+const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", campfire: "complex", ruling: "quick", grader: "quick" };
 const settings = store.get("bench.settings", { runs: 3, tiers: {} });
 settings.tiers = { ...DEFAULT_TIERS, ...settings.tiers };
 const saveSettings = () => store.set("bench.settings", settings);
@@ -61,7 +65,7 @@ let controller = new AbortController();
 async function load() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
   const sources = ["fixtures/cells/packet.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
-  const code = ["src/context.js", "bench/checks.js"];
+  const code = ["src/context.js", "src/campaign/relationship.js", "src/campaign/roster.js", "content/relationship.js", "bench/checks.js"];
   const texts = await Promise.all([...sources, ...code].map(text));
   const [packet, cases] = texts.slice(0, 2).map(JSON.parse);
   const prompts = texts.slice(2, sources.length);
@@ -149,6 +153,7 @@ async function runOne(kind, c) {
   const run = { kind, case: c.id, tier, at: Date.now(), version };
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
+    if (kind === "campfire") return Object.assign(run, await runCampfire(c, k.schema, tier));
     const input = A[`${kind}Input`](env, c, k.schema);
     // A named route that fails only on size goes to the ruling call (D55), not back to the step call.
     const engine =
@@ -224,6 +229,37 @@ async function runHuddle(c, schema, tier) {
     }
   }
   run.checks = turns.flatMap((t) => t.checks.map((x) => ({ ...x, name: `${t.name}: ${x.name}` })));
+  return run;
+}
+
+// A campfire case: any two companions from the roster, the relationship state the case gives, and one call for
+// the first companion in `with`. The engine checks her beats and voices (one retry), then applies the result.
+function campfireSetup(c) {
+  const members = resolveParty(c.party.map((id) => roster[id]));
+  const romance = { ...Rel.newRomance(members, pairs), ...c.romance };
+  for (const [id, r] of Object.entries(c.rel)) romance.rel[id] = { ...Rel.newRel(), ...r };
+  const self = members.find((m) => m.id === c.with[0]);
+  const scene = { private: c.with.length === 1, inPerson: true };
+  return { members, romance, self, scene };
+}
+
+async function runCampfire(c, schema, tier) {
+  const { members, romance, self, scene } = campfireSetup(c);
+  const raw = c.party.map((id) => roster[id]);
+  const [me, ...others] = [raw.find((x) => x.id === self.id), ...raw.filter((x) => x.id !== self.id)];
+  const input = A.campfireInput({ ...env, romance }, { ...c, scene: c.scene }, me, others, schema);
+  const r = await ask(input, schema, tier, (o) => Rel.campfireProblems(romance, self, members, o, scene));
+  const run = { ...r, input };
+  if (r.errors.length) return { ...run, checks: [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }] };
+  const after = Rel.applyCampfire(romance, self, members, r.out, scene);
+  const [b, a] = [romance.rel[self.id], after.rel[self.id]];
+  const tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(a[k] * 10) / 10}`).join(", ");
+  run.checks = [
+    { name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" },
+    { name: "Stage", ok: "info", detail: `${Rel.stage(b, self)} → ${Rel.stage(a, self)}` },
+    { name: "Tracks", ok: "info", detail: `${tracks}; pair ${romance.pair.value}→${after.pair.value}` },
+    { name: "Beats", ok: "info", detail: r.out.beats.join(", ") || "none" },
+  ];
   return run;
 }
 
@@ -375,6 +411,17 @@ function readable(kind, c, run) {
   if (kind === "world")
     return h("ul", { class: "acts" }, (o.actions ?? []).length ? o.actions.map((a) => h("li", {}, h("b", {}, a.npc), ` ${a.because}`, h("code", {}, JSON.stringify(a.ops)))) : h("li", {}, "Nobody acts."));
   if (kind === "ruling") return h("p", { class: "prose" }, h("b", {}, `${o.answer}: `), o.text);
+  if (kind === "campfire") {
+    const self = roster[c.with[0]];
+    const who = { narrator: null, self: self.name, second_voice: self.secondVoice?.name ?? "second voice" };
+    return h(
+      "div",
+      { class: "prose" },
+      (o.segments ?? []).map((x) => h("p", {}, who[x.speaker] ? h("b", {}, `${who[x.speaker]}: `) : null, x.text)),
+      (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
+      [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((t) => h("p", { class: "texture" }, t)),
+    );
+  }
   if (kind === "narration")
     return h("div", { class: "prose" }, (o.text ?? "").split(/\n+/).map((p) => h("p", {}, p)), o.texture?.length ? h("p", { class: "texture" }, `Texture: ${o.texture.join(" · ")}`) : null);
   return null;
@@ -456,6 +503,7 @@ function caseCard(kind, c) {
     h("div", { class: "case-head" }, h("h2", {}, c.title), ui.button),
     c.look_for ? h("p", { class: "look" }, c.look_for) : null,
     c.plan ? h("blockquote", {}, c.plan) : null,
+    c.scene ? c.scene.map((x) => h("blockquote", {}, x.text)) : null,
     h("div", { class: "row" }, ui.summary, ui.status),
     ui.flaws,
     ui.runs,
@@ -483,7 +531,9 @@ function settingsView() {
     const input =
       k.id === "huddle"
         ? A.companionInput(env, c, env.companions[0], env.companions.slice(1), c.huddle, k.schema)
-        : A[`${k.id}Input`](env, c, k.schema);
+        : k.id === "campfire"
+          ? A.campfireInput({ ...env, romance: campfireSetup(c).romance }, c, roster[c.with[0]], c.party.filter((id) => id !== c.with[0]).map((id) => roster[id]), k.schema)
+          : A[`${k.id}Input`](env, c, k.schema);
     return h("li", {}, `${k.label}: ${(input.length / 1024).toFixed(1)} KB input, prompt ${(env.prompts[k.call ?? k.id].length / 1024).toFixed(1)} KB`);
   });
   return h(

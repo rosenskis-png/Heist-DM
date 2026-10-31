@@ -2,6 +2,10 @@
 // fetching and the calling. Used by the bench page and, from Phase 4, the game.
 import { layoutFacts } from "./engine/map.js";
 import { invariants } from "../content/setting.js";
+import { pairs } from "../content/pairs.js";
+import * as Relationship from "../content/relationship.js";
+import * as Rel from "./campaign/relationship.js";
+import { resolveParty, pairEntry } from "./campaign/roster.js";
 
 // Strip coordinates (D9) and, for the party's view, everything hidden. The layout comes as facts the engine
 // derived from geometry: sizes and distances (D28).
@@ -45,27 +49,64 @@ const abilitiesFor = ({ combat, noncombat, ...rest }) => {
 // The rules-facing part of a sheet: who they are and what they can do.
 const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skills, abilities: abilitiesFor(s.abilities) });
 
-// A companion's huddle profile is an allowlist (D59): fields not named here, including UI and engine data
-// and special cases not yet declared (Phase 5), never reach a prompt.
-const HUDDLE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
+// A companion's profile is an allowlist (D59): fields not named here, including UI and engine data and any
+// declared data not resolved below, never reach a prompt.
+const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
   "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
   "suppressed", "darkTriggers"];
+// Gated fields, by the gate's name in content/relationship.js `reveal`.
+const GATED = { first: (c) => c.first, why: (c) => c.why, hidden: (c) => c.hidden, deep: (c) => c.deep, dark: (c) => c.dark,
+  payoff_scene: (c) => c.payoff.scene, quest: (c) => c.quest };
 
-// A companion's own profile, gated by relationship and act (docs/spec/companions.md §3) and by D50:
-// she gets her hunch and the plan she reaches for, never her blind spots.
-export function ownProfile(c, rel, act) {
-  const { hidden, deep, dark, payoff, quest, questAct, planning, react } = c;
-  const out = Object.fromEntries(HUDDLE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
+// A companion's own profile, as resolved for this party (src/campaign/roster.js), gated by relationship and act
+// (docs/spec/companions.md §3), with her declared special cases resolved for this scene (§6). `scene.private`:
+// the player is alone with her; `scene.inPerson`: at camp rather than over the rings. In the huddle she gets her
+// hunch and the plan she reaches for, never her blind spots (D50).
+export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}) {
+  const out = Object.fromEntries(PROFILE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
   out.abilities = abilitiesFor(c.abilities);
-  out.planning = { reaches_for: planning.reaches_for, hunch: planning.hunch };
-  if ((rel.turn ?? 0) < 8) Object.assign(out, { first: c.first, why: c.why });
-  if (rel.intimacy >= 2 || rel.payoff) out.hidden = hidden;
-  if (rel.payoff || rel.intimacy >= 5 || rel.lean >= 3) Object.assign(out, { deep, dark });
-  if (!rel.payoff && rel.heat >= payoff.at - 2) out.payoff_scene = payoff.scene;
-  if (act >= questAct - 1) out.quest = quest;
-  out.react = react[rel.config] ?? null;
+  if (planning) out.planning = { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch };
+  const v = Rel.view(rom, c);
+  for (const [k, gate] of Object.entries(Relationship.reveal)) if (Rel.holds(v, gate)) out[k] = GATED[k](c);
+  const notes = (c.notes ?? []).filter((n) => Rel.holds(v, n.when)).map((n) => n.text);
+  if (notes.length) out.notes = notes;
+  const sv = Rel.secondVoiceState(rom, c, scene);
+  if (sv) {
+    const { name, voice, look, relayed } = c.secondVoice;
+    out.second_voice = sv.speaks ? { name, voice, speaks_here: true, ...(sv.present ? { in_her_own_body: look } : {}) } : { name, relayed };
+  }
+  const partner = members.find((m) => m.id !== c.id);
+  if (c.tie && partner) out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift };
+  if (partner?.tie?.withId === c.id) {
+    const t = partner.tie;
+    out.tie_to_you = { who: partner.name, note: t.toPartner, bond: t.bond, if_you_learn: t.partnerReacts, you_know: rom.knows };
+  }
+  out.react = c.react[Rel.config(rom, c, members)] ?? null;
   return out;
 }
+
+// Her relationship with the player and the other companion, as her call reads it. Lean is shown whole.
+function relationshipFor(c, rom, members) {
+  const r = rom.rel[c.id];
+  const cfg = Rel.config(rom, c, members);
+  return {
+    stage: Rel.stage(r, c),
+    heat: r.heat,
+    payoff_at: c.payoff.at,
+    intimacy: r.intimacy,
+    regard: r.regard,
+    lean: Math.round(r.lean),
+    happened: ["payoff", "vuln", "deep", "bond", "manifest"].filter((k) => r[k]),
+    hurt: r.hurt,
+    configuration: Relationship.configText[cfg],
+    pair: rom.pair.value,
+    ...(r.memories.length ? { memories: r.memories } : {}),
+    ...(r.commitments.length ? { commitments: r.commitments } : {}),
+  };
+}
+
+// The party's relationship state, or a fresh one when there isn't one yet (the bench).
+const romanceOf = (env, members) => env.romance ?? Rel.newRomance(members, env.pairs ?? pairs, { act: env.act });
 
 const publicProfile = (c) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, abilities: abilitiesFor(c.abilities) });
 
@@ -231,21 +272,54 @@ export function narrationInput(env, c, schema) {
   ]);
 }
 
+// The huddle, or a private channel over the rings (`c.channel === "private"`). `self` and `others` are roster
+// entries; the party is resolved here (ties, D8), and relationship state comes from `env.romance`.
 export function companionInput(env, c, self, others, huddle, schema) {
-  const rel = { heat: 0, intimacy: 0, regard: 0, lean: 0, payoff: false, config: "open" };
+  const [me, ...rest] = resolveParty([self, ...others]);
+  const rom = romanceOf(env, [me, ...rest]);
+  const scene = { private: c.channel === "private", inPerson: false };
   const { opening, people, clock } = env.packet;
-  const pair = env.pairFor(self.id, others.map((o) => o.id));
+  const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
   return compose([
     ...campaign(env, "companion", schema),
-    block("You are", ownProfile(self, rel, env.act)),
-    block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...others.map(publicProfile)]),
+    block("You are", ownProfile(me, rom, [me, ...rest], scene)),
+    block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...rest.map(publicProfile)]),
     block("What the party knows", { map: partyMap(env.packet), people: learnedPeople(people), clock: knownClock(clock) }),
     block("Opening description", opening),
-    block("Your relationship with the player", rel),
-    pair ? block("You and the other companion", pair) : null,
-    block("The huddle so far", huddle),
+    block("Your relationship with the player", relationshipFor(me, rom, [me, ...rest])),
+    pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
+    block(scene.private ? "Your private channel with the player so far" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
-    `It's your turn in the huddle, as ${self.name}.`,
+    scene.private ? `The player is talking to you alone, over the rings, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
+  ]);
+}
+
+// The campfire (docs/spec/calls/campfire.md, D45). `c.with` lists the companions in the scene: her alone (one on
+// one), or both. In a scene with both, she gets the other's public profile and what the other has said and done in
+// this scene, which is in `c.scene`; never the other's secrets or private history. The beats she may report are
+// listed, with any declared beat's own text.
+export function campfireInput(env, c, self, others, schema) {
+  const [me, ...rest] = resolveParty([self, ...others]);
+  const members = [me, ...rest];
+  const rom = romanceOf(env, members);
+  const alone = !c.with.some((id) => id !== me.id);
+  const scene = { private: alone, inPerson: true };
+  const beats = Rel.allowedBeats(rom, me, members, scene);
+  const extra = (me.extraBeats ?? []).map((b) => (beats.includes(b.id) ? b.text : b.cooling)).filter(Boolean);
+  const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
+  return compose([
+    ...campaign(env, "campfire", schema),
+    block("You are", ownProfile(me, rom, members, scene, { planning: false })),
+    alone
+      ? block("The scene", `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
+      : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map(publicProfile) }),
+    block("Your relationship with the player", relationshipFor(me, rom, members)),
+    pair && !alone ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
+    block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
+    block("The story so far", c.log ?? []),
+    c.events ? block("The last encounter", c.events) : null,
+    block("This scene so far", c.scene ?? []),
+    `Continue the scene as ${me.name}.`,
   ]);
 }
 

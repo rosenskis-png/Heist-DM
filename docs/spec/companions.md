@@ -28,7 +28,9 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
 | Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first), `hunch` (a belief about the situation, phrased as a hint, that steers what her call attends to). Her call gets `hunch` and `reaches_for` only; `sees` and `misses` describe her bias for the designer and the bench (D50). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
 | Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
-| Special cases | currently inline, e.g. Nadia's `emberVoice` and `emberLook`, and Lisa's `sisterNote` and `variants`. Phase 5 turns these into declared data (§6). |
+| Special cases | optional, declared: `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes` (§6, D66). |
+
+The exact shape is `schemas/companion.js`, and `node --test` checks every file in the registry against it (D67).
 
 Text inside profiles may mention other companions by name (Fern's rule about Lisa and her sister). That's fine: it's characterization, not code.
 
@@ -36,7 +38,9 @@ Text inside profiles may mention other companions by name (Fern's rule about Lis
 
 Gravenhold revealed parts of a profile as the relationship grew. Keep that, as engine-side gating: like an act gate, a field that isn't unlocked yet is absent from context, not forbidden by a rule.
 
-Each channel sends an allowlist of fields (D59): the huddle sends identity, fantasy, look, voice, depth, rules, skills, abilities (effect text only) and `planning.hunch` and `reaches_for`, gated as below. Fields on no list, such as `color`, `rate`, `leanFromHeat` and undeclared special cases, are never sent.
+Each channel sends an allowlist of fields (D59): the huddle and the campfire send identity, fantasy, look, voice, depth, rules, skills and abilities (effect text only), gated as below, plus her special cases as resolved for the party and scene (§6). The huddle adds `planning.hunch` and `reaches_for`. Fields on no list, such as `color`, `rate`, `leanFromHeat`, a tie's `image`, and any special-case data the engine hasn't resolved, are never sent. Code: `ownProfile` in `src/context.js`.
+
+The gates are data (`reveal` in `content/relationship.js`, D65):
 
 | Field | Sent when (Gravenhold's thresholds) |
 |---|---|
@@ -56,7 +60,7 @@ Port the fields; write the judgment fresh in `prompts/companion.md`, drawing on 
 
 ## 4. Relationship model
 
-As Gravenhold implemented it (legacy `newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`). Phase 5 ports it with two changes: scoring input (§5), and no betrayal (D7).
+Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`) with two changes: scoring input (§5), and no betrayal (D7). Every number and label below is in `content/relationship.js` (D65); the rules are `src/campaign/relationship.js`, pure, tested by `test/companions.test.js`.
 
 **Tracks, per companion**
 - `heat` 0–12: the shallow fulfilment, earned fairly quickly. Its payoff happens only when READY allows it.
@@ -65,9 +69,9 @@ As Gravenhold implemented it (legacy `newRel`, `computeReady`, `configOf`, `stag
 - `lean` 0–10: toward her dark branch.
 - Flags: `payoff`, `vuln`, `deep`, `bond`, `hurt`, `manifest`, plus the memory of what she leaves unsaid.
 
-**Party-level:** the pair value (−10..10, starting from `content/pairs.js`); `knows` (the other companion knows about an involvement); `shared` (all three are openly together).
+**Party-level:** the pair value (−10..10, starting from `content/pairs.js`, moved at most 1 a scene by the campfire); `knows` (the other companion knows about an involvement); `shared` (all three are openly together); the campaign `turn` (one per exchange with the player) and act.
 
-**Caps:** each turn's change is clamped per track. Heat and intimacy gains are capped at +4 per encounter; Gravenhold reset them when an encounter ended.
+**Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat stops rising; for a companion with `leanFromHeat` it feeds lean instead, and intimacy gained after the payoff draws lean back down. She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
 
 **READY** (code decides what may happen):
 - `payoff` once heat ≥ `payoff.at`, the turn count ≥ `minTurns`, and the act ≥ `minAct`;
@@ -76,11 +80,11 @@ As Gravenhold implemented it (legacy `newRel`, `computeReady`, `configOf`, `stag
 
 Nothing is ready while she's hurt.
 
-**Beats** (reported when they really happen on the page): payoff, vulnerability, deep, bond, rupture, repair (only while hurt), discovered, shared, plus companion-specific beats (§6).
+**Beats** (reported by the campfire when they really happen on the page, D65): the READY ones, plus rupture, repair (only while hurt), discovered (once someone is involved and the other doesn't know), shared (both involved, and no tie rules it out), and declared beats (§6). The engine applies them in order, each checked when it's reached, so a payoff can make the beat that follows it possible in the same scene. A beat that isn't allowed goes back for the one retry (D13).
 
-**Configurations:** the love-triangle state, computed from both companions' payoff flags, `knows` and `shared`. One of: chosen, thirdwheel, secondfiddle, shared, cheatedOn, affair, rivals, ignored, open. Each companion's `react` gives her reaction to each.
+**Configurations:** the love-triangle state, computed from both companions' payoff flags (and which came first), `knows` and `shared`, unless a tie overrides it (§6). One of: chosen, thirdwheel, secondfiddle, shared, cheatedOn, affair, rivals, ignored, open. Each companion's `react` gives her reaction to each except open.
 
-**Stage labels** (for the UI): Strangers → Friends / Drawn → Burning → Lovers / Opening up → Bonded / In love, with Hurt overriding. Some companions override the wording (§6).
+**Stage labels** (for the UI): Strangers → Friends / Drawn → Burning → Lovers / Opening up → Bonded / In love (Indulging and Consumed when lean runs high), with Hurt overriding. A companion can override the wording (§6).
 
 ## 5. Scoring input (D20)
 
@@ -93,24 +97,26 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 ## 6. Adding or removing a companion (D8)
 
-**Add:** write `content/companions/<id>.js` with the fields in §2, and add one line to `content/companions/index.js`. Optionally add pair dynamics with existing companions to `content/pairs.js`, and a Lisa variant (below).
+**Add:** write `content/companions/<id>.js` with the fields in §2, and add one line to `content/companions/index.js`. Optionally add pair dynamics with existing companions to `content/pairs.js`. `node --test` tells you what's missing or misspelled.
 
-**Remove:** delete the file and its registry line. Entries that name it in `pairs.js` or Lisa's `variants` are simply ignored.
+**Change:** her look, outfit, voice, personality and abilities are all fields in her file. Nothing else reads them by name, so editing the file is the whole change.
 
-**Rules that keep this true**
-- Engine code and prompts never name a companion id.
-- A missing pair entry is normal: the pair starts at 0, and each companion judges the dynamic from her own profile and the other's public profile.
+**Remove:** delete the file and its registry line. Entries that name her in `pairs.js` or in another companion's `tie.by` are simply ignored.
+
+**Rules that keep this true** (checked by `test/companions.test.js`, D67)
+- Engine code, schemas and prompts never name a companion.
+- A missing pair entry is normal: the pair starts at 0, and each companion judges the dynamic from her own profile and the other's public profile (D68).
 - A companion that depends on another declares the dependency in her own file.
 
-**Gravenhold's special cases, to become declared data in Phase 5**
+**Special cases** (D66). Each is a general mechanism; any companion can declare one. The engine resolves it for the current party and scene, and only the result reaches a prompt.
 
-| Companion | Gravenhold's code | Proposed declaration in her file |
+| Declaration | What it does | Example |
 |---|---|---|
-| Lisa | Her race, look, outfit, manner and bond depend on which companion is her older sister (`LISA_VARIANTS`, `HERITAGE`, `LISA_STYLE`); special configurations when she's involved | `variants` keyed by the sister's id (already the shape in `lisa.js`). A companion without a variant can't be paired with her, and the setup screen hides that pairing. Configuration overrides as data. |
-| Nadia | Ember, a second voice: speaks only in private, manifests in her own body after the payoff (`emberVoice`, `emberLook`, the `manifest` beat) | `secondVoice: { id, voice, look, speaksWhen, manifestsAfter }` |
-| Ruby | A `storm` beat with a cooldown | `extraBeats: [{ id, cooldown, effect }]` |
-| Serena | Her own stage labels ("The chase", "Almost caught") | `stageLabels` overrides |
-| Fern | Makes no advances until he shows interest (heat < 2, no payoff) | A gated note, using the same mechanism as §3: `notes: [{ when, text }]` |
+| `tie: { required, set, append, toPartner, triangle, by: { <other id>: { set, append, gift, bond, partnerReacts, image } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.bothInvolved` gives the configuration for each side when both are involved, and `triangle.shared: false` rules out the shared beat. With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `image` is for the parked portraits and reaches no prompt. | Lisa and her older sister |
+| `secondVoice: { id, name, voice, look, relayed, manifestsAfter, beat }` | A second character in her. In company, her call gets only `relayed`. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private, once `manifestsAfter` is set or ready, she's there in her own body (`look`), and `beat` may be reported once. | Nadia's Ember |
+| `extraBeats: [{ id, cooldown, text, cooling }]` | A beat of her own, allowed once `cooldown` campaign turns have passed since the last. Her campfire call gets `text` while it's allowed and `cooling` while it isn't. | Ruby's storm |
+| `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Serena's "The chase", "Almost caught" |
+| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
 ## 7. Not carried over
 - Betrayal (D7).

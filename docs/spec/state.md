@@ -46,7 +46,7 @@ The engine validates every write against the map and state before committing it.
 | Companion AI | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
 | Engine | Ticks, schedules, rolls, consequences applied, effects, objective status, event log, table read |
-| Campfire | Relationship changes, memories, revealed secrets, commitments |
+| Campfire | Relationship changes (including the pair value), beats, memories, revealed secrets, commitments |
 
 ## The hand-off (D21)
 

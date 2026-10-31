@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 4 (The Cells, playable).** Phases 0–3 are done.
+**Current phase: 4 (The Cells, playable).** Phases 0–3 are done. Phase 5's code was built ahead of Phase 4, since it needs no UI; only its campfire exit test is left.
 
 ---
 
@@ -104,11 +104,19 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
-**Open questions**
-1. **Shapes for the special cases.** Until they're declared, they're on no allowlist and never reach a prompt (D59); the engine resolves the active variant (Lisa's) and sends only that. *Recommendation:* see the table in `docs/spec/companions.md`.
-2. **Caps on relationship changes.** *Recommendation:* start from Gravenhold's caps (per-turn changes clamped; heat and intimacy gains capped at +4 per encounter) and tune after playtests.
-3. **Companion-driven events** (personal quests). *Recommendation:* each quest is placed in a packet at generation, as hidden things and an optional objective. The companion knows about it through her own data. Nothing fires unless it was placed.
-4. **Pairs with no written dynamic.** *Recommendation:* the pair starts at 0. Each companion's call already sees the other's public profile (name, role, blurb, voice) and judges the dynamic from her own beliefs, admires and despises.
+- [x] The relationship model, ported with Gravenhold's numbers as content (D65): `src/campaign/relationship.js`, `content/relationship.js`.
+- [x] Special cases as general mechanisms declared in each file (D66): `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes`.
+- [x] A schema for companion files, and tests that keep the roster open (D67): `schemas/companion.js`, `test/companions.test.js`.
+- [x] Every ability has a `declared` block, companions and classes. Only Wild Shape and Lyra's senses carry effects or traits; the rest are use counts, and judgment handles what they do.
+- [x] The campfire: `prompts/campfire.md`, `campfireInput` in `src/context.js`, the engine's beat and voice checks, and a Campfire tab on the bench with five cases.
+- [ ] **The campfire feels like Gravenhold's.** Run the bench's Campfire cases and judge them by gut, as Phase 2 did for voices. Look for the romance floor in each companion's register, beats only when the scene earns them, small honest changes, and the declared cases working (Fern waiting, Ember appearing after the payoff, no storm while cooling, Lisa as her sister's sister). Republishing the bench needs `src/campaign/`, `content/relationship.js` and `content/companions/index.js` alongside the files it already loads.
+
+**Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
+
+**Carried into Phase 4:**
+- **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`); the UI advances it once per player message in the huddle, a moment or camp, and calls `endEncounter` with the hand-off.
+- **Beats outside camp.** Only the campfire reports beats (D65). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
+- **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. Nadia can relay Ember there; if Ember needs her own lines over the rings, the candidate needs a speaker.
 
 ## Phase 6: Act 1, hand-authored
 

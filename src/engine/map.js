@@ -27,7 +27,7 @@ export function crossings(s, from, path) {
 }
 
 // Working a connection (locking, unlocking, opening) takes someone with hands, on a side it's worked from (D64).
-// Anyone a sheet or a flag hasn't taken hands from has them: Fern as a rat doesn't.
+// Anyone a sheet or a flag hasn't taken hands from has them: a rat doesn't.
 export const hasHands = (s, id) => (isParty(s, id) || isNpc(s, id)) && flag(s, id, "hands") !== false;
 export const workedFrom = (c, z) => c.between.includes(z) && (c.operated_from === "both" || c.operated_from === z || c.reachable_from_other_side === true);
 

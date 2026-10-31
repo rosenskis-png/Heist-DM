@@ -58,6 +58,8 @@ export default {
     ignored: `insulted; she redoubles her teasing, then gives up and toys with someone else`,
   },
   leanFromHeat: true,
+  // Her own wording for two stages (docs/spec/companions.md §4).
+  stageLabels: { drawn: "The chase", burning: "Almost caught" },
   beliefs:
     "freedom above all; life is a game; cleverness is the highest virtue",
   admires: `wit; audacity; outsmarting enemies; humiliating the powerful; playing along; surprising her; mercy that humiliates an enemy`,
@@ -76,12 +78,14 @@ export default {
       uses: "once per encounter",
       perRest: 3,
       effect: `A foxfire illusion of her (or anyone) that draws up to three enemies' attention and pursuit for a minute.`,
+      declared: { uses: { encounter: 1, rest: 3 }, effects: [] },
     },
     noncombat: {
       id: "glamour",
       name: "Glamour",
       uses: "at will",
       effect: `Disguise herself or one other person as anyone she has seen, including the voice, for a few minutes, as long as no one touches them. Cold iron breaks it.`,
+      declared: { uses: null, effects: [] },
     },
     limits: [
       "Cold iron burns her and stops her magic on contact",

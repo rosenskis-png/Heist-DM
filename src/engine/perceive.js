@@ -15,7 +15,7 @@ export function npcPerceives(s, npc, zones, noise) {
   return louder(noise, hears.level) && zones.some((z) => hears.zones.includes(z));
 }
 
-// A member's traits, from their abilities' declared blocks (Lyra: sees_in_dark, hears_through_walls).
+// A member's traits, from their abilities' declared blocks (e.g. sees_in_dark, hears_through_walls).
 const traits = (s, id) => {
   const a = sheet(s, id)?.abilities ?? {};
   return [a.combat, a.noncombat].flatMap((x) => x?.declared?.traits ?? []);
