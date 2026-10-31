@@ -10,8 +10,9 @@ export const tracks = {
   lean: [0, 10],
 };
 
-// The pair value's range, and how far one scene may move it.
-export const pair = { range: [-10, 10], perScene: 1 };
+// How each companion feels about the other: the range, and how far one scene may move her view (D73).
+// The pair value is the two views' average.
+export const pair = { range: [-10, 10], perScene: 2 };
 
 // Gravenhold's per-turn clamps (heat −2..2, depth −3..2, regard −3..2, dark 0..2) and its +4 per encounter cap
 // on heat and intimacy gains, reset when an encounter ends.

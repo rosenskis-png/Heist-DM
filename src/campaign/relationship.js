@@ -25,16 +25,19 @@ export const newRel = () => ({
   memories: [],
   commitments: [],
   revealed: [],
+  // How she feels about the other companion (D73).
+  towardOther: 0,
 });
 
 // The party's relationship state: one entry per companion, plus the pair. `members` are the two companions.
 export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
   const [a, b] = members.map((c) => c.id);
+  const start = b ? pairEntry(pairs, a, b)?.start ?? 0 : 0;
   return {
     turn,
     act,
-    rel: Object.fromEntries(members.map((c) => [c.id, newRel()])),
-    pair: { value: b ? pairEntry(pairs, a, b)?.start ?? 0 : 0 },
+    rel: Object.fromEntries(members.map((c) => [c.id, { ...newRel(), towardOther: start }])),
+    pair: { value: start },
     knows: false,
     shared: false,
     wardrobe: newWardrobe(members),
@@ -181,8 +184,8 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
   return problems;
 }
 
-// A campfire output, once it has no problems: track changes (within the same caps), the pair, beats, memories,
-// revealed secrets and commitments. Everything is about her (D45).
+// A campfire output, once it has no problems: track changes (within the same caps), her view of the other
+// companion, beats, memories, revealed secrets, commitments and her outfit. Everything is about her (D45).
 export function applyCampfire(rom, c, members, out, scene = {}) {
   const delta = {};
   let pairBy = 0;
@@ -191,7 +194,10 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
     else delta[x.track] = (delta[x.track] ?? 0) + x.by;
   }
   let s = applyDelta(rom, c, delta);
-  s.pair.value = clamp(s.pair.value + clamp(pairBy, [-R.pair.perScene, R.pair.perScene]), R.pair.range);
+  const own = s.rel[c.id];
+  own.towardOther = clamp(own.towardOther + clamp(pairBy, [-R.pair.perScene, R.pair.perScene]), R.pair.range);
+  const views = Object.values(s.rel).map((x) => x.towardOther);
+  s.pair.value = Math.round(views.reduce((a, b) => a + b, 0) / views.length);
   s = applyBeats(s, c, members, out.beats, scene).state;
   const r = s.rel[c.id];
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);

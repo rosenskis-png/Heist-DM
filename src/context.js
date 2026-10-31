@@ -103,7 +103,7 @@ function relationshipFor(c, rom, members) {
     happened: ["payoff", "vuln", "deep", "bond", "manifest"].filter((k) => r[k]),
     hurt: r.hurt,
     configuration: Relationship.configText[cfg],
-    pair: rom.pair.value,
+    you_feel_about_the_other_companion: r.towardOther,
     ...(r.memories.length ? { memories: r.memories } : {}),
     ...(r.commitments.length ? { commitments: r.commitments } : {}),
   };
@@ -322,7 +322,7 @@ export function campfireInput(env, c, self, others, schema) {
       ? block("The scene", `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
       : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map(publicProfile) }),
     block("Your relationship with the player", relationshipFor(me, rom, members)),
-    pair && !alone ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
+    alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), you_feel_about_her: rom.rel[me.id].towardOther }),
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),

@@ -69,7 +69,9 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 - `lean` 0–10: toward her dark branch.
 - Flags: `payoff`, `vuln`, `deep`, `bond`, `hurt`, `manifest`, plus the memory of what she leaves unsaid.
 
-**Party-level:** the pair value (−10..10, starting from `content/pairs.js`, moved at most 1 a scene by the campfire); `knows` (the other companion knows about an involvement); `shared` (all three are openly together); the campaign `turn` (one per exchange with the player) and act.
+**Per companion, toward the other:** how she feels about the other companion (−10..10, starting from the pair's `start` in `content/pairs.js`, moved at most 2 a scene by the campfire, D73).
+
+**Party-level:** the pair value, the average of the two views; `knows` (the other companion knows about an involvement); `shared` (all three are openly together); the campaign `turn` (one per exchange with the player) and act.
 
 **Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat stops rising; for a companion with `leanFromHeat` it feeds lean instead, and intimacy gained after the payoff draws lean back down. She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
 

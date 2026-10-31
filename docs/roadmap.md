@@ -120,6 +120,10 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 6. Character feel otherwise held.
 7. **Outfits failed** (second round). Cause: the campfire's `outfit` had to be a valid id, so a model writing null or guessing an id failed validation, and her call got no id for what she had on and no description of what else she owned. Fix: `outfit` is an id or null, and her call gets the id of what she's wearing and the id and look of each other outfit.
 8. **Nadia and Ember turned jealous** (second round). Cause: the first fix framed Ember's tastes against Nadia's, on top of an old hidden layer about each wanting him alone. Fix: D72, and her file rewritten to the designer's description.
+9. **The Campfire tab broke after switching away, and some responses didn't show** (third round). Cause: saved runs don't keep inputs, and the campfire view read them, so rendering threw once saved runs loaded. Fix: guarded, and each run now renders on its own, so one bad run can't blank a case.
+10. **Camp with both stayed shallow** (third round). Cause: every answer had to move something, so the second opened a small question of her own, and nothing invited the two to deal with each other. Fix: D73.
+11. **Ember should wait for the payoff,** then choose: D74.
+12. **Lisa** (from Gravenhold): in private she may dream aloud about a future with just him, but the secret thrill matters more; she never demands he choose, and after being caught and swearing it off she'll try to start it again. Her pursuit and suppressed desire are rewritten to say so.
 
 **Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
 

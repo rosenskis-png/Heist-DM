@@ -12,7 +12,7 @@ export const campfireSchema = withDefs({
     segments: list(obj(["speaker", "text"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text") }), 1),
     changes: list(
       obj(["track", "by", "reason"], {
-        // `pair` is her side of how she and the other companion get on; it moves the pair value at most 1 a scene.
+        // `pair` is how she feels about the other companion; it moves her view at most 2 a scene (D73).
         track: { enum: ["heat", "intimacy", "regard", "lean", "pair"] },
         by: { type: "integer", minimum: -3, maximum: 3 },
         reason: r("text"),
@@ -23,8 +23,8 @@ export const campfireSchema = withDefs({
     commitments: list(r("text")),
     // Only beats the engine listed as ready or always allowed; the engine rejects any other.
     beats: list(r("id")),
-    // What this answer moves between the player and one of the companions: a question she asks him, a move, a
-    // dare, something she pushes. Null if nothing. With both companions present, one of the two must (D70).
+    // What this answer moves, between the player and a companion or between the two companions: a question, a
+    // move, a dare, something pushed or brought into the open. Null if nothing. With both present, one must (D70).
     advances: { oneOf: [r("text"), { type: "null" }] },
     // The id of an outfit she owns that she changes into on the page, or null (docs/spec/companions.md §7).
     outfit: { oneOf: [r("id"), { type: "null" }] },

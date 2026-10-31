@@ -455,7 +455,8 @@ function campfireView(run) {
         (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
         [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
       ),
-      fold(`Input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input),
+      // Saved runs don't keep inputs (save()).
+      t.input ? fold(`Input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
       fold("Raw output", json(o)),
     );
   });
@@ -492,27 +493,35 @@ function renderRuns(kind, c, ui) {
   ui.flaws.replaceChildren(...(table ? [table] : []));
   ui.runs.replaceChildren(
     ...runs.map((run, i) => {
-      const head = h(
-        "summary",
-        {},
-        h("span", { class: "rn" }, `#${runs.length - i}`),
-        h("span", { class: "meta" }, `${run.tier} · ${run.ms ? (run.ms / 1000).toFixed(0) + "s" : "–"} · ${run.inputChars ? (run.inputChars / 1024).toFixed(0) + " KB in" : ""}${run.version !== version ? " · older version" : ""}`),
-        run.error ? chip(false, "error") : h("span", { class: "dots" }, (run.checks ?? []).filter((x) => x.ok !== "info").map((x) => h("i", { class: x.ok === true ? "ok" : x.ok === "near" ? "near" : "bad", title: x.name }))),
-      );
-      const body = run.error
-        ? h("p", { class: "err" }, run.error)
-        : h(
-            "div",
-            { class: "body" },
-            h("ul", { class: "checks" }, (run.checks ?? []).map((x) => h("li", {}, chip(x.ok, x.ok === true ? "pass" : x.ok === "near" ? "close" : x.ok === "info" ? "note" : "fail"), ` ${x.name}`, x.detail ? h("small", {}, ` ${x.detail}`) : null))),
-            run.graderError ? h("p", { class: "err" }, `Grader: ${run.graderError}`) : null,
-            kind === "huddle" ? huddleView(c, run) : kind === "campfire" ? campfireView(run) : readable(kind, c, run),
-            run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
-            run.out ? fold("Raw output", json(run.out)) : null,
-          );
-      return h("details", { class: `run${run.version !== version ? " old" : ""}`, open: i === 0 && !run.saved }, head, body);
+      try {
+        return runView(kind, c, run, i, runs);
+      } catch (e) {
+        return h("p", { class: "err" }, `Run #${runs.length - i} couldn't be shown: ${errorText(e)}`);
+      }
     }),
   );
+}
+
+function runView(kind, c, run, i, runs) {
+  const head = h(
+    "summary",
+    {},
+    h("span", { class: "rn" }, `#${runs.length - i}`),
+    h("span", { class: "meta" }, `${run.tier} · ${run.ms ? (run.ms / 1000).toFixed(0) + "s" : "–"} · ${run.inputChars ? (run.inputChars / 1024).toFixed(0) + " KB in" : ""}${run.version !== version ? " · older version" : ""}`),
+    run.error ? chip(false, "error") : h("span", { class: "dots" }, (run.checks ?? []).filter((x) => x.ok !== "info").map((x) => h("i", { class: x.ok === true ? "ok" : x.ok === "near" ? "near" : "bad", title: x.name }))),
+  );
+  const body = run.error
+    ? h("p", { class: "err" }, run.error)
+    : h(
+        "div",
+        { class: "body" },
+        h("ul", { class: "checks" }, (run.checks ?? []).map((x) => h("li", {}, chip(x.ok, x.ok === true ? "pass" : x.ok === "near" ? "close" : x.ok === "info" ? "note" : "fail"), ` ${x.name}`, x.detail ? h("small", {}, ` ${x.detail}`) : null))),
+        run.graderError ? h("p", { class: "err" }, `Grader: ${run.graderError}`) : null,
+        kind === "huddle" ? huddleView(c, run) : kind === "campfire" ? campfireView(run) : readable(kind, c, run),
+        run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
+        run.out ? fold("Raw output", json(run.out)) : null,
+      );
+  return h("details", { class: `run${run.version !== version ? " old" : ""}`, open: i === 0 && !run.saved }, head, body);
 }
 
 function caseCard(kind, c) {

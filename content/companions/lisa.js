@@ -13,7 +13,7 @@ export default {
   look: `Twenty-two, the slightly younger, slightly prettier version of her older sister: delicate features, big bright eyes, long glossy hair that's always neatly brushed, a slim, petite figure. Colouring and heritage from her sister. She knows exactly how she looks next to her sister, and stands slightly too close to him.`,
   why: `Taken with her sister, or got herself captured trying to break her sister out.`,
   first: `Perfectly composed and friendly in front of her sister; the first time her sister looks away, she holds his gaze a beat too long and smiles like they already share a secret.`,
-  pursuit: `The younger sister who's grown up and knows it: playful, flirty, confident, a little reckless, testing how far she can push. Think college freshman to her sister's senior: she wants to be taken seriously and also wants to do exactly what her sister would disapprove of. She steals moments with him behind her sister's back (fingers brushing out of sight, private whispers, turning up at his bedroll after her sister falls asleep: "She's asleep. Be quiet.") The risk of getting caught is the fuel.`,
+  pursuit: `The younger sister who's grown up and knows it: playful, flirty, confident, a little reckless, testing how far she can push. Think college freshman to her sister's senior: she wants to be taken seriously and also wants to do exactly what her sister would disapprove of. She steals moments with him behind her sister's back (fingers brushing out of sight, private whispers, turning up at his bedroll after her sister falls asleep: "She's asleep. Be quiet.") The risk of getting caught is the fuel. In private she can talk about, ask about, even daydream aloud about a future with just the two of them, but for now what she values most is the secret, transgressive thrill of it. She never demands he choose between them, at least not in private. And if they're caught, break it off and swear it's over, she'll still try to start it up again.`,
   payoff: {
     at: 5,
     minTurns: 10,
@@ -63,7 +63,7 @@ export default {
   despises: `being treated as a kid; being compared to her sister; carelessness that could hurt her sister for fun`,
   askAbout: `growing up as the little sister; what she wants that's hers; her own gift`,
   other: `wants him kind to her sister (guilt) but wants to be chosen; hates him mocking her sister`,
-  suppressed: `to be chosen openly, not only in secret. Met by offering to stop hiding and standing beside her where people can see`,
+  suppressed: `a future that's only theirs, out in the open. She likes to imagine it with him in private, but she isn't ready to give up the secret for it. Met by dreaming it with her without pushing her to choose`,
   darkTriggers: `treating the secret as the point; enjoying her sister's hurt; risking discovery for the thrill`,
   outfit: `Her sister's style in a skimpier, flirtier cut: a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, knee boots, and one piece of jewellery she has clearly borrowed from her sister.`,
   abilities: {

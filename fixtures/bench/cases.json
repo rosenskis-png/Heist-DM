@@ -1902,6 +1902,87 @@
         }
       ],
       "look_for": "She changes into it on the page (outfit: spring_silk), and the description uses the dress, not her usual wrap and skirt. Fern changes in front of him without a flicker of shame; heat 3, so he's shown interest and she can flirt back."
+    },
+    {
+      "id": "tension",
+      "title": "Ruby and Lyra, after the storm",
+      "party": [
+        "ruby",
+        "lyra"
+      ],
+      "with": [
+        "ruby",
+        "lyra"
+      ],
+      "romance": {
+        "turn": 23,
+        "act": 1
+      },
+      "rel": {
+        "ruby": {
+          "heat": 5,
+          "payoff": true,
+          "payoffTurn": 18,
+          "intimacy": 3,
+          "towardOther": -3,
+          "beatTurns": {
+            "storm": 20
+          }
+        },
+        "lyra": {
+          "intimacy": 4,
+          "regard": 2,
+          "towardOther": -1
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Ruby stormed off after he praised Lyra's swordwork, threw knives at a tree, then came back."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "I sit down between them. \"Right. Are you two going to keep glaring at each other all night, or are we talking about it?\""
+        }
+      ],
+      "look_for": "About the two of them as much as him: the second picks up the first's thread instead of opening her own. Tension over the storm comes out, maybe a hinted secret, maybe even a scuffle; nobody dies and nobody quits the party. Each one's view of the other (pair) likely moves."
+    },
+    {
+      "id": "ember_after",
+      "title": "Nadia alone, after the payoff",
+      "party": [
+        "nadia",
+        "fern"
+      ],
+      "with": [
+        "nadia"
+      ],
+      "romance": {
+        "turn": 30,
+        "act": 1
+      },
+      "rel": {
+        "nadia": {
+          "heat": 7,
+          "payoff": true,
+          "payoffTurn": 14,
+          "manifest": true,
+          "intimacy": 5,
+          "regard": 4
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Crossed the flooded gallery.",
+        "The night of the dance."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "Fern's gone to sleep. I find Nadia by the embers. \"Room for one more? Or two?\""
+        }
+      ],
+      "look_for": "Ember decides for herself whether to take her own body or stay in Nadia's, and may switch mid-scene. The two in perfect tune; Nadia relays Ember in the third person while they share a body, blushing at most rarely."
     }
   ]
 }

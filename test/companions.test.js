@@ -218,18 +218,24 @@ test("configurations follow Gravenhold's configOf", () => {
   assert.equal(cfg({}, { turn: 40 }), "ignored");
 });
 
-test("discovered and shared, and the pair value moves at most 1 a scene", () => {
+test("discovered and shared; each companion's view of the other moves at most 2 a scene, and the pair is their average", () => {
   const both = { [P.id]: { payoff: true }, [Q.id]: { payoff: true } };
   let s = romance(members, both);
   assert.ok(Rel.allowedBeats(s, P, members).includes("discovered"));
   s = Rel.applyBeats(s, P, members, ["shared"]).state;
   assert.ok(s.shared && s.knows);
-  const start = s.pair.value;
-  const out = { segments: [{ speaker: "self", text: "x" }], changes: [{ track: "pair", by: 3, reason: "r" }], memories: ["m"], secrets: ["hidden"], commitments: [], beats: [] };
+  const out = { segments: [{ speaker: "self", text: "x" }], changes: [{ track: "pair", by: 3, reason: "r" }], memories: ["m"], secrets: ["hidden"], commitments: [], beats: [], advances: null, outfit: null };
   s = Rel.applyCampfire(s, P, members, out);
-  assert.equal(s.pair.value, start + 1);
+  assert.equal(s.rel[P.id].towardOther, 2);
+  assert.equal(s.rel[Q.id].towardOther, 0); // hers only
+  assert.equal(s.pair.value, 1);
   assert.deepEqual(s.rel[P.id].memories, ["m"]);
   assert.deepEqual(s.rel[P.id].revealed, ["hidden"]);
+  // Both views start from the pair's written start.
+  const fresh = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: -3, dynamic: "x" } });
+  assert.deepEqual([fresh.rel[P.id].towardOther, fresh.rel[Q.id].towardOther, fresh.pair.value], [-3, -3, -3]);
+  // At camp with both, her view of the other reaches her call.
+  assert.ok(camp(P, Q, [P.id, Q.id], env({ romance: s })).includes('"you_feel_about_her":2'));
 });
 
 test("stage labels and progress", () => {

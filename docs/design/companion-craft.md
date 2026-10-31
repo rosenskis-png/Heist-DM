@@ -15,7 +15,7 @@ This section is the source of the shared style guide, `prompts/style.md`.
 - **What the game is.** A wish-fulfilment romantic fantasy in the tradition of the great RPG companion romances, as emotionally intense and satisfying as possible. It sits on top of genuinely challenging, logical gameplay where the party depends on each other.
 - **Who the companions are.** Fully realised adult women with their own agendas.
 - **Messy and even toxic dynamics are welcome** where they fit the character. They are always between consenting adults, and always fiction.
-  - The one limit on messiness is structural: no companion betrays the party (D7). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, and ruptures are all still on the table.
+  - The limits on messiness are structural: no companion betrays the party (D7), nobody dies at the hands of the party, and nobody refuses to keep working together, however friendly, romantic, angry or toxic things get between them (D73). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, ruptures, and even a fight in camp are all still on the table.
 - **Never sand the edges off anyone.** A companion who is softened into blandness has been lost.
 - **Never lecture,** in narration or in a companion's voice. A companion can disapprove, loudly, in character. The game never moralizes at the player.
 - **Plain speech.** Natural, concrete language with no aphorisms or clever abstract metaphors. Personality shows through word choice and attitude.
