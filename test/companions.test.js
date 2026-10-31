@@ -268,20 +268,18 @@ test("gated fields appear only when their gate opens", () => {
 
 // ---------- declared special cases (docs/spec/companions.md §6) ----------
 
-const noted = having("notes");
-test("a note is sent only while its gate holds", { skip: !noted }, () => {
-  const o = all.find((c) => c !== noted && !partyProblems([noted, c]).length);
-  const n = noted.notes[0];
-  const text = JSON.stringify(n.text);
-  const open = romance([noted, o]);
-  const shut = Object.keys(n.when[0]).find((k) => Array.isArray(n.when[0][k]));
-  const inputWith = (s) => huddle(noted, o, env({ romance: s }));
-  if (Rel.holds(Rel.view(open, noted), n.when)) assert.ok(inputWith(open).includes(text));
-  if (shut) {
-    const [op, v] = n.when[0][shut];
-    const closed = romance([noted, o], { [noted.id]: { [shut]: op.startsWith("<") ? v : v - 1 } });
-    assert.ok(!inputWith(closed).includes(text));
-  }
+test("a note is sent only while its gate holds, including gates on derived terms", () => {
+  const c = newcomer({ notes: [{ when: [{ heat: ["<", 2], payoff: false }], text: "N1" }, { when: [{ toPayoff: ["<=", 1] }], text: "N2" }] });
+  const o = plain()[1];
+  const input = (rels) => huddle(c, o, env({ romance: romance([c, o], { [c.id]: rels }) }));
+  assert.ok(input({}).includes('"N1"') && !input({}).includes('"N2"'));
+  assert.ok(!input({ heat: 2 }).includes('"N1"'));
+  assert.ok(input({ heat: c.payoff.at - 1 }).includes('"N2"'));
+});
+
+test("every declared gate uses only terms the engine knows", () => {
+  const known = new Set(Object.keys(Rel.view(romance(members), P)));
+  for (const c of all) for (const n of c.notes ?? []) for (const alt of n.when) for (const k of Object.keys(alt)) assert.ok(known.has(k), `${c.id}: ${k}`);
 });
 
 const voiced = having("secondVoice");
@@ -394,11 +392,21 @@ test("a second voice's own tastes reach her call in company and in private", { s
   for (const input of [huddle(voiced, o), rings]) assert.ok(input.includes(JSON.stringify(sv.admires)) && input.includes(JSON.stringify(sv.despises)));
 });
 
-test("a pair can start lopsided, and a gate can read how the other companion feels about her", () => {
-  const s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: -4 }, dynamic: "x" } });
+test("a pair can start lopsided; gates read her perception of the other, which only her own scenes move (D76)", () => {
+  let s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: -4 }, dynamic: "x" } });
   assert.deepEqual([s.rel[P.id].towardOther, s.rel[Q.id].towardOther, s.pair.value], [2, -4, -1]);
-  assert.equal(Rel.view(s, P).fromOther, -4);
-  assert.ok(Rel.holds(Rel.view(s, Q), [{ fromOther: [">=", 2], towardOther: ["<", 0] }]));
-  const lopsided = Object.values(pairs).filter((p) => typeof p.start === "object");
-  for (const p of lopsided) for (const v of Object.values(p.start)) assert.ok(Number.isInteger(v) && v >= -10 && v <= 10);
+  assert.deepEqual([s.rel[P.id].readOfOther, s.rel[Q.id].readOfOther], [-4, 2]); // first impressions are right
+  assert.equal(Rel.view(s, P).fromOther, undefined); // never the truth
+  // Q warms to P in secret; P's read doesn't move with it.
+  const out = { segments: [{ speaker: "self", text: "x" }], changes: [{ track: "pair", by: 2, reason: "r" }], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null };
+  s = Rel.applyCampfire(s, Q, members, out);
+  assert.equal(s.rel[Q.id].towardOther, -2);
+  assert.equal(s.rel[P.id].readOfOther, -4);
+  // P comes to believe she's trusted, rightly or not.
+  s = Rel.applyCampfire(s, P, members, { ...out, changes: [{ track: "read", by: 5, reason: "r" }] });
+  assert.equal(s.rel[P.id].readOfOther, -2);
+  assert.ok(Rel.holds(Rel.view(s, P), [{ readOfOther: [">=", -2] }]));
+  assert.ok(camp(P, Q, [P.id, Q.id], env({ romance: s })).includes('"you_think_she_feels_about_you":-2'));
+  for (const p of Object.values(pairs).filter((x) => typeof x.start === "object"))
+    for (const v of Object.values(p.start)) assert.ok(Number.isInteger(v) && v >= -10 && v <= 10);
 });

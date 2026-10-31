@@ -25,8 +25,9 @@ export const newRel = () => ({
   memories: [],
   commitments: [],
   revealed: [],
-  // How she feels about the other companion (D73).
+  // How she feels about the other companion (D73), and how she thinks the other feels about her (D76).
   towardOther: 0,
+  readOfOther: 0,
 });
 
 // The party's relationship state: one entry per companion, plus the pair. `members` are the two companions.
@@ -39,7 +40,8 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
   return {
     turn,
     act,
-    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), towardOther: views[i] }])),
+    // Her first read of the other is right; after that only her own judgment moves it (D76).
+    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), towardOther: views[i], readOfOther: views[1 - i] ?? 0 }])),
     pair: { value: Math.round(views.reduce((x, y) => x + y, 0) / (views.length || 1)) },
     knows: false,
     shared: false,
@@ -50,15 +52,12 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
 // Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D70).
 export const speakingOrder = (rom, ids) => (rom.turn % 2 ? [...ids].reverse() : [...ids]);
 
-// What gates read: her tracks and flags, how the other companion feels about her, the campaign's turn and act,
-// and two distances.
+// What gates read: her tracks and flags (including her read of the other, never the other's real feelings, D76),
+// the campaign's turn and act, and two distances.
 export function view(rom, c) {
   const rel = rom.rel[c.id];
-  const other = Object.keys(rom.rel).find((id) => id !== c.id);
   return {
     ...rel,
-    // How the other companion feels about her.
-    fromOther: other ? rom.rel[other].towardOther : 0,
     turn: rom.turn,
     act: rom.act,
     toPayoff: c.payoff.at - rel.heat,
@@ -196,13 +195,17 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
 export function applyCampfire(rom, c, members, out, scene = {}) {
   const delta = {};
   let pairBy = 0;
+  let readBy = 0;
   for (const x of out.changes) {
     if (x.track === "pair") pairBy += x.by;
+    else if (x.track === "read") readBy += x.by;
     else delta[x.track] = (delta[x.track] ?? 0) + x.by;
   }
   let s = applyDelta(rom, c, delta);
   const own = s.rel[c.id];
-  own.towardOther = clamp(own.towardOther + clamp(pairBy, [-R.pair.perScene, R.pair.perScene]), R.pair.range);
+  const step = (v, by) => clamp(v + clamp(by, [-R.pair.perScene, R.pair.perScene]), R.pair.range);
+  own.towardOther = step(own.towardOther, pairBy);
+  own.readOfOther = step(own.readOfOther, readBy);
   const views = Object.values(s.rel).map((x) => x.towardOther);
   s.pair.value = Math.round(views.reduce((a, b) => a + b, 0) / views.length);
   s = applyBeats(s, c, members, out.beats, scene).state;

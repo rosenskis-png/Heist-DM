@@ -108,6 +108,14 @@ textarea { font: 14px var(--body); color: var(--fg); background: var(--bg); bord
 .set select { font: 14px var(--body); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
 .tiers { display: grid; gap: 6px; }
 ul.sizes { margin: 0; padding-left: 18px; font: 13px var(--mono); color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 6px 16px; }
+.set input[type="number"] { width: 5em; font: 14px var(--mono); color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 6px; font-variant-numeric: tabular-nums; }
+.check { font-size: 14px; display: inline-flex; align-items: center; gap: 4px; margin-right: 12px; }
+.stack { display: grid; gap: 4px; font-size: 15px; }
+dl.looks { margin: 0; display: grid; gap: 4px; font-size: 14px; }
+.look-row { display: grid; grid-template-columns: 8.5em 1fr; gap: 8px; }
+.look-row dt { color: var(--muted); text-transform: capitalize; }
+.look-row dd { margin: 0; min-width: 0; }
 @media (max-width: 480px) { h1 { display: none; } nav button { padding: 6px 8px; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>

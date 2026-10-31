@@ -12,8 +12,9 @@ export const campfireSchema = withDefs({
     segments: list(obj(["speaker", "text"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text") }), 1),
     changes: list(
       obj(["track", "by", "reason"], {
-        // `pair` is how she feels about the other companion; it moves her view at most 2 a scene (D73).
-        track: { enum: ["heat", "intimacy", "regard", "lean", "pair"] },
+        // `pair` is how she feels about the other companion, `read` how she thinks the other feels about her; each
+        // moves at most 2 a scene (D73, D76).
+        track: { enum: ["heat", "intimacy", "regard", "lean", "pair", "read"] },
         by: { type: "integer", minimum: -3, maximum: 3 },
         reason: r("text"),
       }),

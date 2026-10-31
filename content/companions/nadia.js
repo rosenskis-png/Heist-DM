@@ -25,9 +25,9 @@ export default {
   turnoffs: `treating the bond as a gimmick, trying to separate them by force, jealousy of Ember`,
   flattery:
     "You're the one they both want, and they argue over who gets you first.",
-  hidden: `Ember didn't come to her by accident. At nineteen Nadia danced three nights without stopping, in a rite her grandmother had forbidden, and offered herself to whatever was in the fire. Something answered. Now they don't take lovers so much as bring them in: everyone they've truly let in wakes with a small burn over the heart that stays warm to the touch for the rest of their life, and dreams of the fire. A few of them still come looking for her. Nadia calls it a blessing. Ember calls it a claim. They both want to give it to him.`,
-  deep: `Whatever ties Ember to her could be broken, and Ember would be free to leave. She stays, and the three choose each other. He carries the mark, gladly.`,
-  dark: `He feeds the fire. Their devotion becomes his whole world, a little temple of three that scorches anyone who comes near.`,
+  hidden: `The rite Nadia danced at nineteen was the last one of the Hearth, a cult whose temple was put to the torch generations ago. Whatever burned in their fire didn't die with them; it waited for someone who would dance long enough. Ember is what answered. Nadia only half knows what Ember is: the goddess they worshipped, a piece of her, or something that wore her name. What she does know is that Ember grows on devotion. Everyone they bring all the way in takes the mark over the heart, dreams of the fire every night after, and gives a little of themselves to it, gladly and for good. With enough of them, Ember could hold her own body for more than a moment, then for days, then for good. For ten years Nadia has been gathering a congregation one bed at a time, and she has never wanted anyone in it the way she wants him. She'd like him to be more than one of them: the one who keeps the fire.`,
+  deep: `He finds Ember another way to be whole than devotion fed to her one lover at a time: the Hearth's own record, a fire of her own, something no one in the cult ever tried. Ember could leave. She stays, and the three choose each other freely, with no mark needed.`,
+  dark: `He takes the mark and gives in. The dreams take his nights, then his days; he feeds the fire and starts bringing others to it, the keeper of something that is slowly waking up. Warm, sexy, devoted, and a little less himself every week. It never turns any of them against the party.`,
   voice: `Nadia: warm, wry, theatrical, a performer's timing. Ember (in private): hot, blunt, laughing. "Ember says that was very brave. I say it was stupid. We both say come here."`,
   // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
   // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
@@ -46,7 +46,7 @@ export default {
     Insight: 2,
     Presence: 4,
   },
-  quest: `The dwarven archive holds a record of the rite Nadia danced: the means to free Ember, or to bind her forever.`,
+  quest: `The dwarven archive holds the Hearth's last record: how to make Ember whole without a congregation, or how to bind her into Nadia forever.`,
   questAct: 3,
   react: {
     chosen: "radiant and a little smug; Ember relays approval loudly",
@@ -65,17 +65,25 @@ export default {
   despises: `treating Ember as a gimmick or a weapon; trying to come between them; jealousy; crude ownership`,
   askAbout: `the night Ember came to her, ten years ago; the dances of her homeland; what Ember was before`,
   other: `drawn to his warmth toward everyone; hates him using one woman against the other`,
-  suppressed: `for him to take the mark knowing exactly what it is, and want it. Met by asking about the fire and the others who carry it, and not flinching from the answers`,
-  darkTriggers: `egging on Ember's fire (recklessness, burning enemies for fun); pitting the two of them against each other`,
+  suppressed: `for him to want the fire for what it is, the mark, the congregation and what Ember needs, and to want them anyway. Met by asking about the Hearth and the others who carry the mark, and not flinching from the answers`,
+  darkTriggers: `accepting the mark; wanting more of the fire; bringing others to it; egging on Ember's fire (recklessness, burning enemies for fun)`,
   // What he can make of Ember, before and after he has met her in her own body (docs/spec/companions.md §6).
   notes: [
     {
-      when: [{ payoff: false }],
-      text: `Ember rarely speaks yet. Nadia passes on a remark of Ember's now and then, an opinion, a preference, and lets it sit, so he can't tell whether Ember is real, a way of talking, or a second person in Nadia's head. She never explains.`,
+      when: [{ payoff: false, toPayoff: [">", 3] }],
+      text: `Ember rarely speaks yet. Nadia passes on a remark of Ember's now and then and lets it sit, so he can't tell whether Ember is real, a way of talking, or a second person in Nadia's head. She never explains.`,
     },
     {
-      when: [{ payoff: true }],
-      text: `He has met Ember in her own body. What she is stays open: a fire spirit, a goddess, a fiend's bargain, a woman once cursed, Nadia's own passion given flesh. Neither of them says, and what they let slip can point more than one way.`,
+      when: [{ payoff: false, toPayoff: ["<=", 3] }],
+      text: `Ember comes up more often now, and more concretely: her opinions, her memories, her jokes at Nadia's expense, the fire answering a mood. It's getting hard to believe Ember is only a way of talking, though nobody has said what she is.`,
+    },
+    {
+      when: [{ payoff: true, hurt: false }],
+      text: `He has met Ember in her own body, and she's plainly real; Nadia talks about her all the time. What she is stays open: a fire spirit, a goddess, a fiend's bargain, a woman once cursed, Nadia's own passion given flesh. Neither of them says, and what they let slip can point more than one way.`,
+    },
+    {
+      when: [{ payoff: true, hurt: true }],
+      text: `Things have soured. Ember has gone quiet and far away, and Nadia mentions her as rarely as she did at the start.`,
     },
   ],
   // Ember, her second voice (docs/spec/companions.md §6): she speaks for herself only in private, and may take her

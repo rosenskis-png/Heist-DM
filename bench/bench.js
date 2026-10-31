@@ -7,8 +7,8 @@ import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import { companions as roster } from "../content/companions/index.js";
 import * as Rel from "../src/campaign/relationship.js";
-import { resolveParty } from "../src/campaign/roster.js";
-import { addOutfit } from "../src/campaign/wardrobe.js";
+import { addOutfit, equip, wearing } from "../src/campaign/wardrobe.js";
+import { resolveParty, partyProblems } from "../src/campaign/roster.js";
 import * as A from "../src/context.js";
 import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
 import { flagKeys } from "../src/engine/plan.js";
@@ -609,6 +609,7 @@ function show(tab) {
   for (const b of document.querySelectorAll("nav button")) b.setAttribute("aria-current", b.dataset.tab === tab ? "page" : "false");
   const main = $("#cases");
   if (tab === "settings") return main.replaceChildren(settingsView());
+  if (tab === "camp") return main.replaceChildren(...campView());
   main.replaceChildren(...env.cases[tab].map((c) => caseCard(tab, c)));
 }
 
@@ -623,6 +624,7 @@ async function start() {
   }
   $("nav").replaceChildren(
     ...KINDS.map((k) => h("button", { "data-tab": k.id, onclick: () => show(k.id) }, k.label)),
+    h("button", { "data-tab": "camp", onclick: () => show("camp") }, "Camp"),
     h("button", { "data-tab": "settings", onclick: () => show("settings") }, "⚙"),
   );
   show(current);
@@ -633,6 +635,177 @@ async function start() {
   }
   await loadSaved();
   show(current);
+}
+
+// ---------- Camp: free play for character design ----------
+// Any two companions, any relationship state, one on one or both, as many turns as you like. Each answer goes
+// through the engine's checks and is applied, so the numbers move as the scene does. Kept in this browser only.
+
+const camp = store.get("bench.camp", null) ?? { a: "nadia", b: "fern", with: "both", log: "", romance: null, transcript: [], looks: {} };
+const saveCamp = () => store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
+const campMembers = () => resolveParty([roster[camp.a], roster[camp.b]]);
+function campReset() {
+  camp.romance = Rel.newRomance(campMembers(), pairs, { turn: 10, act: 1 });
+  camp.transcript = [];
+  saveCamp();
+}
+
+// What the scene has said so far, as the next call reads it.
+function campScene() {
+  return camp.transcript.flatMap((t) => {
+    if (t.from === "player") return [{ from: "player", text: t.text }];
+    if (!t.out) return [];
+    const c = roster[t.from];
+    return t.out.segments.map((g) => ({ from: g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : c.name, text: g.text }));
+  });
+}
+
+async function campSend(text, status) {
+  const members = campMembers();
+  const ids = camp.with === "both" ? [camp.a, camp.b] : [camp.with];
+  camp.transcript.push({ from: "player", text });
+  camp.romance = Rel.nextTurn(camp.romance);
+  const order = ids.length > 1 ? Rel.speakingOrder(camp.romance, ids) : ids;
+  let mustAdvance = false;
+  for (const id of order) {
+    status.textContent = `${roster[id].name} is answering…`;
+    const self = members.find((m) => m.id === id);
+    const other = id === camp.a ? camp.b : camp.a;
+    const where = { private: ids.length === 1, inPerson: true, mustAdvance };
+    const c = { with: ids, scene: campScene(), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
+    const input = A.campfireInput({ ...env, romance: camp.romance }, c, roster[id], [roster[other]], campfireSchema);
+    try {
+      const r = await ask(input, campfireSchema, settings.tiers.campfire, (o) => Rel.campfireProblems(camp.romance, self, members, o, where));
+      if (r.errors.length) {
+        camp.transcript.push({ from: id, error: r.errors.slice(0, 5).join("; "), input });
+        break;
+      }
+      camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
+      camp.transcript.push({ from: id, out: r.out, input, retried: r.retried });
+      mustAdvance = !r.out.advances;
+    } catch (e) {
+      camp.transcript.push({ from: id, error: errorText(e), input });
+      break;
+    }
+  }
+  status.textContent = "";
+  saveCamp();
+}
+
+// A plain description of how she looks now, for the designer: from her look, what she has on, and her second
+// voice's look if she has one.
+async function describeLooks(id, out) {
+  const c = campMembers().find((m) => m.id === id);
+  const source = { name: c.name, race: c.race, age: c.age, look: c.look, wearing: wearing(camp.romance, c), ...(c.secondVoice ? { second_voice: { name: c.secondVoice.name, look: c.secondVoice.look } } : {}) };
+  out.replaceChildren(h("p", { class: "status" }, "Describing…"));
+  try {
+    const d = await sample.json(
+      `Below is a game character's appearance as written. Restate it as a clean, simple description for the game's designer, using only what's written (say "not described" where nothing is). Return only JSON: {"outfit": text, "hair": text (colour and style), "face": text (features), "body_type": text, "body_shape": text, "other_features": text (anything else defining)${c.secondVoice ? `, "second_voice": the same fields for ${c.secondVoice.name}` : ""}}.\n\n${JSON.stringify(source)}`,
+      { modelTier: "quick", cache: true, signal: controller.signal },
+    );
+    const rows = (o) => Object.entries(o).filter(([k]) => k !== "second_voice").map(([k, v]) => h("div", { class: "look-row" }, h("dt", {}, k.replace("_", " ")), h("dd", {}, String(v))));
+    camp.looks[id] = d;
+    out.replaceChildren(
+      h("dl", { class: "looks" }, rows(d)),
+      d.second_voice ? h("h3", {}, c.secondVoice.name) : null,
+      d.second_voice ? h("dl", { class: "looks" }, rows(d.second_voice)) : null,
+      h("p", { class: "status" }, `Edit in content/companions/${c.id}.js: look, outfit${c.secondVoice ? ", secondVoice.look" : ""}${c.tie ? ", or the tie entry for this sister" : ""}.`),
+    );
+  } catch (e) {
+    out.replaceChildren(h("p", { class: "err" }, errorText(e)));
+  }
+}
+
+function campView() {
+  if (!roster[camp.a] || !roster[camp.b]) Object.assign(camp, { a: Object.keys(roster)[0], b: Object.keys(roster)[1] });
+  const problems = partyProblems([roster[camp.a], roster[camp.b]]);
+  if (!problems.length && (!camp.romance || !camp.romance.rel[camp.a] || !camp.romance.rel[camp.b])) campReset();
+  const rerender = () => show("camp");
+  const pick = (key) =>
+    h("select", { id: `camp-${key}`, onchange: (e) => ((camp[key] = e.target.value), (camp.with = "both"), (camp.romance = null), saveCamp(), rerender()) },
+      Object.values(roster).map((c) => h("option", { value: c.id, selected: camp[key] === c.id }, c.name)));
+  const setup = h(
+    "section",
+    { class: "case" },
+    h("div", { class: "case-head" }, h("h2", {}, "Camp"), h("button", { class: "run-btn ghost", onclick: () => (campReset(), rerender()) }, "Start over")),
+    h("p", { class: "look" }, "Pick two companions, set where everything stands, then talk. The numbers move with the scene, and you can change them any time."),
+    h("label", { class: "set" }, h("span", {}, "First companion"), pick("a")),
+    h("label", { class: "set" }, h("span", {}, "Second companion"), pick("b")),
+    problems.length ? h("p", { class: "err" }, `These two can't share a party: ${problems.join("; ")}`) : null,
+  );
+  if (problems.length) return [setup];
+  const members = campMembers();
+  setup.append(
+    h("label", { class: "set" }, h("span", {}, "At the fire"),
+      h("select", { id: "camp-with", onchange: (e) => ((camp.with = e.target.value), saveCamp(), rerender()) },
+        [["both", "Both"], [camp.a, `${roster[camp.a].name} alone`], [camp.b, `${roster[camp.b].name} alone`]].map(([v, l]) => h("option", { value: v, selected: camp.with === v }, l)))),
+    ...["turn", "act"].map((k) =>
+      h("label", { class: "set" }, h("span", {}, k === "turn" ? "Campaign turn" : "Act"),
+        h("input", { id: `camp-${k}`, type: "number", min: k === "act" ? 1 : 0, value: camp.romance[k], onchange: (e) => ((camp.romance[k] = Number(e.target.value)), saveCamp(), rerender()) }))),
+    h("label", { class: "stack" }, h("span", {}, "The story so far (one event per line)"),
+      h("textarea", { id: "camp-log", rows: 2, oninput: (e) => ((camp.log = e.target.value), saveCamp()) }, camp.log)),
+  );
+  const TRACKS = [["heat", 0, 12], ["intimacy", 0, 10], ["regard", -10, 10], ["lean", 0, 10], ["towardOther", -10, 10, "feels about the other"], ["readOfOther", -10, 10, "thinks the other feels"]];
+  const cards = members.map((c) => {
+    const r = camp.romance.rel[c.id];
+    const set = (k, v) => ((r[k] = v), saveCamp(), rerender());
+    const looks = h("div");
+    const owned = camp.romance.wardrobe[c.id];
+    return h(
+      "section",
+      { class: "case" },
+      h("div", { class: "case-head" }, h("h2", {}, c.name), h("span", { class: "chip info" }, Rel.stage(r, c))),
+      h("div", { class: "grid" },
+        TRACKS.map(([k, lo, hi, label]) =>
+          h("label", { class: "set" }, h("span", {}, label ?? k), h("input", { id: `camp-${c.id}-${k}`, type: "number", min: lo, max: hi, step: 1, value: Math.round(r[k] * 10) / 10, onchange: (e) => set(k, Number(e.target.value)) })))),
+      h("div", { class: "row" },
+        [["payoff", "payoff happened"], ["vuln", "opened up"], ["hurt", "hurt"], ...(c.secondVoice ? [["manifest", `${c.secondVoice.name} has appeared`]] : [])].map(([k, label]) =>
+          h("label", { class: "check" }, h("input", { id: `camp-${c.id}-${k}`, type: "checkbox", checked: !!r[k], onchange: (e) => set(k, e.target.checked) }), ` ${label}`))),
+      h("label", { class: "set" }, h("span", {}, "Wearing"),
+        h("select", { id: `camp-${c.id}-outfit`, onchange: (e) => ((camp.romance = equip(camp.romance, c.id, e.target.value)), saveCamp(), rerender()) },
+          Object.entries(owned.owned).map(([id, o]) => h("option", { value: id, selected: owned.equipped === id }, o.name)))),
+      h("button", { class: "run-btn ghost", onclick: () => describeLooks(c.id, looks) }, "Describe looks"),
+      looks,
+      h("p", { class: "status" }, `Ready: ${Rel.allowedBeats(camp.romance, c, members, { private: camp.with === c.id, inPerson: true }).join(", ")}`),
+    );
+  });
+  const status = h("span", { class: "status" });
+  const box = h("textarea", { id: "camp-say", rows: 3, placeholder: "What you say or do" });
+  const send = h("button", { class: "run-btn", onclick: async () => {
+    const text = box.value.trim();
+    if (!text || !sample) return;
+    send.disabled = true;
+    await campSend(text, status);
+    rerender();
+  } }, "Send");
+  const lines = camp.transcript.map((t) => {
+    if (t.from === "player") return h("blockquote", {}, t.text);
+    const c = roster[t.from];
+    if (t.error) return h("p", { class: "err" }, `${c.name}: ${t.error}`);
+    const who = { narrator: null, self: c.name, second_voice: c.secondVoice?.name ?? "second voice" };
+    const o = t.out;
+    return h("div", { class: "turn" },
+      h("div", { class: "prose" }, o.segments.map((g) => h("p", {}, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
+      h("p", { class: "texture" }, [
+        ...o.changes.map((x) => `${x.track} ${x.by > 0 ? "+" : ""}${x.by} (${x.reason})`),
+        o.beats.length ? `beats: ${o.beats.join(", ")}` : null,
+        o.advances ? `moves: ${o.advances}` : null,
+        o.outfit ? `changes into: ${o.outfit}` : null,
+        t.retried ? "retried once" : null,
+      ].filter(Boolean).join(" · ")),
+      t.input ? fold(`${c.name}'s input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
+      fold("Raw output", json(o)),
+    );
+  });
+  const scene = h(
+    "section",
+    { class: "case" },
+    h("h2", {}, "The scene"),
+    lines.length ? lines : h("p", { class: "look" }, "Nothing yet. Say something to start."),
+    box,
+    h("div", { class: "row" }, send, status, sample ? null : h("span", { class: "status" }, "Open on claude.ai to talk.")),
+  );
+  return [setup, ...cards, scene];
 }
 
 start();
