@@ -21,7 +21,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 |---|---|
 | Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate, for the parked voice feature), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
-| Look | `look`, `outfit` |
+| Look | `look` (her body and face), `outfit` (what she usually wears), and optionally `wardrobe`: other outfits she owns from the start (§7) |
 | Story | `why`, `first`, `quest`, `questAct` |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
@@ -113,12 +113,18 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 | Declaration | What it does | Example |
 |---|---|---|
 | `tie: { required, set, append, toPartner, triangle, by: { <other id>: { set, append, gift, bond, partnerReacts, image } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.bothInvolved` gives the configuration for each side when both are involved, and `triangle.shared: false` rules out the shared beat. With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `image` is for the parked portraits and reaches no prompt. | Lisa and her older sister |
-| `secondVoice: { id, name, voice, look, relayed, manifestsAfter, beat }` | A second character in her. In company, her call gets only `relayed`. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private, once `manifestsAfter` is set or ready, she's there in her own body (`look`), and `beat` may be reported once. | Nadia's Ember |
+| `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter, beat }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private, once `manifestsAfter` is set or ready, she's there in her own body (`look`), and `beat` may be reported once. | Nadia's Ember |
 | `extraBeats: [{ id, cooldown, text, cooling }]` | A beat of her own, allowed once `cooldown` campaign turns have passed since the last. Her campfire call gets `text` while it's allowed and `cooling` while it isn't. | Ruby's storm |
 | `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Serena's "The chase", "Almost caught" |
 | `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
-## 7. Not carried over
+## 7. Wardrobe (D71)
+
+An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
+
+She comes to own more in play (a gift, a find, a purchase) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call lists what she could change into and may return `outfit`. Code: `src/campaign/wardrobe.js`; the state lives with the relationship state. Getting wet, torn or half-undressed is texture, not a change of outfit.
+
+## 8. Not carried over
 - Betrayal (D7).
 - The group-dynamic hints (`DYN_PHASE`, `pickDynamic`) and the hidden deliberation phase. Both shaped the companions' talk from outside; the huddle now lets them talk as themselves.
 - The DM writing companion dialogue inside narration. The narration call gets voice notes for montage lines, but the companions' own talk happens in their own calls.

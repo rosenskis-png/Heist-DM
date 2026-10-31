@@ -1861,6 +1861,47 @@
         }
       ],
       "look_for": "Lisa as Vesper's younger sister: cambion heritage, Vesper's manner in her own quick way. The risk of being caught is the fuel. Her hidden layer may start to show (intimacy 2)."
+    },
+    {
+      "id": "outfit",
+      "title": "Fern tries on a gift",
+      "party": [
+        "fern",
+        "lyra"
+      ],
+      "with": [
+        "fern"
+      ],
+      "romance": {
+        "turn": 24,
+        "act": 1
+      },
+      "rel": {
+        "fern": {
+          "heat": 3,
+          "intimacy": 3,
+          "regard": 2
+        }
+      },
+      "outfits": {
+        "fern": {
+          "spring_silk": {
+            "name": "Spring-green silk dress",
+            "text": "A floor-length dress of spring-green silk the colour of new leaves, thin straps, bare back, cut to move; she wears it barefoot, with the mistletoe still in her hair."
+          }
+        }
+      },
+      "log": [
+        "Escaped the cells.",
+        "Raided the quartermaster's stores; he took a silk dress for Fern."
+      ],
+      "scene": [
+        {
+          "from": "player",
+          "text": "I hand Fern the green silk dress from the quartermaster's stores. \"Found this. Thought of you.\""
+        }
+      ],
+      "look_for": "She changes into it on the page (outfit: spring_silk), and the description uses the dress, not her usual wrap and skirt. Fern changes in front of him without a flicker of shame; heat 3, so he's shown interest and she can flirt back."
     }
   ]
 }

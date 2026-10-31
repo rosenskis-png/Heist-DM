@@ -3,6 +3,7 @@
 // does differently is declared in her file. Code never names a companion (D8).
 import * as R from "../../content/relationship.js";
 import { pairEntry } from "./roster.js";
+import { newWardrobe, equip } from "./wardrobe.js";
 
 const clamp = (v, [lo, hi]) => Math.max(lo, Math.min(hi, v));
 const copy = (x) => structuredClone(x);
@@ -36,8 +37,12 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1 } = {}) {
     pair: { value: b ? pairEntry(pairs, a, b)?.start ?? 0 : 0 },
     knows: false,
     shared: false,
+    wardrobe: newWardrobe(members),
   };
 }
+
+// Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D70).
+export const speakingOrder = (rom, ids) => (rom.turn % 2 ? [...ids].reverse() : [...ids]);
 
 // What gates read: her tracks and flags, plus the campaign's turn and act and two distances.
 export function view(rom, c) {
@@ -159,8 +164,9 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
   return { state: out, rejected };
 }
 
-// Problems with a campfire output beyond its schema: beats not allowed, and lines for a voice she doesn't have
-// here. A call with problems gets one retry with them listed (D13).
+// Problems with a campfire output beyond its schema: beats not allowed, lines for a voice she doesn't have here,
+// an outfit she doesn't own, and, when she answers second with both companions present and the first moved
+// nothing (`scene.mustAdvance`, D70), moving nothing herself. A call with problems gets one retry with them listed (D13).
 export function campfireProblems(rom, c, members, out, scene = {}) {
   const problems = [];
   let s = rom;
@@ -170,6 +176,8 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
     s = r.state;
   }
   if (out.segments.some((x) => x.speaker === "second_voice") && !secondVoiceState(rom, c, scene)?.speaks) problems.push("no second voice speaks in this scene");
+  if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
+  if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
   return problems;
 }
 
@@ -189,7 +197,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);
   r.commitments = [...r.commitments, ...out.commitments];
   r.revealed = [...new Set([...r.revealed, ...out.secrets])];
-  return s;
+  return out.outfit ? equip(s, c.id, out.outfit) : s;
 }
 
 // The love-triangle state for her (Gravenhold's configOf). A tie can declare how the triangle reads when both

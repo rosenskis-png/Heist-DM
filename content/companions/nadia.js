@@ -11,10 +11,10 @@ export default {
   blurb: `A dancer-sorceress with a fire djinn bound into the tattoo on her arm. They've been lovers for ten years. Both of them have noticed you.`,
   fantasy:
     "Two women who want you, are lovers with each other, and invite you in.",
-  look: `Strong dark brows, kohl-lined warm brown eyes flecked with gold, full lips. Tall, with long dancer's legs, a toned bare midriff and real curves. Waist-length black curls threaded with tiny gold beads. A flame tattoo spirals up one arm. When Ember speaks through her, her eyes flash gold and her voice drops.`,
+  look: `Strong dark brows, kohl-lined warm brown eyes flecked with gold, full lips. Tall, with long dancer's legs, a toned bare midriff and real curves. Waist-length black curls threaded with tiny gold beads. A flame tattoo spirals up one arm.`,
   why: `Captured performing for the enemy's officers; they keep her to dance, and fear the fire.`,
-  first: `She dances for the guards to cover a moment of the party's escape, and mid-spin her eyes flash gold. Afterward: "Ember says to get that one out. She was very insistent."`,
-  pursuit: `In group scenes Nadia relays Ember constantly and specifically ("Ember says your hands are wasted on a sword." "I like that. Ember doesn't."), eyes flashing gold. Alone with him, Ember speaks for herself, and after the payoff she is physically there too: two women with him.`,
+  first: `She dances for the guards to cover a moment of the party's escape. Afterward: "Ember says to get that one out. She was very insistent."`,
+  pursuit: `In group scenes Nadia relays Ember constantly and specifically, in the third person and without fuss ("Ember says your hands are wasted on a sword." "I like that. Ember doesn't."). She's happy to tell him what either of them thinks, and they often disagree. Alone with him, Ember speaks for herself, and after the payoff she is physically there too: two women with him.`,
   payoff: {
     at: 6,
     minTurns: 10,
@@ -74,7 +74,10 @@ export default {
     name: "Ember",
     voice: `hot, blunt, laughing, impatient, possessive of Nadia and very interested in him`,
     look: `Ember manifested: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery.`,
-    relayed: `Ember doesn't speak or appear while anyone else is present. Nadia may relay her ("Ember says...", "Ember doesn't like her"), and her eyes flash gold.`,
+    relayed: `Ember doesn't speak for herself while anyone else is present. Nadia talks about her freely, in the third person: what Ember thinks, wants and can't stand, which is often not what Nadia does ("Ember says...", "Ember doesn't like her").`,
+    // Where Ember differs from Nadia. Draft from the profile above; the designer may rewrite.
+    admires: `boldness and recklessness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; a secret worth keeping`,
+    despises: `caution and hedging; being talked past or spoken of as a thing; anyone who tries to have Nadia without her; cold, damp places`,
     manifestsAfter: "payoff",
     beat: "manifest",
   },

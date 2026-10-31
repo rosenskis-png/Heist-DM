@@ -322,3 +322,59 @@ test("an extra beat has a cooldown in campaign turns", { skip: !storming }, () =
   assert.ok(Rel.allowedBeats(s, storming, m).includes(b.id));
   assert.ok(camp(storming, o, [storming.id], env({ romance: s })).includes(JSON.stringify(b.text)));
 });
+
+// ---------- the wardrobe (docs/spec/companions.md §7, D71) ----------
+
+test("she owns her usual outfit, can be given more, and her profile describes what she has on", async () => {
+  const W = await import("../src/campaign/wardrobe.js");
+  const silk = { name: "Silk dress", text: "A long dress of green silk." };
+  let s = romance(members);
+  assert.equal(W.wearing(s, P), P.outfit);
+  assert.throws(() => W.equip(s, P.id, "silk"));
+  s = W.equip(W.addOutfit(s, P.id, "silk", silk), P.id, "silk");
+  const input = huddle(P, Q, env({ romance: s }));
+  assert.ok(input.includes(JSON.stringify(silk.text)) && !input.includes(JSON.stringify(P.outfit)));
+  assert.equal(s.wardrobe[Q.id].equipped, "usual"); // only hers
+  // At camp she can change on the page, into something she owns.
+  const out = { segments: [{ speaker: "self", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null };
+  const back = Rel.applyCampfire(s, P, members, { ...out, outfit: "usual" });
+  assert.equal(W.wearing(back, P), P.outfit);
+  assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, outfit: "ballgown" }), ["she doesn't own an outfit called ballgown"]);
+  assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes('"could_change_into":[{"id":"usual"'));
+});
+
+test("a tie's outfit is her usual one in that party", { skip: !tied }, () => {
+  const partner = companions[Object.keys(tied.tie.by).find((id) => companions[id])];
+  const m = resolveParty([tied, partner]);
+  const set = tied.tie.by[partner.id].set?.outfit;
+  if (set) assert.equal(Rel.newRomance(m).wardrobe[tied.id].owned.usual.text, set);
+});
+
+// ---------- campfire with both (D70) ----------
+
+test("with both at the fire, the first speaker alternates, and one of the two must move something", () => {
+  assert.deepEqual(Rel.speakingOrder(romance(members, {}, { turn: 4 }), [P.id, Q.id]), [P.id, Q.id]);
+  assert.deepEqual(Rel.speakingOrder(romance(members, {}, { turn: 5 }), [P.id, Q.id]), [Q.id, P.id]);
+  const out = { segments: [{ speaker: "self", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null };
+  const s = romance(members);
+  assert.equal(Rel.campfireProblems(s, P, members, out, { mustAdvance: true }).length, 1);
+  assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, advances: "asks him to stay" }, { mustAdvance: true }), []);
+  assert.deepEqual(Rel.campfireProblems(s, P, members, out, {}), []);
+  const second = A.campfireInput(env(), { with: [P.id, Q.id], scene: [], mustAdvance: true }, P, [Q], campfireSchema);
+  assert.ok(second.includes(`${Q.name} didn't move anything`));
+});
+
+// ---------- what her call knows about herself ----------
+
+test("her call knows a form an ability put her in", () => {
+  const e = env({ state: { flags: { [P.id]: { form: "animal" } } } });
+  assert.ok(huddle(P, Q, e).includes('## You, right now\n\n```json\n{"form":"animal"}'));
+  assert.ok(!huddle(P, Q).includes("You, right now"));
+});
+
+test("a second voice's own tastes reach her call in company and in private", { skip: !voiced?.secondVoice.admires }, () => {
+  const o = all.find((c) => c !== voiced && !partyProblems([voiced, c]).length);
+  const sv = voiced.secondVoice;
+  const rings = A.companionInput(env(), { channel: "private" }, voiced, [o], [], companionSchema);
+  for (const input of [huddle(voiced, o), rings]) assert.ok(input.includes(JSON.stringify(sv.admires)) && input.includes(JSON.stringify(sv.despises)));
+});

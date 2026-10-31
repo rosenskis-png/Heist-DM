@@ -44,5 +44,6 @@ test("bench campfire cases name a party the roster allows", async () => {
     assert.deepEqual(partyProblems(members), [], c.id);
     assert.ok(c.with.length && c.with.every((id) => c.party.includes(id)), c.id);
     assert.ok(Object.keys(c.rel).every((id) => c.party.includes(id)), c.id);
+    assert.ok(Object.keys(c.outfits ?? {}).every((id) => c.party.includes(id)), c.id);
   }
 });

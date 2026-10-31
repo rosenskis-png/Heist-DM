@@ -10,7 +10,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Two campaign clocks:** alert and days (D21).
 - **Slack:** a hidden −10..+10 that moves the next encounter's deadlines (D41). Never shown.
 - **Character sheets:** class or companion abilities with their exact effects, conditions and limits; HP and conditions; ability uses per encounter and per rest. Abilities are exact, conditional and limited, and they're the main way a plan handles a risk.
-- **Companions:** which two are in the party, their relationship state, the pair value, memories and commitments (`docs/spec/companions.md`).
+- **Companions:** which two are in the party, their relationship state, the pair value, memories and commitments, and what each owns to wear and has on (`docs/spec/companions.md`).
 - **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
 - **Gear and items** the party holds.
 - **The encounter log:** one line per finished encounter.
@@ -46,7 +46,7 @@ The engine validates every write against the map and state before committing it.
 | Companion AI | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
 | Engine | Ticks, schedules, rolls, consequences applied, effects, objective status, event log, table read |
-| Campfire | Relationship changes (including the pair value), beats, memories, revealed secrets, commitments |
+| Campfire | Relationship changes (including the pair value), beats, memories, revealed secrets, commitments, her outfit |
 
 ## The hand-off (D21)
 

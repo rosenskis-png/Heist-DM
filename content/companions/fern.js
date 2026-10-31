@@ -88,7 +88,7 @@ export default {
       name: "Wild Shape",
       uses: "once per encounter",
       perRest: 3,
-      effect: `She turns into any animal she has seen during the campaign (at the start, only the prison rats) and stays in that form until the encounter ends: a one-way switch with no turning back. In animal form she can't speak aloud (the rings still carry her thoughts) and can talk with animals.`,
+      effect: `She turns into any animal she has seen during the campaign (at the start, only the prison rats) and stays in that form until the encounter ends: a one-way switch with no turning back. In animal form she still talks with the party, mind to mind over the rings, just not out loud, and she can talk with animals. Her clothes and gear merge into the new form and come back with her when she changes back.`,
       // What the engine tracks (D30); the effect text above is what the AIs judge from.
       declared: {
         uses: { encounter: 1, rest: 3 },

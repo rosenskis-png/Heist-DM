@@ -8,6 +8,7 @@ import { pairs } from "../content/pairs.js";
 import { companions as roster } from "../content/companions/index.js";
 import * as Rel from "../src/campaign/relationship.js";
 import { resolveParty } from "../src/campaign/roster.js";
+import { addOutfit } from "../src/campaign/wardrobe.js";
 import * as A from "../src/context.js";
 import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
 import { flagKeys } from "../src/engine/plan.js";
@@ -232,34 +233,59 @@ async function runHuddle(c, schema, tier) {
   return run;
 }
 
-// A campfire case: any two companions from the roster, the relationship state the case gives, and one call for
-// the first companion in `with`. The engine checks her beats and voices (one retry), then applies the result.
+// A campfire case: any two companions from the roster and the relationship state the case gives. One on one is
+// one call. With both, it's two calls in speaking order (D70), the second seeing the first's answer and, if that
+// moved nothing, required to. The engine checks each answer (one retry), then applies it.
 function campfireSetup(c) {
   const members = resolveParty(c.party.map((id) => roster[id]));
   const romance = { ...Rel.newRomance(members, pairs), ...c.romance };
   for (const [id, r] of Object.entries(c.rel)) romance.rel[id] = { ...Rel.newRel(), ...r };
-  const self = members.find((m) => m.id === c.with[0]);
-  const scene = { private: c.with.length === 1, inPerson: true };
-  return { members, romance, self, scene };
+  let out = romance;
+  for (const [who, owned] of Object.entries(c.outfits ?? {})) for (const [id, o] of Object.entries(owned)) out = addOutfit(out, who, id, o);
+  return { members, romance: out };
 }
 
 async function runCampfire(c, schema, tier) {
-  const { members, romance, self, scene } = campfireSetup(c);
-  const raw = c.party.map((id) => roster[id]);
-  const [me, ...others] = [raw.find((x) => x.id === self.id), ...raw.filter((x) => x.id !== self.id)];
-  const input = A.campfireInput({ ...env, romance }, { ...c, scene: c.scene }, me, others, schema);
-  const r = await ask(input, schema, tier, (o) => Rel.campfireProblems(romance, self, members, o, scene));
-  const run = { ...r, input };
-  if (r.errors.length) return { ...run, checks: [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }] };
-  const after = Rel.applyCampfire(romance, self, members, r.out, scene);
-  const [b, a] = [romance.rel[self.id], after.rel[self.id]];
-  const tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(a[k] * 10) / 10}`).join(", ");
-  run.checks = [
-    { name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" },
-    { name: "Stage", ok: "info", detail: `${Rel.stage(b, self)} → ${Rel.stage(a, self)}` },
-    { name: "Tracks", ok: "info", detail: `${tracks}; pair ${romance.pair.value}→${after.pair.value}` },
-    { name: "Beats", ok: "info", detail: r.out.beats.join(", ") || "none" },
-  ];
+  let { members, romance } = campfireSetup(c);
+  const order = c.with.length > 1 ? Rel.speakingOrder(romance, c.with) : c.with;
+  const scene = [...c.scene];
+  const turns = [];
+  let ms = 0;
+  let inputChars = 0;
+  let mustAdvance = false;
+  for (const id of order) {
+    const self = members.find((m) => m.id === id);
+    const others = c.party.filter((x) => x !== id).map((x) => roster[x]);
+    const where = { private: c.with.length === 1, inPerson: true, mustAdvance };
+    const input = A.campfireInput({ ...env, romance }, { ...c, scene, mustAdvance }, roster[id], others, schema);
+    const r = await ask(input, schema, tier, (o) => Rel.campfireProblems(romance, self, members, o, where));
+    ms += r.ms;
+    inputChars += r.inputChars;
+    const turn = { id, name: self.name, input, out: r.out, errors: r.errors, first: r.first };
+    turns.push(turn);
+    if (r.errors.length) break;
+    const after = Rel.applyCampfire(romance, self, members, r.out, where);
+    const [b, x] = [romance.rel[id], after.rel[id]];
+    turn.tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(x[k] * 10) / 10}`).join(", ") + `; pair ${romance.pair.value}→${after.pair.value}`;
+    turn.stage = `${Rel.stage(b, self)} → ${Rel.stage(x, self)}`;
+    romance = after;
+    scene.push(...r.out.segments.map((g) => ({ from: g.speaker === "narrator" ? "narrator" : id, text: g.text })));
+    mustAdvance = !r.out.advances;
+  }
+  const run = { turns, ms, inputChars, campfire: true };
+  run.checks = turns.flatMap((t) => [
+    t.errors.length
+      ? { name: `${t.name}: valid after one retry`, ok: false, detail: t.errors.slice(0, 5).join("; ") }
+      : { name: `${t.name}: valid first time`, ok: !t.first, detail: t.first ? t.first.slice(0, 5).join("; ") : "" },
+    ...(t.errors.length ? [] : [
+      { name: `${t.name}: stage`, ok: "info", detail: t.stage },
+      { name: `${t.name}: tracks`, ok: "info", detail: t.tracks },
+      { name: `${t.name}: beats`, ok: "info", detail: t.out.beats.join(", ") || "none" },
+      { name: `${t.name}: moves`, ok: "info", detail: t.out.advances ?? "nothing" },
+      ...(t.out.outfit ? [{ name: `${t.name}: changes into`, ok: "info", detail: t.out.outfit }] : []),
+    ]),
+  ]);
+  if (turns.length > 1) run.checks.push({ name: "Someone moved something", ok: turns.some((t) => t.out?.advances), detail: "" });
   return run;
 }
 
@@ -411,20 +437,28 @@ function readable(kind, c, run) {
   if (kind === "world")
     return h("ul", { class: "acts" }, (o.actions ?? []).length ? o.actions.map((a) => h("li", {}, h("b", {}, a.npc), ` ${a.because}`, h("code", {}, JSON.stringify(a.ops)))) : h("li", {}, "Nobody acts."));
   if (kind === "ruling") return h("p", { class: "prose" }, h("b", {}, `${o.answer}: `), o.text);
-  if (kind === "campfire") {
-    const self = roster[c.with[0]];
-    const who = { narrator: null, self: self.name, second_voice: self.secondVoice?.name ?? "second voice" };
+  return null;
+}
+
+function campfireView(run) {
+  return (run.turns ?? []).map((t) => {
+    const who = { narrator: null, self: t.name, second_voice: roster[t.id].secondVoice?.name ?? "second voice" };
+    const o = t.out ?? {};
     return h(
       "div",
-      { class: "prose" },
-      (o.segments ?? []).map((x) => h("p", {}, who[x.speaker] ? h("b", {}, `${who[x.speaker]}: `) : null, x.text)),
-      (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
-      [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((t) => h("p", { class: "texture" }, t)),
+      { class: "turn" },
+      run.turns.length > 1 ? h("div", { class: "who" }, t.name) : null,
+      h(
+        "div",
+        { class: "prose" },
+        (o.segments ?? []).map((x) => h("p", {}, who[x.speaker] ? h("b", {}, `${who[x.speaker]}: `) : null, x.text)),
+        (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
+        [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
+      ),
+      fold(`Input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input),
+      fold("Raw output", json(o)),
     );
-  }
-  if (kind === "narration")
-    return h("div", { class: "prose" }, (o.text ?? "").split(/\n+/).map((p) => h("p", {}, p)), o.texture?.length ? h("p", { class: "texture" }, `Texture: ${o.texture.join(" · ")}`) : null);
-  return null;
+  });
 }
 
 function huddleView(c, run) {
@@ -472,7 +506,7 @@ function renderRuns(kind, c, ui) {
             { class: "body" },
             h("ul", { class: "checks" }, (run.checks ?? []).map((x) => h("li", {}, chip(x.ok, x.ok === true ? "pass" : x.ok === "near" ? "close" : x.ok === "info" ? "note" : "fail"), ` ${x.name}`, x.detail ? h("small", {}, ` ${x.detail}`) : null))),
             run.graderError ? h("p", { class: "err" }, `Grader: ${run.graderError}`) : null,
-            kind === "huddle" ? huddleView(c, run) : readable(kind, c, run),
+            kind === "huddle" ? huddleView(c, run) : kind === "campfire" ? campfireView(run) : readable(kind, c, run),
             run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
             run.out ? fold("Raw output", json(run.out)) : null,
           );

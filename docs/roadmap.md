@@ -111,11 +111,20 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 - [x] The campfire: `prompts/campfire.md`, `campfireInput` in `src/context.js`, the engine's beat and voice checks, and a Campfire tab on the bench with five cases.
 - [ ] **The campfire feels like Gravenhold's.** Run the bench's Campfire cases and judge them by gut, as Phase 2 did for voices. Look for the romance floor in each companion's register, beats only when the scene earns them, small honest changes, and the declared cases working (Fern waiting, Ember appearing after the payoff, no storm while cooling, Lisa as her sister's sister). Republishing the bench needs `src/campaign/`, `content/relationship.js` and `content/companions/index.js` alongside the files it already loads.
 
+**Bench findings** (the designer's first campfire runs; cause, then fix)
+1. **Fern lost her ring voice and her clothes in rat form.** Cause: her ability text led with "can't speak aloud" and said nothing about her gear, and no companion call knew its own form. Fix: the text now says she talks over the rings and her gear merges into the new form; a companion's call now gets the form an ability put her in.
+2. **Nadia's eyes flashed gold whenever she relayed Ember.** Cause: it was written into her look, first meeting, pursuit and relay text. Fix: removed; she speaks of Ember freely in the third person, and Ember has her own `admires` and `despises`.
+3. **Payoff scenes faded at the first kiss.** Cause: every payoff scene ends in "Fade.", and the craft said to cut at "the threshold" without saying which. Fix: D69.
+4. **Camp with both needed more.** The designer asked for two calls an exchange, alternating, with something moving each time: D70.
+5. **Outfits should change in play:** D71.
+6. Character feel otherwise held.
+
 **Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
 
 **Carried into Phase 4:**
 - **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`); the UI advances it once per player message in the huddle, a moment or camp, and calls `endEncounter` with the hand-off.
 - **Beats outside camp.** Only the campfire reports beats (D65). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
+- **Getting outfits in play.** `addOutfit` exists, but nothing calls it yet. The UI needs a way to give one (a found item, a gift), and the wardrobe screen calls `equip`.
 - **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. Nadia can relay Ember there; if Ember needs her own lines over the rings, the candidate needs a speaker.
 
 ## Phase 6: Act 1, hand-authored

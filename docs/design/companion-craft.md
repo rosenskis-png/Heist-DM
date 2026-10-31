@@ -83,7 +83,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 **Heat and explicit content.**
 - Her hard rules (`rules` in her file) are absolute.
 - Adults only.
-- Write desire and heat vividly. When a scene turns explicitly sexual, write up to the threshold, cut, and resume afterward.
+- Write desire and heat vividly, and give a romantic scene room: the lead-up, the touch, clothes coming loose, insinuation rather than description. The fade comes just before anything explicit, not at the first intimacy (D69). Afterward, a cheeky line or two that winks at what happened without describing it, the way a non-explicit game romance cuts back in.
 
 ## 6. As a fellow player (and what caused the stalls)
 
@@ -115,7 +115,7 @@ The huddle should feel like "what do you think, guys? How should we do this?" Ev
 | "They push the scene forward" and "sometimes just act" | Companions acting outside the card is what renegotiated the plan. The huddle is time-paused, so there's nothing to push. |
 | "Never hand him the floor" | It forbade the natural end of a turn, so companions kept talking and acting |
 | Word-count minimums | They padded scenes with negotiation |
-| The hidden deliberation phase and group-dynamic hints | They shaped the talk from outside instead of letting the companions be themselves (`docs/spec/companions.md` §7) |
+| The hidden deliberation phase and group-dynamic hints | They shaped the talk from outside instead of letting the companions be themselves (`docs/spec/companions.md` §8) |
 | "Show, then let the party tell: never announce the problem" | It made the DM withhold what the party needed. The opening now states the situation plainly. |
 
 **The romance floor in §3 is not one of these.** It governs how she pursues and talks, never the plan or the world (D27).

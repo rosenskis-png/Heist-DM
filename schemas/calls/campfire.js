@@ -5,7 +5,7 @@ import { r, list, obj } from "../shape.js";
 // Every field is about the companion whose call this is (D45); she never writes for the other one.
 export const campfireSchema = withDefs({
   $id: "campfire",
-  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats"], {
+  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances"], {
     // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
     // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
     // them anywhere else.
@@ -23,5 +23,10 @@ export const campfireSchema = withDefs({
     commitments: list(r("text")),
     // Only beats the engine listed as ready or always allowed; the engine rejects any other.
     beats: list(r("id")),
+    // What this answer moves between the player and one of the companions: a question she asks him, a move, a
+    // dare, something she pushes. Null if nothing. With both companions present, one of the two must (D70).
+    advances: { oneOf: [r("text"), { type: "null" }] },
+    // An outfit she owns that she changes into during the scene (docs/spec/companions.md §7).
+    outfit: r("id"),
   }),
 });

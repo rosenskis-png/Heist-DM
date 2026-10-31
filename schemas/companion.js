@@ -109,12 +109,17 @@ export const companionFileSchema = withDefs({
         voice: t,
         look: t,
         relayed: t,
+        // Where she differs from the companion she shares a body with.
+        admires: t,
+        despises: t,
         manifestsAfter: { enum: ["payoff", "vuln", "deep", "bond"] },
         beat: r("id"),
       }),
       extraBeats: list(obj(["id", "cooldown", "text"], { id: r("id"), cooldown: { type: "integer", minimum: 0 }, text: t, cooling: t })),
       stageLabels: some(Object.keys(stageLabels), t),
       notes: list(obj(["when", "text"], { when: gate, text: t })),
+      // Outfits she owns from the start besides her `outfit` (docs/spec/companions.md §7).
+      wardrobe: { type: "object", propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: obj(["name", "text"], { name: t, text: t }) },
     },
   ),
 });

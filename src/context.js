@@ -6,6 +6,7 @@ import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
 import { resolveParty, pairEntry } from "./campaign/roster.js";
+import { wearing, wardrobeFor } from "./campaign/wardrobe.js";
 
 // Strip coordinates (D9) and, for the party's view, everything hidden. The layout comes as facts the engine
 // derived from geometry: sizes and distances (D28).
@@ -64,6 +65,8 @@ const GATED = { first: (c) => c.first, why: (c) => c.why, hidden: (c) => c.hidde
 // hunch and the plan she reaches for, never her blind spots (D50).
 export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}) {
   const out = Object.fromEntries(PROFILE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
+  // What she has on now (docs/spec/companions.md §7).
+  out.outfit = wearing(rom, c);
   out.abilities = abilitiesFor(c.abilities);
   if (planning) out.planning = { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch };
   const v = Rel.view(rom, c);
@@ -72,8 +75,9 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   if (notes.length) out.notes = notes;
   const sv = Rel.secondVoiceState(rom, c, scene);
   if (sv) {
-    const { name, voice, look, relayed } = c.secondVoice;
-    out.second_voice = sv.speaks ? { name, voice, speaks_here: true, ...(sv.present ? { in_her_own_body: look } : {}) } : { name, relayed };
+    const { name, voice, look, relayed, admires, despises } = c.secondVoice;
+    const tastes = { ...(admires ? { admires } : {}), ...(despises ? { despises } : {}) };
+    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.present ? { in_her_own_body: look } : {}) } : { name, relayed, ...tastes };
   }
   const partner = members.find((m) => m.id !== c.id);
   if (c.tie && partner) out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift };
@@ -279,6 +283,8 @@ export function companionInput(env, c, self, others, huddle, schema) {
   const rom = romanceOf(env, [me, ...rest]);
   const scene = { private: c.channel === "private", inPerson: false };
   const { opening, people, clock } = env.packet;
+  // A form an ability put her in (e.g. an animal), from the encounter's flags.
+  const form = env.state?.flags?.[me.id]?.form;
   const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
   return compose([
     ...campaign(env, "companion", schema),
@@ -286,6 +292,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
     block("At the table with you", [{ id: "player", name: "The player", class: env.party[0].name }, ...rest.map(publicProfile)]),
     block("What the party knows", { map: partyMap(env.packet), people: learnedPeople(people), clock: knownClock(clock) }),
     block("Opening description", opening),
+    form ? block("You, right now", { form }) : null,
     block("Your relationship with the player", relationshipFor(me, rom, [me, ...rest])),
     pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block(scene.private ? "Your private channel with the player so far" : "The huddle so far", huddle),
@@ -295,9 +302,10 @@ export function companionInput(env, c, self, others, huddle, schema) {
 }
 
 // The campfire (docs/spec/calls/campfire.md, D45). `c.with` lists the companions in the scene: her alone (one on
-// one), or both. In a scene with both, she gets the other's public profile and what the other has said and done in
-// this scene, which is in `c.scene`; never the other's secrets or private history. The beats she may report are
-// listed, with any declared beat's own text.
+// one), or both. In a scene with both, each exchange is two calls in `speakingOrder` (D70): she gets the other's
+// public profile and what the other has said and done in this scene, which is in `c.scene`, never the other's
+// secrets or private history; answering second after a turn that moved nothing, `c.mustAdvance` says so. The beats
+// she may report are listed, with any declared beat's own text, and the outfits she could change into.
 export function campfireInput(env, c, self, others, schema) {
   const [me, ...rest] = resolveParty([self, ...others]);
   const members = [me, ...rest];
@@ -316,10 +324,11 @@ export function campfireInput(env, c, self, others, schema) {
     block("Your relationship with the player", relationshipFor(me, rom, members)),
     pair && !alone ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
+    wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),
     c.events ? block("The last encounter", c.events) : null,
     block("This scene so far", c.scene ?? []),
-    `Continue the scene as ${me.name}.`,
+    c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
 }
 
