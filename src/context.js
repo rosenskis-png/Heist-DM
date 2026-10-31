@@ -77,7 +77,7 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   if (sv) {
     const { name, voice, look, relayed, admires, despises } = c.secondVoice;
     const tastes = { ...(admires ? { admires } : {}), ...(despises ? { despises } : {}) };
-    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.present ? { in_her_own_body: look } : {}) } : { name, relayed, ...tastes };
+    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.canAppear ? { may_take_her_own_body: look } : {}) } : { name, relayed, ...tastes };
   }
   const partner = members.find((m) => m.id !== c.id);
   if (c.tie && partner) out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift };

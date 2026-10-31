@@ -74,15 +74,15 @@ export function ready(rom, c) {
   return out;
 }
 
-// Her second voice is heard only in private, and present in her own body only in person, once the flag it waits
-// for is set or about to be (`secondVoice.manifestsAfter`).
+// Her second voice is heard only in private, and may take her own body only in person, and, if she declares
+// `manifestsAfter`, once that flag is set or about to be. Whether she does is the scene's call.
 export function secondVoiceState(rom, c, scene = {}) {
   const sv = c.secondVoice;
   if (!sv) return null;
   if (!scene.private) return { speaks: false };
   const after = sv.manifestsAfter;
-  const due = rom.rel[c.id][after] || ready(rom, c).includes(after);
-  return { speaks: true, present: !!(scene.inPerson && due) };
+  const due = !after || rom.rel[c.id][after] || ready(rom, c).includes(after);
+  return { speaks: true, canAppear: !!(scene.inPerson && due) };
 }
 
 // Every beat she may report right now, with the reason it's on the list. `members` are both companions as
@@ -98,7 +98,7 @@ export function allowedBeats(rom, c, members, scene = {}) {
   if (o && !rom.shared && r.payoff && ro.payoff && members.every((m) => m.tie?.triangle?.shared !== false)) out.push("shared");
   for (const b of c.extraBeats ?? []) if (rom.turn - (r.beatTurns[b.id] ?? -Infinity) >= b.cooldown) out.push(b.id);
   const sv = secondVoiceState(rom, c, scene);
-  if (sv?.present && !r.manifest) out.push(c.secondVoice.beat);
+  if (sv?.canAppear && !r.manifest) out.push(c.secondVoice.beat);
   return out;
 }
 

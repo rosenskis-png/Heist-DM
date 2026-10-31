@@ -103,7 +103,7 @@ export const companionFileSchema = withDefs({
         }),
         by: { type: "object", minProperties: 1, propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: tieEntry },
       }),
-      secondVoice: obj(["id", "name", "voice", "look", "relayed", "manifestsAfter", "beat"], {
+      secondVoice: obj(["id", "name", "voice", "look", "relayed", "beat"], {
         id: r("id"),
         name: t,
         voice: t,
@@ -112,6 +112,7 @@ export const companionFileSchema = withDefs({
         // Where she differs from the companion she shares a body with.
         admires: t,
         despises: t,
+        // Optional: she can take her own body only once this flag is set or due.
         manifestsAfter: { enum: ["payoff", "vuln", "deep", "bond"] },
         beat: r("id"),
       }),

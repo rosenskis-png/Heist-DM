@@ -118,6 +118,8 @@ All 8 companions, the relationship model, configurations, the campfire, and the 
 4. **Camp with both needed more.** The designer asked for two calls an exchange, alternating, with something moving each time: D70.
 5. **Outfits should change in play:** D71.
 6. Character feel otherwise held.
+7. **Outfits failed** (second round). Cause: the campfire's `outfit` had to be a valid id, so a model writing null or guessing an id failed validation, and her call got no id for what she had on and no description of what else she owned. Fix: `outfit` is an id or null, and her call gets the id of what she's wearing and the id and look of each other outfit.
+8. **Nadia and Ember turned jealous** (second round). Cause: the first fix framed Ember's tastes against Nadia's, on top of an old hidden layer about each wanting him alone. Fix: D72, and her file rewritten to the designer's description.
 
 **Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
 

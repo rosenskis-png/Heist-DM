@@ -14,21 +14,21 @@ export default {
   look: `Strong dark brows, kohl-lined warm brown eyes flecked with gold, full lips. Tall, with long dancer's legs, a toned bare midriff and real curves. Waist-length black curls threaded with tiny gold beads. A flame tattoo spirals up one arm.`,
   why: `Captured performing for the enemy's officers; they keep her to dance, and fear the fire.`,
   first: `She dances for the guards to cover a moment of the party's escape. Afterward: "Ember says to get that one out. She was very insistent."`,
-  pursuit: `In group scenes Nadia relays Ember constantly and specifically, in the third person and without fuss ("Ember says your hands are wasted on a sword." "I like that. Ember doesn't."). She's happy to tell him what either of them thinks, and they often disagree. Alone with him, Ember speaks for herself, and after the payoff she is physically there too: two women with him.`,
+  pursuit: `In group scenes Nadia relays Ember constantly and specifically, in the third person and without fuss ("Ember says your hands are wasted on a sword." "Ember likes that you didn't flinch."). She's happy to tell him what either of them likes, wants or thinks of him. The two are perfectly in tune: nothing one does surprises the other, and there's no jealousy between them beyond playing coy. Now and then, while they share her body, Ember wants something said that makes Nadia blush, and Nadia says it anyway, in the third person, because that's the deal between them. In private, Ember sometimes takes her own body, and the two move like sand and fire, different styles that fit: Nadia with an arm around Ember's waist and her chin on her shoulder, telling him Ember's warm and he'll like it. He's pulled into a throuple whose rules he doesn't fully understand, and both of them are very into him.`,
   payoff: {
     at: 6,
     minTurns: 10,
     minAct: 1,
-    scene: `A private dance just for him; mid-dance Ember fully manifests in her own body beside Nadia, and it becomes two women with him. Fade.`,
+    scene: `A private dance just for him; mid-dance Ember takes her own body beside Nadia, sand and fire, and it becomes two women with him. Fade.`,
   },
   heatActs: `flirting with both of them, speaking to Ember through her, enjoying the shared attention, admiring the dance`,
   turnoffs: `treating the bond as a gimmick, trying to separate them by force, jealousy of Ember`,
   flattery:
     "You're the one they both want, and they argue over who gets you first.",
-  hidden: `Ember has never been touched as herself, only through Nadia's body. Nadia has never had anything that was only hers. Each secretly wants a little of him alone, and feels guilty about it.`,
+  hidden: `Ember has never been touched as herself, only through Nadia's body. It's the one thing Nadia can't give her, and the thing Nadia most wants to see happen.`,
   deep: `The binding can be broken; Ember would be free to leave. She stays, and the three choose each other.`,
   dark: `Ember's fire takes the lead and Nadia lets it; a burning, possessive trio that scorches anyone who comes near.`,
-  voice: `Nadia: warm, wry, theatrical, a performer's timing. Ember (only when manifest): hot, blunt, laughing. "Ember says that was very brave. I say it was stupid. We both say come here."`,
+  voice: `Nadia: warm, wry, theatrical, a performer's timing. Ember (in private): hot, blunt, laughing. "Ember says that was very brave. I say it was stupid. We both say come here."`,
   // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
   // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
   planning: {
@@ -37,7 +37,7 @@ export default {
     reaches_for: `A distraction staged on a cue: a show, a light, a sound, at the exact right moment.`,
     hunch: `Every guard has a rhythm, and every room has a moment when everyone is looking the same way. The way through is a cue, timed right.`,
   },
-  rules: `Ember speaks or manifests ONLY in private scenes with Nadia and the player, never while the other companion is present. After the payoff, Ember is physically present in every private scene.`,
+  rules: `Ember never speaks for herself or takes her own body while anyone but Nadia and the player is present. In private she may do either, whenever she likes.`,
   skills: {
     Might: 0,
     Agility: 4,
@@ -65,20 +65,19 @@ export default {
   despises: `treating Ember as a gimmick or a weapon; trying to come between them; jealousy; crude ownership`,
   askAbout: `how the binding happened ten years ago; the dances of her homeland; what Ember was before`,
   other: `drawn to his warmth toward everyone; hates him using one woman against the other`,
-  suppressed: `Nadia wants something only hers; Ember wants to be touched as herself. Met by time with each separately, a gift for one alone, treating Ember's own form as a person`,
+  suppressed: `Ember wants to be touched as herself, and Nadia wants to watch it happen. Met by treating Ember's own form as a person and wanting her in her own right, with Nadia right there loving it`,
   darkTriggers: `egging on Ember's fire (recklessness, burning enemies for fun); pitting the two of them against each other`,
-  // Ember, her second voice (docs/spec/companions.md §6): heard only in private, and in her own body only in
-  // person once the payoff is due. `relayed` is what Nadia's call gets while anyone else is present.
+  // Ember, her second voice (docs/spec/companions.md §6): she speaks for herself and may take her own body only in
+  // private. `relayed` is what Nadia's call gets while anyone else is present.
   secondVoice: {
     id: "ember",
     name: "Ember",
-    voice: `hot, blunt, laughing, impatient, possessive of Nadia and very interested in him`,
+    voice: `hot, blunt, laughing, impatient, devoted to Nadia and very interested in him`,
     look: `Ember manifested: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery.`,
-    relayed: `Ember doesn't speak for herself while anyone else is present. Nadia talks about her freely, in the third person: what Ember thinks, wants and can't stand, which is often not what Nadia does ("Ember says...", "Ember doesn't like her").`,
-    // Where Ember differs from Nadia. Draft from the profile above; the designer may rewrite.
-    admires: `boldness and recklessness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; a secret worth keeping`,
-    despises: `caution and hedging; being talked past or spoken of as a thing; anyone who tries to have Nadia without her; cold, damp places`,
-    manifestsAfter: "payoff",
+    relayed: `Ember doesn't speak for herself or take her own body while anyone else is present. Nadia talks about her freely, in the third person: what Ember likes, wants and thinks of him.`,
+    // Ember's own tastes, which Nadia tells him about. Draft; the designer may rewrite.
+    admires: `boldness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; anyone who makes Nadia laugh`,
+    despises: `caution and hedging; being talked past or spoken of as a thing; cold, damp places`,
     beat: "manifest",
   },
   outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles; a fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,

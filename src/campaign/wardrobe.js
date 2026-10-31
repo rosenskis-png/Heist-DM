@@ -31,10 +31,11 @@ export function wearing(rom, c) {
   return w ? w.owned[w.equipped].text : c.outfit;
 }
 
-// Her outfits as her call reads them: what she has on, and what else she could change into.
+// Her outfits as her call reads them: what she has on, and what else she owns, each with its id (what `outfit`
+// names) and, for the ones she isn't wearing, what it looks like.
 export function wardrobeFor(rom, c) {
   const w = rom.wardrobe?.[c.id];
   if (!w) return null;
-  const others = Object.entries(w.owned).filter(([id]) => id !== w.equipped).map(([id, o]) => ({ id, name: o.name }));
-  return { wearing: w.owned[w.equipped].name, ...(others.length ? { could_change_into: others } : {}) };
+  const others = Object.entries(w.owned).filter(([id]) => id !== w.equipped).map(([id, o]) => ({ id, name: o.name, looks: o.text }));
+  return { wearing: { id: w.equipped, name: w.owned[w.equipped].name }, ...(others.length ? { could_change_into: others } : {}) };
 }

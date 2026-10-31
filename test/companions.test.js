@@ -279,31 +279,37 @@ test("a note is sent only while its gate holds", { skip: !noted }, () => {
 });
 
 const voiced = having("secondVoice");
-test("a second voice is relayed in company, speaks in private, and takes her own body only in person once due", { skip: !voiced }, () => {
+test("a second voice is relayed in company, speaks in private, and may take her own body only in person", { skip: !voiced }, () => {
   const o = all.find((c) => c !== voiced && !partyProblems([voiced, c]).length);
-  const m = [voiced, o];
-  const sv = voiced.secondVoice;
-  const due = { [voiced.id]: { [sv.manifestsAfter]: true } };
   const e = (s) => env({ romance: s });
-  const group = huddle(voiced, o, e(romance(m, due)));
-  assert.ok(group.includes(JSON.stringify(sv.relayed)) && !group.includes(JSON.stringify(sv.voice)));
-  const rings = A.companionInput(e(romance(m, due)), { channel: "private" }, voiced, [o], [], companionSchema);
-  assert.ok(rings.includes(JSON.stringify(sv.voice)) && !rings.includes(JSON.stringify(sv.look)));
-  assert.ok(!camp(voiced, o, [voiced.id], e(romance(m))).includes(JSON.stringify(sv.look)));
-  assert.ok(camp(voiced, o, [voiced.id], e(romance(m, due))).includes(JSON.stringify(sv.look)));
-  assert.ok(!camp(voiced, o, [voiced.id, o.id], e(romance(m, due))).includes(JSON.stringify(sv.voice)));
-  // The beat lands once, in private and in person.
   const alone = { private: true, inPerson: true };
-  assert.ok(Rel.allowedBeats(romance(m, due), voiced, m, alone).includes(sv.beat));
-  assert.ok(!Rel.allowedBeats(romance(m, due), voiced, m, {}).includes(sv.beat));
-  // A payoff and the manifestation in the same scene.
-  const ready = romance(m, { [voiced.id]: { heat: voiced.payoff.at } }, { turn: 99, act: 9 });
-  const { state, rejected } = Rel.applyBeats(ready, voiced, m, [sv.manifestsAfter === "payoff" ? "payoff" : sv.manifestsAfter, sv.beat], alone);
-  if (sv.manifestsAfter === "payoff") {
-    assert.deepEqual(rejected, []);
-    assert.ok(state.rel[voiced.id].manifest);
+  // Both forms of the mechanism: free to appear in private, and gated on the payoff.
+  const { manifestsAfter, ...free } = voiced.secondVoice;
+  for (const sv of [free, { ...free, manifestsAfter: "payoff" }]) {
+    const c = { ...voiced, secondVoice: sv };
+    const m = [c, o];
+    const due = sv.manifestsAfter ? { [c.id]: { payoff: true } } : {};
+    const group = huddle(c, o, e(romance(m, due)));
+    assert.ok(group.includes(JSON.stringify(sv.relayed)) && !group.includes(JSON.stringify(sv.voice)));
+    const rings = A.companionInput(e(romance(m, due)), { channel: "private" }, c, [o], [], companionSchema);
+    assert.ok(rings.includes(JSON.stringify(sv.voice)) && !rings.includes(JSON.stringify(sv.look))); // over the rings: no body
+    assert.ok(camp(c, o, [c.id], e(romance(m, due))).includes(`"may_take_her_own_body":${JSON.stringify(sv.look)}`));
+    assert.equal(camp(c, o, [c.id], e(romance(m))).includes(JSON.stringify(sv.look)), !sv.manifestsAfter);
+    assert.ok(!camp(c, o, [c.id, o.id], e(romance(m, due))).includes(JSON.stringify(sv.voice)));
+    // The beat lands once, in private and in person.
+    assert.ok(Rel.allowedBeats(romance(m, due), c, m, alone).includes(sv.beat));
+    assert.ok(!Rel.allowedBeats(romance(m, due), c, m, {}).includes(sv.beat));
+    assert.ok(!Rel.allowedBeats(romance(m, { [c.id]: { ...due[c.id], manifest: true } }), c, m, alone).includes(sv.beat));
+    if (sv.manifestsAfter) {
+      // A payoff and the manifestation in the same scene.
+      const ready = romance(m, { [c.id]: { heat: c.payoff.at } }, { turn: 99, act: 9 });
+      const { state, rejected } = Rel.applyBeats(ready, c, m, ["payoff", sv.beat], alone);
+      assert.deepEqual(rejected, []);
+      assert.ok(state.rel[c.id].manifest);
+    }
   }
-  const lines = { segments: [{ speaker: "second_voice", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [] };
+  const m = [voiced, o];
+  const lines = { segments: [{ speaker: "second_voice", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null };
   assert.deepEqual(Rel.campfireProblems(romance(m), voiced, m, lines, {}), ["no second voice speaks in this scene"]);
   assert.deepEqual(Rel.campfireProblems(romance(m), voiced, m, lines, alone), []);
 });
@@ -340,7 +346,10 @@ test("she owns her usual outfit, can be given more, and her profile describes wh
   const back = Rel.applyCampfire(s, P, members, { ...out, outfit: "usual" });
   assert.equal(W.wearing(back, P), P.outfit);
   assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, outfit: "ballgown" }), ["she doesn't own an outfit called ballgown"]);
-  assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes('"could_change_into":[{"id":"usual"'));
+  assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes(`"wearing":{"id":"silk","name":"Silk dress"},"could_change_into":[{"id":"usual","name":"Usual outfit","looks":${JSON.stringify(P.outfit)}}]`));
+  // Naming the outfit she already has on is fine; null is no change.
+  assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, outfit: "silk" }), []);
+  assert.equal(W.wearing(Rel.applyCampfire(s, P, members, { ...out, outfit: null }), P), silk.text);
 });
 
 test("a tie's outfit is her usual one in that party", { skip: !tied }, () => {
