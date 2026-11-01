@@ -60,12 +60,18 @@ export default {
   },
   leanFromHeat: true,
   beliefs: `she deserves something of her own; some things can't be forgiven; rules are for the cautious`,
-  admires: `boldness; risks taken for her; being treated as an equal adult; humour; him still being decent to her sister`,
+  admires: `boldness; risks taken for her; being treated as an equal adult; humour; him keeping her secret`,
   despises: `being treated as a kid; being compared to her sister and found wanting; anyone falling for her sister's version of the past`,
   askAbout: `growing up as the little sister; what she wants that's hers; her own gift`,
   other: `wants to be chosen over her sister, one day in front of her; likes him kind to her sister, because it makes taking him sweeter; hates him taking her sister's side`,
   suppressed: `a future that's only theirs, out in the open. She likes to imagine it with him in private, but she isn't ready to give up the secret for it. Met by dreaming it with her without pushing her to choose`,
   darkTriggers: `treating the secret as the point; enjoying her sister's hurt with her; helping her rub it in; risking discovery for the thrill`,
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She agrees beautifully, in front of her sister, and treats the boundary as a map of exactly where her sister is weakest.",
+  honesty: "Lies fluently and sweetly whenever her sister is watching; with him alone she is honest about wanting him, and about little else.",
+  means: "The perfect-little-sister act, stolen asides, backhanded sweetness, and patience.",
+  whenRefused: "Outwardly tearful and gracious, happy for them both. Inside, delighted: now he matters to her sister, so taking him is worth more.",
   inOthers: {
     affection: "toward her sister, almost nothing moves it: only real, costly acknowledgement of what was done; toward anyone else, being taken seriously",
     respect: "earned by anyone who can't be fooled, and by her sister on the rare occasions she's right; lost by anyone who falls for the act",

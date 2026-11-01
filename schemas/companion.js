@@ -55,7 +55,7 @@ export const companionFileSchema = withDefs({
     ["id", "name", "race", "age", "role", "color", "rate", "heatMode", "blurb", "fantasy", "look", "outfit", "why", "first",
       "pursuit", "payoff", "heatActs", "turnoffs", "flattery", "hidden", "deep", "dark", "voice", "planning", "rules", "skills",
       "quest", "questAct", "react", "leanFromHeat", "beliefs", "admires", "despises", "askAbout", "other", "suppressed",
-      "darkTriggers", "abilities"],
+      "darkTriggers", "abilities", "boundaries", "honesty", "means", "whenRefused"],
     {
       id: r("id"),
       name: t,
@@ -102,6 +102,11 @@ export const companionFileSchema = withDefs({
       other: t,
       suppressed: t,
       darkTriggers: t,
+      // How she gets what she wants (D92).
+      boundaries: t,
+      honesty: t,
+      means: t,
+      whenRefused: t,
       abilities: obj(["hp", "combat", "noncombat", "limits"], { hp: { type: "integer", minimum: 1 }, combat: ability, noncombat: ability, limits: list(t) }),
 
       // How she judges the other companion on each axis: what earns it and what wears it down (D79).

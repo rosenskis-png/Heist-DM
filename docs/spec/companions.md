@@ -19,12 +19,13 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 
 | Group | Fields |
 |---|---|
-| Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate, for the parked voice feature), `blurb` |
+| Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D89), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
 | Look | `look` (her body and face), `outfit` (what she usually wears), and optionally `wardrobe`: other outfits she owns from the start (§7) |
 | Story | `why`, `first`, `quest`, `questAct` |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
+| How she gets what she wants | `boundaries` (what she does with a no), `honesty` (when and how she lies), `means` (what she'll do), `whenRefused` (what she shows, and what she resolves inside). Fern is the honest baseline (D92). |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
 | Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first), `hunch` (a belief about the situation, phrased as a hint, that steers what her call attends to). Her call gets `hunch` and `reaches_for` only; `sees` and `misses` describe her bias for the designer and the bench (D50). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
 | Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
@@ -72,6 +73,7 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 - `believes`: about him and the other companion, `past` (ever involved) and `current` (involved now). Only her own campfire output, and the `in_the_open` beat, change it; it can be wrong (D81).
 - `storm`: her level on a declared escalation, 0 when calm (D82).
 - `noticed`: asides of the other's she caught, for her next call only (D80).
+- `agenda`: her private plan in a line, set by her campfire output and seen only by her own calls (D92).
 - `form` (a shapeshifter's current look), `knowsShifter` (she knows the other can shift), `absent` (turns someone wore her face) (D86).
 
 **Per companion, toward the other** (D77): her view of the other on three axes, `affection`, `respect` and `trust`, each −10..10, starting from the pair's `start` in `content/pairs.js` (one number for both or each one's own view keyed by id; a view is one number, meaning affection, or the axes) or from a tie (§6). Her read of the other's view on the same axes starts right, unless the other declares a mask, and only her own campfire output moves it, so it can be wrong (D76). Each moves at most 2 an answer, less within declared `limits`. No call or gate ever sees the other's real feelings.

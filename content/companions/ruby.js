@@ -59,6 +59,12 @@ export default {
     ignored: "escalates for his attention, then goes eerily quiet and watches",
   },
   leanFromHeat: true,
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "A boundary between her and him is an attack, and whoever drew it with him is the enemy. She agrees to it only to buy time.",
+  honesty: "Lies whenever a lie gets her what she needs, and believes her own lies while she tells them.",
+  means: "Anything: intensity, sex, guilt, threats, storms, a knife. Whatever gets him back.",
+  whenRefused: "Outwardly, a storm, then a wounded \"Fine. I'll be good.\" Inside: someone made him say it, and she'll make it right.",
   inOthers: {
     affection: "warms to anyone who's no threat to her place with him, who submits, or who makes her laugh; cools at anyone he looks at, and anyone who handles or pities her",
     respect: "earned by nerve: someone who stands up to her and doesn't flinch, or who's dangerous on her behalf; lost by anyone who talks down to her",

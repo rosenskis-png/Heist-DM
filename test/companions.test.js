@@ -42,7 +42,7 @@ const romance = (members, rels = {}, over = {}) => {
   return { ...r, ...over };
 };
 // A campfire output that does nothing.
-const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: false }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null });
+const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: false }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null, form: null, inner: "x", agenda: null });
 // Two companions with no declared special cases.
 const plain = () => {
   const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation && !c.shapeshift && !c.fixed && !c.reveal);
@@ -578,4 +578,15 @@ test("a tie can grant a special case with one partner, and two shapeshifters kno
   assert.equal(m[0].shapeshift.text, "So can she.");
   const s = Rel.newRomance(m, pairs);
   assert.ok(s.rel.sis.knowsShifter && s.rel[shifter.id].knowsShifter);
+});
+
+test("every companion declares how she gets what she wants, and her private agenda carries into her next call (D92)", () => {
+  for (const c of all) for (const k of ["boundaries", "honesty", "means", "whenRefused"]) assert.ok(typeof c[k] === "string" && c[k].length > 20, `${c.id}: ${k}`);
+  let s = romance(members);
+  s = Rel.applyCampfire(s, P, members, { ...blank(), agenda: "Get him alone and make her look possessive." });
+  assert.equal(s.rel[P.id].agenda, "Get him alone and make her look possessive.");
+  s = Rel.applyCampfire(s, P, members, blank()); // null keeps it
+  assert.equal(s.rel[P.id].agenda, "Get him alone and make her look possessive.");
+  assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes("make her look possessive"));
+  assert.ok(!camp(Q, P, [P.id, Q.id], env({ romance: s })).includes("make her look possessive")); // never the other's call
 });

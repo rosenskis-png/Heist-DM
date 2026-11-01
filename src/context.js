@@ -54,7 +54,7 @@ const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skil
 // declared data not resolved below, never reach a prompt.
 const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
   "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
-  "suppressed", "darkTriggers", "inOthers", "recalibrates"];
+  "suppressed", "darkTriggers", "inOthers", "recalibrates", "boundaries", "honesty", "means", "whenRefused"];
 // Gated fields, by the gate's name in content/relationship.js `reveal`.
 const GATED = { first: (c) => c.first, why: (c) => c.why, hidden: (c) => c.hidden, deep: (c) => c.deep, dark: (c) => c.dark,
   payoff_scene: (c) => c.payoff.scene, quest: (c) => c.quest };
@@ -94,6 +94,8 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   }
   const partner = members.find((m) => m.id !== c.id);
   if (partner?.shapeshift && r.knowsShifter) out.you_know = `${partner.name} can change her shape.`;
+  // What she privately means to do, carried from scene to scene (D92). Only her own calls see it.
+  if (r.agenda) out.your_private_agenda = r.agenda;
   if (r.absent?.length) out.not_you = `If he brings up being alone with you at camp on turn ${r.absent.join(", ")}, you weren't there and don't remember it. Don't play along.`;
   if (c.tie && partner) {
     out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift, ...(c.tie.secret ? { your_secret: c.tie.secret } : {}) };

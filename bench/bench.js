@@ -458,7 +458,7 @@ function campfireView(run) {
         { class: "prose" },
         (o.segments ?? []).map((x) => h("p", { class: x.aside ? "aside" : null }, x.aside ? h("span", { class: "chip info" }, "aside") : null, who[x.speaker] ? h("b", {}, ` ${who[x.speaker]}: `) : null, x.text)),
         (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
-        [...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
+        [...(o.inner ? [`Inside: ${o.inner}`] : []), ...(o.agenda ? [`Agenda: ${o.agenda}`] : []), ...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
       ),
       // Saved runs don't keep inputs (save()).
       t.input ? fold(`Input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
@@ -893,6 +893,7 @@ function campView() {
         [["past", `thinks you and ${other.name} were involved`], ["current", `thinks you and ${other.name} are involved now`]].map(([k, label]) =>
           h("label", { class: "check" }, h("input", { id: `camp-${c.id}-believes-${k}`, type: "checkbox", checked: !!r.believes[k], onchange: (e) => setIn("believes", k, e.target.checked) }), ` ${label}`))),
       r.noticed.length ? h("p", { class: "status" }, `Caught, for her next answer: ${r.noticed.join(" · ")}`) : null,
+      camp.reveal ? h("label", { class: "stack" }, h("span", {}, "Private agenda"), h("textarea", { id: `camp-${c.id}-agenda`, rows: 2, onchange: (e) => set("agenda", e.target.value.trim() || null) }, r.agenda ?? "")) : null,
       c.shapeshift ? h("label", { class: "stack" }, h("span", {}, "Current form (empty: her own look)"), h("textarea", { id: `camp-${c.id}-form`, rows: 2, onchange: (e) => set("form", e.target.value.trim() || null) }, r.form ?? "")) : null,
       r.knowsShifter && other.shapeshift ? h("p", { class: "status" }, `Knows ${other.name} can change her shape.`) : null,
       r.absent.length ? h("p", { class: "status" }, `Someone wore her face on turn ${r.absent.join(", ")}.`) : null,
@@ -910,12 +911,12 @@ function campView() {
       [["open", "everything's out in the open"], ["shared", "all three openly together"]].map(([k, label]) =>
         h("label", { class: "check" }, h("input", { id: `camp-${k}`, type: "checkbox", checked: !!camp.romance[k], onchange: (e) => ((camp.romance[k] = e.target.checked), saveCamp(), rerender()) }), ` ${label}`))),
     h("button", { class: "run-btn ghost", onclick: () => ((camp.romance = Rel.endEncounter(camp.romance)), saveCamp(), rerender()) }, "New camp (resets the +4 gain caps)"),
-    members.some((c) => c.shapeshift)
-      ? h("div", { class: "row" },
-          h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show who's really here"),
-          h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), saveCamp()) }), " a shapeshifter always comes in the other's place (testing)"),
-          camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : null)
-      : "",
+    h("div", { class: "row" },
+      h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show what's really going on (thoughts, agendas, disguises)"),
+      members.some((c) => c.shapeshift)
+        ? h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), saveCamp()) }), " a shapeshifter always comes in the other's place (testing)")
+        : "",
+      camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : ""),
   );
   if (Speech.available()) {
     const ranked = Speech.rank(Speech.voices());
@@ -965,6 +966,7 @@ function campView() {
     const who = { narrator: null, self: campName(t), second_voice: c.secondVoice?.name ?? "second voice" };
     const o = t.out;
     return h("div", { class: "turn" },
+      camp.reveal && (o.inner || o.agenda) ? h("p", { class: "inner" }, o.inner ? `Inside: ${o.inner}` : null, o.agenda ? ` · New agenda: ${o.agenda}` : null) : null,
       h("div", { class: "prose" }, o.segments.map((g) => h("p", { class: g.aside ? "aside" : null }, g.aside ? h("span", { class: "chip info" }, "aside") : null, g.aside ? " " : null, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
       h("p", { class: "texture" }, [
         ...o.changes.map((x) => `${x.track} ${x.by > 0 ? "+" : ""}${x.by} (${x.reason})`),

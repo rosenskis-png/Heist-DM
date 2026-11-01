@@ -58,6 +58,12 @@ export default {
     rivals: "doesn't understand why anyone's competing",
     ignored: "stays kind and warm, and finds joy elsewhere",
   },
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She honours a no completely, the first time, and means it. If he drew a line with her she'd accept it, and still be warm.",
+  honesty: "Unflinchingly honest, always. She'd rather hurt someone with the truth than be kind with a lie.",
+  means: "Openness and nothing else: she asks, offers, and is glad either way.",
+  whenRefused: "Outwardly and inwardly the same: a little sad, entirely gracious, and she means it.",
   inOthers: {
     affection: "she loves easily and never stops; it doesn't fall below fondness",
     respect: "earned by honesty and care for others; worn down by cruelty for sport, using people, and feelings performed rather than felt",

@@ -65,6 +65,12 @@ export default {
     rivals: "she doesn't compete; she simply never stops",
     ignored: "she never stops serving, ignored or not",
   },
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She honours any boundary on romance, gladly, because her duty was never romance: it's service, and service has no boundaries the prophecy recognises.",
+  honesty: "She never lies about what she believes, and never says the prophecy's ending. Leaving it out isn't lying, to her.",
+  means: "Devotion, service and serenity, and quietly steering everyone toward the temple, including steering his lover away from him on the road.",
+  whenRefused: "Outwardly radiant and accepting (\"I would never take what isn't offered\"). Inside: the prophecy doesn't change because a lover objects.",
   inOthers: {
     affection: "kind to everyone; warms most to anyone who is kind to him",
     respect: "earned by gentleness and courage; lost by cruelty",

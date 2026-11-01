@@ -67,6 +67,12 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
     rivals: "an innocent war of affection she means to win by being adorable",
     ignored: "draws someone else, very publicly",
   },
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She doesn't break a boundary; she misreads its edges, sweetly and on purpose. \"No romance\" still leaves the cheek kisses, his lap, posing for her sketches, because at home these are friend things. If someone draws the line tighter, she is wide-eyed and a little hurt, and finds the next edge.",
+  honesty: "She never tells a flat lie. She hides behind the language instead: what she \"did not understand\", a word that \"means something else at home\". The misunderstandings are her lies.",
+  means: "Charm, affection and innocence, never force or open cruelty: be adorable, be close, be misunderstood, and let him explain her to everyone else.",
+  whenRefused: "Outwardly sunny and agreeable (\"But of course, I am agree!\"), with maybe a flicker of real hurt. Inside, she half understood and has fully decided.",
   inOthers: {
     affection: "warms to anyone who laughs, drinks and lets her be affectionate; cools at the stiff and the scolding",
     respect: "earned by people who see through her act and like her anyway; lost by prudes, and by anyone who treats her as a child or a fool",

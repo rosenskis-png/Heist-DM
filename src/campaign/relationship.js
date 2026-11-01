@@ -35,6 +35,8 @@ export const newRel = () => ({
   knowsShifter: false,
   // Campaign turns when someone wearing her face was alone with him (D86).
   absent: [],
+  // What she privately means to do, in a line, carried from scene to scene (D92).
+  agenda: null,
   gain: { heat: 0, intimacy: 0 },
   beatTurns: {},
   memories: [],
@@ -298,6 +300,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   if (out.believes) own.believes = { past: !!(out.believes.past || out.believes.current), current: !!out.believes.current };
   if (c.escalation && out.storm != null) own.storm = clamp(Math.max(out.storm, own.storm - 1), [0, c.escalation.tiers.length]);
   own.noticed = [];
+  if (out.agenda) own.agenda = out.agenda;
   if (c.shapeshift && out.form) own.form = out.form;
   // She wore the other's face: the other wasn't there (D86).
   if (scene.disguisedAs && s.rel[scene.disguisedAs]) s.rel[scene.disguisedAs].absent = [...new Set([...s.rel[scene.disguisedAs].absent, s.turn])].slice(-R.absentLimit);

@@ -60,6 +60,12 @@ export default {
       "starts feeding elsewhere, pointedly, and loses interest in his fate",
   },
   leanFromHeat: true,
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "A boundary is a dare with good manners. She stops what he says to stop in front of others, and goes after the want she can taste underneath it in private.",
+  honesty: "Honest about desire, always: she says exactly what she tastes. About anything else she lies as easily as she breathes, and enjoys it.",
+  means: "Appetite and seduction: she makes him come to her, narrates what he wants until he wants it more, and never asks permission she can taste he'd give.",
+  whenRefused: "Outwardly amused and gracious, as if it were adorable. Inside she can taste how much he didn't mean it, and files that away.",
   inOthers: {
     affection: "warms to appetite, devotion and sins with style; cools at piety, judgement and anyone who shames desire",
     respect: "earned by anyone she can't tempt or read, and by real power; lost by anyone who's easy",

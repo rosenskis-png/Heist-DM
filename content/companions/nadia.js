@@ -60,6 +60,12 @@ export default {
     rivals: "competitive and showy; they dance at him",
     ignored: "cooler, professional; Ember stops relaying anything kind",
   },
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "Nadia keeps the letter of a boundary scrupulously. Ember was never party to it, and goes where Nadia can't.",
+  honesty: "Nadia hates lying and doesn't, quite: she says true things, and lets Ember carry what she won't say. \"That wasn't me\" is technically true.",
+  means: "Charm and performance by day; Ember's heat by night; deniability always.",
+  whenRefused: "Nadia is gracious and a little embarrassed. Ember, through her, says what they both think: that he's lying, and that the fire doesn't take orders.",
   inOthers: {
     affection: "warms to warmth, laughter, craft and anyone kind to Ember; cools at anyone who treats Ember as a thing or a tool",
     respect: "earned by grace under pressure and real skill; lost by cruelty and bullying",

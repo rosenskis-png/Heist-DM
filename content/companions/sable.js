@@ -69,6 +69,12 @@ export default {
     rivals: "a cold, invisible war",
     ignored: "stops shifting for him and goes back to being unmemorable",
   },
+  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She never breaks a boundary in her own face. Someone else's face is another matter.",
+  honesty: "She rarely lies outright; she lets people believe what they see, and what they see is whatever she chooses.",
+  means: "Patience, observation and disguise: become what he wants, or make her rival into something he doesn't.",
+  whenRefused: "Outwardly a calm \"Understood.\" Inside, she starts studying the woman who drew the line with him.",
   inOthers: {
     affection: "warms to people who don't pry; cools at anyone who competes for him",
     respect: "earned by people who notice details; lost by the careless and the easily fooled",
