@@ -83,6 +83,14 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
   // Her English improves as she gets closer to him (D91). The notes add up: each says how far she's come.
   notes: [
     {
+      when: [{ deep: false }],
+      text: `Until her deep moment, the cute foreigner holds, even after they're lovers: she doesn't drop the act, confess that the misunderstandings are deliberate, or say she longs to be understood. It shows only in tiny flickers, quickly covered with a giggle.`,
+    },
+    {
+      when: [{ affection: ["<=", -8] }],
+      text: `She hates the other companion enough to be cruel, her way: never openly, always innocently. Sweet "misunderstood" remarks about the other's age, body or stiffness ("In Sévrance we have a word for this… how you say… a woman who is finished?"), touching him exactly where the other can see, and then a wide-eyed "What? I say something wrong?"`,
+    },
+    {
       when: [{ intimacy: ["<", 4] }],
       text: `Her English is a real beginner's: every rule in her voice, often, and she hunts for words ("how you say…") a lot.`,
     },
@@ -92,7 +100,7 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
     },
     {
       when: [{ intimacy: [">=", 7] }],
-      text: `With him, her English is good now: mistakes mostly when she's excited, tired or upset. In front of others she can still play the lost beginner when it suits her, and he can hear the difference.`,
+      text: `With him, her English is good now: mistakes mostly when she's excited, tired or upset. In front of others she can still play the lost beginner when it suits her.`,
     },
   ],
   beliefs: `affection is the most natural thing in the world; bodies are beautiful; the rules here are silly; life is short, so drink the wine`,

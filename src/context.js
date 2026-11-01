@@ -90,7 +90,7 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   if (c.escalation) {
     const e = c.escalation;
     const lvl = rom.rel[c.id].storm;
-    out.escalation = { name: e.name, level: lvl, now: lvl ? e.tiers[lvl - 1] : "calm", tiers: e.tiers.map((x, i) => `${i + 1}: ${x}`), what_calms_it: e.calms, ...(e.actsOnOther ? { from_level_she_may_act_on_the_other_companion: e.actsOnOther } : {}) };
+    out.escalation = { name: e.name, level: lvl, now: lvl ? e.tiers[lvl - 1] : "calm", tiers: e.tiers.map((x, i) => `${i + 1}: ${x}`), what_starts_or_raises_it: e.rises, what_calms_it: e.calms, ...(e.actsOnOther ? { from_level_she_may_act_on_the_other_companion: e.actsOnOther } : {}) };
   }
   const partner = members.find((m) => m.id !== c.id);
   if (partner?.shapeshift && r.knowsShifter) out.you_know = `${partner.name} can change her shape.`;
@@ -374,7 +374,6 @@ export function campfireInput(env, c, self, others, schema) {
       : null,
     block("Your relationship with the player", relationshipFor(me, rom, members)),
     alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
-    rom.rel[me.id].noticed?.length ? block("Something you caught that you weren't meant to (they don't know you saw)", rom.rel[me.id].noticed) : null,
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),

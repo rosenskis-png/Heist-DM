@@ -124,7 +124,7 @@ export const companionFileSchema = withDefs({
       mask: view,
       // A state that builds and falls slowly: tiers from mild to worst, what calms it, and the tier from which she may
       // act on the other companion's body (D82).
-      escalation: obj(["name", "tiers", "calms"], { name: t, tiers: list(t, 1), calms: t, actsOnOther: { type: "integer", minimum: 1 } }),
+      escalation: obj(["name", "tiers", "rises", "calms"], { name: t, tiers: list(t, 1), rises: t, calms: t, actsOnOther: { type: "integer", minimum: 1 } }),
 
       // Special cases, declared (docs/spec/companions.md §6). All optional.
       tie: obj(["by"], {

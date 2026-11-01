@@ -8,9 +8,11 @@ export const campfireSchema = withDefs({
   ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit", "believes", "storm", "risk", "form", "inner", "agenda"], {
     // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
     // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
-    // them anywhere else. An `aside` is meant for the player alone: the other companion's call never sees it,
-    // though she may catch it (D80).
-    segments: list(obj(["speaker", "text", "aside"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text"), aside: { type: "boolean" } }), 1),
+    // them anywhere else. `aside` (D80, D93): "no" for the scene everyone shares; "action", something physical done
+    // out of the other companion's sight, which she may catch; "ring", words to the player alone over the telepathy
+    // rings, silent and never caught; "to_other", words to the other companion alone over the rings, which the player
+    // doesn't hear.
+    segments: list(obj(["speaker", "text", "aside"], { speaker: { enum: ["narrator", "self", "second_voice"] }, text: r("text"), aside: { enum: ["no", "action", "ring", "to_other"] } }), 1),
     changes: list(
       obj(["track", "by", "reason"], {
         // `affection`, `respect` and `trust` are how she feels about the other companion; `read_*` how she thinks

@@ -42,7 +42,7 @@ const romance = (members, rels = {}, over = {}) => {
   return { ...r, ...over };
 };
 // A campfire output that does nothing.
-const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: false }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null, form: null, inner: "x", agenda: null });
+const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: "no" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null, form: null, inner: "x", agenda: null });
 // Two companions with no declared special cases.
 const plain = () => {
   const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation && !c.shapeshift && !c.fixed && !c.reveal);
@@ -276,20 +276,18 @@ test("with no change to heat, intimacy or regard, a value below +2 rises toward 
   assert.equal(s.rel[P.id].regard, 2);
 });
 
-test("an aside in company is rarely caught; the catcher's next call sees it once (D80)", () => {
-  const out = { ...blank(), segments: [{ speaker: "self", text: "said aloud", aside: false }, { speaker: "self", text: "a hand on his knee", aside: true }], risk: "high" };
-  let s = { ...romance(members), forced: [99] };
-  s = Rel.applyCampfire(s, P, members, out);
-  assert.deepEqual(s.rel[Q.id].noticed, []);
-  s = Rel.applyCampfire({ ...s, forced: [4] }, P, members, out);
-  assert.equal(s.rel[Q.id].noticed.length, 1);
-  assert.ok(s.rel[Q.id].noticed[0].includes("a hand on his knee"));
-  assert.ok(camp(Q, P, [P.id, Q.id], env({ romance: s })).includes("a hand on his knee"));
-  s = Rel.applyCampfire(s, Q, members, blank());
-  assert.deepEqual(s.rel[Q.id].noticed, []);
-  // The player's whispers too.
-  const w = Rel.playerAside({ ...romance(members), forced: [1] }, Q.id, "meet me later");
-  assert.ok(w.caught && w.state.rel[Q.id].noticed[0].includes("meet me later"));
+test("one catch roll an answer, only for a hidden action in company; ring words are never caught (D80, D93)", () => {
+  const act = { ...blank(), segments: [{ speaker: "self", text: "said aloud", aside: "no" }, { speaker: "self", text: "a hand on his knee", aside: "action" }], risk: "high" };
+  assert.equal(Rel.catchAside({ ...romance(members), forced: [99] }, act).caught, false);
+  assert.equal(Rel.catchAside({ ...romance(members), forced: [4] }, act).caught, true);
+  assert.equal(Rel.catchAside({ ...romance(members), forced: [1] }, act, { private: true }).caught, false);
+  const ring = { ...act, segments: [{ speaker: "self", text: "meet me later", aside: "ring" }] };
+  assert.equal(Rel.catchAside({ ...romance(members), forced: [1] }, ring).caught, false);
+  // At most one aside of each kind; whispering to the other needs her there.
+  const two = { ...act, segments: [...act.segments, { speaker: "self", text: "and another", aside: "action" }] };
+  assert.deepEqual(Rel.campfireProblems(romance(members), P, members, two), ["at most one action aside an answer; put it all in one segment"]);
+  const tell = { ...blank(), segments: [{ speaker: "self", text: "psst", aside: "to_other" }] };
+  assert.deepEqual(Rel.campfireProblems(romance(members), P, members, tell, { private: true }), ["there's no other companion here to whisper to"]);
 });
 
 test("stage labels and progress", () => {

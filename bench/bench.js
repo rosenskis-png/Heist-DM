@@ -273,8 +273,12 @@ async function runCampfire(c, schema, tier) {
     turn.tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(x[k] * 10) / 10}`).join(", ") + "; " + ["affection", "respect", "trust"].map((k) => `${k} ${b.toward[k]}→${x.toward[k]}`).join(", ");
     turn.stage = `${Rel.stage(b, self)} → ${Rel.stage(x, self)}`;
     romance = after;
-    // Her asides never reach the other companion's call (D80).
-    scene.push(...r.out.segments.filter((g) => !g.aside).map((g) => ({ from: g.speaker === "narrator" ? "narrator" : id, text: g.text })));
+    // What the other companion sees of it (D80, D93): the shared scene, words meant for her, and a hidden action only
+    // if she caught it, as plain scene text.
+    const w = Rel.catchAside(romance, r.out, where);
+    romance = w.state;
+    turn.caught = w.caught;
+    scene.push(...r.out.segments.filter((g) => ["no", "to_other"].includes(asideOf(g)) || (asideOf(g) === "action" && w.caught)).map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : id) + (asideOf(g) === "to_other" ? " (to you alone, over the rings)" : ""), text: g.text })));
     mustAdvance = !r.out.advances;
   }
   const run = { turns, ms, inputChars, campfire: true };
@@ -456,7 +460,7 @@ function campfireView(run) {
       h(
         "div",
         { class: "prose" },
-        (o.segments ?? []).map((x) => h("p", { class: x.aside ? "aside" : null }, x.aside ? h("span", { class: "chip info" }, "aside") : null, who[x.speaker] ? h("b", {}, ` ${who[x.speaker]}: `) : null, x.text)),
+        (o.segments ?? []).map((x) => h("p", { class: asideOf(x) !== "no" ? "aside" : null }, asideOf(x) !== "no" ? h("span", { class: "chip info" }, asideOf(x)) : null, who[x.speaker] ? h("b", {}, ` ${who[x.speaker]}: `) : null, x.text)),
         (o.changes ?? []).map((x) => h("p", { class: "texture" }, `${x.track} ${x.by > 0 ? "+" : ""}${x.by}: ${x.reason}`)),
         [...(o.inner ? [`Inside: ${o.inner}`] : []), ...(o.agenda ? [`Agenda: ${o.agenda}`] : []), ...(o.memories ?? []).map((m) => `Memory: ${m}`), ...(o.commitments ?? []).map((m) => `Commitment: ${m}`), ...(o.secrets ?? []).map((m) => `Revealed: ${m}`)].map((x) => h("p", { class: "texture" }, x)),
       ),
@@ -697,11 +701,11 @@ const campCast = () => Speech.assign(Speech.voices(), campSpeakers(), camp.voice
 function campLines(t) {
   const face = t.as ?? t.from;
   const rate = roster[face]?.rate ?? 1;
-  return t.out.segments.map((g) => ({
+  return t.out.segments.filter((g) => asideOf(g) !== "to_other").map((g) => ({
     text: g.text,
     speaker: g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? `${t.from}:second` : face,
     rate: g.speaker === "narrator" ? 1 : rate,
-    volume: g.aside ? 0.7 : 1,
+    volume: asideOf(g) !== "no" ? 0.7 : 1,
   }));
 }
 const campRead = (turns) => Speech.speak(turns.flatMap(campLines), campCast());
@@ -740,18 +744,31 @@ function campReset() {
   saveCamp();
 }
 
-// What the scene has said so far, as `viewer`'s next call reads it: never the other's asides, or the player's
-// whispers to the other (D80).
+// An aside's kind (D93); saves from before it was a kind held true or false.
+const asideOf = (g) => (g.aside === true ? "action" : g.aside || "no");
+
+// What the scene has said so far, as `viewer`'s next call reads it (D80, D93). The player's ring whispers reach only
+// the one he whispered to. A companion's ring words to him reach no one else; her words to the other over the rings
+// reach the other; a hidden action reaches the other only if caught, and then as plain scene text, unflagged.
 function campScene(viewer) {
   return camp.transcript.flatMap((t) => {
-    if (t.from === "player") return t.to && t.to !== viewer ? [] : [{ from: t.to ? "player, whispering to you" : "player", text: t.text }];
+    if (t.from === "player") return t.to && t.to !== viewer ? [] : [{ from: t.to ? "player, to you alone over the rings" : "player", text: t.text }];
     if (!t.out) return [];
     const c = roster[t.from];
+    const mine = t.from === viewer;
     // A disguised turn reads as hers to everyone but the one wearing the face.
-    const name = t.as && t.from !== viewer ? roster[t.as].name : c.name + (t.as ? ` (wearing ${roster[t.as].name}'s face)` : "");
-    return t.out.segments
-      .filter((g) => !g.aside || t.from === viewer)
-      .map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : name) + (g.aside ? " (aside)" : ""), text: g.text }));
+    const name = t.as && !mine ? roster[t.as].name : c.name + (t.as ? ` (wearing ${roster[t.as].name}'s face)` : "");
+    const shown = (g) => {
+      const k = asideOf(g);
+      return k === "no" || mine || k === "to_other" || (k === "action" && t.caught);
+    };
+    const tag = (g) => {
+      const k = asideOf(g);
+      if (k === "to_other") return mine ? " (to her alone, over the rings)" : " (to you alone, over the rings)";
+      if (!mine) return "";
+      return k === "ring" ? " (to him alone, over the rings)" : k === "action" ? " (out of her sight)" : "";
+    };
+    return t.out.segments.filter(shown).map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : name) + tag(g), text: g.text }));
   });
 }
 
@@ -759,16 +776,10 @@ async function campSend(text, status) {
   const members = campMembers();
   const both = camp.with === "both";
   const whisper = both && camp.to !== "all" ? camp.to : null;
-  // A whisper goes to one of them, who answers; the other may catch it (D80).
+  // A whisper goes to one of them over the rings, silently: she answers, and the other never hears it (D93).
   const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.disguise?.actor ?? camp.with];
   camp.transcript.push({ from: "player", text, ...(whisper ? { to: whisper } : {}) });
   camp.romance = Rel.nextTurn(camp.romance);
-  if (whisper) {
-    const other = whisper === camp.a ? camp.b : camp.a;
-    const w = Rel.playerAside(camp.romance, other, text);
-    camp.romance = w.state;
-    if (w.caught) camp.transcript.push({ from: "system", text: `${roster[other].name} caught your whisper.` });
-  }
   const order = ids.length > 1 ? Rel.speakingOrder(camp.romance, ids) : ids;
   let mustAdvance = false;
   for (const id of order) {
@@ -786,10 +797,10 @@ async function campSend(text, status) {
         camp.transcript.push({ from: id, error: r.errors.slice(0, 5).join("; "), input });
         break;
       }
-      const before = camp.romance.rel[other].noticed.length;
       camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
-      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried });
-      if (camp.romance.rel[other].noticed.length > before) camp.transcript.push({ from: "system", text: `${roster[other].name} caught ${self.name}'s aside.` });
+      const w = Rel.catchAside(camp.romance, r.out, where);
+      camp.romance = w.state;
+      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried, ...(w.caught ? { caught: true } : {}) });
       mustAdvance = !r.out.advances;
     } catch (e) {
       camp.transcript.push({ from: id, error: errorText(e), input });
@@ -892,7 +903,6 @@ function campView() {
           h("label", { class: "check" }, h("input", { id: `camp-${c.id}-${k}`, type: "checkbox", checked: !!r[k], onchange: (e) => set(k, e.target.checked) }), ` ${label}`)),
         [["past", `thinks you and ${other.name} were involved`], ["current", `thinks you and ${other.name} are involved now`]].map(([k, label]) =>
           h("label", { class: "check" }, h("input", { id: `camp-${c.id}-believes-${k}`, type: "checkbox", checked: !!r.believes[k], onchange: (e) => setIn("believes", k, e.target.checked) }), ` ${label}`))),
-      r.noticed.length ? h("p", { class: "status" }, `Caught, for her next answer: ${r.noticed.join(" · ")}`) : null,
       camp.reveal ? h("label", { class: "stack" }, h("span", {}, "Private agenda"), h("textarea", { id: `camp-${c.id}-agenda`, rows: 2, onchange: (e) => set("agenda", e.target.value.trim() || null) }, r.agenda ?? "")) : null,
       c.shapeshift ? h("label", { class: "stack" }, h("span", {}, "Current form (empty: her own look)"), h("textarea", { id: `camp-${c.id}-form`, rows: 2, onchange: (e) => set("form", e.target.value.trim() || null) }, r.form ?? "")) : null,
       r.knowsShifter && other.shapeshift ? h("p", { class: "status" }, `Knows ${other.name} can change her shape.`) : null,
@@ -914,9 +924,10 @@ function campView() {
     h("div", { class: "row" },
       h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show what's really going on (thoughts, agendas, disguises)"),
       members.some((c) => c.shapeshift)
-        ? h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), saveCamp()) }), " a shapeshifter always comes in the other's place (testing)")
+        ? h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), campChooseWith(camp.with), rerender()) }), " a shapeshifter always comes in the other's place (testing; one-on-one scenes only)")
         : "",
-      camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : ""),
+      camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : "",
+      camp.forceShift && camp.with === "both" ? h("span", { class: "status" }, "Impersonation happens only one-on-one: choose one of them alone under \"At the fire\".") : ""),
   );
   if (Speech.available()) {
     const ranked = Speech.rank(Speech.voices());
@@ -967,7 +978,15 @@ function campView() {
     const o = t.out;
     return h("div", { class: "turn" },
       camp.reveal && (o.inner || o.agenda) ? h("p", { class: "inner" }, o.inner ? `Inside: ${o.inner}` : null, o.agenda ? ` · New agenda: ${o.agenda}` : null) : null,
-      h("div", { class: "prose" }, o.segments.map((g) => h("p", { class: g.aside ? "aside" : null }, g.aside ? h("span", { class: "chip info" }, "aside") : null, g.aside ? " " : null, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
+      t.caught ? h("p", { class: "caught" }, `caught: ${roster[t.from === camp.a ? camp.b : camp.a].name} saw the hidden action (developer view)`) : null,
+      h("div", { class: "prose" }, o.segments.map((g) => {
+        const k = asideOf(g);
+        const other = roster[t.from === camp.a ? camp.b : camp.a]?.name ?? "the other";
+        // Words between the two companions: the player sees only that something passed between them.
+        if (k === "to_other" && !camp.reveal) return h("p", { class: "aside" }, `${who.self} and ${other} exchange a look; something passes between them over the rings.`);
+        const chip = { action: "out of sight", ring: "over the rings", to_other: `to ${other}, over the rings` }[k];
+        return h("p", { class: k !== "no" ? "aside" : null }, chip ? h("span", { class: "chip info" }, chip) : null, chip ? " " : null, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text);
+      })),
       h("p", { class: "texture" }, [
         ...o.changes.map((x) => `${x.track} ${x.by > 0 ? "+" : ""}${x.by} (${x.reason})`),
         o.beats.length ? `beats: ${o.beats.join(", ")}` : null,

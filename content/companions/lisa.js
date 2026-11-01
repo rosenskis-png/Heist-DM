@@ -59,6 +59,13 @@ export default {
     ignored: `stops seeking him out and turns her attention to proving herself to her sister`,
   },
   leanFromHeat: true,
+  // Cruelty toward the other companion, at her own threshold of hate (D94).
+  notes: [
+    {
+      when: [{ affection: ["<=", -5] }],
+      text: `Your sweetness has teeth now: in private, and in asides, you make sure your sister sees exactly what she's losing, and you enjoy it.`,
+    },
+  ],
   beliefs: `she deserves something of her own; some things can't be forgiven; rules are for the cautious`,
   admires: `boldness; risks taken for her; being treated as an equal adult; humour; him keeping her secret`,
   despises: `being treated as a kid; being compared to her sister and found wanting; anyone falling for her sister's version of the past`,

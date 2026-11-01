@@ -27,8 +27,6 @@ export const newRel = () => ({
   believes: { past: false, current: false },
   // A declared escalation's level, 0 when calm (D82).
   storm: 0,
-  // Asides of the other's she caught, which her next call sees once (D80).
-  noticed: [],
   // A shapeshifter's current form, in words, or null for her own look (D86).
   form: null,
   // Whether she knows the other companion can change her shape (D86).
@@ -272,6 +270,8 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
   if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
   if (out.form && !c.shapeshift) problems.push("she can't change her shape (form must be null)");
+  for (const kind of ["action", "ring", "to_other"]) if (out.segments.filter((x) => x.aside === kind).length > 1) problems.push(`at most one ${kind} aside an answer; put it all in one segment`);
+  if (scene.private && out.segments.some((x) => x.aside === "to_other")) problems.push("there's no other companion here to whisper to");
   const top = c.escalation?.tiers.length ?? 0;
   if (out.storm != null && !c.escalation) problems.push("she has no storm level (storm must be null)");
   else if (out.storm != null && (out.storm < 0 || out.storm > top)) problems.push(`storm must be 0 to ${top}`);
@@ -299,18 +299,10 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   }
   if (out.believes) own.believes = { past: !!(out.believes.past || out.believes.current), current: !!out.believes.current };
   if (c.escalation && out.storm != null) own.storm = clamp(Math.max(out.storm, own.storm - 1), [0, c.escalation.tiers.length]);
-  own.noticed = [];
   if (out.agenda) own.agenda = out.agenda;
   if (c.shapeshift && out.form) own.form = out.form;
   // She wore the other's face: the other wasn't there (D86).
   if (scene.disguisedAs && s.rel[scene.disguisedAs]) s.rel[scene.disguisedAs].absent = [...new Set([...s.rel[scene.disguisedAs].absent, s.turn])].slice(-R.absentLimit);
-  // An aside in company: the other companion may catch it (D80).
-  const o = members.find((m) => m.id !== c.id);
-  const asides = out.segments.filter((x) => x.aside).map((x) => x.text);
-  if (o && !scene.private && asides.length) {
-    const caught = rollCatch(s, out.risk ?? "low");
-    if (caught) s.rel[o.id].noticed = [...s.rel[o.id].noticed, ...asides.map((t) => `${c.name}, out of the others' notice: ${t}`)];
-  }
   s = applyBeats(s, c, members, out.beats, scene).state;
   const r = s.rel[c.id];
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);
@@ -343,12 +335,12 @@ export function rollCatch(rom, risk = "low") {
   return d100(rom) <= (R.asideCatch[risk] ?? R.asideCatch.low);
 }
 
-// Something the player says to one companion out of the other's notice: the other may catch it (D80).
-export function playerAside(rom, overhearer, text) {
-  const out = copy(rom);
-  const caught = rollCatch(out, "low");
-  if (caught) out.rel[overhearer].noticed = [...out.rel[overhearer].noticed, `The player, out of your notice: ${text}`];
-  return { state: out, caught };
+// Whether the other companion catches this answer's hidden action, if it has one (D93): one roll per answer, by the
+// speaker's declared risk, and only in company. Words over the rings are silent and never caught.
+export function catchAside(rom, out, scene = {}) {
+  const state = copy(rom);
+  if (scene.private || !out.segments.some((x) => x.aside === "action")) return { state, caught: false };
+  return { state, caught: rollCatch(state, out.risk ?? "low") };
 }
 
 // The love-triangle state for her (Gravenhold's configOf), from her own involvement and what she believes about

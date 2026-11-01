@@ -82,6 +82,13 @@ export default {
   },
   recalibrates: "Never shows it. She files it away and changes her approach, sometimes her face.",
   leanFromHeat: false,
+  // Cruelty toward the other companion, at her own threshold of hate (D94).
+  notes: [
+    {
+      when: [{ affection: ["<=", -4] }],
+      text: `She hates the other companion enough to be cruel, covertly: rumours, small sabotage, cruel things said in the other's own face when she wears it. Never traceable to her.`,
+    },
+  ],
   beliefs: `everyone is wearing a face; being wanted is safer than being known; a name is something you choose`,
   admires: `attention to detail; discretion; being seen; loyalty; quiet competence`,
   despises: `being stared at as a curiosity; being asked to perform; carelessness; being mistaken for someone else`,

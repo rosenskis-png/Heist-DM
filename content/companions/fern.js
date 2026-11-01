@@ -76,6 +76,10 @@ export default {
   // She waits for him to show interest (docs/spec/companions.md §6). A note is sent only while its gate holds.
   notes: [
     {
+      when: [{ respect: ["<=", -8], trust: ["<=", -8] }],
+      text: `Fern has lost all respect and trust for the other companion, though not her fondness. This is as cruel as she gets: the bluntest truths, said kindly but without softening, and her warmth withdrawn.`,
+    },
+    {
       when: [{ heat: ["<", 2], payoff: false }],
       text: `He hasn't shown interest yet. She doesn't kiss him or make physical advances; her openness shows in how she treats everyone and in what she talks about, so he can discover it himself.`,
     },

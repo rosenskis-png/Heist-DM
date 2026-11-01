@@ -108,17 +108,17 @@
       {
         "speaker": "narrator",
         "text": "Lyra sits with her back to the warm cistern wall and pats the stone beside her. The dripping water keeps a slow time of its own.",
-        "aside": false
+        "aside": "no"
       },
       {
         "speaker": "self",
         "text": "You kept your nerve in there. Sit. I want to look at you when it isn't dark.",
-        "aside": false
+        "aside": "no"
       },
       {
         "speaker": "narrator",
         "text": "She takes your hand and turns it over, checking the scrapes from the bars, her thumb lingering.",
-        "aside": false
+        "aside": "no"
       }
     ],
     "changes": [

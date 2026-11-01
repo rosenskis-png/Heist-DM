@@ -83,6 +83,10 @@ export default {
   // What he can make of Ember, before and after he has met her in her own body (docs/spec/companions.md §6).
   notes: [
     {
+      when: [{ affection: ["<=", -6] }],
+      text: `She hates the other companion enough to be cruel: Nadia goes icily polite, and Ember says the cruel things through her, and Nadia doesn't stop her.`,
+    },
+    {
       when: [{ payoff: false, toPayoff: [">", 3] }],
       text: `Ember rarely speaks yet. Nadia passes on a remark of Ember's now and then and lets it sit, so he can't tell whether Ember is real, a way of talking, or a second person in Nadia's head. She never explains.`,
     },
