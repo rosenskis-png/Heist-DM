@@ -24,6 +24,10 @@ const compare = { enum: ["<", "<=", "=", ">=", ">"] };
 const term = { oneOf: [{ type: "boolean" }, { type: "array", prefixItems: [compare, { type: "number" }], minItems: 2, maxItems: 2 }] };
 const gate = list({ type: "object", minProperties: 1, additionalProperties: term }, 1);
 
+// She can change her shape (D86): what she can do, for her call; and the chance she comes in the other companion's
+// place when the player sits with that one alone, by the first alternative whose gate holds.
+const shapeshift = obj(["text"], { text: t, impersonation: list(obj(["chance"], { chance: { type: "integer", minimum: 0, maximum: 100 }, when: gate })) });
+
 // A tie's entry for one other companion: fields it sets or extends, and what it adds.
 const tieEntry = obj([], {
   set: { type: "object", additionalProperties: t },
@@ -31,6 +35,8 @@ const tieEntry = obj([], {
   gift: t,
   bond: t,
   partnerReacts: t,
+  // Special cases she has only with this partner (D86).
+  grants: obj([], { shapeshift }),
   // What she holds against or hides from this partner: always in her own call, never in the partner's (D84).
   secret: t,
   // The parked portrait feature (D24). On no allowlist.
@@ -100,6 +106,11 @@ export const companionFileSchema = withDefs({
 
       // How she judges the other companion on each axis: what earns it and what wears it down (D79).
       inOthers: some(axes, t),
+      // Tracks that never move (D85).
+      fixed: some(["heat", "intimacy", "regard", "lean"], { type: "number" }),
+      // Her own gates for gated profile fields, replacing the defaults in content/relationship.js `reveal` (D85).
+      reveal: { type: "object", propertyNames: { enum: ["first", "why", "hidden", "deep", "dark", "payoff_scene", "quest"] }, additionalProperties: gate },
+      shapeshift,
       // How she takes it when her read of the other turns out wrong: out loud, or only inside (D79).
       recalibrates: t,
       // Limits on her view of any other companion (D77).

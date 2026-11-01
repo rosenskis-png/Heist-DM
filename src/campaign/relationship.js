@@ -29,6 +29,12 @@ export const newRel = () => ({
   storm: 0,
   // Asides of the other's she caught, which her next call sees once (D80).
   noticed: [],
+  // A shapeshifter's current form, in words, or null for her own look (D86).
+  form: null,
+  // Whether she knows the other companion can change her shape (D86).
+  knowsShifter: false,
+  // Campaign turns when someone wearing her face was alone with him (D86).
+  absent: [],
   gain: { heat: 0, intimacy: 0 },
   beatTurns: {},
   memories: [],
@@ -38,6 +44,12 @@ export const newRel = () => ({
   toward: axes(0),
   read: axes(0),
 });
+
+// A companion's `fixed` tracks never move (D85).
+function pin(r, c) {
+  for (const [k, v] of Object.entries(c.fixed ?? {})) r[k] = v;
+  return r;
+}
 
 // A view on the three axes: one number sets affection only.
 export function axes(v) {
@@ -59,10 +71,12 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1, seed = 1 } 
   };
   const views = members.map(startOf);
   const shown = members.map((c, i) => (c.mask ?? c.tie?.mask ? axes(c.mask ?? c.tie.mask) : views[i]));
+  // Two shapeshifters know each other's secret from the start.
+  const bothShift = members.length > 1 && members.every((c) => c.shapeshift);
   return {
     turn,
     act,
-    rel: Object.fromEntries(members.map((c, i) => [c.id, { ...newRel(), toward: axes(views[i]), read: axes(shown[1 - i] ?? 0) }])),
+    rel: Object.fromEntries(members.map((c, i) => [c.id, pin({ ...newRel(), toward: axes(views[i]), read: axes(shown[1 - i] ?? 0), knowsShifter: bothShift }, c)])),
     open: false,
     shared: false,
     rng: seed >>> 0,
@@ -149,6 +163,7 @@ export function allowedBeats(rom, c, members, scene = {}) {
   if (r.involved) out.push("breakup");
   if (r.payoff && !r.involved) out.push("rekindle");
   if (o && !scene.private && !rom.open) out.push("in_the_open");
+  if (o && c.shapeshift && !scene.private && !ro.knowsShifter) out.push("unmasked");
   if (o && !rom.shared && r.involved && ro.involved && members.every((m) => m.tie?.triangle?.shared !== false)) out.push("shared");
   const v = view(rom, c);
   for (const b of c.extraBeats ?? []) {
@@ -187,6 +202,7 @@ export function applyDelta(rom, c, delta) {
   if (d.lean > 0) r.lean = clamp(r.lean + d.lean, R.tracks.lean);
   r.regard = clamp(r.regard + d.regard, R.tracks.regard);
   if (r.regard <= R.hurt.regard) r.hurt = true;
+  pin(r, c);
   return out;
 }
 
@@ -218,6 +234,8 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
     else if (b === "breakup") {
       r.involved = false;
       if (out.open && o) out.rel[o.id].believes.current = false;
+    } else if (b === "unmasked") {
+      if (o) out.rel[o.id].knowsShifter = true;
     } else if (b === "rekindle") {
       r.involved = true;
       if (out.open && o) out.rel[o.id].believes = { past: true, current: true };
@@ -251,6 +269,7 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
   if (out.segments.some((x) => x.speaker === "second_voice") && !secondVoiceState(rom, c, scene)?.speaks) problems.push("no second voice speaks in this scene");
   if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
+  if (out.form && !c.shapeshift) problems.push("she can't change her shape (form must be null)");
   const top = c.escalation?.tiers.length ?? 0;
   if (out.storm != null && !c.escalation) problems.push("she has no storm level (storm must be null)");
   else if (out.storm != null && (out.storm < 0 || out.storm > top)) problems.push(`storm must be 0 to ${top}`);
@@ -279,6 +298,9 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   if (out.believes) own.believes = { past: !!(out.believes.past || out.believes.current), current: !!out.believes.current };
   if (c.escalation && out.storm != null) own.storm = clamp(Math.max(out.storm, own.storm - 1), [0, c.escalation.tiers.length]);
   own.noticed = [];
+  if (c.shapeshift && out.form) own.form = out.form;
+  // She wore the other's face: the other wasn't there (D86).
+  if (scene.disguisedAs && s.rel[scene.disguisedAs]) s.rel[scene.disguisedAs].absent = [...new Set([...s.rel[scene.disguisedAs].absent, s.turn])].slice(-R.absentLimit);
   // An aside in company: the other companion may catch it (D80).
   const o = members.find((m) => m.id !== c.id);
   const asides = out.segments.filter((x) => x.aside).map((x) => x.text);
@@ -299,7 +321,18 @@ export function recover(rom, c, delta) {
   const out = copy(rom);
   const r = out.rel[c.id];
   for (const k of R.baseline.tracks) if (!delta[k] && r[k] < R.baseline.to) r[k] = Math.min(R.baseline.to, r[k] + R.baseline.by);
+  pin(r, c);
   return out;
+}
+
+// Who really comes when the player sits with `chosen` alone (D86): a shapeshifting other companion may come in
+// her place, by the first of her `impersonation` alternatives whose gate holds. Moves the seeded roll.
+export function whoComes(rom, members, chosen) {
+  const out = copy(rom);
+  const o = members.find((m) => m.id !== chosen);
+  const alt = (o?.shapeshift?.impersonation ?? []).find((a) => !a.when || holds(view(out, o), a.when));
+  const actor = alt && d100(out) <= alt.chance ? o.id : chosen;
+  return { state: out, actor };
 }
 
 // Whether an aside is caught, by the speaker's declared risk (D80). Moves the party's seeded roll (D12).

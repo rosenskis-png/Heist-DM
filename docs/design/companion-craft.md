@@ -64,6 +64,9 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 - **The same act can deepen one companion and wound the other.** That's a feature, not a balancing problem.
 - **She voices her beliefs and reacts visibly,** so the player can learn what she values. A companion whose values are invisible can't be played well.
 - **Her dark branch** comes from her dark triggers, and **her deep branch** from depth. Both are valid endings to play toward.
+- **The shape of every arc** (the designer's framing). She presents her fantasy up front and fulfils its promise quickly; the slow burn is getting deeper, beyond the fantasy.
+  - **The light path:** he treats her as more than the fantasy. He doesn't deny it or pretend it's bad; he recognises the depth beyond it.
+  - **The dark path:** he leans into her harmful urges and treats her as an object of the fantasy. It's a *dark* ending, not a bad one: think ascended Astarion. It needs its own payoff and its own satisfaction, and it never betrays the party (D7).
 - **Her hidden layer** comes out gradually as intimacy rises. The engine withholds it until then (gating), so the writing only has to use it when it's present.
 
 ## 5. Reactions, memory, and each other

@@ -130,5 +130,8 @@ export const stageAt = { consumed: 6, indulging: 5, burningWithin: 1, drawn: 2, 
 // How much of the relationship the sigil shows, 0–7.
 export const progressAt = { friends: 3, close: 8, max: 7 };
 
+// How many turns of "someone wore her face" each companion keeps (D86).
+export const absentLimit = 5;
+
 // How many memories each companion keeps.
 export const memoryLimit = 30;

@@ -29,8 +29,9 @@ export function resolveParty(members) {
     const partner = members.find((o) => o !== c && c.tie?.by?.[o.id]);
     if (!partner) return c.tie ? (({ tie, ...rest }) => rest)(c) : c;
     const { by, required, set: tieSet = {}, append: tieAppend = {}, ...tie } = c.tie;
-    const { set = {}, append = {}, image, ...entry } = by[partner.id];
-    const out = { ...c };
+    const { set = {}, append = {}, image, grants = {}, ...entry } = by[partner.id];
+    // `grants`: special cases she has only with this partner, such as her sister's shapeshifting (D86).
+    const out = { ...c, ...grants };
     for (const [k, v] of Object.entries({ ...tieSet, ...set })) out[k] = fill(v, partner);
     for (const a of [tieAppend, append]) for (const [k, v] of Object.entries(a)) out[k] = [out[k], fill(v, partner)].filter(Boolean).join(" ");
     out.tie = { withId: partner.id, ...Object.fromEntries(Object.entries({ ...tie, ...entry }).map(([k, v]) => [k, fill(v, partner)])) };

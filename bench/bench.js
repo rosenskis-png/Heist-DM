@@ -648,6 +648,28 @@ const camp = store.get("bench.camp", null) ?? { a: "nadia", b: "fern", with: "bo
 // A relationship state saved before the three axes and beliefs (D77, D81) starts over; the transcript stays.
 if (camp.romance && Object.values(camp.romance.rel ?? {}).some((r) => !r.toward)) camp.romance = null;
 camp.to ??= "all";
+// Who is really at the fire when he sits with one of them, if a shapeshifter came in her place (D86).
+camp.disguise ??= null;
+
+// Sitting with one companion alone: a shapeshifting other may come in her place. "Force" makes her come.
+function campChooseWith(value) {
+  camp.with = value;
+  camp.disguise = null;
+  if (value !== "both" && camp.romance) {
+    const members = campMembers();
+    const other = members.find((m) => m.id !== value);
+    let actor = value;
+    if (other?.shapeshift && camp.forceShift) actor = other.id;
+    else {
+      const w = Rel.whoComes(camp.romance, members, value);
+      camp.romance = w.state;
+      actor = w.actor;
+    }
+    if (actor !== value) camp.disguise = { actor, as: value };
+  }
+  saveCamp();
+}
+const campName = (t) => (t.as ? (camp.reveal ? `${roster[t.from].name} (as ${roster[t.as].name})` : roster[t.as].name) : roster[t.from].name);
 const saveCamp = () => store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
 const campMembers = () => resolveParty([roster[camp.a], roster[camp.b]]);
 function campReset() {
@@ -663,9 +685,11 @@ function campScene(viewer) {
     if (t.from === "player") return t.to && t.to !== viewer ? [] : [{ from: t.to ? "player, whispering to you" : "player", text: t.text }];
     if (!t.out) return [];
     const c = roster[t.from];
+    // A disguised turn reads as hers to everyone but the one wearing the face.
+    const name = t.as && t.from !== viewer ? roster[t.as].name : c.name + (t.as ? ` (wearing ${roster[t.as].name}'s face)` : "");
     return t.out.segments
       .filter((g) => !g.aside || t.from === viewer)
-      .map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : c.name) + (g.aside ? " (aside)" : ""), text: g.text }));
+      .map((g) => ({ from: (g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : name) + (g.aside ? " (aside)" : ""), text: g.text }));
   });
 }
 
@@ -674,7 +698,7 @@ async function campSend(text, status) {
   const both = camp.with === "both";
   const whisper = both && camp.to !== "all" ? camp.to : null;
   // A whisper goes to one of them, who answers; the other may catch it (D80).
-  const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.with];
+  const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.disguise?.actor ?? camp.with];
   camp.transcript.push({ from: "player", text, ...(whisper ? { to: whisper } : {}) });
   camp.romance = Rel.nextTurn(camp.romance);
   if (whisper) {
@@ -690,7 +714,9 @@ async function campSend(text, status) {
     const self = members.find((m) => m.id === id);
     const other = id === camp.a ? camp.b : camp.a;
     const where = { private: !both, inPerson: true, mustAdvance };
-    const c = { with: both ? [camp.a, camp.b] : ids, scene: campScene(id), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
+    const as = !both && camp.disguise?.actor === id ? camp.disguise.as : null;
+    if (as) where.disguisedAs = as;
+    const c = { with: both ? [camp.a, camp.b] : ids, ...(as ? { disguisedAs: as } : {}), scene: campScene(id), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
     const input = A.campfireInput({ ...env, romance: camp.romance }, c, roster[id], [roster[other]], campfireSchema);
     try {
       const r = await ask(input, campfireSchema, settings.tiers.campfire, (o) => Rel.campfireProblems(camp.romance, self, members, o, where));
@@ -700,7 +726,7 @@ async function campSend(text, status) {
       }
       const before = camp.romance.rel[other].noticed.length;
       camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
-      camp.transcript.push({ from: id, out: r.out, input, retried: r.retried });
+      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried });
       if (camp.romance.rel[other].noticed.length > before) camp.transcript.push({ from: "system", text: `${roster[other].name} caught ${self.name}'s aside.` });
       mustAdvance = !r.out.advances;
     } catch (e) {
@@ -757,7 +783,7 @@ function campView() {
   const members = campMembers();
   setup.append(
     h("label", { class: "set" }, h("span", {}, "At the fire"),
-      h("select", { id: "camp-with", onchange: (e) => ((camp.with = e.target.value), saveCamp(), rerender()) },
+      h("select", { id: "camp-with", onchange: (e) => (campChooseWith(e.target.value), rerender()) },
         [["both", "Both"], [camp.a, `${roster[camp.a].name} alone`], [camp.b, `${roster[camp.b].name} alone`]].map(([v, l]) => h("option", { value: v, selected: camp.with === v }, l)))),
     ...["turn", "act"].map((k) =>
       h("label", { class: "set" }, h("span", {}, k === "turn" ? "Campaign turn" : "Act"),
@@ -794,6 +820,9 @@ function campView() {
         [["past", `thinks you and ${other.name} were involved`], ["current", `thinks you and ${other.name} are involved now`]].map(([k, label]) =>
           h("label", { class: "check" }, h("input", { id: `camp-${c.id}-believes-${k}`, type: "checkbox", checked: !!r.believes[k], onchange: (e) => setIn("believes", k, e.target.checked) }), ` ${label}`))),
       r.noticed.length ? h("p", { class: "status" }, `Caught, for her next answer: ${r.noticed.join(" · ")}`) : null,
+      c.shapeshift ? h("label", { class: "stack" }, h("span", {}, "Current form (empty: her own look)"), h("textarea", { id: `camp-${c.id}-form`, rows: 2, onchange: (e) => set("form", e.target.value.trim() || null) }, r.form ?? "")) : null,
+      r.knowsShifter && other.shapeshift ? h("p", { class: "status" }, `Knows ${other.name} can change her shape.`) : null,
+      r.absent.length ? h("p", { class: "status" }, `Someone wore her face on turn ${r.absent.join(", ")}.`) : null,
       h("p", { class: "status" }, `Configuration: ${Rel.config(camp.romance, c, members)} · gained this camp: heat ${r.gain.heat}/${Relationship.caps.perEncounter.heat}, intimacy ${r.gain.intimacy}/${Relationship.caps.perEncounter.intimacy}`),
       h("label", { class: "set" }, h("span", {}, "Wearing"),
         h("select", { id: `camp-${c.id}-outfit`, onchange: (e) => ((camp.romance = equip(camp.romance, c.id, e.target.value)), saveCamp(), rerender()) },
@@ -808,6 +837,12 @@ function campView() {
       [["open", "everything's out in the open"], ["shared", "all three openly together"]].map(([k, label]) =>
         h("label", { class: "check" }, h("input", { id: `camp-${k}`, type: "checkbox", checked: !!camp.romance[k], onchange: (e) => ((camp.romance[k] = e.target.checked), saveCamp(), rerender()) }), ` ${label}`))),
     h("button", { class: "run-btn ghost", onclick: () => ((camp.romance = Rel.endEncounter(camp.romance)), saveCamp(), rerender()) }, "New camp (resets the +4 gain caps)"),
+    members.some((c) => c.shapeshift)
+      ? h("div", { class: "row" },
+          h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show who's really here"),
+          h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), saveCamp()) }), " a shapeshifter always comes in the other's place (testing)"),
+          camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : null)
+      : null,
   );
   const status = h("span", { class: "status" });
   const box = h("textarea", { id: "camp-say", rows: 3, placeholder: "What you say or do" });
@@ -828,7 +863,7 @@ function campView() {
     if (t.from === "system") return h("p", { class: "status" }, t.text);
     const c = roster[t.from];
     if (t.error) return h("p", { class: "err" }, `${c.name}: ${t.error}`);
-    const who = { narrator: null, self: c.name, second_voice: c.secondVoice?.name ?? "second voice" };
+    const who = { narrator: null, self: campName(t), second_voice: c.secondVoice?.name ?? "second voice" };
     const o = t.out;
     return h("div", { class: "turn" },
       h("div", { class: "prose" }, o.segments.map((g) => h("p", { class: g.aside ? "aside" : null }, g.aside ? h("span", { class: "chip info" }, "aside") : null, g.aside ? " " : null, who[g.speaker] ? h("b", {}, `${who[g.speaker]}: `) : null, g.text))),
@@ -838,11 +873,12 @@ function campView() {
         o.storm != null ? `storm: ${o.storm}` : null,
         o.believes ? `now believes: ${o.believes.current ? "involved now" : o.believes.past ? "involved once" : "nothing"}` : null,
         o.risk ? `aside risk: ${o.risk}` : null,
+        o.form ? `new form: ${o.form}` : null,
         o.advances ? `moves: ${o.advances}` : null,
         o.outfit ? `changes into: ${o.outfit}` : null,
         t.retried ? "retried once" : null,
       ].filter(Boolean).join(" · ")),
-      t.input ? fold(`${c.name}'s input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
+      t.input ? fold(`${camp.reveal || !t.as ? c.name : roster[t.as].name}'s input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
       fold("Raw output", json(o)),
     );
   });

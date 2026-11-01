@@ -524,3 +524,58 @@ test("a second voice can join a scene in company once her gate holds (D83)", { s
   const input = camp(m[0], m[1], both, env({ romance: s }));
   assert.ok(input.includes('"in_company":true') && input.includes(JSON.stringify(voiced.secondVoice.look)));
 });
+
+// ---------- fixed tracks, own gates, shapeshifting (D85, D86) ----------
+
+test("fixed tracks never move, and her own gate replaces a default one (D85)", () => {
+  const c = { ...P, fixed: { heat: 10, regard: 10 }, reveal: { hidden: [{ deep: true }] } };
+  const m = [c, Q];
+  let s = Rel.newRomance(m, pairs);
+  assert.deepEqual([s.rel[c.id].heat, s.rel[c.id].regard], [10, 10]);
+  s = Rel.applyCampfire(s, c, m, { ...blank(), changes: [{ track: "regard", by: -3, reason: "r" }, { track: "heat", by: -2, reason: "r" }, { track: "intimacy", by: 2, reason: "r" }] });
+  assert.deepEqual([s.rel[c.id].heat, s.rel[c.id].regard, s.rel[c.id].intimacy], [10, 10, 2]);
+  s.rel[c.id].intimacy = 5;
+  assert.ok(!camp(c, Q, [c.id], env({ romance: s })).includes(JSON.stringify(c.hidden)));
+  s.rel[c.id].deep = true;
+  assert.ok(camp(c, Q, [c.id], env({ romance: s })).includes(JSON.stringify(c.hidden)));
+});
+
+test("a shapeshifter changes form, may come in the other's place, and is unmasked only in company (D86)", () => {
+  const shifter = { ...P, shapeshift: { text: "She can look like anyone.", impersonation: [{ chance: 30, when: [{ affection: ["<", 0] }] }, { chance: 5 }] } };
+  const m = [shifter, Q];
+  let s = Rel.newRomance(m, pairs);
+  assert.ok(!s.rel[Q.id].knowsShifter);
+  // Form: hers only, and the other sees it.
+  assert.deepEqual(Rel.campfireProblems(s, Q, m, { ...blank(), form: "taller" }), ["she can't change her shape (form must be null)"]);
+  s = Rel.applyCampfire(s, shifter, m, { ...blank(), form: "a little taller, with longer hair" });
+  assert.equal(s.rel[shifter.id].form, "a little taller, with longer hair");
+  assert.ok(camp(Q, shifter, [Q.id, shifter.id], env({ romance: s })).includes("a little taller, with longer hair"));
+  // Impersonation: by the first gate that holds.
+  s.rel[shifter.id].toward.affection = -5;
+  assert.equal(Rel.whoComes({ ...s, forced: [30] }, m, Q.id).actor, shifter.id);
+  assert.equal(Rel.whoComes({ ...s, forced: [31] }, m, Q.id).actor, Q.id);
+  s.rel[shifter.id].toward.affection = 5;
+  assert.equal(Rel.whoComes({ ...s, forced: [6] }, m, Q.id).actor, Q.id);
+  assert.equal(Rel.whoComes({ ...s, forced: [99] }, m, shifter.id).actor, shifter.id); // the other can't shift
+  // In disguise: her call wears the other's face; the other later knows she wasn't there.
+  const input = A.campfireInput(env({ romance: s }), { with: [Q.id], scene: [], disguisedAs: Q.id }, shifter, [Q], campfireSchema);
+  assert.ok(input.includes(`You are wearing ${Q.name}'s face`));
+  s = Rel.applyCampfire(s, shifter, m, { ...blank(), memories: ["kissed him as her"] }, { private: true, disguisedAs: Q.id });
+  assert.deepEqual(s.rel[Q.id].absent, [s.turn]);
+  assert.ok(s.rel[shifter.id].memories.includes("kissed him as her"));
+  assert.ok(camp(Q, shifter, [Q.id], env({ romance: s })).includes("you weren't there"));
+  // Unmasked: only in company, and only until the other knows.
+  assert.ok(!Rel.allowedBeats(s, shifter, m, { private: true }).includes("unmasked"));
+  s = Rel.applyBeats(s, shifter, m, ["unmasked"]).state;
+  assert.ok(s.rel[Q.id].knowsShifter && !Rel.allowedBeats(s, shifter, m).includes("unmasked"));
+  assert.ok(camp(Q, shifter, [Q.id], env({ romance: s })).includes(`${shifter.name} can change her shape.`));
+});
+
+test("a tie can grant a special case with one partner, and two shapeshifters know each other (D86)", () => {
+  const shifter = { ...Q, shapeshift: { text: "She can look like anyone." } };
+  const sister = { ...P, id: "sis", name: "Sis", tie: { required: true, by: { [shifter.id]: { bond: "b", grants: { shapeshift: { text: "So can she." } } } } } };
+  const m = resolveParty([sister, shifter]);
+  assert.equal(m[0].shapeshift.text, "So can she.");
+  const s = Rel.newRomance(m, pairs);
+  assert.ok(s.rel.sis.knowsShifter && s.rel[shifter.id].knowsShifter);
+});

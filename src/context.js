@@ -70,7 +70,8 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
   out.abilities = abilitiesFor(c.abilities);
   if (planning) out.planning = { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch };
   const v = Rel.view(rom, c);
-  for (const [k, gate] of Object.entries(Relationship.reveal)) if (Rel.holds(v, gate)) out[k] = GATED[k](c);
+  // Her own gate for a field replaces the default (D85).
+  for (const [k, gate] of Object.entries(Relationship.reveal)) if (Rel.holds(v, c.reveal?.[k] ?? gate)) out[k] = GATED[k](c);
   const notes = (c.notes ?? []).filter((n) => Rel.holds(v, n.when)).map((n) => n.text);
   if (notes.length) out.notes = notes;
   const sv = Rel.secondVoiceState(rom, c, scene);
@@ -79,6 +80,12 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
     const tastes = { ...(admires ? { admires } : {}), ...(despises ? { despises } : {}) };
     out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.inCompany ? { in_company: true } : {}), ...(sv.canAppear ? { may_take_her_own_body: look } : {}) } : { name, relayed, ...tastes };
   }
+  // Her shape (D86): what she can do, and how she looks now if she's changed it.
+  const r = rom.rel[c.id];
+  if (c.shapeshift) {
+    out.shapeshift = c.shapeshift.text;
+    if (r.form) out.look = r.form;
+  }
   // A declared escalation: where she is on it now, and every tier (D82).
   if (c.escalation) {
     const e = c.escalation;
@@ -86,6 +93,8 @@ export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}
     out.escalation = { name: e.name, level: lvl, now: lvl ? e.tiers[lvl - 1] : "calm", tiers: e.tiers.map((x, i) => `${i + 1}: ${x}`), what_calms_it: e.calms, ...(e.actsOnOther ? { from_level_she_may_act_on_the_other_companion: e.actsOnOther } : {}) };
   }
   const partner = members.find((m) => m.id !== c.id);
+  if (partner?.shapeshift && r.knowsShifter) out.you_know = `${partner.name} can change her shape.`;
+  if (r.absent?.length) out.not_you = `If he brings up being alone with you at camp on turn ${r.absent.join(", ")}, you weren't there and don't remember it. Don't play along.`;
   if (c.tie && partner) {
     out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift, ...(c.tie.secret ? { your_secret: c.tie.secret } : {}) };
     if (c.tie.mirrorsWhenOpen && rom.open) out.tie.now_in_the_open = { [`${partner.name}'s pursuit, which you now take up`]: partner.pursuit, how: c.tie.mirrorsWhenOpen };
@@ -141,7 +150,8 @@ function relationshipFor(c, rom, members) {
 // The party's relationship state, or a fresh one when there isn't one yet (the bench).
 const romanceOf = (env, members) => env.romance ?? Rel.newRomance(members, env.pairs ?? pairs, { act: env.act });
 
-const publicProfile = (c) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, abilities: abilitiesFor(c.abilities) });
+// What the other companion sees of her, including how she looks right now (a shapeshifter's current form, D86).
+const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c) } : {}), abilities: abilitiesFor(c.abilities) });
 
 // What the party knows about the people: names, known routines, and what's been learned.
 function learnedPeople(people) {
@@ -341,6 +351,8 @@ export function campfireInput(env, c, self, others, schema) {
   const rom = romanceOf(env, members);
   const alone = !c.with.some((id) => id !== me.id);
   const scene = { private: alone, inPerson: true };
+  // She may be wearing the other companion's face, alone with him (D86).
+  const as = c.disguisedAs ? rest.find((o) => o.id === c.disguisedAs) : null;
   const beats = Rel.allowedBeats(rom, me, members, scene);
   const extra = (me.extraBeats ?? []).map((b) => (beats.includes(b.id) ? b.text : b.cooling)).filter(Boolean);
   const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
@@ -348,8 +360,16 @@ export function campfireInput(env, c, self, others, schema) {
     ...campaign(env, "campfire", schema),
     block("You are", ownProfile(me, rom, members, scene, { planning: false })),
     alone
-      ? block("The scene", `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
-      : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map(publicProfile) }),
+      ? block("The scene", as
+        ? `Camp, between encounters. The player is alone with you, but you've come wearing ${as.name}'s face, and he believes you are her. ${as.name} is elsewhere in camp.`
+        : `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
+      : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map((o) => publicProfile(o, rom)) }),
+    as
+      ? block(`You are wearing ${as.name}'s face`, {
+          how: `Look, sound and act like her, well enough to pass, for your own reasons: to be close to him in her place, or to make her look bad. Your narration and lines appear to him as hers. You know only her public face and what you've seen; you don't know her private history with him, so steer around it. Your memories and feelings are your own.`,
+          her: { ...publicProfile(as, rom), look: rom.rel[as.id]?.form ?? as.look },
+        })
+      : null,
     block("Your relationship with the player", relationshipFor(me, rom, members)),
     alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
     rom.rel[me.id].noticed?.length ? block("Something you caught that you weren't meant to (they don't know you saw)", rom.rel[me.id].noticed) : null,

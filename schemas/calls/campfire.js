@@ -5,7 +5,7 @@ import { r, list, obj } from "../shape.js";
 // Every field is about the companion whose call this is (D45); she never writes for the other one.
 export const campfireSchema = withDefs({
   $id: "campfire",
-  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit", "believes", "storm", "risk"], {
+  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit", "believes", "storm", "risk", "form"], {
     // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
     // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
     // them anywhere else. An `aside` is meant for the player alone: the other companion's call never sees it,
@@ -36,5 +36,7 @@ export const campfireSchema = withDefs({
     storm: { oneOf: [{ type: "integer", minimum: 0, maximum: 5 }, { type: "null" }] },
     // How likely her asides are to be caught, if she made any, or null (D80).
     risk: { oneOf: [{ enum: ["low", "medium", "high"] }, { type: "null" }] },
+    // How she looks now, in full, if she changed her shape this answer, or null (D86).
+    form: { oneOf: [r("text"), { type: "null" }] },
   }),
 });

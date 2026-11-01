@@ -72,6 +72,7 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 - `believes`: about him and the other companion, `past` (ever involved) and `current` (involved now). Only her own campfire output, and the `in_the_open` beat, change it; it can be wrong (D81).
 - `storm`: her level on a declared escalation, 0 when calm (D82).
 - `noticed`: asides of the other's she caught, for her next call only (D80).
+- `form` (a shapeshifter's current look), `knowsShifter` (she knows the other can shift), `absent` (turns someone wore her face) (D86).
 
 **Per companion, toward the other** (D77): her view of the other on three axes, `affection`, `respect` and `trust`, each −10..10, starting from the pair's `start` in `content/pairs.js` (one number for both or each one's own view keyed by id; a view is one number, meaning affection, or the axes) or from a tie (§6). Her read of the other's view on the same axes starts right, unless the other declares a mask, and only her own campfire output moves it, so it can be wrong (D76). Each moves at most 2 an answer, less within declared `limits`. No call or gate ever sees the other's real feelings.
 
@@ -127,8 +128,10 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 | `inOthers: { affection, respect, trust }`, `recalibrates` | How she judges the other companion on each axis, and how she takes a wrong read (D79). | Fern loses respect, never fondness |
 | `limits: { <axis>: [lo, hi], perScene }` | Limits on her view of any other companion (D77). | Fern's affection never falls below 0 |
 | `mask` | The view others believe she holds of them at the start (D84). | |
+| `fixed: { <track>: value }`, `reveal: { <field>: gate }` | Tracks that never move, and her own gates for gated fields (D85). | The zealot's devotion |
+| `shapeshift: { text, impersonation: [{ chance, when? }] }` | She can change her shape, reporting her new look as `form`, and may come in the other companion's place when the player sits with that one alone (D86). A tie entry's `grants` gives a special case with one partner only. | The shapeshifter, and Lisa as her sister |
 | `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Serena's "The chase", "Almost caught" |
-| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D76), `believesPast`, `believesCurrent`, `open`, `storm`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
+| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D76), `believesPast`, `believesCurrent`, `open`, `storm`, `knowsShifter`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
 ## 7. Wardrobe (D71)
 
