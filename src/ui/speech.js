@@ -23,6 +23,18 @@ export function score(v) {
   return s;
 }
 
+// A voice's identity: its URI, which tells apart voices that share a name (a standard and a downloaded Samantha).
+export const idOf = (v) => v.voiceURI || v.name;
+
+// Its quality, from Apple's URI or the name: "Premium", "Enhanced", or "" for a standard voice.
+export const quality = (v) => {
+  const id = `${v.name} ${v.voiceURI ?? ""}`;
+  return /premium/i.test(id) ? "Premium" : /enhanced/i.test(id) ? "Enhanced" : "";
+};
+
+// How the picker shows it: name, region, quality.
+export const labelOf = (v) => [v.name.replace(/\s*\((premium|enhanced)\)/i, ""), `(${v.lang})`, quality(v)].filter(Boolean).join(" ");
+
 // English voices, best first, without novelties.
 export const rank = (voices) => voices.filter((v) => /^en/i.test(v.lang) && !NOVELTY.test(v.name)).sort((a, b) => score(b) - score(a));
 
@@ -31,15 +43,16 @@ export const rank = (voices) => voices.filter((v) => /^en/i.test(v.lang) && !NOV
 export function assign(voices, speakers, chosen = {}) {
   const ranked = rank(voices);
   if (!ranked.length) return {};
-  const by = (name) => (name ? ranked.find((v) => v.name === name) : null);
+  // A choice is a voice URI (or, from older saves, a name).
+  const by = (id) => (id ? ranked.find((v) => idOf(v) === id) ?? ranked.find((v) => v.name === id) : null);
   const used = new Set();
   const out = {};
   for (const id of speakers) {
-    const v = by(chosen[id]) ?? ranked.find((x) => isFemale(x) && !used.has(x.name)) ?? ranked.find((x) => !used.has(x.name)) ?? ranked[0];
+    const v = by(chosen[id]) ?? ranked.find((x) => isFemale(x) && !used.has(idOf(x))) ?? ranked.find((x) => !used.has(idOf(x))) ?? ranked[0];
     out[id] = v;
-    used.add(v.name);
+    used.add(idOf(v));
   }
-  out.narrator = by(chosen.narrator) ?? ranked.find((x) => !used.has(x.name)) ?? ranked[0];
+  out.narrator = by(chosen.narrator) ?? ranked.find((x) => !used.has(idOf(x))) ?? ranked[0];
   return out;
 }
 

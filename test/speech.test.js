@@ -1,7 +1,7 @@
 // Text to speech (D89): the pure parts of src/ui/speech.js, with plain voice objects.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { rank, assign, chunks, score } from "../src/ui/speech.js";
+import { rank, assign, chunks, score, idOf, labelOf } from "../src/ui/speech.js";
 
 const v = (name, lang = "en-US", voiceURI = name, localService = true) => ({ name, lang, voiceURI, localService });
 const list = [
@@ -33,4 +33,13 @@ test("long text is read in sentence-sized pieces, with markdown stripped", () =>
   const parts = chunks(long);
   assert.ok(parts.length > 1 && parts.every((p) => p.length <= 220));
   assert.ok(parts.at(-1).endsWith("Then she stops."));
+});
+
+test("two voices with one name stay apart: chosen by URI, labelled by region and quality", () => {
+  const twins = [v("Samantha", "en-US", "com.apple.voice.compact.en-US.Samantha"), v("Samantha", "en-US", "com.apple.voice.enhanced.en-US.Samantha")];
+  assert.equal(rank(twins)[0].voiceURI, "com.apple.voice.enhanced.en-US.Samantha");
+  assert.equal(assign(twins, ["a"], { a: "com.apple.voice.compact.en-US.Samantha" }).a.voiceURI, "com.apple.voice.compact.en-US.Samantha");
+  assert.equal(labelOf(twins[1]), "Samantha (en-US) Enhanced");
+  assert.equal(labelOf(v("Ava (Premium)", "en-US", "com.apple.voice.premium.en-US.Ava")), "Ava (en-US) Premium");
+  assert.equal(idOf({ name: "x" }), "x");
 });

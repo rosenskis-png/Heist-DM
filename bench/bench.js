@@ -875,7 +875,8 @@ function campView() {
     const ranked = Speech.rank(Speech.voices());
     const cast = campCast();
     const label = (id) => (id === "narrator" ? "Narrator" : id.endsWith(":second") ? roster[id.split(":")[0]].secondVoice.name : roster[id].name);
-    const best = ranked.filter((v) => /premium|enhanced/i.test(`${v.name} ${v.voiceURI}`));
+    const all = Speech.voices();
+    const best = ranked.filter((v) => Speech.quality(v));
     setup.append(
       h("details", { class: "fold" },
         h("summary", {}, `Voices · ${ranked.length} English voices, ${best.length} premium or enhanced`),
@@ -884,9 +885,11 @@ function campView() {
           h("label", { class: "set" }, h("span", {}, label(id)),
             h("span", { class: "row" },
               h("select", { id: `camp-voice-${id.replace(":", "-")}`, onchange: (e) => ((camp.voices[id] = e.target.value), saveCamp(), rerender()) },
-                ranked.map((v) => h("option", { value: v.name, selected: cast[id]?.name === v.name }, `${v.name}${v.localService ? "" : " (online)"}`))),
+                ranked.map((v) => h("option", { value: Speech.idOf(v), selected: cast[id] && Speech.idOf(cast[id]) === Speech.idOf(v) }, `${Speech.labelOf(v)}${v.localService ? "" : " (online)"}`))),
               h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), Speech.speak([{ text: "The fire cracks. Somewhere below, chains shift in the dark.", speaker: id, rate: id === "narrator" ? 1 : roster[id.split(":")[0]]?.rate ?? 1 }], campCast())) }, "Try")))),
         h("button", { class: "run-btn ghost", onclick: () => Speech.stop() }, "Stop reading"),
+        // Exactly what the browser lists, every language, for working out which voices a device exposes.
+        fold(`Every voice this browser lists (${all.length})`, all.map((v) => `${v.name} · ${v.lang} · ${v.voiceURI}${v.localService ? "" : " · online"}${v.default ? " · default" : ""}`).join("\n") || "none"),
         h("p", { class: "status" }, "On iPhone, download voices in Settings › Accessibility › Spoken Content › Voices › English (Premium or Enhanced). Whether iOS offers them to web pages depends on the version and the app; Safari shows the most."),
       ),
     );
