@@ -45,7 +45,7 @@ const romance = (members, rels = {}, over = {}) => {
 const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: false }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null });
 // Two companions with no declared special cases.
 const plain = () => {
-  const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation);
+  const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation && !c.shapeshift && !c.fixed && !c.reveal);
   return p.length >= 2 ? p.slice(0, 2) : [newcomer(), newcomer({ id: "ash", name: "Ash" })];
 };
 

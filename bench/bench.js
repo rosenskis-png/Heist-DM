@@ -653,6 +653,41 @@ camp.to ??= "all";
 // Who is really at the fire when he sits with one of them, if a shapeshifter came in her place (D86).
 camp.disguise ??= null;
 
+// Shortcuts for Camp: a general vibe in one pick, adjustable after. Toward the player sets heat, intimacy, regard
+// and the flags; toward the other companion sets her view and her read of the other's.
+const PRESETS_YOU = [
+  { name: "Stranger", set: { heat: 0, intimacy: 0, regard: 0 } },
+  { name: "Curious", set: { heat: 2, intimacy: 1, regard: 2 } },
+  { name: "Flirting", set: { heat: 4, intimacy: 2, regard: 3 } },
+  { name: "Friends", set: { heat: 1, intimacy: 5, regard: 5 } },
+  { name: "Smitten, not yet lovers", set: { heat: 5, intimacy: 4, regard: 5 } },
+  { name: "New lovers", set: { heat: 6, intimacy: 4, regard: 5, payoff: true, involved: true } },
+  { name: "Lovers, opening up", set: { heat: 7, intimacy: 7, regard: 6, payoff: true, involved: true, vuln: true } },
+  { name: "Deeply in love", set: { heat: 8, intimacy: 9, regard: 9, payoff: true, involved: true, vuln: true } },
+  { name: "Wary", set: { heat: 0, intimacy: 0, regard: -3 } },
+  { name: "Resentful", set: { heat: 1, intimacy: 1, regard: -6 } },
+  { name: "Hostile", set: { heat: 0, intimacy: 0, regard: -10 } },
+  { name: "Hate-lust", set: { heat: 6, intimacy: 0, regard: -6 } },
+  { name: "Hurt lover", set: { heat: 5, intimacy: 5, regard: -5, payoff: true, involved: true, hurt: true } },
+  { name: "Exes", set: { heat: 3, intimacy: 4, regard: 0, payoff: true, involved: false } },
+];
+const PRESETS_OTHER = [
+  { name: "Strangers", toward: { affection: 0, respect: 0, trust: 0 } },
+  { name: "Friends", toward: { affection: 5, respect: 4, trust: 5 } },
+  { name: "Best friends", toward: { affection: 9, respect: 7, trust: 9 } },
+  { name: "Lovers", toward: { affection: 10, respect: 6, trust: 8 } },
+  { name: "Fond exasperation", toward: { affection: 5, respect: -3, trust: -3 } },
+  { name: "Protective, condescending", toward: { affection: 6, respect: -3, trust: 4 } },
+  { name: "Respected rival", toward: { affection: -4, respect: 6, trust: 1 } },
+  { name: "Frenemies", toward: { affection: -2, respect: 2, trust: -5 } },
+  { name: "Can't stand her, trusts her", toward: { affection: -5, respect: 3, trust: 5 } },
+  { name: "Contempt", toward: { affection: -4, respect: -9, trust: -3 } },
+  { name: "Hatred", toward: { affection: -9, respect: -6, trust: -8 } },
+  { name: "Secret hatred (thinks she's loved)", toward: { affection: -8, respect: -4, trust: -5 }, read: { affection: 6, respect: 3, trust: 6 } },
+  { name: "Adores her, thinks she's hated", toward: { affection: 7, respect: 5, trust: 6 }, read: { affection: -6, respect: -3, trust: -4 } },
+  { name: "Suspicious", toward: { affection: 1, respect: 1, trust: -7 } },
+];
+
 // ---------- reading Camp aloud (D89) ----------
 camp.voices ??= {};
 // Every voice in the scene: each companion, her second voice if she has one, and the narrator.
@@ -825,7 +860,16 @@ function campView() {
     const other = members.find((m) => m.id !== c.id);
     const set = (k, v) => ((r[k] = v), saveCamp(), rerender());
     const setIn = (group, k, v) => ((r[group][k] = v), saveCamp(), rerender());
-    const num = (id, lo, hi, v, on) => h("input", { id, type: "number", min: lo, max: hi, step: 1, value: Math.round(v * 10) / 10, onchange: (e) => on(Math.max(lo, Math.min(hi, Number(e.target.value)))) });
+    // A dropdown per number: quicker than typing on a phone.
+    const num = (id, lo, hi, v, on) => {
+      const cur = Math.round(v);
+      return h("select", { id, class: "num", onchange: (e) => on(Number(e.target.value)) },
+        Array.from({ length: hi - lo + 1 }, (_, i) => lo + i).map((n) => h("option", { value: n, selected: n === cur }, String(n))));
+    };
+    const preset = (id, label, list, apply) =>
+      h("label", { class: "set" }, h("span", {}, label),
+        h("select", { id, onchange: (e) => { const p = list[Number(e.target.value)]; if (p) { apply(p); saveCamp(); rerender(); } } },
+          [h("option", { value: "" }, "Choose a preset…"), ...list.map((p, i) => h("option", { value: i }, p.name))]));
     const looks = h("div");
     const owned = camp.romance.wardrobe[c.id];
     return h(
@@ -833,11 +877,13 @@ function campView() {
       { class: "case" },
       h("div", { class: "case-head" }, h("h2", {}, c.name), h("span", { class: "chip info" }, Rel.stage(r, c))),
       h("h3", {}, "Toward you"),
+      preset(`camp-${c.id}-preset-you`, "Preset", PRESETS_YOU, (p) => Object.assign(r, { payoff: false, involved: false, vuln: false, hurt: false, ...p.set })),
       h("div", { class: "grid" },
         TRACKS.map(([k, lo, hi]) => h("label", { class: "set" }, h("span", {}, k), num(`camp-${c.id}-${k}`, lo, hi, r[k], (v) => set(k, v)))),
         c.escalation ? h("label", { class: "set" }, h("span", {}, `${c.escalation.name} level`), num(`camp-${c.id}-storm`, 0, c.escalation.tiers.length, r.storm, (v) => set("storm", v))) : null),
       h("ul", { class: "sizes" }, ["heat", "intimacy", "regard"].map((k) => h("li", {}, A.stance(Relationship.stances[k], r[k])))),
       h("h3", {}, `Toward ${other.name}: feels · thinks ${other.name} feels`),
+      preset(`camp-${c.id}-preset-other`, "Preset", PRESETS_OTHER, (p) => ((r.toward = Rel.axes(p.toward)), (r.read = Rel.axes(p.read ?? p.toward)))),
       h("div", { class: "grid" },
         AXES.map((k) => h("label", { class: "set" }, h("span", {}, k),
           h("span", { class: "row" }, num(`camp-${c.id}-${k}`, -10, 10, r.toward[k], (v) => setIn("toward", k, v)), num(`camp-${c.id}-read-${k}`, -10, 10, r.read[k], (v) => setIn("read", k, v)))))),

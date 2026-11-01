@@ -35,7 +35,7 @@ export default {
 - Questions by intonation alone, often with a tag: "You come with me?" "…no?" "…eh?"
 - False friends: "actually" for currently, "eventually" for possibly, "sensible" for sensitive, "I assisted the meeting" for attended.
 - Fillers from her own language slip in: "euh…", "bon", "alors", "enfin", "voilà" to close a thought, and "how you say…" mid-sentence when she hunts for a word.
-- Otherwise words from her own language are very rare: a "mon chéri" or a "oh là là" when emotion runs high, no more.
+- Otherwise words from her own language are very rare: a "mon chéri" when emotion runs high, no more. Never "oh là là".
 How she sounds (the content is only an example): "Okay, so the braid of Sévrance. At home, we don't say this. We say the braid… how you say… glued? Glued to the head. You take three part of hair, on the top. You cross, the left on the middle, the right on the middle, like normal braid. But each time, you take more hair from the side, a little, and you add. Euh… is difficult to explain, I show you better. Every girl at home, the mother, she make this for school. It is for the hair don't move all day. The history, I don't know very well. Is very old, the braid, before everything. The name, I think is the foreigners who say this, not us."`,
   // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
   // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
@@ -74,6 +74,21 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
   },
   recalibrates: `Out loud, wide-eyed and hurt ("But… I think you like me, no?"), whether the hurt is real or not.`,
   leanFromHeat: false,
+  // Her English improves as she gets closer to him (D91). The notes add up: each says how far she's come.
+  notes: [
+    {
+      when: [{ intimacy: ["<", 4] }],
+      text: `Her English is a real beginner's: every rule in her voice, often, and she hunts for words ("how you say…") a lot.`,
+    },
+    {
+      when: [{ intimacy: [">=", 4] }],
+      text: `Her English has improved with him: fewer mistakes, fewer searches for words. The habits stay (the "no?", the "the", the present tense) but lighter, and she's proud when she gets a sentence right.`,
+    },
+    {
+      when: [{ intimacy: [">=", 7] }],
+      text: `With him, her English is good now: mistakes mostly when she's excited, tired or upset. In front of others she can still play the lost beginner when it suits her, and he can hear the difference.`,
+    },
+  ],
   beliefs: `affection is the most natural thing in the world; bodies are beautiful; the rules here are silly; life is short, so drink the wine`,
   admires: `laughter; warmth; anyone who tries to speak her language; art; boldness; being seen as clever`,
   despises: `prudishness; being mocked for her English; jealousy dressed up as morality; being treated as stupid`,
