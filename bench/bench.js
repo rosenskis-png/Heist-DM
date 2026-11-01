@@ -77,7 +77,8 @@ async function load() {
   const cls = classes[cases.player_class];
   const party = [{ id: "player", name: cls.name, role: "The player", skills: cls.mods, abilities: cls.abilities }];
   for (const id of cases.party.filter((p) => p !== "player"))
-    party.push((await import(url(`content/companions/${id}.js`))).default);
+    // A roster companion, or a fixture-only party member such as the Cells encounter's Lyra (D88).
+    party.push((await import(url(roster[id] ? `content/companions/${id}.js` : `fixtures/cells/${id}.js`))).default);
   const { map, people } = packet;
   const sched = people.find((p) => p.schedule)?.schedule;
   env = {

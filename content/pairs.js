@@ -16,18 +16,6 @@ export const pairs = {
     start: { vesper: { affection: 2, respect: -1, trust: 2 }, fern: { affection: 4, respect: 2, trust: 3 } },
     dynamic: `Two unashamed women; Fern thinks Vesper is lovely, Vesper finds Fern's innocence-without-shame baffling.`,
   },
-  "vesper|lyra": {
-    start: -2,
-    dynamic: `Lyra distrusts a demon on principle; Vesper loves needling the noble elf.`,
-  },
-  "vesper|serena": {
-    start: 0,
-    dynamic: `Two seductresses who recognise each other; mutual respect and constant one-upmanship.`,
-  },
-  "vesper|morgana": {
-    start: -1,
-    dynamic: "Two women used to being in control; a cold war of charm.",
-  },
   "nadia|ruby": {
     start: { nadia: { affection: 1, respect: 0, trust: -2 }, ruby: { affection: -2, respect: -1, trust: -3 } },
     dynamic: `Nadia tries to soothe Ruby; Ember thinks Ruby is dangerous and says so.`,
@@ -36,58 +24,9 @@ export const pairs = {
     start: { nadia: { affection: 3, respect: 2, trust: 3 }, fern: { affection: 4, respect: 2, trust: 4 } },
     dynamic: "Warm and easy: performers and free spirits; Fern adores Ember.",
   },
-  "nadia|lyra": {
-    start: 1,
-    dynamic: `Mutual respect between two women of grace; Lyra finds Ember unsettling at first.`,
-  },
-  "nadia|serena": {
-    start: 0,
-    dynamic:
-      "Serena loves stealing Nadia's thunder; Nadia loves the competition.",
-  },
-  "nadia|morgana": {
-    start: -1,
-    dynamic: "Morgana wants Ember as a tool; Nadia will never allow it.",
-  },
   "ruby|fern": {
     start: { ruby: { affection: -1, respect: -2, trust: -1 }, fern: { affection: 3, respect: 1, trust: 2 } },
     dynamic: `Fern keeps trying to hug Ruby; Ruby doesn't know what to do with kindness that isn't his.`,
-  },
-  "ruby|lyra": {
-    start: { ruby: -3, lyra: -1 },
-    dynamic: `Lyra sees Ruby as a danger to him; Ruby sees Lyra as the rival she most fears.`,
-  },
-  "ruby|serena": {
-    start: { ruby: -4, serena: 1 },
-    dynamic: "Serena teases Ruby for sport; Ruby takes it very badly.",
-  },
-  "ruby|morgana": {
-    start: { ruby: -3, morgana: 0 },
-    dynamic: "Morgana treats Ruby as a feral pet; Ruby hates being handled.",
-  },
-  "fern|lyra": {
-    start: 1,
-    dynamic: `Gentle friends; Fern teaches Lyra to laugh, Lyra protects Fern's trust.`,
-  },
-  "fern|serena": {
-    start: 0,
-    dynamic: `Fern finds Serena's games silly and charming; Serena can't fluster her, which drives her mad.`,
-  },
-  "fern|morgana": {
-    start: -1,
-    dynamic: "Fern won't bow to anyone; Morgana finds her refusal intriguing.",
-  },
-  "lyra|serena": {
-    start: -1,
-    dynamic: `Lyra's honesty against Serena's games; Serena enjoys trying to trick her.`,
-  },
-  "lyra|morgana": {
-    start: -1,
-    dynamic: `An elf who has seen queens rise and fall; Morgana resents not impressing her.`,
-  },
-  "serena|morgana": {
-    start: 0,
-    dynamic: `Two women who rule rooms differently; allies in scheming, rivals in everything else.`,
   },
   "lisa|vesper": {
     start: 1,
@@ -105,16 +44,64 @@ export const pairs = {
     start: 1,
     dynamic: "SISTERS (see VARIANT).",
   },
-  "lisa|lyra": {
-    start: 1,
-    dynamic: "SISTERS (see VARIANT).",
+  "annalise|vesper": {
+    start: { vesper: { affection: 3, respect: 3, trust: 0 }, annalise: { affection: 2, respect: 1, trust: 1 } },
+    dynamic: `Vesper tastes the intent behind every 'misunderstanding' and adores it; Annalise can't tell whether Vesper is a friend or the one person who sees right through her.`,
   },
-  "lisa|serena": {
-    start: 1,
-    dynamic: "SISTERS (see VARIANT).",
+  "annalise|nadia": {
+    start: { nadia: { affection: 2, respect: 0, trust: -1 }, annalise: { affection: 3, respect: 2, trust: 2 } },
+    dynamic: `Nadia is charmed; Ember sees straight through the act and says so, through Nadia.`,
   },
-  "lisa|morgana": {
-    start: 1,
-    dynamic: "SISTERS (see VARIANT).",
+  "annalise|ruby": {
+    start: { ruby: { affection: -4, respect: -3, trust: -5 }, annalise: { affection: 1, respect: -1, trust: 0 } },
+    dynamic: `Annalise's 'only friendly' affection with him is Ruby's worst trigger; Annalise doesn't understand, sweetly, on purpose.`,
+  },
+  "annalise|fern": {
+    start: { fern: { affection: 5, respect: 2, trust: 2 }, annalise: { affection: 4, respect: 2, trust: 3 } },
+    dynamic: `Two unashamed women who sketch and bathe together; Fern finds the misunderstandings delightful, until she notices the lies in them.`,
+  },
+  "sable|vesper": {
+    start: { vesper: { affection: 1, respect: 3, trust: -2 }, sable: { affection: -1, respect: 1, trust: -3 } },
+    dynamic: `Vesper can taste when someone's desire doesn't match her face; Sable keeps her distance from the one person who might notice.`,
+  },
+  "sable|nadia": {
+    start: { nadia: { affection: 1, respect: 1, trust: 0 }, sable: { affection: 0, respect: 1, trust: -2 } },
+    dynamic: `Ember notices that Sable's face never quite settles; Sable avoids being alone with Nadia.`,
+  },
+  "sable|ruby": {
+    start: { ruby: { affection: -3, respect: -1, trust: -4 }, sable: { affection: -3, respect: -2, trust: -2 } },
+    dynamic: `A powder keg: Ruby's open jealousy against Sable's invisible manipulation.`,
+  },
+  "sable|fern": {
+    start: { fern: { affection: 3, respect: 1, trust: 3 }, sable: { affection: 1, respect: 0, trust: -1 } },
+    dynamic: `Fern trusts her completely; if she learns Sable lies, it's the one thing Fern can't forgive.`,
+  },
+  "celeste|vesper": {
+    start: { vesper: { affection: 1, respect: -1, trust: -2 }, celeste: { affection: 2, respect: 0, trust: 1 } },
+    dynamic: `A succubus and a priestess of light: Vesper can taste the hunger in Celeste's worship, and something colder under it.`,
+  },
+  "celeste|nadia": {
+    start: { nadia: { affection: 1, respect: 1, trust: -3 }, celeste: { affection: 3, respect: 1, trust: 2 } },
+    dynamic: `Nadia knows what devoted orders can do; to her, the Ordo's light smells faintly of the Hearth's fire.`,
+  },
+  "celeste|ruby": {
+    start: { ruby: { affection: -5, respect: -2, trust: -4 }, celeste: { affection: 2, respect: 0, trust: 1 } },
+    dynamic: `Ruby can't make her back down: Celeste never stops serving him and never raises her voice.`,
+  },
+  "celeste|fern": {
+    start: { fern: { affection: 4, respect: 2, trust: 3 }, celeste: { affection: 3, respect: 2, trust: 3 } },
+    dynamic: `Fern thinks devotion is lovely; Celeste thinks Fern is a child of the light who doesn't know it yet.`,
+  },
+  "annalise|sable": {
+    start: { annalise: { affection: 2, respect: 1, trust: 2 }, sable: { affection: -1, respect: 1, trust: -1 } },
+    dynamic: `Annalise kisses everyone hello; Sable has to remember which face she was wearing last time.`,
+  },
+  "annalise|celeste": {
+    start: { annalise: { affection: 2, respect: 0, trust: 1 }, celeste: { affection: 2, respect: 0, trust: 2 } },
+    dynamic: `Celeste approves of Annalise's devotion to him, and less of the rest; Annalise thinks the priestess is a prude, sweetly.`,
+  },
+  "sable|celeste": {
+    start: { sable: { affection: 0, respect: 0, trust: -2 }, celeste: { affection: 2, respect: 1, trust: 2 } },
+    dynamic: `Celeste trusts the quiet girl; Sable studies Celeste's devotion like a face she can't wear.`,
   },
 };

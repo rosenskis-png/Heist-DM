@@ -130,7 +130,7 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 | `mask` | The view others believe she holds of them at the start (D84). | |
 | `fixed: { <track>: value }`, `reveal: { <field>: gate }` | Tracks that never move, and her own gates for gated fields (D85). | The zealot's devotion |
 | `shapeshift: { text, impersonation: [{ chance, when? }] }` | She can change her shape, reporting her new look as `form`, and may come in the other companion's place when the player sits with that one alone (D86). A tie entry's `grants` gives a special case with one partner only. | The shapeshifter, and Lisa as her sister |
-| `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Serena's "The chase", "Almost caught" |
+| `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Any companion's own stage names |
 | `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D76), `believesPast`, `believesCurrent`, `open`, `storm`, `knowsShifter`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
 ## 7. Wardrobe (D71)

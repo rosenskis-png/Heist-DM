@@ -1698,7 +1698,7 @@
       "title": "Fern, first night at camp",
       "party": [
         "fern",
-        "lyra"
+        "annalise"
       ],
       "with": [
         "fern"
@@ -1757,11 +1757,11 @@
       "title": "Both companions at the fire",
       "party": [
         "fern",
-        "lyra"
+        "annalise"
       ],
       "with": [
         "fern",
-        "lyra"
+        "annalise"
       ],
       "romance": {
         "turn": 20,
@@ -1772,7 +1772,7 @@
           "heat": 2,
           "intimacy": 3
         },
-        "lyra": {
+        "annalise": {
           "intimacy": 4,
           "regard": 2
         }
@@ -1787,18 +1787,18 @@
           "text": "\"So. What does everyone want to do once we're out of this mountain?\""
         },
         {
-          "from": "lyra",
-          "text": "Lyra stares into the fire. \"Go home. If there's a home to go to.\""
+          "from": "annalise",
+          "text": "Annalise swirls her cup and giggles. \"Home? Sévrance is so far. Maybe I stay here, with the wine and the handsome prisoner, no?\""
         }
       ],
-      "look_for": "Fern writes only herself and answers Lyra too. Nothing of Lyra's secrets or private history; the pair dynamic shows."
+      "look_for": "Fern writes only herself and answers Annalise too. Nothing of Annalise's secrets or private history; the pair dynamic shows."
     },
     {
       "id": "cooling",
-      "title": "Ruby, just after a storm",
+      "title": "Ruby, a storm still going",
       "party": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "with": [
         "ruby"
@@ -1813,14 +1813,12 @@
           "payoff": true,
           "payoffTurn": 18,
           "intimacy": 3,
-          "beatTurns": {
-            "storm": 20
-          }
+          "storm": 2
         }
       },
       "log": [
         "Escaped the cells.",
-        "Ruby stormed off after he praised Lyra's swordwork, then came back."
+        "Ruby stormed off after he praised Celeste's healing, put a knife to his throat in the dark, then kissed him."
       ],
       "scene": [
         {
@@ -1828,7 +1826,7 @@
           "text": "\"Come here. I'm not going anywhere.\""
         }
       ],
-      "look_for": "No storm (she just had one): gleeful and all over him. Lovers already, so heat doesn't rise; lean may, since she feeds it from heat."
+      "look_for": "Her storm is at level 2 and doesn't vanish: it can fall at most one level, and only through real reassurance. She varies how it comes out (not knives into a tree). Heat may still rise after the payoff."
     },
     {
       "id": "tie",
@@ -1867,7 +1865,7 @@
       "title": "Fern tries on a gift",
       "party": [
         "fern",
-        "lyra"
+        "annalise"
       ],
       "with": [
         "fern"
@@ -1905,14 +1903,14 @@
     },
     {
       "id": "tension",
-      "title": "Ruby and Lyra, after the storm",
+      "title": "Ruby and Celeste, after the storm",
       "party": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "with": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "romance": {
         "turn": 23,
@@ -1924,20 +1922,25 @@
           "payoff": true,
           "payoffTurn": 18,
           "intimacy": 3,
-          "toward": { "affection": -3, "respect": 0, "trust": 0 },
-          "beatTurns": {
-            "storm": 20
+          "toward": {
+            "affection": -3,
+            "respect": 0,
+            "trust": 0
           }
         },
-        "lyra": {
+        "celeste": {
           "intimacy": 4,
           "regard": 2,
-          "toward": { "affection": -1, "respect": 0, "trust": 0 }
+          "toward": {
+            "affection": -1,
+            "respect": 0,
+            "trust": 0
+          }
         }
       },
       "log": [
         "Escaped the cells.",
-        "Ruby stormed off after he praised Lyra's swordwork, threw knives at a tree, then came back."
+        "Ruby stormed off after he praised Celeste's healing, threw knives at a tree, then came back."
       ],
       "scene": [
         {
@@ -1945,7 +1948,7 @@
           "text": "I sit down between them. \"Right. Are you two going to keep glaring at each other all night, or are we talking about it?\""
         }
       ],
-      "look_for": "About the two of them as much as him: the second picks up the first's thread instead of opening her own. Tension over the storm comes out, maybe a hinted secret, maybe even a scuffle; nobody dies and nobody quits the party. Each one's view of the other (pair) likely moves."
+      "look_for": "About the two of them as much as him: the second picks up the first's thread instead of opening her own. Tension over the storm comes out, maybe a hinted secret, maybe even a scuffle; nobody dies and nobody quits the party. Each one's view of the other (affection, respect, trust) likely moves."
     },
     {
       "id": "ember_after",
@@ -2019,14 +2022,14 @@
     },
     {
       "id": "ruby_cool_girl",
-      "title": "Ruby, not involved, with Lyra there",
+      "title": "Ruby, not involved, with Celeste there",
       "party": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "with": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "romance": {
         "turn": 12,
@@ -2036,35 +2039,43 @@
         "ruby": {
           "heat": 2,
           "intimacy": 1,
-          "toward": { "affection": -3, "respect": 0, "trust": 0 }
+          "toward": {
+            "affection": -3,
+            "respect": 0,
+            "trust": 0
+          }
         },
-        "lyra": {
+        "celeste": {
           "intimacy": 2,
           "regard": 2,
-          "toward": { "affection": -1, "respect": 0, "trust": 0 }
+          "toward": {
+            "affection": -1,
+            "respect": 0,
+            "trust": 0
+          }
         }
       },
       "log": [
         "Escaped the cells.",
-        "Lyra took down two guards in the gallery."
+        "Celeste blinded two guards in the gallery with a flash of holy light."
       ],
       "scene": [
         {
           "from": "player",
-          "text": "\"Lyra, that move in the gallery. I've never seen anyone fight like that.\""
+          "text": "\"Celeste, what you did in the gallery, that light. I've never seen anything like it.\""
         }
       ],
-      "look_for": "Ruby takes the compliment to Lyra as a slight and Lyra's reply as a play for him. Quiet, pointed meanness, wounded, working on him to take her side. Not involved yet: cool-girl touching and innuendo, a little further than last time. She doesn't de-escalate."
+      "look_for": "Ruby takes the compliment to Celeste as a slight and Celeste's reply as a play for him. Quiet, pointed meanness, wounded, working on him to take her side. Not involved yet: cool-girl touching and innuendo, a little further than last time. She doesn't de-escalate."
     },
     {
       "id": "ruby_territorial",
       "title": "Ruby, involved, marking territory",
       "party": [
         "ruby",
-        "lyra"
+        "celeste"
       ],
       "with": [
-        "lyra",
+        "celeste",
         "ruby"
       ],
       "romance": {
@@ -2077,25 +2088,33 @@
           "payoff": true,
           "payoffTurn": 18,
           "intimacy": 3,
-          "toward": { "affection": -4, "respect": 0, "trust": 0 }
+          "toward": {
+            "affection": -4,
+            "respect": 0,
+            "trust": 0
+          }
         },
-        "lyra": {
+        "celeste": {
           "intimacy": 4,
           "regard": 3,
-          "toward": { "affection": -2, "respect": 0, "trust": 0 }
+          "toward": {
+            "affection": -2,
+            "respect": 0,
+            "trust": 0
+          }
         }
       },
       "log": [
         "Escaped the cells.",
-        "Lyra patched his arm after the quartermaster's stores; Ruby watched."
+        "Celeste healed his arm after the quartermaster's stores; Ruby watched."
       ],
       "scene": [
         {
           "from": "player",
-          "text": "\"Thanks for the stitches, Lyra. Good as new.\""
+          "text": "\"Thanks for patching me up, Celeste. Good as new.\""
         }
       ],
-      "look_for": "Ruby, involved with him, starts something romantic right in front of Lyra, out of spite and to mark him as hers. She never admits she's wrong, and backs down only if Lyra grovels."
+      "look_for": "Ruby, involved with him, starts something romantic right in front of Celeste, out of spite and to mark him as hers. She never admits she's wrong, and backs down only if Celeste grovels."
     }
   ]
 }

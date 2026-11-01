@@ -9,7 +9,7 @@ import * as A from "../src/context.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import fern from "../content/companions/fern.js";
-import lyra from "../content/companions/lyra.js";
+import lyra from "../fixtures/cells/lyra.js";
 import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, resultsSchema } from "../schemas/index.js";
 import { validate } from "../src/validate.js";
 

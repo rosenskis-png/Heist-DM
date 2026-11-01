@@ -1,4 +1,5 @@
-// Extracted from Gravenhold (legacy/gravenhold.html). See docs/spec/companions.md.
+// The Cells encounter's test party member (fixtures/cells). Not in the roster: Lyra was retired as a companion
+// (D88), and lives on here because the engine tests and the bench's encounter cases are built around her senses.
 export default {
   id: "lyra",
   name: "Lyra",

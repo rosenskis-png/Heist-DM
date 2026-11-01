@@ -4,9 +4,9 @@ import nadia from "./nadia.js";
 import ruby from "./ruby.js";
 import lisa from "./lisa.js";
 import fern from "./fern.js";
-import lyra from "./lyra.js";
-import serena from "./serena.js";
-import morgana from "./morgana.js";
+import annalise from "./annalise.js";
+import sable from "./sable.js";
+import celeste from "./celeste.js";
 
 // The roster. Adding or removing a companion is one file plus one line here.
 export const companions = {
@@ -15,7 +15,7 @@ export const companions = {
   ruby,
   lisa,
   fern,
-  lyra,
-  serena,
-  morgana,
+  annalise,
+  sable,
+  celeste,
 };
