@@ -39,6 +39,7 @@ Gravenhold's `Game` component is built around one chat log and is not reused. It
 
 ## Settings
 - **Speed and quality** (D48): a choice between faster, cheaper calls and a smarter DM, charged to the player's own usage.
+- **Read aloud** (D89): narration and companion lines spoken with the browser's voices (`src/ui/speech.js`), downloaded Premium and Enhanced voices first. A voice per companion, her second voice and the narrator, each choosable and previewable; each companion speaks at her file's `rate`; asides are quieter; a disguised companion speaks in the voice of the face she wears. Speech starts from a tap (iOS requires it), then can read each new answer automatically. On the bench it lives in Camp.
 
 ## Developer view (recommended)
 A hidden panel showing the last call's assembled input and raw output, held in memory only and never stored (D10). It makes precise playtest feedback easy to give.

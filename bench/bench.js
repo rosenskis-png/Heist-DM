@@ -14,6 +14,7 @@ import * as A from "../src/context.js";
 import { load as loadEncounter, checkSteps } from "../src/engine/index.js";
 import { flagKeys } from "../src/engine/plan.js";
 import * as C from "./checks.js";
+import * as Speech from "../src/ui/speech.js";
 
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const $ = (sel, el = document) => el.querySelector(sel);
@@ -652,6 +653,31 @@ camp.to ??= "all";
 // Who is really at the fire when he sits with one of them, if a shapeshifter came in her place (D86).
 camp.disguise ??= null;
 
+// ---------- reading Camp aloud (D89) ----------
+camp.voices ??= {};
+// Every voice in the scene: each companion, her second voice if she has one, and the narrator.
+const campSpeakers = () => campMembers().flatMap((c) => [c.id, ...(c.secondVoice ? [`${c.id}:second`] : [])]);
+const campCast = () => Speech.assign(Speech.voices(), campSpeakers(), camp.voices);
+// A companion's turn as lines to read. A disguised turn is read in the voice of the face she's wearing.
+function campLines(t) {
+  const face = t.as ?? t.from;
+  const rate = roster[face]?.rate ?? 1;
+  return t.out.segments.map((g) => ({
+    text: g.text,
+    speaker: g.speaker === "narrator" ? "narrator" : g.speaker === "second_voice" ? `${t.from}:second` : face,
+    rate: g.speaker === "narrator" ? 1 : rate,
+    volume: g.aside ? 0.7 : 1,
+  }));
+}
+const campRead = (turns) => Speech.speak(turns.flatMap(campLines), campCast());
+// Some browsers list their voices late; redraw Camp once they arrive.
+let voiceCount = 0;
+Speech.voices(() => {
+  const n = Speech.voices().length;
+  if (n !== voiceCount && document.querySelector("#camp-say")) show("camp");
+  voiceCount = n;
+});
+
 // Sitting with one companion alone: a shapeshifting other may come in her place. "Force" makes her come.
 function campChooseWith(value) {
   camp.with = value;
@@ -845,6 +871,26 @@ function campView() {
           camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : null)
       : null,
   );
+  if (Speech.available()) {
+    const ranked = Speech.rank(Speech.voices());
+    const cast = campCast();
+    const label = (id) => (id === "narrator" ? "Narrator" : id.endsWith(":second") ? roster[id.split(":")[0]].secondVoice.name : roster[id].name);
+    const best = ranked.filter((v) => /premium|enhanced/i.test(`${v.name} ${v.voiceURI}`));
+    setup.append(
+      h("details", { class: "fold" },
+        h("summary", {}, `Voices · ${ranked.length} English voices, ${best.length} premium or enhanced`),
+        h("label", { class: "check" }, h("input", { id: "camp-read", type: "checkbox", checked: !!camp.readAloud, onchange: (e) => ((camp.readAloud = e.target.checked), saveCamp()) }), " read new answers aloud"),
+        ...[...campSpeakers(), "narrator"].map((id) =>
+          h("label", { class: "set" }, h("span", {}, label(id)),
+            h("span", { class: "row" },
+              h("select", { id: `camp-voice-${id.replace(":", "-")}`, onchange: (e) => ((camp.voices[id] = e.target.value), saveCamp(), rerender()) },
+                ranked.map((v) => h("option", { value: v.name, selected: cast[id]?.name === v.name }, `${v.name}${v.localService ? "" : " (online)"}`))),
+              h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), Speech.speak([{ text: "The fire cracks. Somewhere below, chains shift in the dark.", speaker: id, rate: id === "narrator" ? 1 : roster[id.split(":")[0]]?.rate ?? 1 }], campCast())) }, "Try")))),
+        h("button", { class: "run-btn ghost", onclick: () => Speech.stop() }, "Stop reading"),
+        h("p", { class: "status" }, "On iPhone, download voices in Settings › Accessibility › Spoken Content › Voices › English (Premium or Enhanced). Whether iOS offers them to web pages depends on the version and the app; Safari shows the most."),
+      ),
+    );
+  }
   const status = h("span", { class: "status" });
   const box = h("textarea", { id: "camp-say", rows: 3, placeholder: "What you say or do" });
   const to = camp.with === "both"
@@ -856,7 +902,10 @@ function campView() {
     const text = box.value.trim();
     if (!text || !sample) return;
     send.disabled = true;
+    Speech.unlock();
+    const before = camp.transcript.length;
     await campSend(text, status);
+    if (camp.readAloud) campRead(camp.transcript.slice(before).filter((t) => t.out));
     rerender();
   } }, "Send");
   const lines = camp.transcript.map((t) => {
@@ -879,6 +928,7 @@ function campView() {
         o.outfit ? `changes into: ${o.outfit}` : null,
         t.retried ? "retried once" : null,
       ].filter(Boolean).join(" · ")),
+      Speech.available() ? h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), campRead([t])) }, "Read aloud") : null,
       t.input ? fold(`${camp.reveal || !t.as ? c.name : roster[t.as].name}'s input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
       fold("Raw output", json(o)),
     );
