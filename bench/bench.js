@@ -869,7 +869,7 @@ function campView() {
           h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show who's really here"),
           h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), saveCamp()) }), " a shapeshifter always comes in the other's place (testing)"),
           camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : null)
-      : null,
+      : "",
   );
   if (Speech.available()) {
     const ranked = Speech.rank(Speech.voices());
@@ -885,7 +885,7 @@ function campView() {
           h("label", { class: "set" }, h("span", {}, label(id)),
             h("span", { class: "row" },
               h("select", { id: `camp-voice-${id.replace(":", "-")}`, onchange: (e) => ((camp.voices[id] = e.target.value), saveCamp(), rerender()) },
-                ranked.map((v) => h("option", { value: Speech.idOf(v), selected: cast[id] && Speech.idOf(cast[id]) === Speech.idOf(v) }, `${Speech.labelOf(v)}${v.localService ? "" : " (online)"}`))),
+                ranked.map((v) => h("option", { value: Speech.idOf(v), selected: cast[id] && Speech.idOf(cast[id]) === Speech.idOf(v) }, `${Speech.labelOf(v)}${ranked.filter((x) => x.name === v.name && x.lang === v.lang).length > 1 ? ` · ${Speech.idOf(v).split(/[./]/).slice(-2).join(".")}` : ""}${v.localService ? "" : " (online)"}`))),
               h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), Speech.speak([{ text: "The fire cracks. Somewhere below, chains shift in the dark.", speaker: id, rate: id === "narrator" ? 1 : roster[id.split(":")[0]]?.rate ?? 1 }], campCast())) }, "Try")))),
         h("button", { class: "run-btn ghost", onclick: () => Speech.stop() }, "Stop reading"),
         // Exactly what the browser lists, every language, for working out which voices a device exposes.
