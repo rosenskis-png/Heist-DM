@@ -133,8 +133,8 @@ The companions (eight; the roster is open), the relationship model, configuratio
 
 19. **Feelings didn't drive behaviour** (sixth round). At −10 regard, or −10 toward the other companion, they played neutral and warmed to niceness; wrong reads never surprised anyone. Cause: the numbers reached the call bare, and one pair number was too thin. Fix: D77, D78, D79.
 20. **Whispers, triangles, storms, Ember in company, Lisa's grudge, Vesper's shamelessness:** D80 to D84. Vesper's pursuit is now shameless, sexual and a little desperate, a performance; her deep path is self-respect while staying a succubus.
-21. **Serena, Morgana and Lyra replaced** by Annalise, Sable and Celeste (D88). Lyra stays as the Cells encounter's fixture party member. Still open: nobody in the roster has dark skin, and Ruby has no quick friend.
-- [ ] **Play the three new companions in Camp:** Annalise's broken English and deliberate misunderstandings; Sable's subtle shifting and her impersonations (with "show who's really here" on, then off); Celeste's fixed devotion and how long her secret holds; Lisa with each as her sister.
+21. **Serena, Morgana and Lyra replaced** by Annaleise, Sable and Celeste (D88). Lyra stays as the Cells encounter's fixture party member. Still open: nobody in the roster has dark skin, and Ruby has no quick friend.
+- [ ] **Play the three new companions in Camp:** Annaleise's broken English and deliberate misunderstandings; Sable's subtle shifting and her impersonations (with "show who's really here" on, then off); Celeste's fixed devotion and how long her secret holds; Lisa with each as her sister.
 
 **Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D65, D66 and D68.
 

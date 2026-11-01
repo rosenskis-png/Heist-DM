@@ -206,19 +206,19 @@ export default {
           img: `She wears a sexy thin, clinging leaf-green linen wrap top cut low in front and open at the sides, a short, nearly sheer cream-and-green gauze skirt slung low on her hips, flowers in her hair, bare feet`,
         },
       },
-      annalise: {
+      annaleise: {
         set: {
           race: "human, from Sévrance",
-          outfit: `Annalise's style, even barer: a cropped off-the-shoulder blouse with nothing under it, a tiny pleated wine-red skirt, stockings with the garters showing.`,
+          outfit: `Annaleise's style, even barer: a cropped off-the-shoulder blouse with nothing under it, a tiny pleated wine-red skirt, stockings with the garters showing.`,
         },
         append: {
           look: `Her heritage here: wavy chestnut-brunette hair, brown eyes and light olive skin, like her sister's.`,
-          voice: `Grew up with Annalise: the same Sévrançais endearments and the same broken English, but Lisa's English is better than she lets on, and her "misunderstandings" are sharper. She sounds like her sister at times and like herself at others: clearly her own person, clearly raised together.`,
+          voice: `Grew up with Annaleise: the same novice English shaped by their own language (present tense for ongoing things, "the" before everything, "no?" on the end, "euh" and "voilà"), but Lisa's English is better than she lets on, and her "misunderstandings" are sharper. She sounds like her sister at times and like herself at others: clearly her own person, clearly raised together.`,
         },
         gift: "a quick ear: she speaks the common tongue far better than she pretends",
-        bond: `Sisters from Sévrance, sent abroad together. Annalise always got the attention; Lisa learned the act from her, and plays it with less innocence.`,
+        bond: `Sisters from Sévrance, sent abroad together. Annaleise always got the attention; Lisa learned the act from her, and plays it with less innocence.`,
         partnerReacts: "a flood of Sévrançais, tears, and a very public kiss on him to prove a point",
-        secret: `Back home, Annalise found your love letters, told your parents they were hers as a joke, and read them aloud at a family dinner. The boy left town. Annalise still thinks it was funny. You have never forgiven her. For the cruelty of it, you'll play matchmaker: cheer her on with him, the better to take him later.`,
+        secret: `Back home, Annaleise found your love letters, told your parents they were hers as a joke, and read them aloud at a family dinner. The boy left town. Annaleise still thinks it was funny. You have never forgiven her. For the cruelty of it, you'll play matchmaker: cheer her on with him, the better to take him later.`,
         image: {
           features: "light olive skin",
           eyes: "bright brown",

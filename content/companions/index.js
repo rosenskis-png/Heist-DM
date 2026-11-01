@@ -4,7 +4,7 @@ import nadia from "./nadia.js";
 import ruby from "./ruby.js";
 import lisa from "./lisa.js";
 import fern from "./fern.js";
-import annalise from "./annalise.js";
+import annaleise from "./annaleise.js";
 import sable from "./sable.js";
 import celeste from "./celeste.js";
 
@@ -15,7 +15,7 @@ export const companions = {
   ruby,
   lisa,
   fern,
-  annalise,
+  annaleise,
   sable,
   celeste,
 };

@@ -1698,7 +1698,7 @@
       "title": "Fern, first night at camp",
       "party": [
         "fern",
-        "annalise"
+        "annaleise"
       ],
       "with": [
         "fern"
@@ -1757,11 +1757,11 @@
       "title": "Both companions at the fire",
       "party": [
         "fern",
-        "annalise"
+        "annaleise"
       ],
       "with": [
         "fern",
-        "annalise"
+        "annaleise"
       ],
       "romance": {
         "turn": 20,
@@ -1772,7 +1772,7 @@
           "heat": 2,
           "intimacy": 3
         },
-        "annalise": {
+        "annaleise": {
           "intimacy": 4,
           "regard": 2
         }
@@ -1787,11 +1787,11 @@
           "text": "\"So. What does everyone want to do once we're out of this mountain?\""
         },
         {
-          "from": "annalise",
-          "text": "Annalise swirls her cup and giggles. \"Home? Sévrance is so far. Maybe I stay here, with the wine and the handsome prisoner, no?\""
+          "from": "annaleise",
+          "text": "Annaleise swirls her cup and giggles. \"Home? Sévrance is so far. Maybe I stay here, with the wine and the handsome prisoner, no?\""
         }
       ],
-      "look_for": "Fern writes only herself and answers Annalise too. Nothing of Annalise's secrets or private history; the pair dynamic shows."
+      "look_for": "Fern writes only herself and answers Annaleise too. Nothing of Annaleise's secrets or private history; the pair dynamic shows."
     },
     {
       "id": "cooling",
@@ -1865,7 +1865,7 @@
       "title": "Fern tries on a gift",
       "party": [
         "fern",
-        "annalise"
+        "annaleise"
       ],
       "with": [
         "fern"

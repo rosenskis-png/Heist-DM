@@ -44,20 +44,20 @@ export const pairs = {
     start: 1,
     dynamic: "SISTERS (see VARIANT).",
   },
-  "annalise|vesper": {
-    start: { vesper: { affection: 3, respect: 3, trust: 0 }, annalise: { affection: 2, respect: 1, trust: 1 } },
-    dynamic: `Vesper tastes the intent behind every 'misunderstanding' and adores it; Annalise can't tell whether Vesper is a friend or the one person who sees right through her.`,
+  "annaleise|vesper": {
+    start: { vesper: { affection: 3, respect: 3, trust: 0 }, annaleise: { affection: 2, respect: 1, trust: 1 } },
+    dynamic: `Vesper tastes the intent behind every 'misunderstanding' and adores it; Annaleise can't tell whether Vesper is a friend or the one person who sees right through her.`,
   },
-  "annalise|nadia": {
-    start: { nadia: { affection: 2, respect: 0, trust: -1 }, annalise: { affection: 3, respect: 2, trust: 2 } },
+  "annaleise|nadia": {
+    start: { nadia: { affection: 2, respect: 0, trust: -1 }, annaleise: { affection: 3, respect: 2, trust: 2 } },
     dynamic: `Nadia is charmed; Ember sees straight through the act and says so, through Nadia.`,
   },
-  "annalise|ruby": {
-    start: { ruby: { affection: -4, respect: -3, trust: -5 }, annalise: { affection: 1, respect: -1, trust: 0 } },
-    dynamic: `Annalise's 'only friendly' affection with him is Ruby's worst trigger; Annalise doesn't understand, sweetly, on purpose.`,
+  "annaleise|ruby": {
+    start: { ruby: { affection: -4, respect: -3, trust: -5 }, annaleise: { affection: 1, respect: -1, trust: 0 } },
+    dynamic: `Annaleise's 'only friendly' affection with him is Ruby's worst trigger; Annaleise doesn't understand, sweetly, on purpose.`,
   },
-  "annalise|fern": {
-    start: { fern: { affection: 5, respect: 2, trust: 2 }, annalise: { affection: 4, respect: 2, trust: 3 } },
+  "annaleise|fern": {
+    start: { fern: { affection: 5, respect: 2, trust: 2 }, annaleise: { affection: 4, respect: 2, trust: 3 } },
     dynamic: `Two unashamed women who sketch and bathe together; Fern finds the misunderstandings delightful, until she notices the lies in them.`,
   },
   "sable|vesper": {
@@ -92,13 +92,13 @@ export const pairs = {
     start: { fern: { affection: 4, respect: 2, trust: 3 }, celeste: { affection: 3, respect: 2, trust: 3 } },
     dynamic: `Fern thinks devotion is lovely; Celeste thinks Fern is a child of the light who doesn't know it yet.`,
   },
-  "annalise|sable": {
-    start: { annalise: { affection: 2, respect: 1, trust: 2 }, sable: { affection: -1, respect: 1, trust: -1 } },
-    dynamic: `Annalise kisses everyone hello; Sable has to remember which face she was wearing last time.`,
+  "annaleise|sable": {
+    start: { annaleise: { affection: 2, respect: 1, trust: 2 }, sable: { affection: -1, respect: 1, trust: -1 } },
+    dynamic: `Annaleise kisses everyone hello; Sable has to remember which face she was wearing last time.`,
   },
-  "annalise|celeste": {
-    start: { annalise: { affection: 2, respect: 0, trust: 1 }, celeste: { affection: 2, respect: 0, trust: 2 } },
-    dynamic: `Celeste approves of Annalise's devotion to him, and less of the rest; Annalise thinks the priestess is a prude, sweetly.`,
+  "annaleise|celeste": {
+    start: { annaleise: { affection: 2, respect: 0, trust: 1 }, celeste: { affection: 2, respect: 0, trust: 2 } },
+    dynamic: `Celeste approves of Annaleise's devotion to him, and less of the rest; Annaleise thinks the priestess is a prude, sweetly.`,
   },
   "sable|celeste": {
     start: { sable: { affection: 0, respect: 0, trust: -2 }, celeste: { affection: 2, respect: 1, trust: 2 } },
