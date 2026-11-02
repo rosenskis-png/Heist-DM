@@ -91,7 +91,7 @@ export default {
   ],
   beliefs: `everyone is wearing a face; being wanted is safer than being known; a name is something you choose`,
   admires: `attention to detail; discretion; being seen; loyalty; quiet competence`,
-  despises: `being stared at as a curiosity; being asked to perform; carelessness; being mistaken for someone else`,
+  despises: `being stared at as a curiosity; being asked to perform on demand; carelessness; being seen through before she chooses to be`,
   askAbout: `where she grew up; what she "really" looks like; her name; the faces she's worn`,
   other: `wants him to herself; watches the other companion the way a thief watches a lock`,
   suppressed: `to be wanted in her own face. Met by noticing her when she hasn't changed, and preferring it`,

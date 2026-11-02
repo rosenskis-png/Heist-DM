@@ -718,8 +718,12 @@ Speech.voices(() => {
 });
 
 // Sitting with one companion alone: a shapeshifting other may come in her place. "Force" makes her come.
+// Changing who's at the fire starts a new scene: the chat clears, any whisper target resets, and who really comes is
+// decided once, for the whole scene.
 function campChooseWith(value) {
+  if (value !== camp.with) camp.transcript = [];
   camp.with = value;
+  camp.to = "all";
   camp.disguise = null;
   if (value !== "both" && camp.romance) {
     const members = campMembers();
@@ -775,7 +779,8 @@ function campScene(viewer) {
 async function campSend(text, status) {
   const members = campMembers();
   const both = camp.with === "both";
-  const whisper = both && camp.to !== "all" ? camp.to : null;
+  // A whisper target only counts if she's one of the two here (an old save could name someone else).
+  const whisper = both && [camp.a, camp.b].includes(camp.to) ? camp.to : null;
   // A whisper goes to one of them over the rings, silently: she answers, and the other never hears it (D93).
   const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.disguise?.actor ?? camp.with];
   camp.transcript.push({ from: "player", text, ...(whisper ? { to: whisper } : {}) });
@@ -783,7 +788,8 @@ async function campSend(text, status) {
   const order = ids.length > 1 ? Rel.speakingOrder(camp.romance, ids) : ids;
   let mustAdvance = false;
   for (const id of order) {
-    status.textContent = `${roster[id].name} is answering…`;
+    const face = !both && camp.disguise?.actor === id ? camp.disguise.as : id;
+    status.textContent = `${roster[face].name} is answering…`;
     const self = members.find((m) => m.id === id);
     const other = id === camp.a ? camp.b : camp.a;
     const where = { private: !both, inPerson: true, mustAdvance };
@@ -800,7 +806,7 @@ async function campSend(text, status) {
       camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
       const w = Rel.catchAside(camp.romance, r.out, where);
       camp.romance = w.state;
-      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried, ...(w.caught ? { caught: true } : {}) });
+      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried, ...(r.first ? { firstProblems: r.first.slice(0, 5) } : {}), ...(w.caught ? { caught: true } : {}) });
       mustAdvance = !r.out.advances;
     } catch (e) {
       camp.transcript.push({ from: id, error: errorText(e), input });
@@ -841,7 +847,7 @@ function campView() {
   if (!problems.length && (!camp.romance || !camp.romance.rel[camp.a] || !camp.romance.rel[camp.b])) campReset();
   const rerender = () => show("camp");
   const pick = (key) =>
-    h("select", { id: `camp-${key}`, onchange: (e) => ((camp[key] = e.target.value), (camp.with = "both"), (camp.romance = null), saveCamp(), rerender()) },
+    h("select", { id: `camp-${key}`, onchange: (e) => ((camp[key] = e.target.value), (camp.with = "both"), (camp.to = "all"), (camp.disguise = null), (camp.romance = null), saveCamp(), rerender()) },
       Object.values(roster).map((c) => h("option", { value: c.id, selected: camp[key] === c.id }, c.name)));
   const setup = h(
     "section",
@@ -924,7 +930,7 @@ function campView() {
     h("div", { class: "row" },
       h("label", { class: "check" }, h("input", { id: "camp-reveal", type: "checkbox", checked: !!camp.reveal, onchange: (e) => ((camp.reveal = e.target.checked), saveCamp(), rerender()) }), " show what's really going on (thoughts, agendas, disguises)"),
       members.some((c) => c.shapeshift)
-        ? h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), campChooseWith(camp.with), rerender()) }), " a shapeshifter always comes in the other's place (testing; one-on-one scenes only)")
+        ? h("label", { class: "check" }, h("input", { id: "camp-force", type: "checkbox", checked: !!camp.forceShift, onchange: (e) => ((camp.forceShift = e.target.checked), camp.transcript.length ? saveCamp() : campChooseWith(camp.with), rerender()) }), " a shapeshifter always comes in the other's place (testing; one-on-one scenes only)")
         : "",
       camp.reveal && camp.disguise ? h("span", { class: "chip near" }, `${roster[camp.disguise.actor].name} is wearing ${roster[camp.disguise.as].name}'s face`) : "",
       camp.forceShift && camp.with === "both" ? h("span", { class: "status" }, "Impersonation happens only one-on-one: choose one of them alone under \"At the fire\".") : ""),
@@ -996,7 +1002,7 @@ function campView() {
         o.form ? `new form: ${o.form}` : null,
         o.advances ? `moves: ${o.advances}` : null,
         o.outfit ? `changes into: ${o.outfit}` : null,
-        t.retried ? "retried once" : null,
+        t.retried ? `retried once${t.firstProblems ? ` (first draft: ${t.firstProblems.join("; ")})` : ""}` : null,
       ].filter(Boolean).join(" · ")),
       Speech.available() ? h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), campRead([t])) }, "Read aloud") : null,
       t.input ? fold(`${camp.reveal || !t.as ? c.name : roster[t.as].name}'s input · ${(t.input.length / 1024).toFixed(1)} KB`, t.input) : null,
