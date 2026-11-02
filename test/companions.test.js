@@ -276,18 +276,17 @@ test("with no change to heat, intimacy or regard, a value below +2 rises toward 
   assert.equal(s.rel[P.id].regard, 2);
 });
 
-test("one catch roll an answer, only for a hidden action in company; ring words are never caught (D80, D93)", () => {
+test("one catch roll an answer, only for hidden actions in company; ring words are never caught (D80, D93, D98)", () => {
   const act = { ...blank(), segments: [{ speaker: "self", text: "said aloud", aside: "no" }, { speaker: "self", text: "a hand on his knee", aside: "action" }], risk: "high" };
   assert.equal(Rel.catchAside({ ...romance(members), forced: [99] }, act).caught, false);
   assert.equal(Rel.catchAside({ ...romance(members), forced: [4] }, act).caught, true);
   assert.equal(Rel.catchAside({ ...romance(members), forced: [1] }, act, { private: true }).caught, false);
   const ring = { ...act, segments: [{ speaker: "self", text: "meet me later", aside: "ring" }] };
   assert.equal(Rel.catchAside({ ...romance(members), forced: [1] }, ring).caught, false);
-  // At most one aside of each kind; whispering to the other needs her there.
+  // Several asides in one answer are fine, and still one roll.
   const two = { ...act, segments: [...act.segments, { speaker: "self", text: "and another", aside: "action" }] };
-  assert.deepEqual(Rel.campfireProblems(romance(members), P, members, two), ["at most one action aside an answer; put it all in one segment"]);
-  const tell = { ...blank(), segments: [{ speaker: "self", text: "psst", aside: "to_other" }] };
-  assert.deepEqual(Rel.campfireProblems(romance(members), P, members, tell, { private: true }), ["there's no other companion here to whisper to"]);
+  assert.deepEqual(Rel.campfireProblems(romance(members), P, members, two), []);
+  assert.equal(Rel.catchAside({ ...romance(members), forced: [99, 1] }, two).caught, false);
 });
 
 test("stage labels and progress", () => {

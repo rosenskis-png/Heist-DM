@@ -718,13 +718,9 @@ Speech.voices(() => {
 });
 
 // Sitting with one companion alone: a shapeshifting other may come in her place. "Force" makes her come.
-// Changing who's at the fire starts a new scene: the chat clears, any whisper target resets, and who really comes is
-// decided once, for the whole scene.
+// Changing who's at the fire continues the same chat (D98): any whisper target resets, and who really comes is decided
+// once, for the whole private scene. A companion never sees a private scene she wasn't in.
 function campChooseWith(value) {
-  if (value !== camp.with && camp.transcript.length) {
-    keepPrevious();
-    camp.transcript = [];
-  }
   camp.with = value;
   camp.to = "all";
   camp.disguise = null;
@@ -794,6 +790,8 @@ const asideOf = (g) => (g.aside === true ? "action" : g.aside || "no");
 // reach the other; a hidden action reaches the other only if caught, and then as plain scene text, unflagged.
 function campScene(viewer) {
   return camp.transcript.flatMap((t) => {
+    // A private scene she wasn't in never reaches her.
+    if (t.present && t.present !== "both" && t.present !== viewer) return [];
     if (t.from === "player") return t.to && t.to !== viewer ? [] : [{ from: t.to ? "player, to you alone over the rings" : "player", text: t.text }];
     if (!t.out) return [];
     const c = roster[t.from];
@@ -821,7 +819,9 @@ async function campSend(text, status) {
   const whisper = both && [camp.a, camp.b].includes(camp.to) ? camp.to : null;
   // A whisper goes to one of them over the rings, silently: she answers, and the other never hears it (D93).
   const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.disguise?.actor ?? camp.with];
-  camp.transcript.push({ from: "player", text, ...(whisper ? { to: whisper } : {}) });
+  // Who was really there: both, or the one he sat with (the shapeshifter, if she came in that one's place).
+  const present = both ? "both" : camp.disguise?.actor ?? camp.with;
+  camp.transcript.push({ from: "player", text, present, ...(whisper ? { to: whisper } : {}) });
   camp.romance = Rel.nextTurn(camp.romance);
   const order = ids.length > 1 ? Rel.speakingOrder(camp.romance, ids) : ids;
   let mustAdvance = false;
@@ -844,7 +844,7 @@ async function campSend(text, status) {
       camp.romance = Rel.applyCampfire(camp.romance, self, members, r.out, where);
       const w = Rel.catchAside(camp.romance, r.out, where);
       camp.romance = w.state;
-      camp.transcript.push({ from: id, ...(as ? { as } : {}), out: r.out, input, retried: r.retried, ...(r.first ? { firstProblems: r.first.slice(0, 5) } : {}), ...(w.caught ? { caught: true } : {}) });
+      camp.transcript.push({ from: id, present, ...(as ? { as } : {}), out: r.out, input, retried: r.retried, ...(r.first ? { firstProblems: r.first.slice(0, 5) } : {}), ...(w.caught ? { caught: true } : {}) });
       mustAdvance = !r.out.advances;
     } catch (e) {
       camp.transcript.push({ from: id, error: errorText(e), input });

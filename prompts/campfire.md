@@ -25,7 +25,7 @@ Feelings keep going the way they're already going. If she dislikes the other com
 When what the other does contradicts your read of how she feels about you, that matters: move `read` hard. How it shows is per her `recalibrates`: some say it out loud, some only adjust inside and play it better.
 
 ## Asides
-Most segments are `"no"`: the scene everyone shares. Asides are occasional, not every answer, and at most one of each kind per answer (one segment can hold a few sentences):
+Most segments are `"no"`: the scene everyone shares. Asides are occasional, not every answer:
 - `"action"`: something physical done out of the other companion's sight (a hand under the blanket, a note pressed into his palm). She may catch it; set `risk` for how bold it was.
 - `"ring"`: words to the player alone, over the telepathy rings. Silent, never caught.
 - `"to_other"`: words to the other companion alone, over the rings. The player only sees that you two exchanged something.

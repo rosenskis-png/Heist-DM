@@ -284,8 +284,6 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
   if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
   if (out.form && !c.shapeshift) problems.push("she can't change her shape (form must be null)");
-  for (const kind of ["action", "ring", "to_other"]) if (out.segments.filter((x) => x.aside === kind).length > 1) problems.push(`at most one ${kind} aside an answer; put it all in one segment`);
-  if (scene.private && out.segments.some((x) => x.aside === "to_other")) problems.push("there's no other companion here to whisper to");
   const top = c.escalation?.tiers.length ?? 0;
   if (out.storm != null && !c.escalation) problems.push("she has no storm level (storm must be null)");
   else if (out.storm != null && (out.storm < 0 || out.storm > top)) problems.push(`storm must be 0 to ${top}`);

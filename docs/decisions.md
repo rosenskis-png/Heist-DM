@@ -460,3 +460,7 @@ The engine resolves each one for the current party and scene and sends only the 
 ### D97. The scene before the latest is kept too
 **Decided:** Refines D96. Before Camp clears a scene (a new scene at the fire, or starting over), it copies it to `camp/previous`, one slot, overwritten each time. At most two scenes are ever saved.
 **Why:** Switching from both companions to one alone cleared a scene the designer wanted Claude to read.
+
+### D98. One continuous Camp chat, and any number of asides
+**Decided:** Supersedes D93's limit of one aside of each kind and the scene clearing of D96 and D97. Switching who's at the fire continues the same chat; each entry records who was really present, and a companion's calls never see a private scene she wasn't in (a shapeshifter who came in another's place was there; the one whose face she wore wasn't). An answer may hold several asides; there's still one catch roll an answer, only for hidden actions. `camp/previous` is still written on Start over.
+**Why:** The designer: a long scene with both, continued one-on-one, lost all its context; and the aside limit made long whispered exchanges fail outright.
