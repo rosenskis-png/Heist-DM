@@ -721,7 +721,10 @@ Speech.voices(() => {
 // Changing who's at the fire starts a new scene: the chat clears, any whisper target resets, and who really comes is
 // decided once, for the whole scene.
 function campChooseWith(value) {
-  if (value !== camp.with) camp.transcript = [];
+  if (value !== camp.with && camp.transcript.length) {
+    keepPrevious();
+    camp.transcript = [];
+  }
   camp.with = value;
   camp.to = "all";
   camp.disguise = null;
@@ -747,7 +750,12 @@ let latestTimer;
 const saveLatest = () => {
   if (!db) return;
   clearTimeout(latestTimer);
-  latestTimer = setTimeout(() => {
+  latestTimer = setTimeout(() => db.doc("camp/latest").set(campDoc()).catch(() => {}), 1500);
+};
+// Before a scene is cleared, it's kept as `camp/previous` (one slot, overwritten), so switching scenes can't lose it.
+const keepPrevious = () => db?.doc("camp/previous").set(campDoc()).catch(() => {});
+function campDoc() {
+  {
     const answered = camp.transcript.map((t, i) => (t.input ? i : -1)).filter((i) => i >= 0).slice(-2);
     const doc = {
       at: Date.now(),
@@ -763,15 +771,16 @@ const saveLatest = () => {
       state: camp.romance,
       transcript: camp.transcript.map((t, i) => (answered.includes(i) ? t : (({ input, ...rest }) => rest)(t))),
     };
-    db.doc("camp/latest").set(JSON.parse(JSON.stringify(doc))).catch(() => {});
-  }, 1500);
-};
+    return JSON.parse(JSON.stringify(doc));
+  }
+}
 const saveCamp = () => {
   store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
   saveLatest();
 };
 const campMembers = () => resolveParty([roster[camp.a], roster[camp.b]]);
 function campReset() {
+  if (camp.transcript.length) keepPrevious();
   camp.romance = Rel.newRomance(campMembers(), pairs, { turn: 10, act: 1 });
   camp.transcript = [];
   saveCamp();

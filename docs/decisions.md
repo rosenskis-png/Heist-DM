@@ -456,3 +456,7 @@ The engine resolves each one for the current party and scene and sends only the 
 ### D96. The latest Camp scene is saved for the design thread
 **Decided:** Camp also writes its current scene to one document in the artifact's db (`camp/latest`), which each save overwrites: the scene's settings, the relationship state, and the transcript with every output, problem and retry. Full inputs are kept only for the last two answers. Changing who's at the fire clears the scene, so the document always holds the most recent one and nothing older accumulates.
 **Why:** The designer wanted Claude to see the scene being troubleshot, without a pile of old saves.
+
+### D97. The scene before the latest is kept too
+**Decided:** Refines D96. Before Camp clears a scene (a new scene at the fire, or starting over), it copies it to `camp/previous`, one slot, overwritten each time. At most two scenes are ever saved.
+**Why:** Switching from both companions to one alone cleared a scene the designer wanted Claude to read.
