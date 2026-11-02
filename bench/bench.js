@@ -740,7 +740,36 @@ function campChooseWith(value) {
   saveCamp();
 }
 const campName = (t) => (t.as ? (camp.reveal ? `${roster[t.from].name} (as ${roster[t.as].name})` : roster[t.as].name) : roster[t.from].name);
-const saveCamp = () => store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
+// Camp is saved in this browser, and the latest scene also goes to the artifact's db (D96), one document that each
+// save overwrites, so the design thread can read the scene being troubleshot and nothing older piles up. Full inputs
+// are kept only for the last two answers; the rest keep their outputs, problems and retries.
+let latestTimer;
+const saveLatest = () => {
+  if (!db) return;
+  clearTimeout(latestTimer);
+  latestTimer = setTimeout(() => {
+    const answered = camp.transcript.map((t, i) => (t.input ? i : -1)).filter((i) => i >= 0).slice(-2);
+    const doc = {
+      at: Date.now(),
+      version,
+      with: camp.with,
+      to: camp.to,
+      first: camp.a,
+      second: camp.b,
+      disguise: camp.disguise,
+      forceShift: !!camp.forceShift,
+      showingTruth: !!camp.reveal,
+      log: camp.log,
+      state: camp.romance,
+      transcript: camp.transcript.map((t, i) => (answered.includes(i) ? t : (({ input, ...rest }) => rest)(t))),
+    };
+    db.doc("camp/latest").set(JSON.parse(JSON.stringify(doc))).catch(() => {});
+  }, 1500);
+};
+const saveCamp = () => {
+  store.set("bench.camp", { ...camp, transcript: camp.transcript.map(({ input, ...t }) => t) });
+  saveLatest();
+};
 const campMembers = () => resolveParty([roster[camp.a], roster[camp.b]]);
 function campReset() {
   camp.romance = Rel.newRomance(campMembers(), pairs, { turn: 10, act: 1 });

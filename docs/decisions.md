@@ -452,3 +452,7 @@ The engine resolves each one for the current party and scene and sends only the 
 ### D95. A campfire answer's empty parts are filled before it's checked
 **Decided:** Before validation, `fillCampfire` treats an absent optional field as null, an absent list as empty, and a segment with no aside marked as ordinary scene text. Everything else still fails the check and gets the one retry (D13): a wrong value, a missing segment text, a missing inner thought, a beat that isn't allowed.
 **Why:** The designer saw a retry on every message. The format reaches the model only as text, and with a dozen required fields, most of them usually null, nearly every first draft left one out, doubling the wait for nothing.
+
+### D96. The latest Camp scene is saved for the design thread
+**Decided:** Camp also writes its current scene to one document in the artifact's db (`camp/latest`), which each save overwrites: the scene's settings, the relationship state, and the transcript with every output, problem and retry. Full inputs are kept only for the last two answers. Changing who's at the fire clears the scene, so the document always holds the most recent one and nothing older accumulates.
+**Why:** The designer wanted Claude to see the scene being troubleshot, without a pile of old saves.
