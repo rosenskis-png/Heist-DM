@@ -117,7 +117,7 @@ async function slot(fn) {
 
 // One call, with the one retry on validation errors (D13). Never retries a runtime error.
 // `engine` adds the engine's own validation (moves, flags), which also goes back for the one retry.
-async function ask(input, schema, tier, engine = () => []) {
+async function ask(input, schema, tier, engine = () => [], prepare = (o) => o) {
   const opts = () => ({ modelTier: tier, cache: false, signal: controller.signal });
   return slot(async () => {
     const t0 = performance.now();
@@ -128,7 +128,7 @@ async function ask(input, schema, tier, engine = () => []) {
         await new Promise((r) => setTimeout(r, 15000));
         return sample.json(x, opts());
       });
-    let out = await call(input);
+    let out = prepare(await call(input));
     let errors = validate(schema, out);
     if (!errors.length) errors = engine(out);
     let retried = false;
@@ -141,7 +141,7 @@ async function ask(input, schema, tier, engine = () => []) {
         { role: "assistant", content: JSON.stringify(out) },
         { role: "user", content: `That has problems:\n${errors.slice(0, 20).join("\n")}\nReturn the corrected JSON object only.` },
       ];
-      out = await call(turns);
+      out = prepare(await call(turns));
       errors = validate(schema, out);
       if (!errors.length) errors = engine(out);
     }
@@ -262,7 +262,7 @@ async function runCampfire(c, schema, tier) {
     const others = c.party.filter((x) => x !== id).map((x) => roster[x]);
     const where = { private: c.with.length === 1, inPerson: true, mustAdvance };
     const input = A.campfireInput({ ...env, romance }, { ...c, scene, mustAdvance }, roster[id], others, schema);
-    const r = await ask(input, schema, tier, (o) => Rel.campfireProblems(romance, self, members, o, where));
+    const r = await ask(input, schema, tier, (o) => Rel.campfireProblems(romance, self, members, o, where), Rel.fillCampfire);
     ms += r.ms;
     inputChars += r.inputChars;
     const turn = { id, name: self.name, input, out: r.out, errors: r.errors, first: r.first };
@@ -798,7 +798,7 @@ async function campSend(text, status) {
     const c = { with: both ? [camp.a, camp.b] : ids, ...(as ? { disguisedAs: as } : {}), scene: campScene(id), mustAdvance, log: camp.log.split("\n").map((l) => l.trim()).filter(Boolean) };
     const input = A.campfireInput({ ...env, romance: camp.romance }, c, roster[id], [roster[other]], campfireSchema);
     try {
-      const r = await ask(input, campfireSchema, settings.tiers.campfire, (o) => Rel.campfireProblems(camp.romance, self, members, o, where));
+      const r = await ask(input, campfireSchema, settings.tiers.campfire, (o) => Rel.campfireProblems(camp.romance, self, members, o, where), Rel.fillCampfire);
       if (r.errors.length) {
         camp.transcript.push({ from: id, error: r.errors.slice(0, 5).join("; "), input });
         break;

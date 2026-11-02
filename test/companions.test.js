@@ -588,3 +588,13 @@ test("every companion declares how she gets what she wants, and her private agen
   assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes("make her look possessive"));
   assert.ok(!camp(Q, P, [P.id, Q.id], env({ romance: s })).includes("make her look possessive")); // never the other's call
 });
+
+test("a campfire answer's nothing parts are filled before it's checked; real mistakes still fail (D95)", async () => {
+  const { validate } = await import("../src/validate.js");
+  const bare = { segments: [{ speaker: "self", text: "x" }, { speaker: "self", text: "y", aside: true }], changes: [], inner: "z" };
+  const out = Rel.fillCampfire(bare);
+  assert.deepEqual(validate(campfireSchema, out), []);
+  assert.deepEqual(out.segments.map((g) => g.aside), ["no", "action"]);
+  assert.ok(validate(campfireSchema, Rel.fillCampfire({ ...bare, storm: "high" })).length); // wrong, not absent
+  assert.ok(validate(campfireSchema, Rel.fillCampfire({ segments: bare.segments })).length); // her inner thought is required
+});

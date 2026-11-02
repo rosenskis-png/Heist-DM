@@ -255,6 +255,20 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
   return { state: out, rejected };
 }
 
+// A campfire output with its "nothing" parts filled in before it's checked (D95): an absent optional field is null,
+// an absent list is empty, and a segment with no aside marked is ordinary scene text. Anything else that's wrong
+// still fails the check and goes back for the one retry.
+const NULLABLE = ["advances", "outfit", "believes", "storm", "risk", "form", "agenda"];
+const LISTS = ["changes", "memories", "secrets", "commitments", "beats"];
+export function fillCampfire(out) {
+  if (!out || typeof out !== "object" || Array.isArray(out)) return out;
+  const o = { ...out };
+  for (const k of NULLABLE) if (o[k] === undefined) o[k] = null;
+  for (const k of LISTS) if (o[k] === undefined || o[k] === null) o[k] = [];
+  if (Array.isArray(o.segments)) o.segments = o.segments.map((g) => (g && typeof g === "object" ? { ...g, aside: g.aside === true ? "action" : g.aside === false || g.aside == null ? "no" : g.aside } : g));
+  return o;
+}
+
 // Problems with a campfire output beyond its schema: beats not allowed, lines for a voice she doesn't have here,
 // an outfit she doesn't own, and, when she answers second with both companions present and the first moved
 // nothing (`scene.mustAdvance`, D70), moving nothing herself. A call with problems gets one retry with them listed (D13).
