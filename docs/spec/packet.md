@@ -1,6 +1,6 @@
 # The encounter packet
 
-Everything fixed for one encounter. Its shape is `schemas/packet.js`. It's built by the generator (or by hand until Phase 7), validated by the engine, and fixed for the whole encounter. Live changes go in encounter state (`docs/spec/state.md`), never here.
+Everything fixed for one encounter. Its shape is `schemas/packet.js`. It's built by generation (`docs/spec/generation.md`; the Cells is written by hand), validated by the engine, and fixed for the whole encounter. Live changes go in encounter state (`docs/spec/state.md`), never here.
 
 How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked example is `fixtures/cells/`.
 
@@ -12,9 +12,14 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **Optional objectives,** such as `item_held: gear_sack`.
 - **Purpose:** what this encounter is for, in one or two concrete sentences.
 - **Expected length,** in plans committed (e.g. 1–2, 3–5).
-- **No routes, ever.** The intent never lists solutions, obvious or alternative. The generator may privately check that at least one route exists, but that route is never stored or sent. The engine rejects a packet with route-like fields.
+- **No routes, ever.** The intent never lists solutions, obvious or alternative. The critique call plays approaches privately (D120), but they are never stored or sent. The engine rejects a packet with route-like fields.
 
-Rooms (D22) have `mode: "room"` and no objective.
+- **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
+- **Exits:** each way out carries a one-line stub for the next scene it leads to (D119).
+
+Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, may place events, and hold one outfit unless they're a campfire (D122).
+
+A generated packet carries only what ruled mode reads, with no triggers, meters or sense links (D116).
 
 ## 2. People
 One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they react under pressure, `disposition`, position, and a `schedule` if they have one. NPC reactions on world turns come from these sheets.

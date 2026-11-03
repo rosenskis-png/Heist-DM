@@ -36,7 +36,7 @@ Prompts are always ordered campaign → encounter → live. `sample` gives no pr
 - **Coordinates never go to any call** (D9). The map block is relationships plus `layout`: facts the engine derives from geometry (each zone's size, how far apart its connections and placed things are). Code: `src/context.js`.
 - **Hidden things** go only to the plan calls and the Moment AI, marked hidden.
 - **Companions** see only what the party knows, plus their own data.
-- The generator and campfire calls are described in `docs/spec/calls/`.
+- Generation's calls (sketch, critique, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet. The campfire call is in `docs/spec/calls/campfire.md`.
 
 ## 3. Act gates
 
@@ -51,7 +51,9 @@ An invariant or worked example can carry an act gate: the first act it applies i
 
 | Call | Method | Replay cache | Starting tier |
 |---|---|---|---|
-| Generator | `sample.json` | off | `complex` |
+| Sketch | `sample.json` | off | `complex` |
+| Critique | `sample.json` | off | `complex` |
+| Encode | `sample.json` | off | `default` |
 | Step | `sample.json` | on | `default` |
 | Pricing | `sample.json` | on | `default` |
 | World | `sample.json` | on | `default` |

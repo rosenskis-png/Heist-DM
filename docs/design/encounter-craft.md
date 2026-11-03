@@ -315,10 +315,22 @@ The good versions in the worked examples had fewer pre-written branches than the
 
 ---
 
-## 10. In this project
+## 10. Rooms
+
+A room has no objective and no danger, and the party leaves when it likes (D121). That doesn't make it empty.
+
+- **A room exists for something:** a companion moment, a trade, a discovery, a hint about what's ahead. Mood plus a companion moment is enough; the hot spring needs nothing else.
+- **Give it one thing that happens if they stay:** the spring starts to glow, the sun sets, the cook starts gossiping. Then lingering is a choice, and it costs only time.
+- **A room can be scouting in disguise.** The kitchen staff talk about the guard rotation; the merchant knows which door sticks. That's planning bought with time and favours (§1), before the encounter it serves.
+- **Its outfit belongs to it.** The one outfit a room holds should be something only that room could give, so a companion wearing it later carries the room with her.
+
+---
+
+## 11. In this project
 
 - **Which principles become engine checks:** the validation section of `docs/spec/packet.md`. They are warnings, not rejections, until playtests show which ones predict a bad encounter.
 - **The worked example:** the Cells, rebuilt as a packet, in `fixtures/cells/walkthrough.md`.
+- **The generator** (`docs/spec/generation.md`) builds from motifs: short patterns taken from encounters like the ones below, such as the moving key, the alarm with a weakness, the witness with an ultimatum, the arrival deadline and the hidden exit an NPC knows. They live in `content/motifs.js` (D118). Its critique call is §8's step 10, done by a separate call (D120).
 
 Everything the engine can't check stays as judgment. Improve that judgment with better information (the purpose line, the table read, worked examples), not with more rules in the prompt.
 

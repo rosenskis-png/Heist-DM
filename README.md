@@ -47,7 +47,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/principles.md` | Lessons from Gravenhold, the 8 design principles, and the reflexes to resist |
 | `docs/roadmap.md` | Phases, exit tests, and **every open question** with a recommendation |
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
-| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
+| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `ruled`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
 | `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
 | `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |
@@ -65,4 +65,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 4: The Cells, playable,** is built, with two ways to run it: the engine's pipeline, and ruled mode, where the DM rules and the engine keeps the books (D75, `docs/spec/ruled.md`). The first playtests found the engine's rules too tight; the next ones compare the two. **Phase 5: Companions ported** is built too (`src/campaign/`, `test/companions.test.js`) and waits on the designer's campfire runs. See `docs/roadmap.md`.
+**Phases 4 and 5 are done** (D115): the Cells is playable, in ruled mode by default (D75, `docs/spec/ruled.md`), and all the companions are ported. **Phase 7: The generator** is next, and Act 1 will be generated rather than written by hand (`docs/spec/generation.md`, D115–D124). See `docs/roadmap.md`.

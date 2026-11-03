@@ -9,7 +9,7 @@ Who does what, the encounter loop, and time. For why it's shaped this way, see `
 | Actor | Calls | Job |
 |---|---|---|
 | **Engine** | none | Owns all state. Does geometry, dice, ticks, schedules, validation, objective checks, the event log and the table read. Pure code: no DOM, no AI calls (D12). |
-| **Generator** | Once per encounter, plus a validation retry | Builds the encounter packet (`docs/spec/packet.md`). Hand-authored packets replace it until Phase 7 (D25). |
+| **Generation** | Sketch, critique and encode, once per packet | Builds the next encounter, room or campfire from a seed code picks (`docs/spec/generation.md`). |
 | **Plan AI** | Step, pricing, world and narration calls | Turns committed plans into resolvable steps, prices them, plays the world's response, and narrates. |
 | **Moment AI** | One call per exchange; one per combat round | Answers questions, runs checks, plays NPCs, runs combat, and redirects actions to the draft card. |
 | **Companion AI** | One call per companion per message; campfire | Voices each companion in the huddle and at the campfire. |
@@ -23,8 +23,8 @@ The plan side is split into several small sequential calls (decide → validate 
 | Mode | Cards | Ticks | Calls |
 |---|---|---|---|
 | **Encounter** | yes | yes | all |
-| **Room** (exploration, social, respite; D22) | no | no | moment, companion |
-| **Campfire** (between encounters) | no | no, time passes freely | campfire, one call per companion (D45) |
+| **Room** (exploration, social, respite; D22, D121) | no | only for events the room places | moment, companion |
+| **Campfire** (a room where the party rests; D122) | no | no, time passes freely | campfire, one call per companion (D45) |
 
 ## Encounter loop
 

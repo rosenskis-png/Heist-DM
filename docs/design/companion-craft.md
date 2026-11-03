@@ -77,7 +77,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 - **Let the companions talk to each other.** They clash, bond, and discuss the player behind their back. The pair dynamic (`content/pairs.js`) is a starting point, not a script.
 - **Whisper rings.** A private whisper while the other companion is talking aloud is a great beat. Who put the rings on them is an Act 3 mystery: characters may wonder briefly, but never harp on it.
 - **Beats only when they truly happen on the page.** A beat (payoff, vulnerability, rupture, repair…) is reported when the scene actually delivered it, never because it was due.
-- **Respite rooms are where romance breathes** (D22). No clock, no threat, room to linger.
+- **Respite rooms are where romance breathes** (D22, D121). No deadline, no threat, room to linger.
 
 **When she scores herself** (D20), the judgment Gravenhold used still applies:
 - mostly small changes, 0 or 1;

@@ -10,7 +10,7 @@ export { momentSchema } from "./calls/moment.js";
 export { companionSchema } from "./calls/companion.js";
 export { campfireSchema } from "./calls/campfire.js";
 export { rulingSchema } from "./calls/ruling.js";
-export { generatorSchema } from "./calls/generator.js";
+export { encodeSchema } from "./calls/encode.js";
 export { adjudicateSchema } from "./calls/adjudicate.js";
 export { resolveSchema } from "./calls/resolve.js";
 export { sceneSchema } from "./calls/scene.js";

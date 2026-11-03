@@ -13,7 +13,8 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Companions:** which two are in the party, their relationship state (including each one's view of the other, D92), memories and commitments, and what each owns to wear and has on (`docs/spec/companions.md`).
 - **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
 - **Gear and items** the party holds.
-- **The encounter log:** one line per finished encounter.
+- **The encounter log:** one line per finished encounter. The sketch call reads it as background (D119).
+- **What the act has used:** the kinds, genres and motifs of its packets, so the next seed avoids repeats (D118).
 - **The hand-off** from the last encounter (below).
 
 ## Live encounter state (bounded by the encounter)
@@ -54,9 +55,10 @@ When an encounter ends, the engine writes a hand-off object, and the next packet
 
 - alert and days;
 - gear, conditions, HP;
-- NPC fates, by id;
 - companions present;
-- the exit used (which decides the next scene);
+- the exit used, and its next-scene stub (D119);
+- **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;
+- **the world's memory** (D123): NPC fates and who saw the party, which come back only through a callback the seed allows;
 - the outcome and the ticks to spare before the deadline, which update slack (D41);
 - the one-line log entry.
 

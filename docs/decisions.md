@@ -566,3 +566,82 @@ The engine resolves each one for the current party and scene and sends only the 
 Gated fields, notes, her private agenda, a tie's secret and how the partner would take learning it stay at the campfire. Code: `encounterCases` in `src/context.js`.
 **Why:** D79 keeps secrets at camp and encounter calls small. Phase 5's special cases were written for the huddle, and some of them are who she is in any scene: someone's sister, what she's wearing, a second voice that speaks for her. Without them she would play as a different person in encounters.
 **Rules out:** Gated fields or notes in any encounter call.
+
+### D115. Phases 4 and 5 close, and the generator is next, without hand-authoring Act 1
+**Decided:** Supersedes D25. The designer's call (2026-11-03): Phases 4 and 5 are done, and their open questions stay open, answered in play rather than gating the next phase. Phase 6 folds into Phase 7: Act 1 is generated, not written by hand. The Cells stays the only hand-authored encounter. Hand-written material is limited to what the generator needs as worked examples: a few design sketches (D117), which Claude may draft for the designer to judge.
+**Why:** The loop is proven on the Cells, and ruled mode (D75) removed most of the engine vocabulary Phase 6 was meant to stretch. Writing every Act 1 packet by hand costs the designer far more than reading generated sketches does. D25's concern, testing the loop and the generator at the same time, is smaller now that the loop has been played.
+**Rules out:** Holding the generator until hand-authored packets pass.
+
+### D116. Generated packets are written for ruled mode
+**Decided:** A generated packet carries what ruled mode reads (`docs/spec/ruled.md`): the intent, people with sheets and routines, placed events, zones with purposes, connections, things with properties, fixed facts, hidden things, prose `notes` on how people react, and the opening. It writes no triggers, meters or sense-link tables. Engine mode keeps its hand-authored packet, the Cells.
+**Why:** Ruled mode is the default (D75), and the third playtest preferred it by a lot. In ruled mode, triggers, meters, perception and fit don't run as rules, and they are exactly the parts a generated packet would most often get inconsistent. Leaving them out also keeps packets inside ruled mode's input budgets (D76).
+**Rules out:** Generated encounters in engine mode, unless a later decision adds the formal parts.
+
+### D117. The generator designs the whole encounter first, then encodes it in stages
+**Decided:** Generation runs in this order (`docs/spec/generation.md`):
+1. **seed:** code picks the ingredients (D118);
+2. **sketch:** one call writes the whole design in plain English;
+3. **critique:** one call tests the design (D120);
+4. **revise:** the sketch call again, given the critique;
+5. **encode:** calls that turn the sketch into packet data in stages, the engine validating after each;
+6. **layout:** code puts it on the grid.
+
+The sketch and the critique are the generator's own: they are on no play call's allowlist (D59), and the critique's plans are routes, so they are thrown away (`docs/spec/packet.md` §1). The calls are `sketch`, `critique` and `encode`; `encode` replaces the `generator` call name.
+**Why:** Interlock needs forward references. The key ring is interesting only because of the jailer's cycle, and the drum only because of the gutter rats. The packet's stages (objective, places, things, clock) are the order to encode and validate in. As a design order they would let each stage connect only to earlier ones, which produces elements that touch nothing. Designing in prose and encoding separately also splits creative work from formal work, as principle 3 splits deciding from narrating.
+**Rules out:** Designing an encounter stage by stage in packet order.
+
+### D118. Code picks each encounter's ingredients
+**Decided:** The engine draws each packet's seed with the campaign's seeded random generator:
+- **the kind:** encounter, room or campfire (D121, D122);
+- **for an encounter, its genre** (escape, infiltration, rescue, negotiation with a deadline, a mechanism, a fight with a setup, and the like) and **2–3 motifs** from the motif library (`content/motifs.js`);
+- **one or two of the act's mechanics** (`content/setting.js`), and the faction's alarm;
+- **whether a callback is allowed** (D123).
+
+It avoids genres and motifs the act has already used. A motif is a short pattern of how a situation is built, such as a needed object that moves between a person and a fixture on a cycle, or an alarm that is a physical thing with a weakness. It describes the world, never the party's routes. The sketch must connect the motifs to each other and may invent at most one element that comes from no motif. The sketch call sees only the chosen genre's promise and motifs, and one worked example of another genre. The library starts from the Cells and the reference encounters in `docs/design/encounter-craft.md`, and grows from generated packets the designer approves.
+**Why:** Asked for an encounter with no constraints, a model writes the average one, and the same one again next time: a locked door, a guard, a roll each. Models are good at combining, reskinning and connecting, and bad at inventing a good mechanism from nothing. The table picks the question and the AI answers it, so judgment stays where it matters: interlock, wants and properties. Slicing by genre keeps the prompt small as the range of encounters grows. Showing an example of a different genre teaches the quality bar without the shape to copy.
+**Rules out:** An unseeded "write an encounter" call; one generator prompt holding every genre; worked examples of the genre being generated.
+
+### D119. The sketch call's context comes in three tiers
+**Decided:**
+- **Must honour:** the hand-off (D21), including any attachment (D123), and the one-line stub for the next scene that the exit taken carries.
+- **Background:** the act's goal and mechanics, and the encounter log, one line per finished encounter, written by the engine when each one ended.
+- **The seed** (D118).
+
+Every packet's exits each carry a one-line stub for the next scene they lead to, so each encounter foreshadows the next.
+**Why:** The designer's idea: the generator should know the act's theme and what just happened, without anchoring on it. Telling a model not to anchor is a rule in a prompt, and it half-obeys. Structure does it instead: facts it must keep, colour it may use, and a seed that pushes it away from repeating itself. The log lines already exist and were written at the time. An AI-written "story so far" would be the rolling summary principle 4 rules out.
+**Rules out:** A summary of the act written by an AI; an instruction not to anchor.
+
+### D120. The critique plays a clever player, and a revision only cuts or connects
+**Decided:** The critique call reads the sketch and the party's abilities. It plays three genuinely different approaches (force, guile, and something odd), each walked clean and messy, and reports:
+- a clean run that produces nothing interesting;
+- one roll deciding the encounter;
+- an approach that hits a wall because nothing in its way has properties to work with;
+- one approach that plainly beats the others;
+- a party member with nothing only they can do;
+- an element no approach touched.
+
+Its plans also count ticks, which sizes the deadline: some exploring plus two recovered failures (D37), in ruled mode's time (D77). The revision may cut, connect or swap an element, never add one. Rooms and campfires skip the critique.
+**Why:** `docs/design/encounter-craft.md` §8 asks for two private runs, a clean one and a messy one. That is where an encounter's quality is found, and it needs a separate call to do it honestly. Without the cut-or-connect limit, critique-and-revise loops bloat, which is "add a mechanic to fix it" in miniature; the craft guide found the good versions had fewer branches and more connections. This is not the banned referee AI: it runs before play, and its output never reaches a play call.
+**Rules out:** A revision that adds elements; storing or sending the critique's plans.
+
+### D121. Rooms have time when it matters, and one outfit each
+**Decided:** Supersedes D22's "no ticks". A room has no objective, danger or deadline, and the party can leave at any time. Time passes with what the party does there (the Moment's time, D77), so a room can place events: at tick 5 the spring starts to glow, the sun sets. A room exists for something: a companion moment, a trade, a discovery, a hint about what's ahead. Mood and a companion moment are enough. Every room except a campfire holds exactly one outfit, themed on the room and placed in it as a thing. Taking it adds it to a companion's wardrobe (`addOutfit`, D86). The generator writes it for a companion in the party, from her file (D8). Outfits are cosmetic.
+**Why:** The designer's call (2026-11-03). Gravenhold's rooms were dead air when nothing happened in them. An outfit found in a strange room makes the room memorable, because the outfit carries it.
+**Rules out:** Outfits with mechanical effects, for now; rooms with an objective or a deadline.
+
+### D122. A campfire is a room where the party rests
+**Decided:** Campfires are rooms (D121) where the party rests. Resting recharges per-rest uses, the campfire scene plays (D45, D113), and relationships move. Each act's sanctuary (`content/setting.js`) is its main campfire, with one or two smaller rests in between. Code places them, never the AI.
+**Why:** The designer's call (2026-11-03). One kind of space with one loop is simpler than a separate mode. Placing rests in code keeps the AI from choosing when the party gets relief, which would be pacing by mood.
+
+### D123. What travels with the party lasts one encounter; what the world remembers comes back only through the seed
+**Decided:** The hand-off splits in two.
+- **Attachments** change who is in the party: an NPC travelling with it, a companion missing from it. An attachment carries into the next packet, which must say how it resolves. The NPC parts ways for reasons of their own; she rejoins when she's rescued, or after a failed rescue at a cost, never for good (D7). A packet that leaves one unresolved is rejected, and the engine drops every attachment when that encounter ends.
+- **The world's memory** is NPC fates, who saw the party, grudges and the alert. It is stored, but an NPC from it reappears only when the seed allows a callback (D118).
+
+**Why:** The designer's rule (2026-11-03): an NPC freed in the first room must not guide the party forever. Models keep whatever is in their context, so anything the hand-off carries tends to stay. A rule that nothing unique survives an encounter would also wipe out callbacks, which Act 5's mechanics promise ("allies freed earlier return and enemies spared come back"). Splitting the two keeps both.
+**Rules out:** Permanent companions beyond the two; a packet that ignores an attachment it was handed.
+
+### D124. No open spaces
+**Decided:** Every encounter and room is bounded. A large cavern, or a field ringed by cliffs, is one large zone with its ways out at the edges.
+**Why:** The designer's call (2026-11-03). It keeps every packet inside the size ceiling (D26) and the map's walls honest (D28), and it's where this game's decisions happen.
+**Rules out:** Generated wilderness, towns and cities.

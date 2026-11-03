@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 4 (The Cells, playable).** Phases 0–3 are done. Phase 4 is built; its playtests are next. Phase 5 is built too; only its campfire exit test is left.
+**Current phase: 7 (The generator).** Phases 0–5 are done. Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115).
 
 ---
 
@@ -88,6 +88,8 @@ Pure ES modules tested with `node --test`, with a seeded random number generator
 
 The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 
+**Closed** by the designer (D115). Its open questions below stay open and are answered in play, not as a gate. Lyra left the roster (D103) but the playable Cells still uses her as its own party member.
+
 **Exit:**
 - The rat plan gets the party out of their cells by exchange 4.
 - Across 5 playtests: no stalls, a median of 2 card edits or fewer, and no interruption that a playtester calls unfair (D36).
@@ -144,6 +146,8 @@ The companions (eight; the roster is open), the relationship model, configuratio
 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
+**Closed** by the designer (D115). The unchecked items below are judged in play.
+
 - [x] The relationship model, ported with Gravenhold's numbers as content (D80): `src/campaign/relationship.js`, `content/relationship.js`.
 - [x] Special cases as general mechanisms declared in each file (D81): `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes`.
 - [x] A schema for companion files, and tests that keep the roster open (D82): `schemas/companion.js`, `test/companions.test.js`.
@@ -186,34 +190,41 @@ The companions (eight; the roster is open), the relationship model, configuratio
 
 ## Phase 6: Act 1, hand-authored
 
-The Cells, plus 2–3 more packets including at least one room, and the hand-off between encounters (D21).
-
-**Exit:** Act 1 plays end to end from a new game.
-
-**Open questions**
-1. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
-2. **Does the engine hold up beyond the Cells?** Its mechanisms are general (nothing in `src/engine/` names a Cells id), but it has only met one packet, so its vocabulary is Cells-sized. Known narrow spots:
-   - **Recognizing a broken plan early** (D62) covers only an item missing from where the plan expects it. Other broken preconditions (a door now barred, a contact who has left) are caught only when the step reaches them.
-   - **Hazards** (fire, a trap, a collapsing floor) have no packet format, so the card's `hazards` is always empty.
-   - **A fight or an ending** is the only kind of trigger that interrupts a plan before its next step. A trigger that changes the situation some other way is met at the effect.
-   - **Movement** is checked only by size, hands and side. Climbing, swimming or flying are priced by judgment, which is right unless a packet needs one enforced.
-   - **Traits** the engine reads are named in code (`sees_in_dark`, `hears_through_walls`). A new sense needs code.
-   - **Layout facts** list distances between every pair of connections and placed things in a zone, which grows fast in a big room.
-
-   *Recommendation:* build at least one Act 1 packet deliberately unlike the Cells (a room, a hazard, an NPC who leaves, a door worked from one side), and extend the engine only where that real packet needs it. The generator must not start (Phase 7) until two differently shaped packets pass.
+Folded into Phase 7 (D115). Its questions moved there.
 
 ## Phase 7: The generator
 
-Built in stages, each validated by the engine before the next: objective and people → zones and geometry → things → clock → alarm ladder → opening description.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms with an outfit each (D121) and campfires (D122), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
-**Exit:** generated packets pass validation within one retry, and play comparably to the hand-authored Act 1 packets.
+**Exit:**
+- Generated packets pass validation within one retry, and stay inside ruled mode's budgets (D76).
+- On the bench, ten sketches from the same act read as different encounters, and the designer judges them comparable to the Cells.
+- The critique call finds the flaws planted in hand-made sketches in 4 of 5 runs.
+- Act 1 plays end to end from a new game: generated encounters, rooms with outfits, campfires, and every attachment resolved within one encounter.
+
+**Build order** (each judged on the bench before the next, as Phase 2 judged the play calls)
+1. **The motif library** (`content/motifs.js`): the Cells' motifs, and the heist's and the cavern's from `docs/design/encounter-craft.md`'s appendix. Each genre's promise.
+2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge. They're the only hand-written material (D115).
+3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
+4. **Sketch and critique** on a bench tab: generate ten sketches per seed, read them side by side, and plant flaws to test the critique. No encoding yet; this tests judgment, not code.
+5. **Encode** in stages, validated by the engine, and the layout from the sketch's rough sizes.
+6. **The hand-off:** attachments, the world's memory, next-scene stubs, and the outfit a room gives.
+7. **Play Act 1** from a new game.
 
 **Open questions**
-1. **Layout from a sketch.** *Recommendation:* the generator writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28). A layout step in code snaps that to the grid and validates it. Settle the sketch format here. If layout fails, the encounter ships without a map (D9).
-2. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, until playtests show which ones predict a bad encounter. A generator can satisfy a count like "every element connects to two others" without being good.
+1. **The sketch's format.** *Recommendation:* the shape of `fixtures/cells/walkthrough.md` §1 (intent, people table, routines, places as relationships, things and properties, fixed facts, hidden things, events, attachments, exits with stubs, what the opening shows), about 1–2 KB. Tables where the walkthrough has them.
+2. **A motif's format.** *Recommendation:* a name; the pattern in a paragraph; the decisions it creates (routing, timing, approach, what to keep, `docs/design/encounter-craft.md` §2); what it usually connects to; the genres it suits; and the encounter it came from. Never a route.
+3. **Act 1's genres.** *Recommendation:* from the act's mechanics (`content/setting.js`): escape, infiltration, a negotiation with a deadline, a mechanism or hazard, and a fight with a setup. In ruled mode a hazard is a fixed fact plus placed events, and a fight runs as the Moment's rounds, so none of these needs new engine rules.
+4. **Layout from a sketch.** *Recommendation:* the sketch writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28), and states any distance that matters as a constraint ("the peg within 5 ft of the stool"). Code snaps it to the grid and validates it. A failure goes back once, described as relationships; then the packet ships without a map (D9). No open spaces (D124).
+5. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, and go to the critique as facts, not to the sketch as rules. Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop the ones that test triggers, meters or sense links, which ruled packets don't have (D116).
+6. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
+7. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
+8. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
+9. **How many campfires an act.** *Recommendation:* one after every two or three encounters, with the act's sanctuary as the last. A starting value.
 
 ## Later
 
 Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
 
+- **A vibe at new game start.** The player types an adventure's vibe ("trapped in a creepy noble's masquerade, gothic eldritch horror", "an epic escape from hell"), and the campaign is built from it. Not a different world: the same companions and the same shape of five acts (trapped, crossing the working levels, uncovering the secret, the climax, getting out), with the factions, alarms, acts and enemy generated, and a short pitch the player can reroll. *What it needs first:* each companion's file split into a core that never changes and setting hooks the vibe rewrites in the same shape (Fern's is always "something alive and sacred is being exploited here, and she was caught defending it"). That is the romance pillar's content, so it's real work across every companion.
 - **Improvised structure** (D29). If playtests show players wanting to find features the packet doesn't have, revisit with the player-initiated version first: the DM judges the feature against the zone's purpose line and fixed facts, a "maybe" becomes a search check, and an `add_connection` operation places it.

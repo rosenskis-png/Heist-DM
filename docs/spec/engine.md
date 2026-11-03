@@ -155,7 +155,7 @@ There is no operation that adds a zone, a connection or a hidden thing (D29).
 - **Judge** plausibility, progress, "solved", NPC motives, or odds.
 - **Write prose.**
 - **Hold pacing formulas,** risk budgets or escalation curves (D4).
-- **Store or send routes.** The generator's private route check is thrown away.
+- **Store or send routes.** The critique call's plans are thrown away (D120).
 - **Invent entities or events.** It only runs what the packet and the AIs' validated outputs say.
 - **Name a companion.** Companion behaviour comes from her file (D8).
 - **Call an AI.** The call layer does that; the engine stays pure (D12).

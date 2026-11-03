@@ -143,7 +143,7 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
 
-She comes to own more in play (a gift, a find, a purchase) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state. Getting wet, torn or half-undressed is texture, not a change of outfit.
+She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state. Getting wet, torn or half-undressed is texture, not a change of outfit.
 
 ## 8. Not carried over
 - Betrayal (D7).
