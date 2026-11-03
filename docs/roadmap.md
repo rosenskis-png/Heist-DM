@@ -4,6 +4,8 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
+**Next thread: combat.** It's the biggest open design problem, and the reason the work so far has leaned on non-combat encounters. See "Combat" below. Decide it before the table is built, since fights run there.
+
 ---
 
 ## Done
@@ -22,7 +24,6 @@ Each phase's full record (findings, causes and fixes) is in git history; what it
 
 Not gates. Each is answered when play shows it.
 
-- **The table and action restructure** (the next UI build, discussed in Phase 4 and never built): one main tab for talk (narration, the DM, people and companions chiming in, all free), whispers, and an action tab for plans and fights. D79's briefs are what make one call voicing both companions safe.
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 - **Card leaks the engine can't see.** The engine rejects a card that names a hidden thing, but not one that describes it in plain words ("he's got them on his belt"). *Recommendation:* watch for it in playtests before adding anything.
 - **Call records for playtests.** *Recommendation:* during playtests the save keeps the last few dozen call outputs (not inputs) and the replay log, so a post-mortem can see what each call said; D10 still holds, since it's the player's own save.
@@ -31,6 +32,29 @@ Not gates. Each is answered when play shows it.
 - **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`). *Recommendation:* the page advances it once per player message in the huddle, the Moment or camp, and calls `endEncounter` with the hand-off.
 - **Beats outside camp.** Only the campfire reports beats (D80). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
 - **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. If Ember needs her own lines over the rings, the candidate needs a speaker.
+
+## Combat (the next thread)
+
+Not designed yet. What's true now: a fight runs in the Moment, a round at a time, through the scene call. The DM rules each round, rolls are bands the engine rolls, and HP lives in the ledger (enemies' from their sheet or their tier in `content/rules.js`). The engine's own combat rounds are retired (D125). Questions to answer, before building anything:
+1. **What makes a fight fun here instead of a slog?** The same test as any encounter (`docs/design/encounter-craft.md` §1): decisions whose consequences you can partly see, dice that settle what's left, and every outcome leading somewhere. A fight that's trading blows until HP runs out fails it.
+2. **What a round is.** One message where the player says what everyone does, or something more like a plan card for a fight? How many rounds a fight should take, and how it ends: down, fled, yielded, surrounded, the alarm.
+3. **The companions in a fight.** Does the player command them, or do they act from their own data, the way stances do? How they speak during a fight without a call per round (D127).
+4. **Cost.** One scene call per round on full context. Whether a fight gets a lighter slice or a cheaper tier, as questions do (D127).
+5. **A fight as the point of an encounter,** with a setup (D118's genre): terrain, positions, traps and a plan before it starts, and how the generator builds one.
+
+*Recommendation:* talk it through first, with the encounter craft guide and Gravenhold's combat rule (`content/rules.js`) as the starting points, and decide in `docs/decisions.md` before any code.
+
+## Next build: the table
+
+The screen and call design in D127, with ability uses (D128). Built after combat is decided, before Act 1 is played (Phase 7's step 7).
+
+**Build order**
+1. **The companion call for both.** One call voicing both companions from their briefs, each free to pass. On the bench, run the same huddle cases as one shared call and as two separate calls, and judge whether the two still sound like different people and still catch a flawed plan's holes some of the time (D38, D40). If the shared call loses that, keep two calls.
+2. **The read-only slice and the cheap tier** for questions to the DM, with `test/budget.test.js` holding its size.
+3. **Ability uses** (D128) in the ledger, the DM's calls and the sheet, with the campfire refill.
+4. **The two tabs,** the addressee picker and the call routing, then the specs (`docs/spec/ui.md`, `architecture.md`, `context.md`, the call specs) in the same commit.
+
+**Exit:** a question to the DM costs one cheap call; a table moment costs at most two; the companions' voices hold in a playtest; Fern can't Wild Shape twice before a rest.
 
 ## Phase 7: The generator
 
@@ -61,7 +85,6 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 7. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
 8. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
 9. **How many campfires an act.** *Recommendation:* one after every two or three encounters, with the act's sanctuary as the last. A starting value.
-10. **Ability uses in play.** Resting at a campfire recharges per-rest uses (D122), but nothing records a use while the DM rules: the ledger has no field for it, and `use_ability` is an operation only a packet runs. *Recommendation:* the DM's changes gain a `used` list (who, which ability), the engine counts it against the ability's `declared` uses and rejects one past its limit, and a campfire resets per-rest uses.
 
 ## Later
 

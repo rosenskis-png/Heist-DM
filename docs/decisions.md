@@ -662,3 +662,32 @@ These decisions now apply only as history: D16, D18, D19, D29, D34, D39, D42, D4
 **Decided:** Supersedes D65 and the part of D103 that kept Lyra as the Cells' party member. Lyra is gone. At setup the player chooses two companions from the roster. A packet never names a companion: it places them by slot (`companion_a`, `companion_b`), and loading binds each slot to the party's companions in order (`bindParty` in `src/engine/load.js`). The Cells puts `companion_a` in the middle cell and `companion_b` in the near cell, and its fail-forward ending takes whoever is in the middle cell.
 **Why:** The roster is open (D8), and a packet that names companions works only for that party. The generator needs the same mechanism for every packet it writes (D121).
 **Rules out:** Companion ids in packets; a fixed party for any encounter.
+
+### D127. The table: one talk tab, the rings for all party talk, and code decides which calls run
+**Decided:** The designer's call (2026-11-03). The next screen build replaces the Plan, Moment and Companions tabs with two:
+- **The table,** the main tab: narration, the DM's answers, people talking and the companions chiming in, as one running chat. The player picks who a message is for: the DM, a person in the encounter, or the party.
+- **Plans:** the draft, the card, the dice and the outcome. Committing a plan stays a deliberate act with stakes, kept apart from talk.
+
+**Party talk is always over the whisper rings,** as players at a real table talk without the enemies hearing. Only words the player addresses to a person in the encounter are said aloud in the world. Time stays paused while the party talks (the huddle's rule), so deliberation never moves the world.
+
+**Code decides which calls a message runs,** from who it's for:
+
+| The player | Calls |
+|---|---|
+| asks the DM | the DM's scene call only, on the cheapest tier, with the read-only slice |
+| speaks to a person, or does something | the scene call, then the companions |
+| talks to the party | the companions only |
+| acts in a fight round | the scene call only; the player says what everyone does |
+| drafts a plan | the companions react; the card and the account are the DM's calls |
+
+**The companions share one call,** voicing both from their briefs (D79, D114), after the DM's answer, each free to pass. In an encounter both know the same things (the rings pool what the party knows, and secrets stay at camp), so a shared call leaks nothing. The wall that matters, between the DM who sees hidden things and the party who doesn't, stays. A private word to one companion calls her alone.
+
+**A question to the DM gets a slice:** places, ways, things, fixed facts and the ledger, without people's sheets, reaction notes, the timeline or the companions. It changes nothing in the world, so it doesn't need the whole encounter. Anything that changes the world still sees it all (principle 4).
+
+The specs change when this is built (`docs/roadmap.md`); until then they describe what's built.
+**Why:** The three tabs split one conversation at the table, and sending every message through every call makes a small question cost as much as a scene. The platform offers no prompt caching (D2), so the levers are fewer calls, smaller inputs and cheaper tiers, chosen by structure rather than judgment. One companion call instead of two halves their cost and lets their lines answer each other.
+**Rules out:** The DM writing companions' dialogue; a call that sees both hidden things and a companion's voice; talk at the table that enemies overhear.
+
+### D128. The engine counts ability uses, and rest refills them
+**Decided:** The DM's changes gain a `used` list (who, which ability). The engine counts each against the ability's `declared` uses (D30) and sends back one past its limit, for the retry. Every DM call and the character sheet show what's left ("Wild Shape: 0 of 1"). Per-encounter uses refill when an encounter ends, and per-rest uses at a campfire (D122). Whether an ability fits the situation stays the DM's judgment.
+**Why:** With the engine's pipeline gone (D125), nothing counted a use, so a limited ability was unlimited, and campfires had nothing to refill. The count is bookkeeping, so it belongs in code (principle 2).
