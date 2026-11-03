@@ -78,7 +78,7 @@ async function load() {
   const cls = classes[cases.player_class];
   const party = [{ id: "player", name: cls.name, role: "The player", skills: cls.mods, abilities: cls.abilities }];
   for (const id of cases.party.filter((p) => p !== "player"))
-    // A roster companion, or a fixture-only party member such as the Cells encounter's Lyra (D88).
+    // A roster companion, or a fixture-only party member such as the Cells encounter's Lyra (D103).
     party.push((await import(url(roster[id] ? `content/companions/${id}.js` : `fixtures/cells/${id}.js`))).default);
   const { map, people } = packet;
   const sched = people.find((p) => p.schedule)?.schedule;
@@ -237,12 +237,12 @@ async function runHuddle(c, schema, tier) {
 }
 
 // A campfire case: any two companions from the roster and the relationship state the case gives. One on one is
-// one call. With both, it's two calls in speaking order (D70), the second seeing the first's answer and, if that
+// one call. With both, it's two calls in speaking order (D85), the second seeing the first's answer and, if that
 // moved nothing, required to. The engine checks each answer (one retry), then applies it.
 function campfireSetup(c) {
   const members = resolveParty(c.party.map((id) => roster[id]));
   const romance = { ...Rel.newRomance(members, pairs), ...c.romance };
-  // A case's payoff means they're lovers now unless it says otherwise (D81).
+  // A case's payoff means they're lovers now unless it says otherwise (D96).
   for (const [id, r] of Object.entries(c.rel)) romance.rel[id] = { ...Rel.newRel(), ...(r.payoff ? { involved: true } : {}), ...r, toward: Rel.axes(r.toward ?? romance.rel[id]?.toward), read: Rel.axes(r.read ?? romance.rel[id]?.read) };
   let out = romance;
   for (const [who, owned] of Object.entries(c.outfits ?? {})) for (const [id, o] of Object.entries(owned)) out = addOutfit(out, who, id, o);
@@ -273,7 +273,7 @@ async function runCampfire(c, schema, tier) {
     turn.tracks = ["heat", "intimacy", "regard", "lean"].map((k) => `${k} ${Math.round(b[k] * 10) / 10}→${Math.round(x[k] * 10) / 10}`).join(", ") + "; " + ["affection", "respect", "trust"].map((k) => `${k} ${b.toward[k]}→${x.toward[k]}`).join(", ");
     turn.stage = `${Rel.stage(b, self)} → ${Rel.stage(x, self)}`;
     romance = after;
-    // What the other companion sees of it (D80, D93): the shared scene, words meant for her, and a hidden action only
+    // What the other companion sees of it (D95, D108): the shared scene, words meant for her, and a hidden action only
     // if she caught it, as plain scene text.
     const w = Rel.catchAside(romance, r.out, where);
     romance = w.state;
@@ -651,10 +651,10 @@ async function start() {
 // through the engine's checks and is applied, so the numbers move as the scene does. Kept in this browser only.
 
 const camp = store.get("bench.camp", null) ?? { a: "nadia", b: "fern", with: "both", log: "", romance: null, transcript: [], looks: {} };
-// A relationship state saved before the three axes and beliefs (D77, D81) starts over; the transcript stays.
+// A relationship state saved before the three axes and beliefs (D92, D96) starts over; the transcript stays.
 if (camp.romance && Object.values(camp.romance.rel ?? {}).some((r) => !r.toward)) camp.romance = null;
 camp.to ??= "all";
-// Who is really at the fire when he sits with one of them, if a shapeshifter came in her place (D86).
+// Who is really at the fire when he sits with one of them, if a shapeshifter came in her place (D101).
 camp.disguise ??= null;
 
 // Shortcuts for Camp: a general vibe in one pick, adjustable after. Toward the player sets heat, intimacy, regard
@@ -692,7 +692,7 @@ const PRESETS_OTHER = [
   { name: "Suspicious", toward: { affection: 1, respect: 1, trust: -7 } },
 ];
 
-// ---------- reading Camp aloud (D89) ----------
+// ---------- reading Camp aloud (D104) ----------
 camp.voices ??= {};
 // Every voice in the scene: each companion, her second voice if she has one, and the narrator.
 const campSpeakers = () => campMembers().flatMap((c) => [c.id, ...(c.secondVoice ? [`${c.id}:second`] : [])]);
@@ -718,7 +718,7 @@ Speech.voices(() => {
 });
 
 // Sitting with one companion alone: a shapeshifting other may come in her place. "Force" makes her come.
-// Changing who's at the fire continues the same chat (D98): any whisper target resets, and who really comes is decided
+// Changing who's at the fire continues the same chat (D113): any whisper target resets, and who really comes is decided
 // once, for the whole private scene. A companion never sees a private scene she wasn't in.
 function campChooseWith(value) {
   camp.with = value;
@@ -739,7 +739,7 @@ function campChooseWith(value) {
   saveCamp();
 }
 const campName = (t) => (t.as ? (camp.reveal ? `${roster[t.from].name} (as ${roster[t.as].name})` : roster[t.as].name) : roster[t.from].name);
-// Camp is saved in this browser, and the latest scene also goes to the artifact's db (D96), one document that each
+// Camp is saved in this browser, and the latest scene also goes to the artifact's db (D111), one document that each
 // save overwrites, so the design thread can read the scene being troubleshot and nothing older piles up. Full inputs
 // are kept only for the last two answers; the rest keep their outputs, problems and retries.
 let latestTimer;
@@ -782,10 +782,10 @@ function campReset() {
   saveCamp();
 }
 
-// An aside's kind (D93); saves from before it was a kind held true or false.
+// An aside's kind (D108); saves from before it was a kind held true or false.
 const asideOf = (g) => (g.aside === true ? "action" : g.aside || "no");
 
-// What the scene has said so far, as `viewer`'s next call reads it (D80, D93). The player's ring whispers reach only
+// What the scene has said so far, as `viewer`'s next call reads it (D95, D108). The player's ring whispers reach only
 // the one he whispered to. A companion's ring words to him reach no one else; her words to the other over the rings
 // reach the other; a hidden action reaches the other only if caught, and then as plain scene text, unflagged.
 function campScene(viewer) {
@@ -817,7 +817,7 @@ async function campSend(text, status) {
   const both = camp.with === "both";
   // A whisper target only counts if she's one of the two here (an old save could name someone else).
   const whisper = both && [camp.a, camp.b].includes(camp.to) ? camp.to : null;
-  // A whisper goes to one of them over the rings, silently: she answers, and the other never hears it (D93).
+  // A whisper goes to one of them over the rings, silently: she answers, and the other never hears it (D108).
   const ids = whisper ? [whisper] : both ? [camp.a, camp.b] : [camp.disguise?.actor ?? camp.with];
   // Who was really there: both, or the one he sat with (the shapeshifter, if she came in that one's place).
   const present = both ? "both" : camp.disguise?.actor ?? camp.with;

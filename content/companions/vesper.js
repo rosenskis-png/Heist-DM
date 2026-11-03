@@ -60,14 +60,14 @@ export default {
       "starts feeding elsewhere, pointedly, and loses interest in his fate",
   },
   leanFromHeat: true,
-  // Cruelty toward the other companion, at her own threshold of hate (D94).
+  // Cruelty toward the other companion, at her own threshold of hate (D109).
   notes: [
     {
       when: [{ affection: ["<=", -5] }],
       text: `She hates the other companion enough to be cruel: she tastes the other's jealousy and insecurity and narrates them aloud, with humiliating precision, as if it were flirting.`,
     },
   ],
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "A boundary is a dare with good manners. She stops what he says to stop in front of others, and goes after the want she can taste underneath it in private.",
   honesty: "Honest about desire, always: she says exactly what she tastes. About anything else she lies as easily as she breathes, and enjoys it.",

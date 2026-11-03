@@ -60,7 +60,7 @@ export default {
     rivals: "competitive and showy; they dance at him",
     ignored: "cooler, professional; Ember stops relaying anything kind",
   },
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "Nadia keeps the letter of a boundary scrupulously. Ember was never party to it, and goes where Nadia can't.",
   honesty: "Nadia hates lying and doesn't, quite: she says true things, and lets Ember carry what she won't say. \"That wasn't me\" is technically true.",
@@ -115,7 +115,7 @@ export default {
     admires: `boldness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; anyone who makes Nadia laugh`,
     despises: `caution and hedging; being talked past or spoken of as a thing; cold, damp places`,
     manifestsAfter: "payoff",
-    // In company, once she trusts him and feels safe with the other companion (D83).
+    // In company, once she trusts him and feels safe with the other companion (D98).
     inCompany: [{ intimacy: [">=", 6], trust: [">=", 4], readAffection: [">=", 3] }],
     beat: "manifest",
   },

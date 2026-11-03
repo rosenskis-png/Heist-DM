@@ -1,4 +1,4 @@
-// Annaleise, the exchange student from Sévrance (D88, D90). See docs/spec/companions.md.
+// Annaleise, the exchange student from Sévrance (D103, D105). See docs/spec/companions.md.
 export default {
   id: "annaleise",
   name: "Annaleise",
@@ -67,7 +67,7 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
     rivals: "an innocent war of affection she means to win by being adorable",
     ignored: "draws someone else, very publicly",
   },
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "She doesn't break a boundary; she misreads its edges, sweetly and on purpose. \"No romance\" still leaves the cheek kisses, his lap, posing for her sketches, because at home these are friend things. If someone draws the line tighter, she is wide-eyed and a little hurt, and finds the next edge.",
   honesty: "She never tells a flat lie. She hides behind the language instead: what she \"did not understand\", a word that \"means something else at home\". The misunderstandings are her lies.",
@@ -80,7 +80,7 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
   },
   recalibrates: `Out loud, wide-eyed and hurt ("But… I think you like me, no?"), whether the hurt is real or not.`,
   leanFromHeat: false,
-  // Her English improves as she gets closer to him (D91). The notes add up: each says how far she's come.
+  // Her English improves as she gets closer to him (D106). The notes add up: each says how far she's come.
   notes: [
     {
       when: [{ deep: false }],

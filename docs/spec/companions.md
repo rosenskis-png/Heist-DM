@@ -19,19 +19,19 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 
 | Group | Fields |
 |---|---|
-| Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D89), `blurb` |
+| Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D104), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
 | Look | `look` (her body and face), `outfit` (what she usually wears), and optionally `wardrobe`: other outfits she owns from the start (§7) |
 | Story | `why`, `first`, `quest`, `questAct` |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
-| How she gets what she wants | `boundaries` (what she does with a no), `honesty` (when and how she lies), `means` (what she'll do), `whenRefused` (what she shows, and what she resolves inside). Fern is the honest baseline (D92). |
+| How she gets what she wants | `boundaries` (what she does with a no), `honesty` (when and how she lies), `means` (what she'll do), `whenRefused` (what she shows, and what she resolves inside). Fern is the honest baseline (D107). |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
 | Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first), `hunch` (a belief about the situation, phrased as a hint, that steers what her call attends to). Her call gets `hunch` and `reaches_for` only; `sees` and `misses` describe her bias for the designer and the bench (D50). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
 | Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
-| Special cases | optional, declared: `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes` (§6, D66). |
+| Special cases | optional, declared: `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes` (§6, D81). |
 
-The exact shape is `schemas/companion.js`, and `node --test` checks every file in the registry against it (D67).
+The exact shape is `schemas/companion.js`, and `node --test` checks every file in the registry against it (D82).
 
 Text inside profiles may mention other companions by name (Fern's rule about Lisa and her sister). That's fine: it's characterization, not code.
 
@@ -41,7 +41,7 @@ Gravenhold revealed parts of a profile as the relationship grew. Keep that, as e
 
 Each channel sends an allowlist of fields (D59): the huddle and the campfire send identity, fantasy, look, voice, depth, rules, skills and abilities (effect text only), gated as below, plus her special cases as resolved for the party and scene (§6). The huddle adds `planning.hunch` and `reaches_for`. Fields on no list, such as `color`, `rate`, `leanFromHeat`, a tie's `image`, and any special-case data the engine hasn't resolved, are never sent. Code: `ownProfile` in `src/context.js`.
 
-The gates are data (`reveal` in `content/relationship.js`, D65):
+The gates are data (`reveal` in `content/relationship.js`, D80):
 
 | Field | Sent when (Gravenhold's thresholds) |
 |---|---|
@@ -61,28 +61,28 @@ Port the fields; write the judgment fresh in `prompts/companion.md`, drawing on 
 
 ## 4. Relationship model
 
-Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`) with two changes: scoring input (§5), and no betrayal (D7). Every number and label below is in `content/relationship.js` (D65); the rules are `src/campaign/relationship.js`, pure, tested by `test/companions.test.js`.
+Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`) with two changes: scoring input (§5), and no betrayal (D7). Every number and label below is in `content/relationship.js` (D80); the rules are `src/campaign/relationship.js`, pure, tested by `test/companions.test.js`.
 
 **Tracks, per companion**
 - `heat` 0–12: the shallow fulfilment, earned fairly quickly. Its payoff happens only when READY allows it.
 - `intimacy` 0–10: the slow burn: opening up, vulnerability, love.
 - `regard` −10..10: general approval. At −5 or below she is hurt.
-- Heat, intimacy and regard below +2 rise by 1 after any campfire answer that doesn't change them (D78).
+- Heat, intimacy and regard below +2 rise by 1 after any campfire answer that doesn't change them (D93).
 - `lean` 0–10: toward her dark branch.
 - Flags: `payoff`, `involved` (lovers now), `vuln`, `deep`, `bond`, `hurt`, `manifest`, plus the memory of what she leaves unsaid.
-- `believes`: about him and the other companion, `past` (ever involved) and `current` (involved now). Only her own campfire output, and the `in_the_open` beat, change it; it can be wrong (D81).
-- `storm`: her level on a declared escalation, 0 when calm (D82).
-- `noticed`: asides of the other's she caught, for her next call only (D80).
-- `agenda`: her private plan in a line, set by her campfire output and seen only by her own calls (D92).
-- `form` (a shapeshifter's current look), `knowsShifter` (she knows the other can shift), `absent` (turns someone wore her face) (D86).
+- `believes`: about him and the other companion, `past` (ever involved) and `current` (involved now). Only her own campfire output, and the `in_the_open` beat, change it; it can be wrong (D96).
+- `storm`: her level on a declared escalation, 0 when calm (D97).
+- `noticed`: asides of the other's she caught, for her next call only (D95).
+- `agenda`: her private plan in a line, set by her campfire output and seen only by her own calls (D107).
+- `form` (a shapeshifter's current look), `knowsShifter` (she knows the other can shift), `absent` (turns someone wore her face) (D101).
 
-**Per companion, toward the other** (D77): her view of the other on three axes, `affection`, `respect` and `trust`, each −10..10, starting from the pair's `start` in `content/pairs.js` (one number for both or each one's own view keyed by id; a view is one number, meaning affection, or the axes) or from a tie (§6). Her read of the other's view on the same axes starts right, unless the other declares a mask, and only her own campfire output moves it, so it can be wrong (D76). Each moves at most 2 an answer, less within declared `limits`. No call or gate ever sees the other's real feelings.
+**Per companion, toward the other** (D92): her view of the other on three axes, `affection`, `respect` and `trust`, each −10..10, starting from the pair's `start` in `content/pairs.js` (one number for both or each one's own view keyed by id; a view is one number, meaning affection, or the axes) or from a tie (§6). Her read of the other's view on the same axes starts right, unless the other declares a mask, and only her own campfire output moves it, so it can be wrong (D91). Each moves at most 2 an answer, less within declared `limits`. No call or gate ever sees the other's real feelings.
 
 **Party-level:** `open` (where everyone stands with him is out in the open), `shared` (all three are openly together), the campaign `turn` (one per exchange with the player), the act, and the seeded roll for catching asides.
 
-**What her call reads** (D79): every number with a stance sentence from `stances` in `content/relationship.js`.
+**What her call reads** (D94): every number with a stance sentence from `stances` in `content/relationship.js`.
 
-**Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat keeps moving; for a companion with `leanFromHeat`, heat gained then also feeds lean, and intimacy gained after the payoff draws lean back down (D78). She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
+**Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat keeps moving; for a companion with `leanFromHeat`, heat gained then also feeds lean, and intimacy gained after the payoff draws lean back down (D93). She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
 
 **READY** (code decides what may happen):
 - `payoff` once heat ≥ `payoff.at`, the turn count ≥ `minTurns`, and the act ≥ `minAct`;
@@ -91,9 +91,9 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 
 Nothing is ready while she's hurt.
 
-**Beats** (reported by the campfire when they really happen on the page, D65): the READY ones, plus rupture, repair (only while hurt), breakup (while involved), rekindle (after a breakup), in_the_open (with all three present, until it has happened), shared (both involved, and no tie rules it out), and declared beats (§6). The engine applies them in order, each checked when it's reached, so a payoff can make the beat that follows it possible in the same scene. A beat that isn't allowed goes back for the one retry (D13).
+**Beats** (reported by the campfire when they really happen on the page, D80): the READY ones, plus rupture, repair (only while hurt), breakup (while involved), rekindle (after a breakup), in_the_open (with all three present, until it has happened), shared (both involved, and no tie rules it out), and declared beats (§6). The engine applies them in order, each checked when it's reached, so a payoff can make the beat that follows it possible in the same scene. A beat that isn't allowed goes back for the one retry (D13).
 
-**Configurations** (D81): the love-triangle state as she sees it, from her own involvement and her beliefs, never the truth about him and the other. One of: chosen, former, cheatedOn, affair, rivals, shared, thirdwheel, secondfiddle, ignored, open. Each companion's `react` gives her reaction to each except open (former is optional).
+**Configurations** (D96): the love-triangle state as she sees it, from her own involvement and her beliefs, never the truth about him and the other. One of: chosen, former, cheatedOn, affair, rivals, shared, thirdwheel, secondfiddle, ignored, open. Each companion's `react` gives her reaction to each except open (former is optional).
 
 **Stage labels** (for the UI): Strangers → Friends / Drawn → Burning → Lovers / Opening up → Bonded / In love (Indulging and Consumed when lean runs high), with Hurt overriding. A companion can override the wording (§6).
 
@@ -114,28 +114,28 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 **Remove:** delete the file and its registry line. Entries that name her in `pairs.js` or in another companion's `tie.by` are simply ignored.
 
-**Rules that keep this true** (checked by `test/companions.test.js`, D67)
+**Rules that keep this true** (checked by `test/companions.test.js`, D82)
 - Engine code, schemas and prompts never name a companion.
-- A missing pair entry is normal: the pair starts at 0, and each companion judges the dynamic from her own profile and the other's public profile (D68).
+- A missing pair entry is normal: the pair starts at 0, and each companion judges the dynamic from her own profile and the other's public profile (D83).
 - A companion that depends on another declares the dependency in her own file.
 
-**Special cases** (D66). Each is a general mechanism; any companion can declare one. The engine resolves it for the current party and scene, and only the result reaches a prompt.
+**Special cases** (D81). Each is a general mechanism; any companion can declare one. The engine resolves it for the current party and scene, and only the result reaches a prompt.
 
 | Declaration | What it does | Example |
 |---|---|---|
-| `tie: { required, set, append, toPartner, triangle, start, partnerStart, mask, limits, secret, mirrorsWhenOpen, by: { <other id>: { set, append, gift, bond, partnerReacts, secret, image } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.shared: false` rules out the shared beat. `start` and `partnerStart` give both starting views, `mask` the view her partner believes she holds, `limits` cap her view of her partner until their `until` beat, `secret` reaches only her call, and `mirrorsWhenOpen` hands her her partner's pursuit once everything is in the open (D84). With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `image` is for the parked portraits and reaches no prompt. | Lisa and her older sister |
-| `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter?, inCompany?, beat }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private she may take her own body (`look`); whether she does is the scene's call (D72). With the optional `manifestsAfter`, she can only once that flag is set or ready. With the optional gate `inCompany`, she may also speak and take her own body in company, in person (D83). `beat` is reported the first time she does. | Nadia's Ember |
+| `tie: { required, set, append, toPartner, triangle, start, partnerStart, mask, limits, secret, mirrorsWhenOpen, by: { <other id>: { set, append, gift, bond, partnerReacts, secret, image } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.shared: false` rules out the shared beat. `start` and `partnerStart` give both starting views, `mask` the view her partner believes she holds, `limits` cap her view of her partner until their `until` beat, `secret` reaches only her call, and `mirrorsWhenOpen` hands her her partner's pursuit once everything is in the open (D99). With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `image` is for the parked portraits and reaches no prompt. | Lisa and her older sister |
+| `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter?, inCompany?, beat }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private she may take her own body (`look`); whether she does is the scene's call (D87). With the optional `manifestsAfter`, she can only once that flag is set or ready. With the optional gate `inCompany`, she may also speak and take her own body in company, in person (D98). `beat` is reported the first time she does. | Nadia's Ember |
 | `extraBeats: [{ id, cooldown?, once?, when?, text, cooling? }]` | A beat of her own, allowed once `cooldown` campaign turns have passed since the last, only once with `once`, and only while the gate `when` holds. Her campfire call gets `text` while it's allowed and `cooling` while it isn't. | Lisa's reconciliation |
-| `escalation: { name, tiers, rises, calms, actsOnOther? }` | A state that builds and falls slowly (D82): `rises` says what starts and raises it (D94); her call sees her level and every tier, says where it stands after each answer, and it falls at most one level an answer. From `actsOnOther`, she may act physically on the other companion. | Ruby's storms |
-| `inOthers: { affection, respect, trust }`, `recalibrates` | How she judges the other companion on each axis, and how she takes a wrong read (D79). | Fern loses respect, never fondness |
-| `limits: { <axis>: [lo, hi], perScene }` | Limits on her view of any other companion (D77). | Fern's affection never falls below 0 |
-| `mask` | The view others believe she holds of them at the start (D84). | |
-| `fixed: { <track>: value }`, `reveal: { <field>: gate }` | Tracks that never move, and her own gates for gated fields (D85). | The zealot's devotion |
-| `shapeshift: { text, impersonation: [{ chance, when? }] }` | She can change her shape, reporting her new look as `form`, and may come in the other companion's place when the player sits with that one alone (D86). A tie entry's `grants` gives a special case with one partner only. | The shapeshifter, and Lisa as her sister |
+| `escalation: { name, tiers, rises, calms, actsOnOther? }` | A state that builds and falls slowly (D97): `rises` says what starts and raises it (D109); her call sees her level and every tier, says where it stands after each answer, and it falls at most one level an answer. From `actsOnOther`, she may act physically on the other companion. | Ruby's storms |
+| `inOthers: { affection, respect, trust }`, `recalibrates` | How she judges the other companion on each axis, and how she takes a wrong read (D94). | Fern loses respect, never fondness |
+| `limits: { <axis>: [lo, hi], perScene }` | Limits on her view of any other companion (D92). | Fern's affection never falls below 0 |
+| `mask` | The view others believe she holds of them at the start (D99). | |
+| `fixed: { <track>: value }`, `reveal: { <field>: gate }` | Tracks that never move, and her own gates for gated fields (D100). | The zealot's devotion |
+| `shapeshift: { text, impersonation: [{ chance, when? }] }` | She can change her shape, reporting her new look as `form`, and may come in the other companion's place when the player sits with that one alone (D101). A tie entry's `grants` gives a special case with one partner only. | The shapeshifter, and Lisa as her sister |
 | `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Any companion's own stage names |
-| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D76), `believesPast`, `believesCurrent`, `open`, `storm`, `knowsShifter`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
+| `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D91), `believesPast`, `believesCurrent`, `open`, `storm`, `knowsShifter`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
-## 7. Wardrobe (D71)
+## 7. Wardrobe (D86)
 
 An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
 

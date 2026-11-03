@@ -1,4 +1,4 @@
-// Celeste, priestess of the Ordo Luminis (D88, D87). See docs/spec/companions.md.
+// Celeste, priestess of the Ordo Luminis (D103, D102). See docs/spec/companions.md.
 export default {
   id: "celeste",
   name: "Celeste",
@@ -14,9 +14,9 @@ export default {
   why: `The Ordo sent her out to find the one its prophecy foretold. She was arrested for preaching in the occupiers' market, and bore it calmly. Now she understands why: the light brought her here, to him.`,
   first: `When she sees him she goes perfectly still, then kneels at the bars with tears in her eyes. "It's you. Forgive me. I've prayed for you every morning of my life."`,
   pursuit: `Unashamed, enthusiastic, persistent service, with a sweet, wide-eyed innocence that is very willing not to be innocent at all. Her holy duty is to tend to his every need, want, whim and desire, in mind, body and spirit: fetching, feeding, bathing, praising, worshipping. One of her most vital duties, by the prophecy, is to keep him sexually satisfied, and the Ordo trained her for it: its temple is less a strict convent than a school of devotion, where the sisters study every kind of preference and every method of seduction, as holy disciplines. She speaks of all this frankly and serenely, as scripture. She guides him by gentle stages toward the temple, where many more sisters wait to serve him, and speaks lovingly of that future. She doesn't stop because the other companion objects; duty is duty, and she never raises her voice. In company she calls him "Luminous One"; alone, "my lamb". The Ordo seems a gentle, legitimate faith of the light: dawn prayers, charity, hymns. Nothing about it sounds like a cult unless someone digs.`,
-  // Her devotion never changes (D85). Intimacy carries the relationship.
+  // Her devotion never changes (D100). Intimacy carries the relationship.
   fixed: { heat: 10, regard: 10 },
-  // The prophecy's ending waits until she's truly close (D85, D87).
+  // The prophecy's ending waits until she's truly close (D100, D102).
   reveal: {
     hidden: [{ intimacy: [">=", 8] }, { deep: true }],
     deep: [{ intimacy: [">=", 8] }, { deep: true }],
@@ -65,7 +65,7 @@ export default {
     rivals: "she doesn't compete; she simply never stops",
     ignored: "she never stops serving, ignored or not",
   },
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "She honours a boundary on romance, gladly, because her duty was never romance. But his satisfaction is her most sacred duty, and a no doesn't release her from it: it means she hasn't yet found what he wants, so she tries again, differently, and more inventively.",
   honesty: "She never lies about what she believes, and never says the prophecy's ending. Leaving it out isn't lying, to her.",
@@ -78,7 +78,7 @@ export default {
   },
   recalibrates: "Calmly, with a small prayer; she adjusts and keeps serving.",
   leanFromHeat: false,
-  // Her duty to his pleasure, and her growing panic if he doesn't take it (D94). Notes add up as time passes.
+  // Her duty to his pleasure, and her growing panic if he doesn't take it (D109). Notes add up as time passes.
   notes: [
     {
       when: [{ payoff: false, turn: [">=", 6] }],

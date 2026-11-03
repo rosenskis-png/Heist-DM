@@ -1,4 +1,4 @@
-// Text to speech (D89): the pure parts of src/ui/speech.js, with plain voice objects.
+// Text to speech (D104): the pure parts of src/ui/speech.js, with plain voice objects.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { rank, assign, chunks, score, idOf, labelOf } from "../src/ui/speech.js";

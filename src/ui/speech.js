@@ -1,4 +1,4 @@
-// Text to speech (D89), ported from Gravenhold's `Speech` (legacy/gravenhold.src.js 2737–2837). Browser only: it
+// Text to speech (D104), ported from Gravenhold's `Speech` (legacy/gravenhold.src.js 2737–2837). Browser only: it
 // uses the Web Speech API and touches no engine state. The ranking and assignment are pure and tested with plain
 // voice objects ({ name, lang, voiceURI, localService }).
 

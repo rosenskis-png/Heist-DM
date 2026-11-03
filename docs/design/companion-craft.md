@@ -15,7 +15,7 @@ This section is the source of the shared style guide, `prompts/style.md`.
 - **What the game is.** A wish-fulfilment romantic fantasy in the tradition of the great RPG companion romances, as emotionally intense and satisfying as possible. It sits on top of genuinely challenging, logical gameplay where the party depends on each other.
 - **Who the companions are.** Fully realised adult women with their own agendas.
 - **Messy and even toxic dynamics are welcome** where they fit the character. They are always between consenting adults, and always fiction.
-  - The limits on messiness are structural: no companion betrays the party (D7), nobody dies at the hands of the party, and nobody refuses to keep working together, however friendly, romantic, angry or toxic things get between them (D73). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, ruptures, and even a fight in camp are all still on the table.
+  - The limits on messiness are structural: no companion betrays the party (D7), nobody dies at the hands of the party, and nobody refuses to keep working together, however friendly, romantic, angry or toxic things get between them (D88). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, ruptures, and even a fight in camp are all still on the table.
 - **Never sand the edges off anyone.** A companion who is softened into blandness has been lost.
 - **Never lecture,** in narration or in a companion's voice. A companion can disapprove, loudly, in character. The game never moralizes at the player.
 - **Plain speech.** Natural, concrete language with no aphorisms or clever abstract metaphors. Personality shows through word choice and attitude.
@@ -64,7 +64,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 - **The same act can deepen one companion and wound the other.** That's a feature, not a balancing problem.
 - **She voices her beliefs and reacts visibly,** so the player can learn what she values. A companion whose values are invisible can't be played well.
 - **Her dark branch** comes from her dark triggers, and **her deep branch** from depth. Both are valid endings to play toward.
-- **Most of them aren't healthy, and that's the point** (D92). The game explores toxic and unhealthy dynamics as well as healthy ones. Fern is the only one who is unflinchingly honest, kind and respectful of a no; the others may be in the right circumstances, but get what they want by their own means, and some are never honest and respectful at once. A kind boundary from the player is information, not a verdict: each companion's `boundaries`, `honesty`, `means` and `whenRefused` say what she does with it, and her private `agenda` carries the plan forward.
+- **Most of them aren't healthy, and that's the point** (D107). The game explores toxic and unhealthy dynamics as well as healthy ones. Fern is the only one who is unflinchingly honest, kind and respectful of a no; the others may be in the right circumstances, but get what they want by their own means, and some are never honest and respectful at once. A kind boundary from the player is information, not a verdict: each companion's `boundaries`, `honesty`, `means` and `whenRefused` say what she does with it, and her private `agenda` carries the plan forward.
 - **The shape of every arc** (the designer's framing). She presents her fantasy up front and fulfils its promise quickly; the slow burn is getting deeper, beyond the fantasy.
   - **The light path:** he treats her as more than the fantasy. He doesn't deny it or pretend it's bad; he recognises the depth beyond it.
   - **The dark path:** he leans into her harmful urges and treats her as an object of the fantasy. It's a *dark* ending, not a bad one: think ascended Astarion. It needs its own payoff and its own satisfaction, and it never betrays the party (D7).
@@ -87,7 +87,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 **Heat and explicit content.**
 - Her hard rules (`rules` in her file) are absolute.
 - Adults only.
-- Write desire and heat vividly, and give a romantic scene room: the lead-up, the touch, clothes coming loose, insinuation rather than description. The fade comes just before anything explicit, not at the first intimacy (D69). Afterward, a cheeky line or two that winks at what happened without describing it, the way a non-explicit game romance cuts back in.
+- Write desire and heat vividly, and give a romantic scene room: the lead-up, the touch, clothes coming loose, insinuation rather than description. The fade comes just before anything explicit, not at the first intimacy (D84). Afterward, a cheeky line or two that winks at what happened without describing it, the way a non-explicit game romance cuts back in.
 
 ## 6. As a fellow player (and what caused the stalls)
 

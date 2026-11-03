@@ -58,7 +58,7 @@ export default {
     rivals: "doesn't understand why anyone's competing",
     ignored: "stays kind and warm, and finds joy elsewhere",
   },
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "She honours a no completely, the first time, and means it. If he drew a line with her she'd accept it, and still be warm.",
   honesty: "Unflinchingly honest, always. She'd rather hurt someone with the truth than be kind with a lie.",
@@ -70,7 +70,7 @@ export default {
     trust: "earned by openness; worn down by lies and secrecy, the only betrayal she recognises",
   },
   recalibrates: "Out loud and gently: \"Oh, I thought we were all right?\"",
-  // Her affection for anyone doesn't fall below fondness; tired and frustrated is as far as she goes (D77).
+  // Her affection for anyone doesn't fall below fondness; tired and frustrated is as far as she goes (D92).
   limits: { affection: [0, 10] },
   leanFromHeat: false,
   // She waits for him to show interest (docs/spec/companions.md §6). A note is sent only while its gate holds.

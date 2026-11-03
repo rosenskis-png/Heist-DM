@@ -176,7 +176,7 @@ test("hurt: regard at −5, or intimacy dropping 3 at once; nothing is ready whi
   assert.ok(t.rel[P.id].hurt);
 });
 
-test("after the payoff, heat stays fluid, and also feeds the dark branch only for a companion who declares it (D78)", () => {
+test("after the payoff, heat stays fluid, and also feeds the dark branch only for a companion who declares it (D93)", () => {
   for (const leanFromHeat of [true, false]) {
     const c = { ...P, leanFromHeat };
     const s = Rel.applyDelta(romance([c, Q], { [c.id]: { payoff: true, heat: c.payoff.at } }), c, { heat: 2 });
@@ -203,7 +203,7 @@ test("beats apply in order and only when allowed", () => {
   assert.deepEqual(Rel.campfireProblems(s, P, members, out), ["beat deep isn't allowed now"]);
 });
 
-test("configurations come from her own involvement and what she believes, never the truth (D81)", () => {
+test("configurations come from her own involvement and what she believes, never the truth (D96)", () => {
   const cfg = (rels, over, who = P) => Rel.config(romance(members, rels, over), who, members);
   const believes = { past: true, current: true };
   assert.equal(cfg({}), "open");
@@ -247,7 +247,7 @@ test("breakup, rekindle, in the open and shared; beliefs only from her own outpu
   assert.deepEqual(s.rel[P.id].believes, { past: false, current: false });
 });
 
-test("each companion's view of the other moves on three axes, at most 2 an answer, hers only (D77)", () => {
+test("each companion's view of the other moves on three axes, at most 2 an answer, hers only (D92)", () => {
   let s = romance(members);
   const out = { ...blank(), changes: [{ track: "affection", by: 3, reason: "r" }, { track: "trust", by: -2, reason: "r" }, { track: "read_respect", by: 1, reason: "r" }], memories: ["m"], secrets: ["hidden"] };
   const before = structuredClone(s.rel);
@@ -266,7 +266,7 @@ test("each companion's view of the other moves on three axes, at most 2 an answe
   assert.ok(input.includes("you_feel_about_her") && input.includes(`(affection ${s.rel[P.id].toward.affection})`));
 });
 
-test("with no change to heat, intimacy or regard, a value below +2 rises toward it, and never falls to it (D78)", () => {
+test("with no change to heat, intimacy or regard, a value below +2 rises toward it, and never falls to it (D93)", () => {
   let s = romance(members, { [P.id]: { regard: -10, heat: 0, intimacy: 5 } });
   s = Rel.applyCampfire(s, P, members, blank());
   assert.deepEqual([s.rel[P.id].regard, s.rel[P.id].heat, s.rel[P.id].intimacy], [-9, 1, 5]);
@@ -276,7 +276,7 @@ test("with no change to heat, intimacy or regard, a value below +2 rises toward 
   assert.equal(s.rel[P.id].regard, 2);
 });
 
-test("one catch roll an answer, only for hidden actions in company; ring words are never caught (D80, D93, D98)", () => {
+test("one catch roll an answer, only for hidden actions in company; ring words are never caught (D95, D108, D113)", () => {
   const act = { ...blank(), segments: [{ speaker: "self", text: "said aloud", aside: "no" }, { speaker: "self", text: "a hand on his knee", aside: "action" }], risk: "high" };
   assert.equal(Rel.catchAside({ ...romance(members), forced: [99] }, act).caught, false);
   assert.equal(Rel.catchAside({ ...romance(members), forced: [4] }, act).caught, true);
@@ -386,7 +386,7 @@ test("an extra beat can have a cooldown in campaign turns, a gate, or happen onc
 });
 
 const storming = having("escalation");
-test("an escalation rises as fast as the call says and falls one level an answer at most (D82)", { skip: !storming }, () => {
+test("an escalation rises as fast as the call says and falls one level an answer at most (D97)", { skip: !storming }, () => {
   const o = all.find((c) => c !== storming && !partyProblems([storming, c]).length);
   const m = resolveParty([storming, o]);
   const top = storming.escalation.tiers.length;
@@ -400,7 +400,7 @@ test("an escalation rises as fast as the call says and falls one level an answer
   assert.deepEqual(Rel.campfireProblems(s, m[1], m, { ...blank(), storm: 1 }), ["she has no storm level (storm must be null)"]);
 });
 
-test("limits: a floor on her view of anyone, and a tie's ceiling and pace until its beat (D77, D84)", () => {
+test("limits: a floor on her view of anyone, and a tie's ceiling and pace until its beat (D92, D99)", () => {
   const floored = { ...P, limits: { affection: [0, 10] } };
   let s = romance([floored, Q], { [floored.id]: { toward: { affection: 1, respect: 0, trust: 0 } } });
   s = Rel.applyCampfire(s, floored, [floored, Q], { ...blank(), changes: [{ track: "affection", by: -2, reason: "r" }, { track: "respect", by: -2, reason: "r" }] });
@@ -408,7 +408,7 @@ test("limits: a floor on her view of anyone, and a tie's ceiling and pace until 
 });
 
 const masked = all.find((c) => c.tie?.mask);
-test("a tie can start both views and mask hers; her partner's read starts at the mask (D84)", { skip: !masked }, () => {
+test("a tie can start both views and mask hers; her partner's read starts at the mask (D99)", { skip: !masked }, () => {
   const partner = companions[Object.keys(masked.tie.by).find((id) => companions[id])];
   const m = resolveParty([masked, partner]);
   let s = Rel.newRomance(m, pairs);
@@ -434,7 +434,7 @@ test("a tie can start both views and mask hers; her partner's read starts at the
   }
 });
 
-// ---------- the wardrobe (docs/spec/companions.md §7, D71) ----------
+// ---------- the wardrobe (docs/spec/companions.md §7, D86) ----------
 
 test("she owns her usual outfit, can be given more, and her profile describes what she has on", async () => {
   const W = await import("../src/campaign/wardrobe.js");
@@ -464,7 +464,7 @@ test("a tie's outfit is her usual one in that party", { skip: !tied }, () => {
   if (set) assert.equal(Rel.newRomance(m).wardrobe[tied.id].owned.usual.text, set);
 });
 
-// ---------- campfire with both (D70) ----------
+// ---------- campfire with both (D85) ----------
 
 test("with both at the fire, the first speaker alternates, and one of the two must move something", () => {
   assert.deepEqual(Rel.speakingOrder(romance(members, {}, { turn: 4 }), [P.id, Q.id]), [P.id, Q.id]);
@@ -493,7 +493,7 @@ test("a second voice's own tastes reach her call in company and in private", { s
   for (const input of [huddle(voiced, o), rings]) assert.ok(input.includes(JSON.stringify(sv.admires)) && input.includes(JSON.stringify(sv.despises)));
 });
 
-test("a pair can start lopsided; gates read her perception of the other, which only her own scenes move (D76)", () => {
+test("a pair can start lopsided; gates read her perception of the other, which only her own scenes move (D91)", () => {
   let s = Rel.newRomance(members, { [`${P.id}|${Q.id}`]: { start: { [P.id]: 2, [Q.id]: { affection: -4, trust: -6 } }, dynamic: "x" } });
   assert.deepEqual([s.rel[P.id].toward.affection, s.rel[Q.id].toward.affection, s.rel[Q.id].toward.trust], [2, -4, -6]);
   assert.deepEqual([s.rel[P.id].read.affection, s.rel[P.id].read.trust, s.rel[Q.id].read.affection], [-4, -6, 2]); // first impressions are right
@@ -511,7 +511,7 @@ test("a pair can start lopsided; gates read her perception of the other, which o
     for (const v of Object.values(p.start)) for (const n of Object.values(Rel.axes(v))) assert.ok(Number.isInteger(n) && n >= -10 && n <= 10);
 });
 
-test("a second voice can join a scene in company once her gate holds (D83)", { skip: !voiced?.secondVoice.inCompany }, () => {
+test("a second voice can join a scene in company once her gate holds (D98)", { skip: !voiced?.secondVoice.inCompany }, () => {
   const o = all.find((c) => c !== voiced && !partyProblems([voiced, c]).length);
   const m = resolveParty([voiced, o]);
   const both = [voiced.id, o.id];
@@ -522,9 +522,9 @@ test("a second voice can join a scene in company once her gate holds (D83)", { s
   assert.ok(input.includes('"in_company":true') && input.includes(JSON.stringify(voiced.secondVoice.look)));
 });
 
-// ---------- fixed tracks, own gates, shapeshifting (D85, D86) ----------
+// ---------- fixed tracks, own gates, shapeshifting (D100, D101) ----------
 
-test("fixed tracks never move, and her own gate replaces a default one (D85)", () => {
+test("fixed tracks never move, and her own gate replaces a default one (D100)", () => {
   const c = { ...P, fixed: { heat: 10, regard: 10 }, reveal: { hidden: [{ deep: true }] } };
   const m = [c, Q];
   let s = Rel.newRomance(m, pairs);
@@ -537,7 +537,7 @@ test("fixed tracks never move, and her own gate replaces a default one (D85)", (
   assert.ok(camp(c, Q, [c.id], env({ romance: s })).includes(JSON.stringify(c.hidden)));
 });
 
-test("a shapeshifter changes form, may come in the other's place, and is unmasked only in company (D86)", () => {
+test("a shapeshifter changes form, may come in the other's place, and is unmasked only in company (D101)", () => {
   const shifter = { ...P, shapeshift: { text: "She can look like anyone.", impersonation: [{ chance: 30, when: [{ affection: ["<", 0] }] }, { chance: 5 }] } };
   const m = [shifter, Q];
   let s = Rel.newRomance(m, pairs);
@@ -568,7 +568,7 @@ test("a shapeshifter changes form, may come in the other's place, and is unmaske
   assert.ok(camp(Q, shifter, [Q.id], env({ romance: s })).includes(`${shifter.name} can change her shape.`));
 });
 
-test("a tie can grant a special case with one partner, and two shapeshifters know each other (D86)", () => {
+test("a tie can grant a special case with one partner, and two shapeshifters know each other (D101)", () => {
   const shifter = { ...Q, shapeshift: { text: "She can look like anyone." } };
   const sister = { ...P, id: "sis", name: "Sis", tie: { required: true, by: { [shifter.id]: { bond: "b", grants: { shapeshift: { text: "So can she." } } } } } };
   const m = resolveParty([sister, shifter]);
@@ -577,7 +577,7 @@ test("a tie can grant a special case with one partner, and two shapeshifters kno
   assert.ok(s.rel.sis.knowsShifter && s.rel[shifter.id].knowsShifter);
 });
 
-test("every companion declares how she gets what she wants, and her private agenda carries into her next call (D92)", () => {
+test("every companion declares how she gets what she wants, and her private agenda carries into her next call (D107)", () => {
   for (const c of all) for (const k of ["boundaries", "honesty", "means", "whenRefused"]) assert.ok(typeof c[k] === "string" && c[k].length > 20, `${c.id}: ${k}`);
   let s = romance(members);
   s = Rel.applyCampfire(s, P, members, { ...blank(), agenda: "Get him alone and make her look possessive." });
@@ -588,7 +588,7 @@ test("every companion declares how she gets what she wants, and her private agen
   assert.ok(!camp(Q, P, [P.id, Q.id], env({ romance: s })).includes("make her look possessive")); // never the other's call
 });
 
-test("a campfire answer's nothing parts are filled before it's checked; real mistakes still fail (D95)", async () => {
+test("a campfire answer's nothing parts are filled before it's checked; real mistakes still fail (D110)", async () => {
   const { validate } = await import("../src/validate.js");
   const bare = { segments: [{ speaker: "self", text: "x" }, { speaker: "self", text: "y", aside: true }], changes: [], inner: "z" };
   const out = Rel.fillCampfire(bare);

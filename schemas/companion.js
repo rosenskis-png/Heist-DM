@@ -24,7 +24,7 @@ const compare = { enum: ["<", "<=", "=", ">=", ">"] };
 const term = { oneOf: [{ type: "boolean" }, { type: "array", prefixItems: [compare, { type: "number" }], minItems: 2, maxItems: 2 }] };
 const gate = list({ type: "object", minProperties: 1, additionalProperties: term }, 1);
 
-// She can change her shape (D86): what she can do, for her call; and the chance she comes in the other companion's
+// She can change her shape (D101): what she can do, for her call; and the chance she comes in the other companion's
 // place when the player sits with that one alone, by the first alternative whose gate holds.
 const shapeshift = obj(["text"], { text: t, impersonation: list(obj(["chance"], { chance: { type: "integer", minimum: 0, maximum: 100 }, when: gate })) });
 
@@ -35,17 +35,17 @@ const tieEntry = obj([], {
   gift: t,
   bond: t,
   partnerReacts: t,
-  // Special cases she has only with this partner (D86).
+  // Special cases she has only with this partner (D101).
   grants: obj([], { shapeshift }),
-  // What she holds against or hides from this partner: always in her own call, never in the partner's (D84).
+  // What she holds against or hides from this partner: always in her own call, never in the partner's (D99).
   secret: t,
   // The parked portrait feature (D24). On no allowlist.
   image: { type: "object", additionalProperties: t },
 });
-// A view of another companion: one number (affection) or any of the three axes (D77).
+// A view of another companion: one number (affection) or any of the three axes (D92).
 const view = { oneOf: [{ type: "integer", minimum: -10, maximum: 10 }, { ...some(axes, { type: "integer", minimum: -10, maximum: 10 }) }] };
 // Limits on her view of another companion: a range per axis, how far one answer may move it, and the beat that
-// lifts the limits (D77).
+// lifts the limits (D92).
 const range = { type: "array", prefixItems: [{ type: "integer" }, { type: "integer" }], minItems: 2, maxItems: 2 };
 const limits = obj([], { ...Object.fromEntries(axes.map((k) => [k, range])), perScene: { type: "integer", minimum: 0 }, until: r("id") });
 
@@ -102,28 +102,28 @@ export const companionFileSchema = withDefs({
       other: t,
       suppressed: t,
       darkTriggers: t,
-      // How she gets what she wants (D92).
+      // How she gets what she wants (D107).
       boundaries: t,
       honesty: t,
       means: t,
       whenRefused: t,
       abilities: obj(["hp", "combat", "noncombat", "limits"], { hp: { type: "integer", minimum: 1 }, combat: ability, noncombat: ability, limits: list(t) }),
 
-      // How she judges the other companion on each axis: what earns it and what wears it down (D79).
+      // How she judges the other companion on each axis: what earns it and what wears it down (D94).
       inOthers: some(axes, t),
-      // Tracks that never move (D85).
+      // Tracks that never move (D100).
       fixed: some(["heat", "intimacy", "regard", "lean"], { type: "number" }),
-      // Her own gates for gated profile fields, replacing the defaults in content/relationship.js `reveal` (D85).
+      // Her own gates for gated profile fields, replacing the defaults in content/relationship.js `reveal` (D100).
       reveal: { type: "object", propertyNames: { enum: ["first", "why", "hidden", "deep", "dark", "payoff_scene", "quest"] }, additionalProperties: gate },
       shapeshift,
-      // How she takes it when her read of the other turns out wrong: out loud, or only inside (D79).
+      // How she takes it when her read of the other turns out wrong: out loud, or only inside (D94).
       recalibrates: t,
-      // Limits on her view of any other companion (D77).
+      // Limits on her view of any other companion (D92).
       limits,
-      // The view the other companion believes she holds, at the start (D84).
+      // The view the other companion believes she holds, at the start (D99).
       mask: view,
       // A state that builds and falls slowly: tiers from mild to worst, what calms it, and the tier from which she may
-      // act on the other companion's body (D82).
+      // act on the other companion's body (D97).
       escalation: obj(["name", "tiers", "rises", "calms"], { name: t, tiers: list(t, 1), rises: t, calms: t, actsOnOther: { type: "integer", minimum: 1 } }),
 
       // Special cases, declared (docs/spec/companions.md §6). All optional.
@@ -136,7 +136,7 @@ export const companionFileSchema = withDefs({
           shared: { type: "boolean" },
         }),
         // Her and her partner's starting views of each other, the view her partner believes she holds, limits on her
-        // view of her partner (D84), and whether she takes up her partner's pursuit once things are in the open.
+        // view of her partner (D99), and whether she takes up her partner's pursuit once things are in the open.
         start: view,
         partnerStart: view,
         mask: view,
@@ -156,7 +156,7 @@ export const companionFileSchema = withDefs({
         despises: t,
         // Optional: she can take her own body only once this flag is set or due.
         manifestsAfter: { enum: ["payoff", "vuln", "deep", "bond"] },
-        // Optional: she may speak and take her own body in company, in person, while this gate holds (D83).
+        // Optional: she may speak and take her own body in company, in person, while this gate holds (D98).
         inCompany: gate,
         beat: r("id"),
       }),

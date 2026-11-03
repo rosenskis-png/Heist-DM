@@ -1,7 +1,7 @@
 // Extracted from Gravenhold (legacy/gravenhold.html). See docs/spec/companions.md.
 // Optional dynamics between two companions, keyed "a|b" in either order.
-// `start` is where both start, or each one's own starting view of the other, keyed by id (D73). A view is one
-// number (affection) or the three axes (D77).
+// `start` is where both start, or each one's own starting view of the other, keyed by id (D88). A view is one
+// number (affection) or the three axes (D92).
 // A missing pair falls back to the two profiles.
 export const pairs = {
   "vesper|nadia": {

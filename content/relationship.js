@@ -1,6 +1,6 @@
 // The relationship model's numbers and words, ported from Gravenhold (legacy newRel, computeReady, configOf,
 // stageLabel and the scoring in applyResult). The rules that read them are in src/campaign/relationship.js;
-// the meaning is in docs/spec/companions.md §3–5. Everything here is tuning: change a number, not the code (D65).
+// the meaning is in docs/spec/companions.md §3–5. Everything here is tuning: change a number, not the code (D80).
 
 // Each track's range.
 export const tracks = {
@@ -11,19 +11,19 @@ export const tracks = {
 };
 
 // How each companion feels about the other, on three axes, and her read of how the other feels about her on the
-// same three (D77): the range, and how far one answer may move each. A pair's `start` that is one number sets
+// same three (D92): the range, and how far one answer may move each. A pair's `start` that is one number sets
 // affection only.
 export const axes = ["affection", "respect", "trust"];
 export const pair = { range: [-10, 10], perScene: 2 };
 
 // With no change to one of these tracks in an answer, a value below `to` rises by `by`: her natural interest in
-// him, so any history can be recovered (D78). It never pulls a value down.
+// him, so any history can be recovered (D93). It never pulls a value down.
 export const baseline = { to: 2, by: 1, tracks: ["heat", "intimacy", "regard"] };
 
-// The chance, in percent, that the other companion catches an aside, by the risk the speaker declares (D80).
+// The chance, in percent, that the other companion catches an aside, by the risk the speaker declares (D95).
 export const asideCatch = { low: 1, medium: 2, high: 4 };
 
-// What each number means, for her call (D79). Each band is [lowest value, text]; the highest band at or below the
+// What each number means, for her call (D94). Each band is [lowest value, text]; the highest band at or below the
 // value applies. Player tracks describe her toward him; each axis has her own view and her read of the other's.
 export const stances = {
   heat: [[0, "no desire for him at all"], [1, "a flicker of interest in him"], [3, "she wants him, and it shows when she lets it"], [5, "she wants him badly"], [9, "she's consumed with wanting him"]],
@@ -50,7 +50,7 @@ export const caps = {
   perEncounter: { heat: 4, intimacy: 4 },
 };
 
-// After her payoff, heat stays fluid (D78). For a companion with `leanFromHeat`, heat gained then also feeds her
+// After her payoff, heat stays fluid (D93). For a companion with `leanFromHeat`, heat gained then also feeds her
 // dark branch, and intimacy gained after the payoff draws her back from it.
 export const afterPayoff = { heatToLean: 0.6, intimacyFromLean: 0.5 };
 
@@ -93,7 +93,7 @@ export const reveal = {
 export const ignored = { turn: 40, heat: 2, intimacy: 2 };
 
 // What each configuration means, for her call. Her reaction to it is `react` in her file.
-// Computed from her own involvement and what she believes about him and the other (D81), never the truth about them.
+// Computed from her own involvement and what she believes about him and the other (D96), never the truth about them.
 export const configText = {
   chosen: "He has chosen her (they are lovers), as far as she knows.",
   former: "They were lovers once; it's over, for now.",
@@ -130,7 +130,7 @@ export const stageAt = { consumed: 6, indulging: 5, burningWithin: 1, drawn: 2, 
 // How much of the relationship the sigil shows, 0–7.
 export const progressAt = { friends: 3, close: 8, max: 7 };
 
-// How many turns of "someone wore her face" each companion keeps (D86).
+// How many turns of "someone wore her face" each companion keeps (D101).
 export const absentLimit = 5;
 
 // How many memories each companion keeps.

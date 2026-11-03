@@ -21,31 +21,31 @@ export const newRel = () => ({
   bond: false,
   hurt: false,
   manifest: false,
-  // Whether they're lovers now (the payoff starts it, a breakup ends it, D81).
+  // Whether they're lovers now (the payoff starts it, a breakup ends it, D96).
   involved: false,
-  // What she believes about him and the other companion: ever involved, and involved now (D81).
+  // What she believes about him and the other companion: ever involved, and involved now (D96).
   believes: { past: false, current: false },
-  // A declared escalation's level, 0 when calm (D82).
+  // A declared escalation's level, 0 when calm (D97).
   storm: 0,
-  // A shapeshifter's current form, in words, or null for her own look (D86).
+  // A shapeshifter's current form, in words, or null for her own look (D101).
   form: null,
-  // Whether she knows the other companion can change her shape (D86).
+  // Whether she knows the other companion can change her shape (D101).
   knowsShifter: false,
-  // Campaign turns when someone wearing her face was alone with him (D86).
+  // Campaign turns when someone wearing her face was alone with him (D101).
   absent: [],
-  // What she privately means to do, in a line, carried from scene to scene (D92).
+  // What she privately means to do, in a line, carried from scene to scene (D107).
   agenda: null,
   gain: { heat: 0, intimacy: 0 },
   beatTurns: {},
   memories: [],
   commitments: [],
   revealed: [],
-  // How she feels about the other companion, and how she thinks the other feels about her (D76), on each axis (D77).
+  // How she feels about the other companion, and how she thinks the other feels about her (D91), on each axis (D92).
   toward: axes(0),
   read: axes(0),
 });
 
-// A companion's `fixed` tracks never move (D85).
+// A companion's `fixed` tracks never move (D100).
 function pin(r, c) {
   for (const [k, v] of Object.entries(c.fixed ?? {})) r[k] = v;
   return r;
@@ -58,9 +58,9 @@ export function axes(v) {
 }
 
 // The party's relationship state: one entry per companion, plus the pair. `members` are the two companions.
-// A pair's `start` is one number for both, or each one's own view keyed by id (D73), and a view is one number
-// (affection) or the three axes (D77). A tie's `start` and `partnerStart` give both views for her and her partner.
-// Her first read of the other is right (D76), unless the other declares a `mask`: then her read starts at the mask.
+// A pair's `start` is one number for both, or each one's own view keyed by id (D88), and a view is one number
+// (affection) or the three axes (D92). A tie's `start` and `partnerStart` give both views for her and her partner.
+// Her first read of the other is right (D91), unless the other declares a `mask`: then her read starts at the mask.
 export function newRomance(members, pairs = {}, { turn = 0, act = 1, seed = 1 } = {}) {
   const [a, b] = members.map((c) => c.id);
   const start = b ? pairEntry(pairs, a, b)?.start ?? 0 : 0;
@@ -85,7 +85,7 @@ export function newRomance(members, pairs = {}, { turn = 0, act = 1, seed = 1 } 
 }
 
 // The limits on her view of the other: her own `limits`, and her tie's toward her partner until its `until` beat
-// has happened (D77). Each is { <axis>: [lo, hi], perScene }.
+// has happened (D92). Each is { <axis>: [lo, hi], perScene }.
 export function limitsFor(rom, c, members) {
   const out = { perScene: R.pair.perScene, ...Object.fromEntries(R.axes.map((k) => [k, R.pair.range])) };
   const o = members.find((m) => m.id !== c.id);
@@ -99,10 +99,10 @@ export function limitsFor(rom, c, members) {
   return out;
 }
 
-// Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D70).
+// Who answers first at the campfire when the player sits with both: it alternates by campaign turn (D85).
 export const speakingOrder = (rom, ids) => (rom.turn % 2 ? [...ids].reverse() : [...ids]);
 
-// What gates read: her tracks and flags (including her read of the other, never the other's real feelings, D76),
+// What gates read: her tracks and flags (including her read of the other, never the other's real feelings, D91),
 // the campaign's turn and act, and two distances.
 export function view(rom, c) {
   const { toward, read, believes, ...rel } = rom.rel[c.id];
@@ -141,7 +141,7 @@ export function ready(rom, c) {
 
 // Her second voice is heard only in private, and may take her own body only in person, and, if she declares
 // `manifestsAfter`, once that flag is set or about to be. Whether she does is the scene's call. In company in
-// person, she may do both once the gate `inCompany` holds (D83).
+// person, she may do both once the gate `inCompany` holds (D98).
 export function secondVoiceState(rom, c, scene = {}) {
   const sv = c.secondVoice;
   if (!sv) return null;
@@ -255,7 +255,7 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
   return { state: out, rejected };
 }
 
-// A campfire output with its "nothing" parts filled in before it's checked (D95): an absent optional field is null,
+// A campfire output with its "nothing" parts filled in before it's checked (D110): an absent optional field is null,
 // an absent list is empty, and a segment with no aside marked is ordinary scene text. Anything else that's wrong
 // still fails the check and goes back for the one retry.
 const NULLABLE = ["advances", "outfit", "believes", "storm", "risk", "form", "agenda"];
@@ -271,7 +271,7 @@ export function fillCampfire(out) {
 
 // Problems with a campfire output beyond its schema: beats not allowed, lines for a voice she doesn't have here,
 // an outfit she doesn't own, and, when she answers second with both companions present and the first moved
-// nothing (`scene.mustAdvance`, D70), moving nothing herself. A call with problems gets one retry with them listed (D13).
+// nothing (`scene.mustAdvance`, D85), moving nothing herself. A call with problems gets one retry with them listed (D13).
 export function campfireProblems(rom, c, members, out, scene = {}) {
   const problems = [];
   let s = rom;
@@ -313,7 +313,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   if (c.escalation && out.storm != null) own.storm = clamp(Math.max(out.storm, own.storm - 1), [0, c.escalation.tiers.length]);
   if (out.agenda) own.agenda = out.agenda;
   if (c.shapeshift && out.form) own.form = out.form;
-  // She wore the other's face: the other wasn't there (D86).
+  // She wore the other's face: the other wasn't there (D101).
   if (scene.disguisedAs && s.rel[scene.disguisedAs]) s.rel[scene.disguisedAs].absent = [...new Set([...s.rel[scene.disguisedAs].absent, s.turn])].slice(-R.absentLimit);
   s = applyBeats(s, c, members, out.beats, scene).state;
   const r = s.rel[c.id];
@@ -323,7 +323,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   return out.outfit ? equip(s, c.id, out.outfit) : s;
 }
 
-// With no change to a baseline track this answer, a value below the baseline rises toward it (D78).
+// With no change to a baseline track this answer, a value below the baseline rises toward it (D93).
 export function recover(rom, c, delta) {
   const out = copy(rom);
   const r = out.rel[c.id];
@@ -332,7 +332,7 @@ export function recover(rom, c, delta) {
   return out;
 }
 
-// Who really comes when the player sits with `chosen` alone (D86): a shapeshifting other companion may come in
+// Who really comes when the player sits with `chosen` alone (D101): a shapeshifting other companion may come in
 // her place, by the first of her `impersonation` alternatives whose gate holds. Moves the seeded roll.
 export function whoComes(rom, members, chosen) {
   const out = copy(rom);
@@ -342,12 +342,12 @@ export function whoComes(rom, members, chosen) {
   return { state: out, actor };
 }
 
-// Whether an aside is caught, by the speaker's declared risk (D80). Moves the party's seeded roll (D12).
+// Whether an aside is caught, by the speaker's declared risk (D95). Moves the party's seeded roll (D12).
 export function rollCatch(rom, risk = "low") {
   return d100(rom) <= (R.asideCatch[risk] ?? R.asideCatch.low);
 }
 
-// Whether the other companion catches this answer's hidden action, if it has one (D93): one roll per answer, by the
+// Whether the other companion catches this answer's hidden action, if it has one (D108): one roll per answer, by the
 // speaker's declared risk, and only in company. Words over the rings are silent and never caught.
 export function catchAside(rom, out, scene = {}) {
   const state = copy(rom);
@@ -356,7 +356,7 @@ export function catchAside(rom, out, scene = {}) {
 }
 
 // The love-triangle state for her (Gravenhold's configOf), from her own involvement and what she believes about
-// him and the other, never the truth about them (D81). Both can be in the dark at once.
+// him and the other, never the truth about them (D96). Both can be in the dark at once.
 export function config(rom, c, members) {
   const o = members.find((m) => m.id !== c.id);
   const r = rom.rel[c.id];

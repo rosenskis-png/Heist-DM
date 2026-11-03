@@ -1,5 +1,5 @@
 // The Cells encounter's test party member (fixtures/cells). Not in the roster: Lyra was retired as a companion
-// (D88), and lives on here because the engine tests and the bench's encounter cases are built around her senses.
+// (D103), and lives on here because the engine tests and the bench's encounter cases are built around her senses.
 export default {
   id: "lyra",
   name: "Lyra",

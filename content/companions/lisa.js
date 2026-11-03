@@ -59,7 +59,7 @@ export default {
     ignored: `stops seeking him out and turns her attention to proving herself to her sister`,
   },
   leanFromHeat: true,
-  // Cruelty toward the other companion, at her own threshold of hate (D94).
+  // Cruelty toward the other companion, at her own threshold of hate (D109).
   notes: [
     {
       when: [{ affection: ["<=", -5] }],
@@ -73,7 +73,7 @@ export default {
   other: `wants to be chosen over her sister, one day in front of her; likes him kind to her sister, because it makes taking him sweeter; hates him taking her sister's side`,
   suppressed: `a future that's only theirs, out in the open. She likes to imagine it with him in private, but she isn't ready to give up the secret for it. Met by dreaming it with her without pushing her to choose`,
   darkTriggers: `treating the secret as the point; enjoying her sister's hurt with her; helping her rub it in; risking discovery for the thrill`,
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "She agrees beautifully, in front of her sister, and treats the boundary as a map of exactly where her sister is weakest.",
   honesty: "Lies fluently and sweetly whenever her sister is watching; with him alone she is honest about wanting him, and about little else.",
@@ -85,7 +85,7 @@ export default {
     trust: "she trusts no one who could take something from her",
   },
   recalibrates: "Never shows it. She smiles, adjusts, and plays it better.",
-  // A true reconciliation with her sister: her own view has to climb to its ceiling first (D84).
+  // A true reconciliation with her sister: her own view has to climb to its ceiling first (D99).
   extraBeats: [
     {
       id: "reconciled",
@@ -126,7 +126,7 @@ export default {
     triangle: {
       shared: false,
     },
-    // She hates her sister and hides it; her sister loves her, protectively, and believes it's mutual (D84).
+    // She hates her sister and hides it; her sister loves her, protectively, and believes it's mutual (D99).
     start: { affection: -9, respect: -4, trust: -3 },
     partnerStart: { affection: 6, respect: 1, trust: 5 },
     mask: { affection: 6, respect: 4, trust: 5 },
@@ -253,7 +253,7 @@ export default {
         bond: `Changeling sisters, bought and sold together as children. Each of them always knows when the other is wearing a face.`,
         partnerReacts: "cold, silent and very dangerous: she knows exactly what Lisa can do",
         secret: `When the buyers came for one of you, Sable let them take you and kept the better home. She says she was nine and didn't know what she was doing. You know she did. You have never forgiven her. You don't matchmake with Sable; you play games with faces, and some of them are hers.`,
-        // Lisa shares her sister's gift, and can wear her sister's face (D86).
+        // Lisa shares her sister's gift, and can wear her sister's face (D101).
         grants: {
           shapeshift: {
             text: `You can take any shape: face, body, voice, clothes, like your sister. Nobody here expects it but her. When you come in your sister's place, you wear her completely, and enjoy it.`,

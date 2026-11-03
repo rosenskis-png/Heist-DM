@@ -59,7 +59,7 @@ export default {
     ignored: "escalates for his attention, then goes eerily quiet and watches",
   },
   leanFromHeat: true,
-  // How she gets what she wants (D92): what she does with a no, when she lies, her means, and what she shows
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
   // and resolves when refused. Fern is the honest baseline.
   boundaries: "A boundary between her and him is an attack, and whoever drew it with him is the enemy. She agrees to it only to buy time.",
   honesty: "Lies whenever a lie gets her what she needs, and believes her own lies while she tells them.",
@@ -90,7 +90,7 @@ export default {
       text: `She feels trust running high in every direction now. Rarely, and only when it really costs her, she might admit honestly in front of everyone that she was wrong.`,
     },
   ],
-  // Her storms build and fall slowly (D82): the level rises as fast as the wound demands and falls one level an
+  // Her storms build and fall slowly (D97): the level rises as fast as the wound demands and falls one level an
   // answer at most, only through what calms it.
   escalation: {
     name: "storm",
@@ -99,7 +99,7 @@ export default {
       `A real wound, and she turns it on him: cruelty that finds the soft spot; vanishing into the night and coming back bloody and smiling; a knife thrown that misses him by an inch; tackling him to the ground with a knife at his throat, threatening his life, then kissing him like she hates how much she wants him.`,
       `Manic: anything to get him, however she gets him. Genuinely dangerous and unpredictable. Walking up in the middle of the night with the other companion bound and gagged and a knife at her throat, holding her hostage until he says what Ruby needs to hear; cutting herself to make him choose; setting the camp on fire to see who he runs to.`,
     ],
-    // What starts a storm (D93): rejection by him without reassurance, not just being upset.
+    // What starts a storm (D108): rejection by him without reassurance, not just being upset.
     rises: `Only feeling rejected by him without reassurance: him choosing the other companion over her, a boundary drawn against her, coldness, being left out, a promise broken. Being angry at the other companion, or upset about anything else, is not a storm by itself; it becomes one only if he sides against her or doesn't reassure her. Each further rejection without reassurance raises it a level.`,
     calms: `From him, an outsized show of apology, reassurance and promises; from the other companion, submission and apology. Time alone doesn't calm it.`,
     actsOnOther: 3,

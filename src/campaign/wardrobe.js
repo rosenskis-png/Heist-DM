@@ -1,4 +1,4 @@
-// What each companion owns to wear, and what she has on (docs/spec/companions.md §7, D71). Pure, like the
+// What each companion owns to wear, and what she has on (docs/spec/companions.md §7, D86). Pure, like the
 // relationship model: each function takes the party's companion state and returns a new one.
 
 // Every companion starts owning her `outfit` (as "usual") plus anything in her file's `wardrobe`, wearing "usual".
