@@ -2,7 +2,8 @@
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
 import { load, apply } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
-import { companions as roster } from "../../content/companions/index.js";
+import { companions } from "../../content/companions/index.js";
+import cellsLyra from "../../fixtures/cells/lyra.js";
 import { pairs } from "../../content/pairs.js";
 
 // The player's sheet: their name, their class's skills and abilities.
@@ -11,7 +12,9 @@ export function playerSheet(player) {
   return { id: "player", name: player.name || cls.name, role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
 }
 
-// The party: the player, then the companions the packet places (Phase 4 plays the Cells' own party, D65).
+// The party: the player, then the companions the packet places (Phase 4 plays the Cells' own party, D65). Lyra
+// left the roster (D103) but is still the Cells' own party member, so the Cells can be played as written.
+const roster = { ...companions, lyra: cellsLyra };
 export const companionIds = (packet) => Object.keys(packet.start.positions).filter((id) => id !== "player" && roster[id]);
 export const partyFor = (player, packet) => [playerSheet(player), ...companionIds(packet).map((id) => roster[id])];
 

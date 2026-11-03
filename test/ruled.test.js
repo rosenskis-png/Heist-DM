@@ -7,7 +7,7 @@ import { validate } from "../src/validate.js";
 import { adjudicateSchema, resolveSchema, sceneSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import fern from "../content/companions/fern.js";
-import lyra from "../content/companions/lyra.js";
+import lyra from "../fixtures/cells/lyra.js";
 
 const packet = JSON.parse(readFileSync(new URL("../content/encounters/cells.json", import.meta.url), "utf8"));
 const party = [{ id: "player", name: "Rogue", ...classes.rogue }, fern, lyra];

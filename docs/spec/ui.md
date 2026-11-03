@@ -47,6 +47,7 @@ Gravenhold's `Game` component is built around one chat log and is not reused. It
 ## Settings
 - **Speed and quality** (D48): Faster, Balanced or Smarter (D71), charged to the player's own usage.
 - **Saves:** save now, export the save as JSON, and import one from the title screen (D74).
+- **Read aloud** (D104): narration and companion lines spoken with the browser's voices (`src/ui/speech.js`), downloaded Premium and Enhanced voices first. A voice per companion, her second voice and the narrator, each choosable and previewable; each companion speaks at her file's `rate`; asides are quieter; a disguised companion speaks in the voice of the face she wears. Speech starts from a tap (iOS requires it), then can read each new answer automatically. On the bench it lives in Camp.
 
 ## Developer view
 A panel behind the menu showing every call this session: its tier, size and time, whether it retried and why, its raw output and its assembled input. It also shows the exit-test counts (exchanges, card edits, and the exchange by which everyone had left where they started), the recorded companion reactions, state, canon and the event log, and exports the session's replay log (D60). Held in memory only and never stored (D10).

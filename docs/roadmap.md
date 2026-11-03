@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 4 (The Cells, playable).** Phases 0–3 are done. Phase 4 is built; its playtests are next.
+**Current phase: 4 (The Cells, playable).** Phases 0–3 are done. Phase 4 is built; its playtests are next. Phase 5 is built too; only its campfire exit test is left.
 
 ---
 
@@ -140,15 +140,49 @@ The three interfaces, the card, the map (D9), saves (D11), and Fern and Lyra.
 
 ## Phase 5: Companions ported
 
-All 8 companions, the relationship model, configurations, the campfire, and the special cases as declared data (D8). Every remaining ability gets its `declared` block (D30).
+The companions (eight; the roster is open), the relationship model, configurations, the campfire, and the special cases as declared data (D8). Every remaining ability gets its `declared` block (D30).
 
 **Exit:** a campfire scene and relationship changes behave like Gravenhold's, and adding or removing a companion takes one file and one registry line.
 
-**Open questions**
-1. **Shapes for the special cases.** Until they're declared, they're on no allowlist and never reach a prompt (D59); the engine resolves the active variant (Lisa's) and sends only that. *Recommendation:* see the table in `docs/spec/companions.md`.
-2. **Caps on relationship changes.** *Recommendation:* start from Gravenhold's caps (per-turn changes clamped; heat and intimacy gains capped at +4 per encounter) and tune after playtests.
-3. **Companion-driven events** (personal quests). *Recommendation:* each quest is placed in a packet at generation, as hidden things and an optional objective. The companion knows about it through her own data. Nothing fires unless it was placed.
-4. **Pairs with no written dynamic.** *Recommendation:* the pair starts at 0. Each companion's call already sees the other's public profile (name, role, blurb, voice) and judges the dynamic from her own beliefs, admires and despises.
+- [x] The relationship model, ported with Gravenhold's numbers as content (D80): `src/campaign/relationship.js`, `content/relationship.js`.
+- [x] Special cases as general mechanisms declared in each file (D81): `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes`.
+- [x] A schema for companion files, and tests that keep the roster open (D82): `schemas/companion.js`, `test/companions.test.js`.
+- [x] Every ability has a `declared` block, companions and classes. Only Wild Shape and Lyra's senses carry effects or traits; the rest are use counts, and judgment handles what they do.
+- [x] The campfire: `prompts/campfire.md`, `campfireInput` in `src/context.js`, the engine's beat and voice checks, and a Campfire tab on the bench with five cases.
+- [ ] **The campfire feels like Gravenhold's.** Run the bench's Campfire cases and judge them by gut, as Phase 2 did for voices. Look for the romance floor in each companion's register, beats only when the scene earns them, small honest changes, and the declared cases working (Fern waiting, Ember appearing after the payoff, no storm while cooling, Lisa as her sister's sister). Republishing the bench needs `src/campaign/`, `content/relationship.js` and `content/companions/index.js` alongside the files it already loads.
+
+**Bench findings** (the designer's first campfire runs; cause, then fix)
+1. **Fern lost her ring voice and her clothes in rat form.** Cause: her ability text led with "can't speak aloud" and said nothing about her gear, and no companion call knew its own form. Fix: the text now says she talks over the rings and her gear merges into the new form; a companion's call now gets the form an ability put her in.
+2. **Nadia's eyes flashed gold whenever she relayed Ember.** Cause: it was written into her look, first meeting, pursuit and relay text. Fix: removed; she speaks of Ember freely in the third person, and Ember has her own `admires` and `despises`.
+3. **Payoff scenes faded at the first kiss.** Cause: every payoff scene ends in "Fade.", and the craft said to cut at "the threshold" without saying which. Fix: D84.
+4. **Camp with both needed more.** The designer asked for two calls an exchange, alternating, with something moving each time: D85.
+5. **Outfits should change in play:** D86.
+6. Character feel otherwise held.
+7. **Outfits failed** (second round). Cause: the campfire's `outfit` had to be a valid id, so a model writing null or guessing an id failed validation, and her call got no id for what she had on and no description of what else she owned. Fix: `outfit` is an id or null, and her call gets the id of what she's wearing and the id and look of each other outfit.
+8. **Nadia and Ember turned jealous** (second round). Cause: the first fix framed Ember's tastes against Nadia's, on top of an old hidden layer about each wanting him alone. Fix: D87, and her file rewritten to the designer's description.
+9. **The Campfire tab broke after switching away, and some responses didn't show** (third round). Cause: saved runs don't keep inputs, and the campfire view read them, so rendering threw once saved runs loaded. Fix: guarded, and each run now renders on its own, so one bad run can't blank a case.
+10. **Camp with both stayed shallow** (third round). Cause: every answer had to move something, so the second opened a small question of her own, and nothing invited the two to deal with each other. Fix: D88.
+11. **Ember should wait for the payoff,** then choose: D89.
+12. **Lisa** (from Gravenhold): in private she may dream aloud about a future with just him, but the secret thrill matters more; she never demands he choose, and after being caught and swearing it off she'll try to start it again. Her pursuit and suppressed desire are rewritten to say so.
+13. **Nadia, refined** (fourth round, character design). Ember is familiar with a body she can only hold briefly, not new to one; before the payoff she barely speaks, so whether she's real stays open; after it, what she is stays open. Nadia is a little shy alone; together the two are in control. Her secret is now the mark the fire leaves on everyone they let in. "Djinn" is gone from her text, since it answered the question. Two gated notes carry the before and after.
+14. **Ruby, refined** (fourth round). She reads the other companion's smallest remark as a play for him, answers with quiet, wounded cruelty that works on him, never admits she's wrong in front of the other, and never de-escalates unless the other grovels. Not involved, she's the boundary-pushing cool girl; involved, she starts things in front of the other out of spite. Gated notes carry the stages; the honest admission waits until she feels trust on all sides (D91).
+15. **Is the bench still the right tool?** It was built to test the calls' judgment on fixed cases; character design needs free scenes with follow-up turns. Fix: the bench's **Camp** tab, free play with any two companions, every number editable, and a "Describe looks" summary per companion. Fixed cases stay for regression; character feel is judged in Camp and then in Phase 4's real play.
+16. **Perception, not truth** (fifth round): D91.
+17. **Nadia's talk of Ember follows the relationship:** rare and vague far from the payoff, more frequent and grounded near it, plainly real after it, withdrawn if she's hurt. Her secret is now the Hearth, a burned cult whose fire Ember came out of, which grows on devotion and marks everyone it takes in; the dark path is giving in to it, the deep path finding Ember another way to be whole.
+18. **Ruby is hot and cold:** manic and dangerous or quiet and wounded, always knives, always hypersexual. With the other companion: cool girl when it's good, quiet manipulation when she's hurt, a real tantrum when slighted and the other won't back down. Alone with him: storms, then always crashes back adoring and a little ashamed. Her blind spot (a submissive rival plus a steady player) and her pull toward him when he's less steady are in her file.
+
+19. **Feelings didn't drive behaviour** (sixth round). At −10 regard, or −10 toward the other companion, they played neutral and warmed to niceness; wrong reads never surprised anyone. Cause: the numbers reached the call bare, and one pair number was too thin. Fix: D92, D93, D94.
+20. **Whispers, triangles, storms, Ember in company, Lisa's grudge, Vesper's shamelessness:** D95 to D99. Vesper's pursuit is now shameless, sexual and a little desperate, a performance; her deep path is self-respect while staying a succubus.
+21. **Serena, Morgana and Lyra replaced** by Annaleise, Sable and Celeste (D103). Lyra stays as the Cells encounter's fixture party member. Still open: nobody in the roster has dark skin, and Ruby has no quick friend.
+- [ ] **Play the three new companions in Camp:** Annaleise's broken English and deliberate misunderstandings; Sable's subtle shifting and her impersonations (with "show who's really here" on, then off); Celeste's fixed devotion and how long her secret holds; Lisa with each as her sister.
+
+**Result** (so far). Adding a companion is one file and one line, checked by a test that plays a companion who isn't in the roster through every input; removing any companion leaves every other pairing working. Phase 5's open questions are settled in D80, D81 and D83.
+
+**Carried into Phase 4:**
+- **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`); the UI advances it once per player message in the huddle, a moment or camp, and calls `endEncounter` with the hand-off.
+- **Beats outside camp.** Only the campfire reports beats (D80). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
+- **Getting outfits in play.** `addOutfit` exists, but nothing calls it yet. The UI needs a way to give one (a found item, a gift), and the wardrobe screen calls `equip`.
+- **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. Nadia can relay Ember there; if Ember needs her own lines over the rings, the candidate needs a speaker.
 
 ## Phase 6: Act 1, hand-authored
 

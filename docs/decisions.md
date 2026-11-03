@@ -401,3 +401,168 @@ Contracts: `schemas/calls/adjudicate.js`, `resolve.js`, `scene.js`, and `schemas
 Her look, fantasy, backstory, secrets and romance arc are for the campfire only. The campfire writes her standing and what she learned (`schemas/calls/campfire.js`); until it's built, every companion is steady.
 **Why:** The designer's call (2026-10-30): secrets belong to camp, and in an encounter a companion only needs how she acts, plus a light read of how things stand. The mood list stops at grumpy and jealous, so a bad night at camp makes her prickly, not uncooperative. The brief is about a third of the profile, and it keeps one companion's secrets out of any call the other might share later.
 **Rules out:** Secrets, the full fantasy or the payoff scene in any encounter call.
+
+### D80. The relationship model's numbers are content, starting from Gravenhold's
+**Decided:** Settles the Phase 5 question on caps. The relationship model is ported from Gravenhold (`newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`), with its numbers unchanged: per-turn clamps, the +4 per encounter cap on heat and intimacy gains, READY thresholds, reveal gates, stage thresholds and labels, configuration text. All of them live in `content/relationship.js`; the rules that read them are in `src/campaign/relationship.js`. The campfire may also move the pair value, by at most 1 a scene, as her side of how the two companions get on. Beats are reported only by the campfire; the huddle moves tracks through tagged reactions (D20), and hurt comes from those.
+**Why:** Gravenhold's numbers are what made its relationships feel right, so they're the starting point, and playtests will tune them. Tuning a number shouldn't mean editing code. Nothing wrote the pair value once the DM stopped scoring every turn.
+**Rules out:** Relationship numbers or labels in code.
+
+### D81. Companion special cases are general mechanisms, declared in her file
+**Decided:** Settles the Phase 5 question on shapes. Each of Gravenhold's hard-coded special cases becomes a mechanism any companion can declare, checked by `schemas/companion.js` (`docs/spec/companions.md` §6):
+- `tie`: she exists in relation to another companion. Its `by` entries, keyed by the other's id, set or extend her fields; `toPartner` goes to the other's call; `triangle` can override the configuration when both are involved and rule out sharing; `required` keeps her out of a party with no matching entry. Lisa's variants and her sister note.
+- `secondVoice`: a second character in her, heard only in private, relayed in company, and in her own body only in person once a declared flag is set or due. Nadia's Ember.
+- `extraBeats`: a beat of her own with a cooldown in campaign turns. Ruby's storm.
+- `stageLabels`: her wording for any stage. Serena's.
+- `notes`: text sent only while a relationship gate holds. Fern waiting for interest.
+
+The engine resolves each one for the current party and scene and sends only the result (D59).
+**Why:** Gravenhold named Lisa, Nadia, Ruby, Serena and Fern in code (D8). A mechanism with one user still has to be general, or the next companion who needs it means code changes. The designer expects to change looks, personalities and the roster itself before release.
+**Rules out:** A special case keyed to a companion id anywhere outside her own file.
+
+### D82. Tests keep the roster open
+**Decided:** `node --test` checks every companion file against `schemas/companion.js`, fails if engine code, schemas or prompts name any companion (her id, her name or her second voice's name), builds every allowed pairing's huddle and campfire inputs under the input limit with no engine or UI data in them, and plays a companion who isn't in the roster through a party with no code change. Tests of a declared mechanism find a companion who declares it, so removing her skips the test rather than breaking it.
+**Why:** D8 was a rule in a document. Structure over instruction applies to the codebase too: a test fails the commit that breaks it.
+**Rules out:** Engine code, schemas or prompts that use a companion as an example, even in comments.
+
+### D83. Personal quests are placed in packets; unwritten pairs start at 0
+**Decided:** Settles the Phase 5 questions on companion-driven events and unwritten pairs. A personal quest reaches play only as hidden things and an optional objective placed in a packet when it's written or generated; the companion knows about it through her `quest` field, gated by act. Nothing fires unless it was placed. A pair with no entry in `content/pairs.js` starts at 0, and each companion judges the dynamic from her own profile and the other's public profile.
+**Why:** Principle 8: no improvised twists, and a quest that fires on its own is one. A missing pair entry has to be normal, or every new companion needs an entry with every old one (D8).
+
+### D84. The fade comes just before anything explicit
+**Decided:** A romantic scene, and above all a payoff, plays out its lead-up: the touch, clothes coming loose, insinuation rather than description. It fades just before it would become explicit, never at the first intimacy. After the fade, a cheeky line or two may wink at what happened without describing it. "Fade" in a companion's payoff scene means that point. The craft is in `docs/design/companion-craft.md` §5; the campfire prompt says it once.
+**Why:** The designer's first campfire runs (Phase 5 bench): payoff scenes ended at the first kiss. Every payoff scene ends in "Fade.", and the craft said "write up to the threshold, cut", which the model read as the threshold of intimacy. The target is a non-explicit game romance, written.
+**Rules out:** Explicit content; fading out at the first touch.
+
+### D85. Camp with both companions: two calls, alternating, and one of them moves something
+**Decided:** When the player sits with both companions, each exchange is two calls, and who answers first alternates by campaign turn. Every campfire answer says what it `advances` between the player and one of the companions (a question, a move, a dare, something pushed), or null. If the first answer moved nothing, the second must: her call is told so, and the engine sends her answer back once if it still moves nothing.
+**Why:** The designer's call: these scenes cost two calls an exchange, so each exchange has to go somewhere in the relationships. Alternating keeps one companion from always reacting to the other. A rule in the prompt alone would compete with her fantasy and her waiting nature; telling the second speaker what the first did, and checking it, is structure.
+**Rules out:** An exchange at camp with both companions in which nothing moves; a fixed first speaker.
+
+### D86. Outfits are things a companion owns and wears
+**Decided:** Each companion owns her usual outfit and any in her file's `wardrobe`, and wears one. She can be given more in play and change into any she owns, from the UI or on the page at the campfire. Every call describes her in what she has on. This state lives with the relationship state (`src/campaign/wardrobe.js`).
+**Why:** The designer wants to change what a companion wears in the game and have her description follow. Her `outfit` was fixed text.
+**Rules out:** Treating getting wet or torn as a change of outfit (that's texture); outfits as engine items with game effects, until something needs one.
+
+### D87. A second voice may take her own body in any private scene
+**Decided:** Refines D81. A companion's second voice may take her own body in any private scene in person, whenever the scene wants it; `manifestsAfter` becomes an optional gate. Her call is told she may, never that she's there. Nadia's file now says what the designer described: Nadia and Ember are perfectly in tune, nothing one does surprises the other, and there's no jealousy between them beyond playing coy. Nadia tells him what Ember likes and wants, in the third person, even when it makes her blush, because that's their deal.
+**Why:** The designer's second campfire runs. Ember had been held back until the payoff, which made the payoff her first appearance, and the declared form forced her presence in every private scene after it. And Phase 5's first fix gave Ember tastes framed against Nadia ("anyone who tries to have Nadia without her", "often not what Nadia does"), which, with the profile's old "each secretly wants a little of him alone", produced a jealous push and pull that isn't the character.
+**Rules out:** Writing the two as rivals for him, or as surprising each other.
+
+### D88. Camp with both is about the two of them too; each has her own view of the other
+**Decided:** Refines D85. When the player sits with both companions, the scene is as much about how the two of them get on as about him. The second picks up the first's thread rather than opening her own, and whatever is between them can come out: friendship, trust, romance, tension, anger over something recent, jealousy, a hint at a secret the other doesn't know, even a fight in camp. Each companion has her own view of the other (−10..10, starting from the pair's `start`), which the campfire moves by up to 2 a scene; the pair value is the two views' average. The campaign's hard limits on party dynamics: nobody dies, and nobody refuses to keep working together, however friendly, romantic, angry or toxic it gets. A fight in camp is narration with relationship consequences, not combat rounds.
+**Why:** The designer's third campfire runs. Requiring each answer to move something made the second companion open a new, small question beside the first's instead of answering it, and nothing in the input invited the two to deal with each other. One shared pair value couldn't say that one adores the other while the other is annoyed.
+**Rules out:** A scene with both that only talks to the player; a symmetric pair value as the only record of how they get on; a companion leaving the party or dying because of party dynamics.
+
+### D89. A second voice waits for its gate, then chooses
+**Decided:** Supersedes D87's first sentence for Nadia. Ember first takes her own body at the payoff (`manifestsAfter: "payoff"` again). After it, in private, she decides each time whether to be in her own body or stay in Nadia's, and may switch mid-scene; her call is told she may, never that she's there. Everything else in D87 stands.
+**Why:** The designer's call: the payoff is Ember's first appearance, and afterwards it's her choice.
+
+### D90. A pair can start lopsided, and a gate can read the other side
+**Decided:** Refines D88. A pair's `start` in `content/pairs.js` may be one number or each companion's own starting view of the other, keyed by id. Relationship gates (reveal gates and `notes`) can read `fromOther`, how the other companion feels about her, as well as her own `towardOther`.
+**Why:** The designer: one companion can like the other while the other dislikes her, from the start. And some character behaviour depends on trust running both ways (Ruby admitting she was wrong in front of everyone), which a gate on her own view alone can't express.
+
+### D91. Gates read her perception of the other, not the truth
+**Decided:** Supersedes D90's `fromOther`. Each companion holds her read of how the other feels about her (`readOfOther`). It starts equal to the other's real starting view; after that, only her own campfire output moves it (`read`, up to 2 a scene). Gates read her read, never the other's real feelings, and no call sees the other's real view. The pair can start lopsided as D90 says.
+**Why:** The designer's pushback: nothing hits harder than believing trust is mutual when it isn't. A gate on the truth would hide exactly that betrayal; a gate on perception makes it possible.
+
+### D92. Companions feel about each other on three axes
+**Decided:** Supersedes D88's single view and the pair value. Each companion holds her view of the other on three axes, `affection` (hate to love), `respect` (contempt to admiration) and `trust` (expects betrayal to would trust with her life), each −10..10, and her read of the other's view on the same three (D91 otherwise unchanged). The campfire moves each by up to 2 an answer. A pair's `start` may give one number (affection) or the axes. A companion may declare `limits` on her view of anyone (a range per axis, a slower pace), and a tie may declare limits toward her partner that last until a named beat. There is no pair value.
+**Why:** The designer's runs: one pair number made the companions' feelings about each other shallow, and the interesting dynamics are combinations (loving someone you don't respect, trusting someone you can't stand). Jealousy was considered as a third axis and rejected: it follows from affection plus her belief about him and the other (D96).
+**Rules out:** A separate spiral mechanic. Natural friendships and feuds emerge from what each companion does and how the other judges it (`inOthers`, D94); the bench checks that they do.
+
+### D93. Player tracks recover toward a baseline; heat stays fluid after the payoff
+**Decided:** After a campfire answer with no change to heat, intimacy or regard, each that is below +2 rises by 1 toward it (`baseline` in `content/relationship.js`). It never pulls a value down. Hurt still needs a repair beat. Heat keeps moving after the payoff, within the same caps; for a companion with `leanFromHeat`, heat gained then also feeds lean.
+**Why:** The designer: any history with the player should be recoverable with time and real effort, and each companion has a natural interest in him. Heat frozen at the payoff made a lover's desire unresponsive.
+
+### D94. Her call reads her feelings as words, and judges others by her own standards
+**Decided:** Every relationship number reaches her call with a stance sentence from bands in `content/relationship.js` (`stances`). The prompt says feelings decide how she plays her fantasy, that feelings have momentum until something real turns them, and that a contradicted read moves `read` hard. Each companion declares `inOthers` (what earns and wears down each axis in someone else) and `recalibrates` (whether she shows a wrong read or adjusts inside). While she dislikes or distrusts someone, plain niceness earns nothing or suspicion; acting on what she genuinely wants still lands.
+**Why:** In the designer's runs, a companion at −10 regard, or at −10 toward the other companion, played as if neutral and warmed to anyone nice. The numbers reached the call bare, and her pursuit text outweighed them. And with feelings ignored, a wrong read could never be contradicted, so there was no surprise.
+
+### D95. Asides
+**Decided:** A campfire segment can be an `aside`, meant for the player alone, and the player can whisper to one companion at camp. The other companion's call never sees it. Each aside answer rolls once, seeded, against a small chance by the risk the speaker declares (1, 2 or 4 percent); a caught aside reaches the catcher's next call once, as something she saw that they don't know she saw. A catch is evidence, not confirmation: what she makes of it depends on her trust and beliefs.
+**Why:** The designer wants Gravenhold's whispers back (Lisa stealing touches in front of her sister), with a real but rare risk: compounding over a campaign, a larger chance would make getting caught routine.
+
+### D96. Triangles come from what each companion believes
+**Decided:** Supersedes the party-level `knows` flag and the tie's `triangle.bothInvolved`. Each companion has `involved` (lovers now: the payoff starts it, a `breakup` beat ends it, `rekindle` restarts it) and believes, about him and the other, `past` (ever involved) and `current` (involved now). Her call can change her beliefs (`believes`), rightly or wrongly. The `in_the_open` beat, with all three present, sets `open` and makes every belief true; `shared` implies it. Her configuration comes from her own involvement and her beliefs: chosen, former, cheatedOn and affair (she knows and it's secret; which depends on who was first), rivals (open), shared, thirdwheel, secondfiddle, ignored, open.
+**Why:** The designer: affairs shouldn't run one way, and both companions can be in the dark at once. Configurations computed from the truth told a companion she was being cheated on before she knew (D91's principle, applied to triangles).
+
+### D97. A companion can declare an escalation
+**Decided:** Replaces Ruby's storm beat. A companion may declare an `escalation`: a name, tiers from mild to worst, what calms it, and the tier from which she may act physically on the other companion. Her level is state; her call says where it stands after each answer, and it falls at most one level an answer. Her call sees the level and every tier. At that tier, her call may write the other companion being restrained, threatened or held hostage (an exception to "she never writes the other"); nobody dies or is maimed (D88).
+**Why:** The designer: Ruby's storms ended after a message or two and were always knives into a tree. They should last, vary, and at their worst be genuinely dangerous: a knife at his throat, the other companion as a hostage.
+
+### D98. A second voice can join a scene in company
+**Decided:** Refines D89. A `secondVoice` may declare `inCompany`, a gate. In person, in company, once it holds (and after `manifestsAfter`), she may speak and take her own body. Nadia's gate: his intimacy with her, her trust in the other companion, and her read that the other likes her.
+**Why:** The designer: Ember should be able to appear at the group campfire when she feels safe enough with him and the other companion.
+
+### D99. A tie can start both views, mask hers, and hold a secret
+**Decided:** A tie may declare `start` and `partnerStart` (both companions' starting views), `mask` (the view her partner believes she holds; the partner's read starts there instead of at the truth), `limits` toward her partner until a beat, `secret` (always in her call, never in the partner's), and `mirrorsWhenOpen` (once everything is in the open, her call gets her partner's pursuit to take up). Lisa now hates her sister and hides it: a per-sister grudge, sweet barbs and stolen asides in front of her, matchmaking out of cruelty with some sisters, and a reconciliation beat that waits for her real view to climb. She still genuinely adores the player.
+**Why:** The designer's Lisa: a nearly unforgivable secret grudge, played as the perfect little sister; the hardest companion to truly reconcile with anyone; and when it comes out, half the hurt little sister and half her sister's own pursuit, done better.
+
+### D100. A companion can fix tracks and gate her own fields
+**Decided:** A companion may declare `fixed` tracks, which never move (no changes, caps or baseline), and `reveal`, her own gate for any gated profile field, replacing the default in `content/relationship.js`.
+**Why:** The coming zealot's heat and regard start at 10 and never change, and her secret must wait far longer than the default hidden gate (intimacy 2).
+
+### D101. Shapeshifting and impersonation
+**Decided:** A companion may declare `shapeshift`: what she can do, and `impersonation` alternatives, each a chance and an optional gate. Her form is state: her campfire answer can set it (`form`), and the other companion's call sees her current look. When the player sits with the other companion alone, the engine rolls (seeded) whether the shapeshifter comes in her place; her call is told she's wearing that face and gets only the other's public profile and look, so she can make mistakes. Memories and changes are hers; the other companion's later calls know which turns she wasn't there, so she doesn't play along. Each companion knows whether the other can shift (`knowsShifter`), which only the `unmasked` beat in company sets, and two shapeshifters know each other. A tie entry can `grants` a special case with one partner. Impersonation happens only in scenes alone with him.
+**Why:** The designer's shapeshifter: subtly adjusting her looks to learn his tastes, and taking the other companion's face to be close to him in her place or to make her look bad; paired with Lisa, both shift.
+**Rules out:** Impersonation in scenes with both companions, where the real one is present.
+
+### D102. The zealot's dark ending is a transformation
+**Decided:** D7 stands. The coming zealot's prophecy names the player as the sacrifice that returns her god. Her dark ending is not his death: the ritual happens and he survives as the god's vessel, no longer quite himself, with her as its first priestess. Her light path is choosing the man over the prophecy, which makes her temple an antagonist (NPC agendas, D7). Lisa, as her sister, was raised in the cult and knows how the prophecy ends.
+**Why:** The designer chose a dark ending in the ascended-Astarion mould over a betrayal or a backstory she never acts on.
+
+### D103. Annalise, Sable and Celeste replace Serena, Morgana and Lyra
+**Decided:** Three new companions, each one fantasy up front, a quick payoff, and depth beyond it (`docs/design/companion-craft.md` §4). **Annalise**, an exchange student from Sévrance: affectionate, giggly, broken English with a consistent Sévrançais glossary, and "misunderstandings" that are mostly deliberate. **Sable**, a changeling: she subtly reshapes herself to learn his tastes and may come in the other companion's place (D101); her name is one she gave herself. **Celeste**, a priestess of the Ordo Luminis, a small, legitimate-seeming order of the light: heat and regard fixed at 10 (D100), and the prophecy's ending held until she's truly close (D102). Lisa has an entry for each as her sister, with her own grudge; with Sable she shares the shapeshifting. Lyra's file moves to `fixtures/cells/` as the Cells encounter's party member, out of the roster.
+**Why:** The designer judged Serena, Morgana and Lyra not interesting enough. Names had to work with voice-to-text.
+
+### D104. Text to speech is back
+**Decided:** Supersedes D24 for text to speech; photo prompts stay parked. Gravenhold's `Speech` is ported to `src/ui/speech.js`: the browser's own voices, English only, novelties dropped, ranked with downloaded Premium and Enhanced voices first (Apple marks them in the name and voice URI), a distinct voice per speaker, sentence-sized utterances. It's UI code: the engine stays pure (D12).
+**Why:** The designer wants companions read aloud, with the iPhone's downloaded premium voices where the browser exposes them.
+**Limits:** A web page only gets the voices the browser lists. Safari on iOS lists downloaded voices; an in-app web view may list fewer. Siri's own voices are never available to web pages.
+
+### D105. Annaleise talks like a real native speaker learning English
+**Decided:** Refines D103. Annalise is renamed Annaleise (the spelling the designer's voice-to-text produces). Her voice follows how a French native who is a novice in English really talks: present tense for ongoing states, literal phrasing from her language, "the" before general nouns, objects as he or she, a repeated subject, questions by intonation with "no?" or "eh?", false friends, and fillers ("euh", "bon", "alors", "enfin", "voilà", "how you say…"), with any other word from her language very rare. Her file carries the rules and a sample paragraph. Sévrance stands in for France, so its language is French in all but name; the invented glossary is gone.
+**Why:** The designer: the broken English didn't sound like a real learner. She's friendly, cool, bubbly, unashamed about learning, très mignonne et très chic.
+
+### D106. Annaleise's English improves with intimacy
+**Decided:** Three gated notes in her file: a real beginner's English below intimacy 4, lighter mistakes from 4, and good English with him from 7, where she can still play the lost beginner in front of others. "Oh là là" is out as too cliché.
+**Why:** The designer: her English should get better as they get closer. Gated notes (D81) already do this, so it needs no engine change.
+
+### D107. Companions pursue what they want by their own means
+**Decided:** Every companion declares `boundaries`, `honesty`, `means` and `whenRefused`: what she does with a no, when she lies, how she gets what she wants, and what she shows and resolves when refused. Fern is the honest baseline; the others disagree with being refused, openly or inside, and keep pursuing. Each campfire answer gives `inner` (what she actually thinks) and may set `agenda`, a private plan the engine carries into her later calls and no one else's. The prompt says her values are hers, not the narrator's, and that an honest boundary doesn't end her pursuit unless her file says so. The bench has the designer's boundary speech as a case for each companion with Fern.
+**Why:** The designer: most companions had drifted into healthy, honest, boundary-respecting relationships, but the game is partly about exploring toxic and unhealthy dynamics. Causes: the model's pull toward gracious acceptance, Fern-like values spread across profiles, and no state to carry a private scheme past one answer.
+
+### D108. Asides have kinds, and a catch is just part of the scene
+**Decided:** Refines D95. A campfire segment's `aside` is "no" (the shared scene), "action" (something physical out of the other companion's sight, the only kind that can be caught), "ring" (words to the player over the telepathy rings, silent and never caught) or "to_other" (words to the other companion over the rings; the player sees only that something passed between them). At most one of each kind an answer. One catch roll an answer, only for an action, only in company. A caught action reaches the catcher's next call as ordinary scene text, unflagged; her call decides whether it's worth answering. The player's whispers go over the rings and are never caught. The bench marks a catch in orange, for testing only.
+**Why:** The designer: telepathy is silent; a catch shouldn't be announced to the catcher; companions should be able to whisper to each other; and a response full of asides shouldn't mean many chances to be caught.
+
+### D109. Storms start from rejection, cruelty has a threshold, and four characters refined
+**Decided:** An escalation declares `rises`, what starts and raises it; Ruby's is feeling rejected by him without reassurance, not being upset in general. Every companion has a gated note for when she hates the other enough to be cruel, at her own threshold and in her own way (Fern: only with respect and trust gone, and only blunt truth and withdrawn warmth). Celeste: sweetly innocent and very willing not to be; keeping him sexually satisfied is a vital duty she trained for in a temple that teaches every preference and method of seduction; if he doesn't take her she stays serene outside and grows more desperate and inventive inside, by turns. Ruby gets the fun of her toxic highs: hypersexual play and raw, adoring need. Annaleise keeps the cute-foreigner act until her deep moment, even after the payoff.
+**Why:** The designer's notes after playing them in Camp.
+
+### D110. A campfire answer's empty parts are filled before it's checked
+**Decided:** Before validation, `fillCampfire` treats an absent optional field as null, an absent list as empty, and a segment with no aside marked as ordinary scene text. Everything else still fails the check and gets the one retry (D13): a wrong value, a missing segment text, a missing inner thought, a beat that isn't allowed.
+**Why:** The designer saw a retry on every message. The format reaches the model only as text, and with a dozen required fields, most of them usually null, nearly every first draft left one out, doubling the wait for nothing.
+
+### D111. The latest Camp scene is saved for the design thread
+**Decided:** Camp also writes its current scene to one document in the artifact's db (`camp/latest`), which each save overwrites: the scene's settings, the relationship state, and the transcript with every output, problem and retry. Full inputs are kept only for the last two answers. Changing who's at the fire clears the scene, so the document always holds the most recent one and nothing older accumulates.
+**Why:** The designer wanted Claude to see the scene being troubleshot, without a pile of old saves.
+
+### D112. The scene before the latest is kept too
+**Decided:** Refines D111. Before Camp clears a scene (a new scene at the fire, or starting over), it copies it to `camp/previous`, one slot, overwritten each time. At most two scenes are ever saved.
+**Why:** Switching from both companions to one alone cleared a scene the designer wanted Claude to read.
+
+### D113. One continuous Camp chat, and any number of asides
+**Decided:** Supersedes D108's limit of one aside of each kind and the scene clearing of D111 and D112. Switching who's at the fire continues the same chat; each entry records who was really present, and a companion's calls never see a private scene she wasn't in (a shapeshifter who came in another's place was there; the one whose face she wore wasn't). An answer may hold several asides; there's still one catch roll an answer, only for hidden actions. `camp/previous` is still written on Start over.
+**Why:** The designer: a long scene with both, continued one-on-one, lost all its context; and the aside limit made long whispered exchanges fail outright.
+
+### D114. In encounters a companion is her brief plus the special cases she acts on
+**Decided:** Reconciles D79 with D81, which were made on separate branches. In encounter calls (the huddle, private channels, and the DM's calls that voice her), a companion gets her brief (D79) plus the declared special cases she acts on in the scene:
+- what she has on;
+- her second voice: relayed in company, speaking for itself over the rings in private;
+- her shape, and how she looks if she has changed it;
+- her tie, without its secret.
+
+Gated fields, notes, her private agenda, a tie's secret and how the partner would take learning it stay at the campfire. Code: `encounterCases` in `src/context.js`.
+**Why:** D79 keeps secrets at camp and encounter calls small. Phase 5's special cases were written for the huddle, and some of them are who she is in any scene: someone's sister, what she's wearing, a second voice that speaks for her. Without them she would play as a different person in encounters.
+**Rules out:** Gated fields or notes in any encounter call.

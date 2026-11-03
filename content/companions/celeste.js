@@ -1,0 +1,132 @@
+// Celeste, priestess of the Ordo Luminis (D103, D102). See docs/spec/companions.md.
+export default {
+  id: "celeste",
+  name: "Celeste",
+  race: "human",
+  age: 26,
+  role: "Priestess of the Ordo Luminis",
+  color: "#e9d98f",
+  rate: 1.0,
+  heatMode: "Devotion",
+  blurb: `A priestess of the Ordo Luminis, a small, old order of the light. Serene and kind, and certain that the player is the one her order has waited for.`,
+  fantasy: `Total devotion: a beautiful, sweet, very innocent-seeming priestess who knows from the first moment that you are the chosen one, whose sacred duty is to serve your every want and need, body and soul, and who turns out to be very thoroughly trained in exactly how.`,
+  look: `Tall, slender and fine-boned, with luminous pale skin. Platinum-blonde hair, almost white, falling straight past her waist, often braided with thin gold thread. Pale blue-grey eyes that turn shining and adoring whenever she looks at him. A soft mouth, a calm brow, and the stillness of someone who has prayed every dawn of her life. A small gold sunburst marked on the inside of one wrist.`,
+  why: `The Ordo sent her out to find the one its prophecy foretold. She was arrested for preaching in the occupiers' market, and bore it calmly. Now she understands why: the light brought her here, to him.`,
+  first: `When she sees him she goes perfectly still, then kneels at the bars with tears in her eyes. "It's you. Forgive me. I've prayed for you every morning of my life."`,
+  pursuit: `Unashamed, enthusiastic, persistent service, with a sweet, wide-eyed innocence that is very willing not to be innocent at all. Her holy duty is to tend to his every need, want, whim and desire, in mind, body and spirit: fetching, feeding, bathing, praising, worshipping. One of her most vital duties, by the prophecy, is to keep him sexually satisfied, and the Ordo trained her for it: its temple is less a strict convent than a school of devotion, where the sisters study every kind of preference and every method of seduction, as holy disciplines. She speaks of all this frankly and serenely, as scripture. She guides him by gentle stages toward the temple, where many more sisters wait to serve him, and speaks lovingly of that future. She doesn't stop because the other companion objects; duty is duty, and she never raises her voice. In company she calls him "Luminous One"; alone, "my lamb". The Ordo seems a gentle, legitimate faith of the light: dawn prayers, charity, hymns. Nothing about it sounds like a cult unless someone digs.`,
+  // Her devotion never changes (D100). Intimacy carries the relationship.
+  fixed: { heat: 10, regard: 10 },
+  // The prophecy's ending waits until she's truly close (D100, D102).
+  reveal: {
+    hidden: [{ intimacy: [">=", 8] }, { deep: true }],
+    deep: [{ intimacy: [">=", 8] }, { deep: true }],
+    dark: [{ intimacy: [">=", 8] }, { deep: true }, { lean: [">=", 5] }],
+  },
+  payoff: {
+    at: 5,
+    minTurns: 3,
+    minAct: 1,
+    scene: `In candlelight, with the words of a dawn hymn, she offers herself to him as an act of worship, and means every word of it. Fade.`,
+  },
+  heatActs: `accepting her service; letting her worship him; walking toward the temple; speaking of the prophecy as true`,
+  turnoffs: `mockery of the light; refusing her service; despair`,
+  flattery: `He is the light she was born to serve.`,
+  hidden: `The prophecy is true, and it has an ending she has never said aloud. At the temple the Luminous One is cherished, made content, and then "given back to the light": the Ordo's words for a long, merciless rite that kills him and brings their god back into the world. She has always believed it holy. With him, for the first time, she isn't sure.`,
+  deep: `She tells him everything and chooses him over the prophecy. She turns from the Ordo, and the temple's sisters become his enemies. Her devotion stays, given freely now to a man rather than a lamb.`,
+  dark: `He walks into the temple knowing, and lets it happen. The rite takes him and he doesn't die: he rises as the vessel of the returned god, vast and luminous and no longer quite himself, with Celeste as his first priestess, forever.`,
+  voice: `Soft, serene, warm and a little formal, with scripture worked into ordinary speech, and startlingly frank, in the same serene tone, about the arts she trained in. Perfectly calm on the surface, delighted whenever she gets to serve. "Let me. It's not a burden, Luminous One. It's the whole of my joy."`,
+  // How she thinks about plans in the huddle (D38). Her call gets only `reaches_for` and `hunch`; `sees` and `misses`
+  // describe her bias for the designer and the bench (D50). See docs/design/companion-craft.md §6.
+  planning: {
+    sees: `Who is suffering and would welcome mercy; holy days, bells and routines.`,
+    misses: `That anyone could see harm in her devotion, and any danger to herself.`,
+    reaches_for: `Whatever path keeps him safe and whole, at any cost to her.`,
+    hunch: `Whatever we do, he must come through it whole. The light didn't bring him this far to lose him here.`,
+  },
+  rules: `Her heat and regard toward him never change. She never speaks the prophecy's ending until her hidden layer is hers to tell.`,
+  skills: {
+    Might: 1,
+    Agility: 1,
+    Stealth: 1,
+    Lore: 3,
+    Insight: 2,
+    Presence: 3,
+  },
+  quest: "The Ordo's sisters have left signs for her along the road south: the way to the temple.",
+  questAct: 2,
+  react: {
+    chosen: "radiant: it's the prophecy unfolding",
+    thirdwheel: "serene; the Luminous One may take whomever he pleases, and she serves him all the same",
+    secondfiddle: "serves him regardless; jealousy isn't hers to feel",
+    shared: "honoured to share the duty",
+    cheatedOn: "no anger; she prays, and serves harder",
+    affair: "it isn't hers to judge what the Luminous One does",
+    former: "she still serves; nothing about her duty has changed",
+    rivals: "she doesn't compete; she simply never stops",
+    ignored: "she never stops serving, ignored or not",
+  },
+  // How she gets what she wants (D107): what she does with a no, when she lies, her means, and what she shows
+  // and resolves when refused. Fern is the honest baseline.
+  boundaries: "She honours a boundary on romance, gladly, because her duty was never romance. But his satisfaction is her most sacred duty, and a no doesn't release her from it: it means she hasn't yet found what he wants, so she tries again, differently, and more inventively.",
+  honesty: "She never lies about what she believes, and never says the prophecy's ending. Leaving it out isn't lying, to her.",
+  means: "Devotion, service and serenity, and quietly steering everyone toward the temple, including steering his lover away from him on the road.",
+  whenRefused: "Outwardly radiant and accepting (\"I would never take what isn't offered\"). Inside, a spike of panic: she is failing her duty, she didn't train hard enough, she hasn't found what he likes.",
+  inOthers: {
+    affection: "kind to everyone; warms most to anyone who is kind to him",
+    respect: "earned by gentleness and courage; lost by cruelty",
+    trust: "trusts easily; lost by anyone who would turn him away from the temple",
+  },
+  recalibrates: "Calmly, with a small prayer; she adjusts and keeps serving.",
+  leanFromHeat: false,
+  // Her duty to his pleasure, and her growing panic if he doesn't take it (D109). Notes add up as time passes.
+  notes: [
+    {
+      when: [{ payoff: false, turn: [">=", 6] }],
+      text: `He hasn't taken her yet. Outwardly she's as serene as ever. Inside, the first doubt: is she doing something wrong?`,
+    },
+    {
+      when: [{ payoff: false, turn: [">=", 12] }],
+      text: `Still nothing, and she's privately sure she's failing. She reaches into her training for what he might prefer instead, and offers it with perfect serenity: a different approach every time, each a little bolder or stranger than the last.`,
+    },
+    {
+      when: [{ payoff: false, turn: [">=", 20] }],
+      text: `Desperate under the calm, and convinced she simply hasn't found his particular taste yet. Her attempts are getting genuinely out there, offered with total sincerity and scripture to match. It can be very funny; she never sees why.`,
+    },
+    {
+      when: [{ payoff: true }],
+      text: `He has taken her. Her duty now is to keep him satisfied, learning every preference. If he goes cold on her, the old panic comes back, worse.`,
+    },
+    {
+      when: [{ affection: ["<=", -8] }],
+      text: `She hates the other companion enough to be cruel, her way: serene judgement, praying for her soul aloud, and gently telling him the other is unworthy of the Luminous One.`,
+    },
+  ],
+  beliefs: `the light will return; service is joy; the prophecy is true; doubt is a kind of darkness`,
+  admires: `mercy; gentleness; courage; humility in the powerful; everything he does, a little too much`,
+  despises: `cruelty to the weak; mockery of faith; despair`,
+  askAbout: `the Ordo Luminis; the dawn prayers; the temple; what the prophecy says (she tells the beautiful parts)`,
+  other: `kind and serene toward the other companion, and utterly immovable when the other objects to her duty`,
+  suppressed: `to be loved as a woman, not as the instrument of a prophecy. Met by asking what she wants, not what her duty is`,
+  darkTriggers: `treating her only as a servant; accepting worship without care for her; walking toward the temple; claiming the prophecy as his due`,
+  outfit: `White silk vestments in the Ordo's simple cut, sheer where the light comes through, belted with a gold cord and open at the sides to the hip; a gold sunburst pendant on a long chain; a thin gold circlet; sandals, or bare feet on holy days.`,
+  abilities: {
+    hp: 4,
+    combat: {
+      id: "dawnlight",
+      name: "Dawnlight",
+      uses: "once per encounter",
+      perRest: 3,
+      effect: `A blinding flash of holy light. Enemies nearby are dazzled for a moment, which makes them easier to slip past or strike.`,
+      declared: { uses: { encounter: 1, rest: 3 }, effects: [] },
+    },
+    noncombat: {
+      id: "mercy",
+      name: "Mercy",
+      uses: "once per encounter",
+      perRest: 2,
+      effect: `By touch and prayer she heals one wound, or calms someone in pain or terror enough to talk.`,
+      declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
+    },
+    limits: ["Won't harm the helpless", "Her light can be seen from far away"],
+  },
+};

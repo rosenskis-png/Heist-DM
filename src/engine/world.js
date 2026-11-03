@@ -22,7 +22,7 @@ export function zoneOf(s, id, seen = 0) {
 
 export const carried = (s, id) => Object.keys(s.holder).filter((item) => s.holder[item] === id);
 
-// People are medium unless a flag says otherwise (Fern as a rat is tiny); things have their packet size.
+// People are medium unless a flag says otherwise (someone shapeshifted into a rat is tiny); things have their packet size.
 export const sizeOf = (s, id) => s.flags[id]?.size ?? thing(s, id)?.size ?? "medium";
 
 export const flag = (s, id, key) => s.flags[id]?.[key];

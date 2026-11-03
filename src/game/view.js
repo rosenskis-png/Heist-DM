@@ -11,7 +11,7 @@ const short = (s, id) => nameOf(s, id).replace(/^the /, "");
 const knownRoutine = (s, p) => p.schedule && (p.schedule.known || s.known.revealed.includes(p.schedule.id));
 const beatName = (s, npc, beat) => person(s, npc)?.schedule?.beats.find((b) => b.id === beat)?.id ?? beat;
 
-// A plan condition in words: "Snag is on his Drink", "Fern holds the key ring".
+// A plan condition in words: "Snag is on his Drink", "the rat holds the key ring".
 export function condText(s, c) {
   const [k, v] = Object.entries(c)[0];
   switch (k) {

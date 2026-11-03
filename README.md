@@ -49,13 +49,13 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
 | `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
-| `src/` | Code: the engine (`src/engine/`, D60), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
+| `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
 | `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |
 | `test/` | `node --test` suites |
 | `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The worked example, the Cells cards and recorded call outputs as data, and the engine's first acceptance test |
-| `content/` | Game data: companions, pairs, classes, rules, setting, and the encounter packets (`content/encounters/`). The source of truth for content. |
+| `content/` | Game data: companions, pairs, classes, rules, setting, the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
 | `bench/` | The Phase 2 judgment test bench: an artifact page that runs the real prompts on hand-written inputs, checked by the engine |
 | `fixtures/bench/` | The bench's test cases beyond the Cells cards |
@@ -65,4 +65,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phase 4: The Cells, playable,** is built, with two ways to run it: the engine's pipeline, and ruled mode, where the DM rules and the engine keeps the books (D75, `docs/spec/ruled.md`). The first playtests found the engine's rules too tight; the next ones compare the two. See `docs/roadmap.md`.
+**Phase 4: The Cells, playable,** is built, with two ways to run it: the engine's pipeline, and ruled mode, where the DM rules and the engine keeps the books (D75, `docs/spec/ruled.md`). The first playtests found the engine's rules too tight; the next ones compare the two. **Phase 5: Companions ported** is built too (`src/campaign/`, `test/companions.test.js`) and waits on the designer's campfire runs. See `docs/roadmap.md`.

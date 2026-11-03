@@ -7,7 +7,7 @@ import { validate } from "../src/validate.js";
 import { momentSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import fern from "../content/companions/fern.js";
-import lyra from "../content/companions/lyra.js";
+import lyra from "../fixtures/cells/lyra.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const packet = JSON.parse(file("content/encounters/cells.json"));

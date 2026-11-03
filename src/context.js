@@ -5,6 +5,11 @@ import { beatOf } from "./engine/clock.js";
 import { partyPerceives, memberPerceives } from "./engine/perceive.js";
 import { invariants } from "../content/setting.js";
 import { combatRule, strike } from "../content/rules.js";
+import { pairs } from "../content/pairs.js";
+import * as Relationship from "../content/relationship.js";
+import * as Rel from "./campaign/relationship.js";
+import { resolveParty, pairEntry } from "./campaign/roster.js";
+import { wearing, wardrobeFor } from "./campaign/wardrobe.js";
 
 // Strip coordinates (D9) and, for the party's view, everything hidden. The layout comes as facts the engine
 // derived from geometry: sizes and distances (D28).
@@ -73,29 +78,110 @@ export function briefProfile(c, standing) {
   };
 }
 
-// A companion's huddle profile is an allowlist (D59): fields not named here, including UI and engine data
-// and special cases not yet declared (Phase 5), never reach a prompt.
-const HUDDLE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
+// A companion's profile is an allowlist (D59): fields not named here, including UI and engine data and any
+// declared data not resolved below, never reach a prompt.
+const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
   "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
-  "suppressed", "darkTriggers"];
+  "suppressed", "darkTriggers", "inOthers", "recalibrates", "boundaries", "honesty", "means", "whenRefused"];
+// Gated fields, by the gate's name in content/relationship.js `reveal`.
+const GATED = { first: (c) => c.first, why: (c) => c.why, hidden: (c) => c.hidden, deep: (c) => c.deep, dark: (c) => c.dark,
+  payoff_scene: (c) => c.payoff.scene, quest: (c) => c.quest };
 
-// A companion's own profile, gated by relationship and act (docs/spec/companions.md §3) and by D50:
-// she gets her hunch and the plan she reaches for, never her blind spots.
-export function ownProfile(c, rel, act) {
-  const { hidden, deep, dark, payoff, quest, questAct, planning, react } = c;
-  const out = Object.fromEntries(HUDDLE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
+// A companion's own profile, as resolved for this party (src/campaign/roster.js), gated by relationship and act
+// (docs/spec/companions.md §3), with her declared special cases resolved for this scene (§6). `scene.private`:
+// the player is alone with her; `scene.inPerson`: at camp rather than over the rings. In the huddle she gets her
+// hunch and the plan she reaches for, never her blind spots (D50).
+export function ownProfile(c, rom, members, scene = {}, { planning = true } = {}) {
+  const out = Object.fromEntries(PROFILE_FIELDS.filter((k) => c[k] !== undefined).map((k) => [k, c[k]]));
+  // What she has on now (docs/spec/companions.md §7).
+  out.outfit = wearing(rom, c);
   out.abilities = abilitiesFor(c.abilities);
-  out.planning = { reaches_for: planning.reaches_for, hunch: planning.hunch };
-  if ((rel.turn ?? 0) < 8) Object.assign(out, { first: c.first, why: c.why });
-  if (rel.intimacy >= 2 || rel.payoff) out.hidden = hidden;
-  if (rel.payoff || rel.intimacy >= 5 || rel.lean >= 3) Object.assign(out, { deep, dark });
-  if (!rel.payoff && rel.heat >= payoff.at - 2) out.payoff_scene = payoff.scene;
-  if (act >= questAct - 1) out.quest = quest;
-  out.react = react[rel.config] ?? null;
+  if (planning) out.planning = { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch };
+  const v = Rel.view(rom, c);
+  // Her own gate for a field replaces the default (D100).
+  for (const [k, gate] of Object.entries(Relationship.reveal)) if (Rel.holds(v, c.reveal?.[k] ?? gate)) out[k] = GATED[k](c);
+  const notes = (c.notes ?? []).filter((n) => Rel.holds(v, n.when)).map((n) => n.text);
+  if (notes.length) out.notes = notes;
+  const sv = Rel.secondVoiceState(rom, c, scene);
+  if (sv) {
+    const { name, voice, look, relayed, admires, despises } = c.secondVoice;
+    const tastes = { ...(admires ? { admires } : {}), ...(despises ? { despises } : {}) };
+    out.second_voice = sv.speaks ? { name, voice, ...tastes, speaks_here: true, ...(sv.inCompany ? { in_company: true } : {}), ...(sv.canAppear ? { may_take_her_own_body: look } : {}) } : { name, relayed, ...tastes };
+  }
+  // Her shape (D101): what she can do, and how she looks now if she's changed it.
+  const r = rom.rel[c.id];
+  if (c.shapeshift) {
+    out.shapeshift = c.shapeshift.text;
+    if (r.form) out.look = r.form;
+  }
+  // A declared escalation: where she is on it now, and every tier (D97).
+  if (c.escalation) {
+    const e = c.escalation;
+    const lvl = rom.rel[c.id].storm;
+    out.escalation = { name: e.name, level: lvl, now: lvl ? e.tiers[lvl - 1] : "calm", tiers: e.tiers.map((x, i) => `${i + 1}: ${x}`), what_starts_or_raises_it: e.rises, what_calms_it: e.calms, ...(e.actsOnOther ? { from_level_she_may_act_on_the_other_companion: e.actsOnOther } : {}) };
+  }
+  const partner = members.find((m) => m.id !== c.id);
+  if (partner?.shapeshift && r.knowsShifter) out.you_know = `${partner.name} can change her shape.`;
+  // What she privately means to do, carried from scene to scene (D107). Only her own calls see it.
+  if (r.agenda) out.your_private_agenda = r.agenda;
+  if (r.absent?.length) out.not_you = `If he brings up being alone with you at camp on turn ${r.absent.join(", ")}, you weren't there and don't remember it. Don't play along.`;
+  if (c.tie && partner) {
+    out.tie = { with: partner.name, bond: c.tie.bond, gift: c.tie.gift, ...(c.tie.secret ? { your_secret: c.tie.secret } : {}) };
+    if (c.tie.mirrorsWhenOpen && rom.open) out.tie.now_in_the_open = { [`${partner.name}'s pursuit, which you now take up`]: partner.pursuit, how: c.tie.mirrorsWhenOpen };
+  }
+  if (partner?.tie?.withId === c.id) {
+    const t = partner.tie;
+    out.tie_to_you = { who: partner.name, note: t.toPartner, bond: t.bond, if_you_learn: t.partnerReacts };
+  }
+  out.react = c.react[Rel.config(rom, c, members)] ?? null;
   return out;
 }
 
-const publicProfile = (c) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, abilities: abilitiesFor(c.abilities) });
+// A number as words, from its bands in content/relationship.js `stances` (D94).
+export function stance(bands, v) {
+  let out = bands[0][1];
+  for (const [at, text] of bands) if (v >= at) out = text;
+  return out;
+}
+
+// How she feels about the other companion, and how she thinks the other feels about her, as words (D92, D94).
+export function pairStance(r) {
+  const S = Relationship.stances;
+  const say = (side, v) => Relationship.axes.map((k) => `${stance(S[k][side], Math.round(v[k]))} (${k} ${Math.round(v[k])})`).join("; ");
+  return { you_feel_about_her: say("own", r.toward), you_think_she_feels_about_you: say("read", r.read) };
+}
+
+// What she believes about him and the other companion (D96).
+const beliefText = (b, other) =>
+  b.current ? `You believe he and ${other} are involved now.` : b.past ? `You believe he and ${other} were involved once, but not now.` : `As far as you know, nothing has happened between him and ${other}.`;
+
+// Her relationship with the player and the other companion, as her call reads it. Lean is shown whole.
+function relationshipFor(c, rom, members) {
+  const r = rom.rel[c.id];
+  const cfg = Rel.config(rom, c, members);
+  const S = Relationship.stances;
+  const o = members.find((m) => m.id !== c.id);
+  return {
+    stage: Rel.stage(r, c),
+    // What the numbers mean for how she treats him (D94).
+    how_she_feels_about_him: ["heat", "intimacy", "regard"].map((k) => `${stance(S[k], r[k])} (${k} ${Math.round(r[k])})`),
+    payoff_at: c.payoff.at,
+    lean: Math.round(r.lean),
+    happened: ["payoff", "vuln", "deep", "bond", "manifest"].filter((k) => r[k]),
+    involved_now: !!r.involved,
+    hurt: r.hurt,
+    configuration: Relationship.configText[cfg],
+    ...(o ? { about_him_and_the_other: beliefText(r.believes, o.name), ...pairStance(r) } : {}),
+    ...(r.memories.length ? { memories: r.memories } : {}),
+    ...(r.commitments.length ? { commitments: r.commitments } : {}),
+  };
+}
+
+// The party's relationship state, or a fresh one when there isn't one yet (the bench).
+const romanceOf = (env, members) => env.romance ?? Rel.newRomance(members, env.pairs ?? pairs, { act: env.act });
+
+// What the other companion sees of her, including how she looks right now (a shapeshifter's current form, D101).
+const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c) } : {}), abilities: abilitiesFor(c.abilities) });
 
 // What the party knows about the people: names, known routines, and what's been learned.
 function learnedPeople(people) {
@@ -341,26 +427,31 @@ export function narrationInput(env, c, schema) {
   ]);
 }
 
-// A companion in the huddle or a private channel, in an encounter: her brief, not her full profile (D79). In
-// ruled mode the encounter and what the party can see come as plain lines (D76); the opening reaches her through
-// the DM's narration.
+// A companion in the huddle or a private channel, in an encounter: her brief, not her full profile (D79), with the
+// special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. In ruled mode the encounter and what the
+// party can see come as plain lines (D76); the opening reaches her through the DM's narration.
 export function companionInput(env, c, self, others, huddle, schema) {
+  const [me, ...rest] = resolveParty([self, ...others]);
   const { people, clock } = env.packet;
-  const pair = env.pairFor(self.id, others.map((o) => o.id));
+  const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
   const privately = c.channel === "private";
+  const rom = romanceOf(env, [me, ...rest]);
   const ruled = env.state?.ruled;
+  // A form an ability put her in (e.g. an animal), from the encounter's flags.
+  const form = env.state?.flags?.[me.id]?.form;
   return compose([
     ...campaign(env, "companion", schema),
-    block("You are", briefProfile(self, standingOf(env, self.id))),
-    block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...others.map(publicProfile)]),
+    block("You are", { ...briefProfile(me, standingOf(env, me.id)), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
+    form ? block("You, right now", { form }) : null,
+    block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
     block("What the party knows", ruled ? encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false }) : { map: partyMap(env.packet), people: learnedPeople(people), clock: knownClock(clock) }),
     c.now ? block("What the party can see right now", c.now) : null,
     c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
-    pair ? block("You and the other companion", pair) : null,
+    pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block(privately ? "Just you and the player, through your ring (the other companion can't hear this)" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.card ? block("The plan as the card shows it", c.card) : null,
-    privately ? `The player is talking to you alone. It's your turn, as ${self.name}.` : `It's your turn in the huddle, as ${self.name}.`,
+    privately ? `The player is talking to you alone. It's your turn, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
   ]);
 }
 
@@ -380,6 +471,59 @@ export function momentInput(env, c, schema) {
     c.recent?.length ? block("Recent exchanges", c.recent) : null,
     block(c.to === "dm" ? "The player asks the DM" : `The player is talking to ${c.to}`, c.conversation),
     c.fight ? "Run this round of the fight." : "Answer the player.",
+  ]);
+}
+
+// Her declared special cases that shape how she acts in an encounter (D114): what she has on, her second voice,
+// her shape, and her tie without its secret. Gated fields, notes and her private agenda stay at camp (D79).
+function encounterCases(c, rom, members, scene) {
+  const own = ownProfile(c, rom, members, scene, { planning: false });
+  const out = {};
+  for (const k of ["outfit", "second_voice", "shapeshift", "you_know"]) if (own[k] !== undefined) out[k] = own[k];
+  if (c.shapeshift && own.look !== c.look) out.look = own.look;
+  if (own.tie) out.tie = { with: own.tie.with, bond: own.tie.bond, gift: own.tie.gift };
+  if (own.tie_to_you) out.tie_to_you = { who: own.tie_to_you.who, note: own.tie_to_you.note, bond: own.tie_to_you.bond };
+  return out;
+}
+
+// The campfire (docs/spec/calls/campfire.md, D45). `c.with` lists the companions in the scene: her alone (one on
+// one), or both. In a scene with both, each exchange is two calls in `speakingOrder` (D85): she gets the other's
+// public profile and what the other has said and done in this scene, which is in `c.scene`, never the other's
+// secrets or private history; answering second after a turn that moved nothing, `c.mustAdvance` says so. The beats
+// she may report are listed, with any declared beat's own text, and the outfits she could change into.
+export function campfireInput(env, c, self, others, schema) {
+  const [me, ...rest] = resolveParty([self, ...others]);
+  const members = [me, ...rest];
+  const rom = romanceOf(env, members);
+  const alone = !c.with.some((id) => id !== me.id);
+  const scene = { private: alone, inPerson: true };
+  // She may be wearing the other companion's face, alone with him (D101).
+  const as = c.disguisedAs ? rest.find((o) => o.id === c.disguisedAs) : null;
+  const beats = Rel.allowedBeats(rom, me, members, scene);
+  const extra = (me.extraBeats ?? []).map((b) => (beats.includes(b.id) ? b.text : b.cooling)).filter(Boolean);
+  const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
+  return compose([
+    ...campaign(env, "campfire", schema),
+    block("You are", ownProfile(me, rom, members, scene, { planning: false })),
+    alone
+      ? block("The scene", as
+        ? `Camp, between encounters. The player is alone with you, but you've come wearing ${as.name}'s face, and he believes you are her. ${as.name} is elsewhere in camp.`
+        : `Camp, between encounters. The player is alone with you. ${rest.map((o) => o.name).join(" and ")} is elsewhere in camp.`)
+      : block("The scene", { where: "Camp, between encounters, the player with both of you.", with_you: rest.map((o) => publicProfile(o, rom)) }),
+    as
+      ? block(`You are wearing ${as.name}'s face`, {
+          how: `Look, sound and act like her, well enough to pass, for your own reasons: to be close to him in her place, or to make her look bad. Your narration and lines appear to him as hers. You know only her public face and what you've seen; you don't know her private history with him, so steer around it. Your memories and feelings are your own.`,
+          her: { ...publicProfile(as, rom), look: rom.rel[as.id]?.form ?? as.look },
+        })
+      : null,
+    block("Your relationship with the player", relationshipFor(me, rom, members)),
+    alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
+    block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
+    wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
+    block("The story so far", c.log ?? []),
+    c.events ? block("The last encounter", c.events) : null,
+    block("This scene so far", c.scene ?? []),
+    c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
 }
 

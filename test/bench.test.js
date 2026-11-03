@@ -43,3 +43,16 @@ test("bench moment cases name real people and say what they expect", () => {
     for (const id of c.unknown ?? []) assert.ok(routines.includes(id), `${c.id}: ${id}`);
   }
 });
+
+test("bench campfire cases name a party the roster allows", async () => {
+  const { companions } = await import("../content/companions/index.js");
+  const { partyProblems } = await import("../src/campaign/roster.js");
+  for (const c of cases.campfire) {
+    const members = c.party.map((id) => companions[id]);
+    assert.ok(members.every(Boolean), `${c.id}: unknown companion`);
+    assert.deepEqual(partyProblems(members), [], c.id);
+    assert.ok(c.with.length && c.with.every((id) => c.party.includes(id)), c.id);
+    assert.ok(Object.keys(c.rel).every((id) => c.party.includes(id)), c.id);
+    assert.ok(Object.keys(c.outfits ?? {}).every((id) => c.party.includes(id)), c.id);
+  }
+});
