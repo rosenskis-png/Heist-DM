@@ -9,56 +9,6 @@ export const BAND = { automatic: "Automatic", easy: "Easy", medium: "Medium", ha
 const cap = (t) => (t ? t[0].toUpperCase() + t.slice(1) : t);
 const short = (s, id) => nameOf(s, id).replace(/^the /, "");
 const knownRoutine = (s, p) => p.schedule && (p.schedule.known || s.known.revealed.includes(p.schedule.id));
-const beatName = (s, npc, beat) => person(s, npc)?.schedule?.beats.find((b) => b.id === beat)?.id ?? beat;
-
-// A plan condition in words: "Snag is on his Drink", "the rat holds the key ring".
-export function condText(s, c) {
-  const [k, v] = Object.entries(c)[0];
-  switch (k) {
-    case "all": return v.map((x) => condText(s, x)).join(" and ");
-    case "any": return v.map((x) => condText(s, x)).join(" or ");
-    case "not": return `not (${condText(s, v)})`;
-    case "beat": return `${short(s, v[0])}'s ${cap(beatName(s, v[0], v[1]))}`;
-    case "in_zone": return `${cap(nameOf(s, v[0]))} is in ${nameOf(s, v[1])}`;
-    case "party_all_in": return `everyone is in ${nameOf(s, v)}`;
-    case "holds": return `${v[0] === "party" ? "someone in the party" : cap(nameOf(s, v[0]))} has ${nameOf(s, v[1])}`;
-    case "flag": return `${cap(nameOf(s, v[0]))} is ${v[2] === true ? "" : v[2] === false ? "not " : `${v[2]} `}${v[1].replace(/_/g, " ")}`.replace(/ +$/, "");
-    case "tick": return `the time is ${v[0]} ${v[1]}`;
-    case "revealed": return `${nameOf(s, v)} is known`;
-    case "hp_below": return `${cap(nameOf(s, v[0]))} is hurt`;
-    case "disposition": return `${short(s, v[0])} is ${v[1].replace(/_/g, " ")}`;
-  }
-  return k;
-}
-
-// The card as the player reviews it: steps, their timing in terms the party knows, bands, reasons and what
-// failure costs (docs/spec/ui.md). Takes a full or shown card and shows only the shown parts. `brief` is the
-// companions' copy.
-export function cardView(s, card, { brief = false } = {}) {
-  const priced = new Map(card.pricing_call.steps.map((p) => [p.n, p]));
-  const facts = new Map(card.facts.map((f) => [f.n, f]));
-  const routines = s.packet.people.filter((p) => knownRoutine(s, p)).map((p) => p.id);
-  const steps = card.step_call.steps.map((st) => {
-    const p = priced.get(st.n) ?? { risks: [], mitigations: [] };
-    const f = facts.get(st.n);
-    const out = {
-      n: st.n,
-      summary: st.summary,
-      ...(st.when ? { waits: `Waits until ${condText(s, st.when.until)}${st.when.max_wait ? `, at most ${st.when.max_wait} ticks` : ""}` } : {}),
-      ...(st.if ? { if: `If ${condText(s, st.if)}; otherwise ${typeof st.otherwise === "string" ? (st.otherwise === "skip" ? "skip it" : "stop") : st.otherwise.summary.replace(/\.$/, "").toLowerCase()}` } : {}),
-      risks: p.risks.map((r) => ({ band: BAND[r.difficulty], reason: r.reason, fails: r.on_fail.summary, stops: r.on_fail.stops_plan })),
-    };
-    if (brief) return out;
-    return {
-      ...out,
-      actors: st.actors.map((a) => short(s, a)),
-      on: Object.entries(f?.beats ?? {}).filter(([npc]) => routines.includes(npc)).map(([npc, b]) => `${short(s, npc)}: ${cap(b)}`),
-      mitigations: p.mitigations.map((m) => m.note),
-      tags: st.tags,
-    };
-  });
-  return brief ? { plan: card.plan, steps } : { plan: card.plan, steps, rulings: card.step_call.rulings.map((r) => r.text), stances: card.stances };
-}
 
 // ---- The map (D9, D71): drawn from the packet's geometry, only what the party knows ----
 
@@ -151,22 +101,21 @@ export function mapView(s) {
   };
 }
 
-// A ruled card (D75) in the same shape as `cardView`: each step's tick and the beats the party knows at that
-// tick, its roll, when the whole plan is done (D77), and the DM's notes on it.
-export function ruledCardView(s, card, { brief = false } = {}) {
-  const routines = s.packet.people.filter((p) => knownRoutine(s, p) && !s.offRoutine?.includes(p.id));
+// The card as the player reviews it (docs/spec/ui.md): each step's tick and the beats the party knows at that
+// tick, its roll, when the whole plan is done (D77), the rulings it depends on, and the DM's notes on it.
+export function cardView(s, card) {
+  const routines = s.packet.people.filter((p) => knownRoutine(s, p) && !s.offRoutine.includes(p.id));
   const steps = card.steps.map((st) => {
     const out = {
       n: st.n,
       summary: st.summary,
       risks: st.roll ? [{ band: BAND[st.roll.band], reason: st.roll.reason, fails: st.roll.fails, stops: st.roll.stops }] : [],
     };
-    if (brief) return out;
     const beats = routines.map((p) => `${short(s, p.id)}: ${cap(beatOf(s, p.id, st.at)?.id ?? "")}`);
     return { ...out, on: [`Tick ${st.at}`, ...beats], mitigations: [] };
   });
   const done = `Done by tick ${card.ends_at}`;
-  return brief ? { plan: card.plan, steps, done } : { plan: card.plan, steps, done, rulings: card.rulings.map((r) => r.text), notes: card.notes ?? [], stances: card.stances ?? [], ruled: true };
+  return { plan: card.plan, steps, done, rulings: card.rulings.map((r) => r.text), notes: card.notes ?? [], stances: card.stances ?? [] };
 }
 
 // The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, and events it knows are coming.
@@ -174,7 +123,7 @@ export function clockView(s) {
   const beats = s.packet.people
     .filter((p) => knownRoutine(s, p) && s.at[p.id] != null)
     .map((p) => {
-      if (s.offRoutine?.includes(p.id)) return { who: short(s, p.id), beat: "Off routine", does: "Not following the routine you know", cue: "" };
+      if (s.offRoutine.includes(p.id)) return { who: short(s, p.id), beat: "Off routine", does: "Not following the routine you know", cue: "" };
       const b = beatOf(s, p.id);
       return b && { who: short(s, p.id), beat: cap(b.id), does: b.label, cue: b.cue };
     })
@@ -182,7 +131,7 @@ export function clockView(s) {
   const coming = s.packet.clock.events
     .filter((e) => (e.known || s.known.revealed.includes(e.id)) && !s.fired.includes(e.id) && s.due[e.id] !== undefined)
     .map((e) => ({ what: cap(e.id.replace(/_/g, " ")), at: s.due[e.id], in: s.due[e.id] - s.tick }));
-  return { tick: s.tick, pending: s.pending, beats, coming, fight: s.combat ? s.combat.enemies.filter((e) => !s.combat.out.includes(e)).map((e) => ({ name: short(s, e), hp: s.combat.hp[e] })) : null };
+  return { tick: s.tick, pending: s.pending, beats, coming };
 }
 
 // Party HP and conditions for the header.

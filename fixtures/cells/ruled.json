@@ -27,10 +27,10 @@
    },
    {
     "n": 3,
-    "summary": "On his next drink the rats bring the ring to Lyra, and Fern gnaws the drumhead.",
+    "summary": "On his next drink the rats bring the ring to Nadia, and Fern gnaws the drumhead.",
     "who": [
      "fern",
-     "lyra"
+     "nadia"
     ],
     "at": 3,
     "roll": {
@@ -42,9 +42,9 @@
    },
    {
     "n": 4,
-    "summary": "Lyra unlocks every door and everyone goes up the stair, Brannoc too.",
+    "summary": "Nadia unlocks every door and everyone goes up the stair, Brannoc too.",
     "who": [
-     "lyra",
+     "nadia",
      "player",
      "brannoc",
      "fern"
@@ -115,12 +115,12 @@
    {
     "n": 3,
     "happened": "yes",
-    "what": "Lyra has the ring; the drum is ruined.",
+    "what": "Nadia has the ring; the drum is ruined.",
     "changes": {
      "holds": [
       {
        "item": "keyring",
-       "by": "lyra"
+       "by": "nadia"
       }
      ],
      "flags": [
@@ -165,7 +165,7 @@
        "to": "stair_top"
       },
       {
-       "who": "lyra",
+       "who": "nadia",
        "to": "stair_top"
       },
       {
@@ -182,7 +182,7 @@
   ],
   "ends_at": 5,
   "narration": {
-   "text": "Fern slips down the grate as a rat. The rats lift the ring behind Snag's back, and by his next drink it's in Lyra's hand and the drumhead hangs in shreds. The doors open, and you all climb into the dark above.",
+   "text": "Fern slips down the grate as a rat. The rats lift the ring behind Snag's back, and by his next drink it's in Nadia's hand and the drumhead hangs in shreds. The doors open, and you all climb into the dark above.",
    "texture": []
   }
  }

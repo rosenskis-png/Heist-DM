@@ -1,12 +1,12 @@
 # Encode call
 
-**Job:** turn a finished sketch into an encounter packet (`docs/spec/packet.md`), for ruled mode (D116).
+**Job:** turn a finished sketch into an encounter packet (`docs/spec/packet.md`), with only what the DM reads (D116).
 **Runtime:** `sample.json`, replay off, `default`. Output: `schemas/calls/encode.js`.
 **Sees:** the sketch, the packet schema's slice for its stage, and the stages already encoded.
 
 ## Stages
 Each stage is one call, validated by the engine before the next:
-objective and people → zones and connections → things → clock (routines and placed events) → notes → opening description.
+objective and people → zones and connections → things → clock (routines and placed events) → notes on how people react → opening description.
 
 It must also:
 - mark which routines and events the party knows from the start (`known`), and which events are deadlines that slack can move (`deadline`, D41);

@@ -1,6 +1,6 @@
 # Adjudicate call
 
-**Job:** in ruled mode (D75), rule on the player's plan and make its card.
+**Job:** rule on the player's plan and make its card (D75).
 **Runtime:** `sample.json`, replay on, `default`.
 **Sees:** the characters, the encounter with hidden things marked and only the routines the party knows, the ledger, the next ticks as the party expects them, decided stances, recent exchanges and the plan.
 

@@ -4,8 +4,9 @@ import { html, useState, useEffect, useRef } from "./h.js";
 import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor } from "../src/game/session.js";
-import { huddle, moment, makeCard, commit, shown } from "../src/game/turns.js";
-import { ruledCard, ruledCommit, ruledScene } from "../src/game/ruled.js";
+import { huddle, makeCard, commit, talk, shown } from "../src/game/turns.js";
+import { companions as roster } from "../content/companions/index.js";
+import { partyProblems } from "../src/campaign/roster.js";
 import { mapView, clockView, partyView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
@@ -26,17 +27,6 @@ const STATUS = {
   scene: "The DM considers…",
 };
 
-// Who rules (D75): the DM, with the engine keeping the books, or Phase 4's engine pipeline.
-const MODES = [
-  ["ruled", "The DM rules", "The DM decides what your plan takes, what needs a roll and what happens. The game keeps track of every ruling so it stays true."],
-  ["engine", "The engine rules", "Phase 4: the engine checks routes, sizes, sight and timing, and the AI prices what's left."],
-];
-// The loop for each mode: making the card, running it, and one Moment exchange.
-const LOOP = {
-  ruled: { card: ruledCard, run: ruledCommit, talk: ruledScene },
-  engine: { card: makeCard, run: commit, talk: moment },
-};
-const loopOf = (session) => LOOP[session.mode ?? "engine"];
 const SPEED = [
   ["faster", "Faster", "Quicker, cheaper calls. The DM misses more."],
   ["balanced", "Balanced", "The tiers the bench settled on."],
@@ -126,24 +116,24 @@ function Title({ env, onNew, onLoad }) {
 
 function Setup({ env, slot, onBack, onBegin }) {
   const [name, setName] = useState("");
-  const [mode, setMode] = useState("ruled");
-  const party = partyFor({ name: name.trim(), class: "rogue" }, env.packet);
+  const [chosen, setChosen] = useState([]);
+  const pick = (id) => setChosen((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length < 2 ? [...c, id] : [c[1], id]));
+  const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen) : null;
+  const problems = party ? partyProblems(party.slice(1)) : [];
   const begin = () => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
-    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, seed, mode }));
+    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, companions: chosen, seed }));
   };
   return html`<main className="setup gutter">
     <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onBack}>Back</button>
     <h2>Who are you?</h2>
     <label className="field"><span>Your name</span><input id="player-name" value=${name} placeholder="The rogue" onChange=${(e) => setName(e.target.value)} /></label>
-    <p className="muted">The Cells are built for this party. Choosing your class and companions comes later.</p>
-    <div className="party">
-      ${party.map((p) => html`<div key=${p.id} className="who" style=${{ "--cc": p.color ?? "var(--gold)" }}><strong>${p.id === "player" ? p.name : p.name}</strong><span>${p.id === "player" ? "You, a rogue" : p.role}</span><span>${p.blurb}</span></div>`)}
+    <p className="muted">You're a rogue. Choose the two companions who wake in the cells beside you.</p>
+    <div className="modes">
+      ${Object.values(roster).map((c) => html`<button key=${c.id} className="who mode" aria-pressed=${chosen.includes(c.id)} style=${{ "--cc": c.color ?? "var(--gold)" }} onClick=${() => pick(c.id)}><strong>${c.name}</strong><span>${c.role}</span><span>${c.blurb}</span></button>`)}
     </div>
-    <div className="field" style=${{ maxWidth: "none" }}><span>Who rules</span>
-      <div className="modes">${MODES.map(([id, label, note]) => html`<button key=${id} className="who mode" aria-pressed=${mode === id} onClick=${() => setMode(id)}><strong>${label}</strong><span>${note}</span></button>`)}</div>
-    </div>
-    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample}>Wake up in the cells</button>
+    ${problems.length ? html`<p className="error">${problems.join(" ")}</p>` : null}
+    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0}>Wake up in the cells</button>
   </main>`;
 }
 
@@ -178,7 +168,7 @@ function Game({ env, slot, initial, onQuit }) {
 
   const save = async () => {
     try {
-      const where = await env.store.save(slot, { name: session.player.name || "The rogue", summary: `${s.packet.name ?? s.packet.id}, ${session.mode === "ruled" ? "the DM rules" : "the engine rules"}, tick ${session.state.tick}${session.ended ? ", finished" : ""}` }, serialize(session));
+      const where = await env.store.save(slot, { name: session.player.name || "The rogue", summary: `${s.packet.name ?? s.packet.id}, tick ${session.state.tick}${session.ended ? ", finished" : ""}` }, serialize(session));
       setSaved(where === "db" ? "Saved." : "Saved in this browser only.");
     } catch (e) {
       setSaved(errorText(e));
@@ -287,12 +277,10 @@ function PlanTab({ session, env, io, run, busy, error, refresh, onQuit }) {
     <div ref=${end}></div>
     ${session.ended
       ? html`<${Ending} session=${session} onQuit=${onQuit} />`
-      : s.combat
-        ? html`<p className="check">You're in a fight. Say what everyone does in the Moment tab, a round at a time.</p>`
-        : showCard
-          ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setEditing(true)} onRun=${(checkpoints) => run("plan", () => loopOf(session).run(session, io, env.prompts, { checkpoints }))} />`
-          : html`<${Draft} session=${session} busy=${busy} error=${error} refresh=${refresh} editing=${!!session.card} onCancel=${() => setEditing(false)}
-              onMake=${() => run("plan", async () => (await loopOf(session).card(session, io, env.prompts), setEditing(false)))} />`}
+      : showCard
+        ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setEditing(true)} onRun=${(checkpoints) => run("plan", () => commit(session, io, env.prompts, { checkpoints }))} />`
+        : html`<${Draft} session=${session} busy=${busy} error=${error} refresh=${refresh} editing=${!!session.card} onCancel=${() => setEditing(false)}
+            onMake=${() => run("plan", async () => (await makeCard(session, io, env.prompts), setEditing(false)))} />`}
   </section>`;
 }
 
@@ -320,7 +308,7 @@ function Draft({ session, busy, error, refresh, editing, onCancel, onMake }) {
   return html`<div className="composer">
     <label htmlFor="plan-draft" className="small muted">The plan, in your words. Number the steps if you like, and say when ("when he sits down…") and what if ("if the cask is unguarded…, otherwise…").</label>
     <textarea id="plan-draft" rows="6" value=${session.draft.plan} disabled=${!!busy} onChange=${(e) => ((session.draft.plan = e.target.value), refresh())}
-      placeholder="1. While Snag is at the cask, Fern turns into a rat…"></textarea>
+      placeholder="1. While Snag is at the cask, we…"></textarea>
     <${Stances} session=${session} refresh=${refresh} />
     ${error ? html`<p className="error">${error}</p>` : null}
     <div className="row">
@@ -347,7 +335,7 @@ function CardBody({ view, checkpoints, toggle }) {
           </div>
           ${st.risks.map((r, i) => html`<div key=${i} className="risk"><span><span className=${`pill ${r.band === "Easy" ? "ok" : r.band === "Medium" ? "gold" : "bad"}`}>${r.band}</span> ${r.reason}</span><span className="fails">If it fails: ${r.fails}${r.stops ? " The plan stops there." : ""}</span></div>`)}
           ${(st.mitigations ?? []).map((m, i) => html`<span key=${"m" + i} className="covered">Covered: ${m}</span>`)}
-          ${!st.risks.length && !(st.mitigations ?? []).length ? html`<span className="covered">${view.ruled ? "No roll." : "No risk the party can see."}</span>` : null}
+          ${!st.risks.length && !(st.mitigations ?? []).length ? html`<span className="covered">No roll.</span>` : null}
           ${toggle && st.n < view.steps.length ? html`<label className="pause"><input id=${`pause-${st.n}`} type="checkbox" checked=${checkpoints.has(st.n)} onChange=${() => toggle(st.n)} /> Pause after this step</label>` : null}
         </div>
       </li>`)}
@@ -392,17 +380,16 @@ function Ending({ session, onQuit }) {
 
 function MomentTab({ session, env, io, run, busy, error, refresh }) {
   const s = session.state;
-  const [to, setTo] = useState(session.talking ?? "dm");
+  const [to, setTo] = useState("dm");
   const [text, setText] = useState("");
-  const fight = !!s.combat;
   const { seen, heard } = partyPerceives(s);
   const people = s.packet.people.filter((p) => s.at[p.id] && (seen.has(s.at[p.id]) || heard.has(s.at[p.id])) && !s.flags[p.id]?.down);
-  const target = fight ? "dm" : people.some((p) => p.id === to) ? to : "dm";
+  const target = people.some((p) => p.id === to) ? to : "dm";
   const send = () => {
     const t = text.trim();
     if (!t) return;
     setText("");
-    run("moment", () => loopOf(session).talk(session, io, env.prompts, { to: target, text: t }));
+    run("moment", () => talk(session, io, env.prompts, { to: target, text: t }));
   };
   const addToPlan = (e) => {
     session.draft.plan = `${session.draft.plan.trim()}${session.draft.plan.trim() ? "\n" : ""}${e.text}`;
@@ -412,9 +399,7 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
   const who = (id) => (id === "dm" ? "DM" : id === "player" ? "You" : nameOf(s, id));
   return html`<section className="feed" aria-label="Moment">
     ${!session.feeds.moment.length
-      ? html`<p className="muted">${session.mode === "ruled"
-          ? "Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A plan of several steps goes on the card."
-          : "Ask the DM anything about where you are, or talk to someone you can see or hear. Questions are free; checks and conversations take a little time. Anything that moves someone or changes the world goes on the plan."}</p>`
+      ? html`<p className="muted">Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A fight goes round by round here too. A plan of several steps goes on the card.</p>`
       : null}
     ${session.feeds.moment.map((e) => {
       if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">You${e.to && e.to !== "dm" ? ` to ${who(e.to)}` : ""}</span><span className="text">${e.text}</span></div>`;
@@ -422,22 +407,19 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
         return html`<div key=${e.at} className="check"><span><span className=${`pill ${e.success ? "ok" : "bad"}`}>${e.success ? "Success" : "Failure"}</span> <span className="small muted">${who(e.actor)}${e.skill ? `, ${e.skill}` : ""}, ${BAND[e.difficulty]}</span></span><span>${e.text}</span></div>`;
       if (e.kind === "redirect")
         return html`<div key=${e.at} className="redirect"><span className="small muted">For the plan:</span><q>${e.text}</q>${e.added ? html`<span className="small muted">Added to your draft.</span>` : html`<button className="ghost" onClick=${() => addToPlan(e)}>Add to the plan</button>`}</div>`;
-      if (e.kind === "hits" || e.kind === "over") return html`<p key=${e.at} className="system">${e.text}</p>`;
       if (e.kind === "time") return html`<p key=${e.at} className="small muted">${e.text}</p>`;
       return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span></div>`;
     })}
     <div className="composer">
-      ${fight
-        ? html`<span className="small"><b>This round.</b> Say what everyone in the party does.</span>`
-        : html`<div className="to" role="group" aria-label="Talk to">
-            <button aria-pressed=${target === "dm"} onClick=${() => setTo("dm")}>Ask the DM</button>
-            ${people.map((p) => html`<button key=${p.id} aria-pressed=${target === p.id} onClick=${() => setTo(p.id)}>${p.name.split(",")[0]}</button>`)}
-          </div>`}
+      <div className="to" role="group" aria-label="Talk to">
+        <button aria-pressed=${target === "dm"} onClick=${() => setTo("dm")}>Ask the DM</button>
+        ${people.map((p) => html`<button key=${p.id} aria-pressed=${target === p.id} onClick=${() => setTo(p.id)}>${p.name.split(",")[0]}</button>`)}
+      </div>
       <textarea id="moment-input" rows="2" value=${text} disabled=${!!busy || !!session.ended} onChange=${(e) => setText(e.target.value)}
         onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
-        placeholder=${fight ? "I go for his knees; Lyra…" : target === "dm" ? "From her cell, could Lyra see the key peg?" : "What do you say?"}></textarea>
+        placeholder=${target === "dm" ? "From her cell, could she see the key peg?" : "What do you say?"}></textarea>
       ${error ? html`<p className="error">${error}</p>` : null}
-      <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim() || !!session.ended} onClick=${send}>${fight ? "Go" : "Send"}</button></div>
+      <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim() || !!session.ended} onClick=${send}>Send</button></div>
     </div>
   </section>`;
 }
@@ -474,7 +456,7 @@ function CompanionsTab({ session, env, io, run, busy, error, colors }) {
     )}
     <div className="composer">
       <textarea id="huddle-input" rows="2" value=${text} disabled=${!!busy} onChange=${(e) => setText(e.target.value)}
-        onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())} placeholder=${channel === "all" ? "Fern, could you get the keys as a rat?" : "Just between us…"}></textarea>
+        onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())} placeholder=${channel === "all" ? "How do we get those keys?" : "Just between us…"}></textarea>
       ${error ? html`<p className="error">${error}</p>` : null}
       <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
     </div>

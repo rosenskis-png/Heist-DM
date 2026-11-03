@@ -1,4 +1,4 @@
-// The adjudicate call (docs/spec/calls/adjudicate.md), in ruled mode (D75).
+// The adjudicate call (docs/spec/calls/adjudicate.md).
 import { ask } from "../ask.js";
 import { adjudicateSchema } from "../../schemas/calls/adjudicate.js";
 import { adjudicateInput } from "../context.js";

@@ -1,10 +1,8 @@
 // A game in progress: campaign values, the engine's encounter state, and what the table has said (D11, D74).
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
-import { load, apply } from "../engine/index.js";
+import { load, apply, bindParty } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
-import { companions } from "../../content/companions/index.js";
-import cellsLyra from "../../fixtures/cells/lyra.js";
-import { pairs } from "../../content/pairs.js";
+import { companions as roster } from "../../content/companions/index.js";
 
 // The player's sheet: their name, their class's skills and abilities.
 export function playerSheet(player) {
@@ -12,34 +10,30 @@ export function playerSheet(player) {
   return { id: "player", name: player.name || cls.name, role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
 }
 
-// The party: the player, then the companions the packet places (Phase 4 plays the Cells' own party, D65). Lyra
-// left the roster (D103) but is still the Cells' own party member, so the Cells can be played as written.
-const roster = { ...companions, lyra: cellsLyra };
-export const companionIds = (packet) => Object.keys(packet.start.positions).filter((id) => id !== "player" && roster[id]);
-export const partyFor = (player, packet) => [playerSheet(player), ...companionIds(packet).map((id) => roster[id])];
+// The party: the player, then the two companions the player chose, which the packet places by slot (D8).
+export const partyFor = (player, companionIds) => [playerSheet(player), ...companionIds.map((id) => roster[id])];
 
-// `mode` is who rules: "engine" (Phase 4's pipeline) or "ruled" (the DM rules, the engine keeps the books, D75).
-export function newSession({ packet, player, seed = 1, slack = 0, act = packet.act ?? 1, mode = "engine" }) {
-  const party = partyFor(player, packet);
-  const state = load({ packet, party, slack, seed, ruled: mode === "ruled" });
+// `companions` is the two companion ids the player chose.
+export function newSession({ packet, player, companions, seed = 1, slack = 0, act = packet.act ?? 1 }) {
+  const party = partyFor(player, companions);
+  const state = load({ packet, party, slack, seed });
   const session = {
-    v: 1,
-    mode,
+    v: 2,
     player,
+    companions,
     act,
     slack,
-    start: { packet: packet.id, seed, slack, ...(mode === "ruled" ? { ruled: true } : {}) },
+    start: { packet: packet.id, seed, slack },
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
     state,
-    feeds: { plan: [], moment: [], huddle: [], private: Object.fromEntries(companionIds(packet).map((id) => [id, []])) },
+    feeds: { plan: [], moment: [], huddle: [], private: Object.fromEntries(companions.map((id) => [id, []])) },
     draft: { plan: "", stances: [] },
     card: null,
-    talking: null,
     counts: { exchanges: 0, edits: 0, out: null },
     reactions: [],
     // Where each companion stands with the player (D79): written at camp, read in encounters.
-    standing: Object.fromEntries(companionIds(packet).map((id) => [id, { mood: "steady", learned: [] }])),
+    standing: Object.fromEntries(companions.map((id) => [id, { mood: "steady", learned: [] }])),
     actions: [],
   };
   post(session, "plan", { who: "dm", kind: "narration", text: packet.opening });
@@ -74,10 +68,7 @@ export function envFor(session, prompts) {
     prompts,
     companions: party.slice(1),
     connections: new Map(packet.map.connections.map((c) => [c.id, c])),
-    // Relationships stay at their starting values until Phase 5 ports the model (D65).
-    rel: {},
     standing: session.standing,
-    pairFor: (a, others) => others.map((b) => pairs[`${a}|${b}`] ?? pairs[`${b}|${a}`]).find(Boolean) ?? null,
   };
 }
 
@@ -91,5 +82,6 @@ export function serialize(session) {
 export function restore(json, packet) {
   const saved = typeof json === "string" ? JSON.parse(json) : json;
   if (saved.start.packet !== packet.id) throw new Error(`this save is for ${saved.start.packet}, not ${packet.id}`);
-  return { ...saved, actions: [], state: { ...saved.state, packet, party: partyFor(saved.player, packet) } };
+  const party = partyFor(saved.player, saved.companions);
+  return { ...saved, actions: [], state: { ...saved.state, packet: bindParty(packet, party), party } };
 }

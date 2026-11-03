@@ -1,8 +1,6 @@
-// Map facts from geometry, routes and fit (docs/spec/engine.md §2, D28, D51, D53, D54, D56).
+// Geometry checks and routes for the moves a packet makes (docs/spec/engine.md §9, D28).
 // Coordinates stay in here; the AIs get only the facts derived from them (D9).
 import { SIZES, conn, sizeOf, carried, flag, zoneOf, isParty, isNpc } from "./world.js";
-
-const FT = 5;
 
 export const other = (c, z) => c.between.find((x) => x !== z);
 
@@ -31,13 +29,6 @@ export function crossings(s, from, path) {
 export const hasHands = (s, id) => (isParty(s, id) || isNpc(s, id)) && flag(s, id, "hands") !== false;
 export const workedFrom = (c, z) => c.between.includes(z) && (c.operated_from === "both" || c.operated_from === z || c.reachable_from_other_side === true);
 
-// Why none of these actors can work this connection from where they are, or null if one can.
-export function cantWork(s, c, actors) {
-  const able = actors.filter((a) => hasHands(s, a));
-  if (!able.length) return "no_hands";
-  return able.some((a) => workedFrom(c, zoneOf(s, a))) ? null : "wrong_side";
-}
-
 // Someone moving who carries a connection's key, has hands, and comes at it from a side it's worked from.
 const opener = (s, c, movers, from) =>
   c.key && workedFrom(c, from) && movers.some((m) => hasHands(s, m) && carried(s, m).includes(c.key));
@@ -49,10 +40,8 @@ export function fitsNow(s, c, movers, from) {
   return !locked && c.fits_unlocked ? c.fits_unlocked : c.fits;
 }
 
-// Why a mover can't cross from `from`: null if it can. A ruling's exception lets that thing through that
-// connection (D55).
+// Why a mover can't cross from `from`: null if it can.
 export function blocked(s, c, mover, movers, from) {
-  if (s.exceptions.includes(`${mover}|${c.id}`)) return null;
   if (SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(fitsNow(s, c, movers, from))) return null;
   const opens = c.fits_unlocked && SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(c.fits_unlocked);
   return opens ? "locked" : "too_big";
@@ -104,7 +93,7 @@ function edges(z) {
 
 const level = (z) => z.level ?? 0;
 
-// Two zones on one level share a wall (for hears_through_walls, engine.md §2).
+// Two zones on one level share a wall (for hears_through_walls, engine.md §5).
 export function shareWall(s, a, b) {
   const za = s.packet.map.zones.find((z) => z.id === a);
   const zb = s.packet.map.zones.find((z) => z.id === b);
@@ -153,38 +142,4 @@ export function geometryProblems(packet) {
       problems.push(`thing ${t.id} isn't inside ${z.id}`);
   }
   return problems;
-}
-
-const connPoint = (c) => (c.square ? [c.square[0] + 0.5, c.square[1] + 0.5] : [(c.wall[0][0] + c.wall[1][0]) / 2, (c.wall[0][1] + c.wall[1][1]) / 2]);
-const feet = (n) => Math.round(n * FT / 5) * 5;
-const dist = ([ax, ay], [bx, by]) => Math.hypot(ax - bx, ay - by);
-
-// The layout facts the AIs receive instead of coordinates (D9, D28): each zone's size, how far it is
-// between the connections across a zone, and how far apart placed things in one zone are.
-export function layoutFacts(packet, { knownOnly = false } = {}) {
-  const keep = (x) => !(knownOnly && x.hidden);
-  const zones = packet.map.zones.filter(keep);
-  const conns = packet.map.connections.filter(keep);
-  const things = packet.map.things.filter((t) => keep(t) && t.location?.at);
-  const out = [];
-  for (const z of zones) {
-    const b = box(z);
-    const area = cells(z).length;
-    const shape = area === (b.x1 - b.x0) * (b.y1 - b.y0) ? "" : ", irregular";
-    out.push(`${z.name}: ${(b.x1 - b.x0) * FT} by ${(b.y1 - b.y0) * FT} ft${shape}.`);
-    // An unnamed connection is named by where it leads from here: "the grate to Far cell".
-    const label = (c) => c.name ?? `the ${c.kind} to ${zones.find((x) => x.id === other(c, z.id))?.name ?? other(c, z.id)}`;
-    const here = conns.filter((c) => c.between.includes(z.id));
-    for (let i = 0; i < here.length; i++)
-      for (let j = i + 1; j < here.length; j++) {
-        const d = feet(dist(connPoint(here[i]), connPoint(here[j])));
-        if (d >= 10) out.push(`In ${z.name}: ${label(here[i])} and ${label(here[j])}, about ${d} ft apart.`);
-      }
-    const inZone = things.filter((t) => t.location.zone === z.id);
-    const at = (t) => [t.location.at[0] + 0.5, t.location.at[1] + 0.5];
-    for (let i = 0; i < inZone.length; i++)
-      for (let j = i + 1; j < inZone.length; j++)
-        out.push(`${inZone[i].name} and ${inZone[j].name}: about ${feet(dist(at(inZone[i]), at(inZone[j])))} ft apart.`);
-  }
-  return out;
 }

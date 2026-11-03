@@ -1,15 +1,22 @@
-// Ruled mode (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
+// The ledger (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
-// objective. It doesn't judge whether anything is possible. Semantics: docs/spec/ruled.md.
+// objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
 import { person, isParty, isNpc, zoneOf, sheet } from "./world.js";
 import { nextTick, objectives, log } from "./clock.js";
-import { revealable } from "./moment.js";
 import { d100, ODDS } from "./rng.js";
 import { enemyTiers } from "../../content/rules.js";
 
 // The ledger's size limits (D76). Facts are what's true now and matters later; history goes to the log. A
 // ruling that would leave more than `facts` active, or add more than `newFacts` at once, goes back for the retry.
 export const LEDGER = { facts: 20, newFacts: 6 };
+
+// What a `reveal` can name: a hidden thing, a routine or a coming event (D44).
+export const revealable = (s) =>
+  new Set([
+    ...["zones", "connections", "things", "facts"].flatMap((k) => s.packet.map[k].filter((x) => x.hidden).map((x) => x.id)),
+    ...s.packet.people.filter((p) => p.schedule).map((p) => p.schedule.id),
+    ...s.packet.clock.events.map((e) => e.id),
+  ]);
 
 const ids = (s, ...kinds) =>
   new Set(
@@ -183,9 +190,6 @@ export function resolve(s, card, rolls, out) {
   }
   if (!s.ended) advanceTo(s, out.ends_at);
   if (!s.ended) applyChanges(s, out.after);
-  s.history.plans += 1;
-  for (const r of rolls.filter((x) => out.steps.some((st) => st.n === x.n))) s.history.rolls.push(r.success);
-  if (out.stopped) s.history.interrupts += 1;
   log(s, { plan: out.steps.map((st) => `${st.n}:${st.happened}`).join(" "), ...(out.stopped ? { stopped: out.stopped.at } : {}) });
   return { rolls, steps: out.steps, stopped: out.stopped ?? null };
 }
@@ -213,7 +217,6 @@ export function scene(s, out) {
     const success = roll <= odds;
     applyChanges(s, (success ? c.success : c.failure).changes);
     log(s, { check: c.who, success });
-    s.history.rolls.push(success);
     return { odds, roll, success };
   });
   applyChanges(s, out.changes);

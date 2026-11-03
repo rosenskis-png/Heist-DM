@@ -1,4 +1,4 @@
-// Ruled mode (D75): the DM rules, the engine keeps the books. Recorded DM outputs, no AI calls.
+// The DM rules, the engine keeps the books (D75). Recorded DM outputs, no AI calls.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -7,11 +7,11 @@ import { validate } from "../src/validate.js";
 import { adjudicateSchema, resolveSchema, sceneSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import fern from "../content/companions/fern.js";
-import lyra from "../fixtures/cells/lyra.js";
+import nadia from "../content/companions/nadia.js";
 
 const packet = JSON.parse(readFileSync(new URL("../content/encounters/cells.json", import.meta.url), "utf8"));
-const party = [{ id: "player", name: "Rogue", ...classes.rogue }, fern, lyra];
-const start = { packet, party, ruled: true, seed: 5 };
+const party = [{ id: "player", name: "Rogue", ...classes.rogue }, fern, nadia];
+const start = { packet, party, seed: 5 };
 
 // The rat plan as a DM would rule it and play it out: four steps, two rolls, small things cost no time.
 const { card: ratCard, played: ratPlayed } = JSON.parse(readFileSync(new URL("../fixtures/cells/ruled.json", import.meta.url), "utf8"));
@@ -32,9 +32,8 @@ test("the rat plan, ruled: rolls first, then the DM's account lands step by step
   assert.equal(after.tick, 4);
   assert.ok(after.facts.some((f) => f.id === "rats_carry_ring"));
   assert.equal(after.flags.drum.gnawed, true);
-  // The engine didn't decide anything: no trigger started a fight when the doors opened.
-  assert.equal(after.combat, null);
-  assert.ok(!after.log.some((l) => l.trigger));
+  // The engine decided nothing about how people react: the DM's account is the only change.
+  assert.ok(after.log.every((l) => !l.trigger));
 });
 
 test("the DM's account must fit the dice and the card", () => {
@@ -78,10 +77,10 @@ test("a scene rolls its checks, and its time passes with the routines", () => {
   assert.equal(lost.at.snag, "guardroom");
 });
 
-test("placed events still run, half as long again (D77): Uzga arrives at 32 and takes Fern if she's in her cell", () => {
+test("placed events run: Uzga arrives at 32 and takes the companion in the middle cell if she's still there", () => {
   let s = load(start);
   for (let i = 0; i < 3; i++) s = apply(s, { type: "scene", out: { reply: "You wait.", ticks: 12 } });
-  assert.equal(s.ended?.outcome, "fern_taken");
+  assert.equal(s.ended?.outcome, "companion_taken");
   assert.equal(s.tick, 32);
 });
 

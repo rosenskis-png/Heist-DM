@@ -216,7 +216,7 @@ This is also how a success produces something interesting.
 
 ## 6. Senses, disguise and pursuit
 
-- **Define observers by their senses, not just their positions:** who sees, who hears, who smells, and in what light. The packet already requires every observer to state what it can see and hear (`docs/spec/packet.md`).
+- **Define observers by their senses, not just their positions:** who sees, who hears, who smells, and in what light. Write it on the sheet or the routine's beat, where the DM reads it (`docs/spec/packet.md` §3).
 - **Different senses make disguises double-edged.**
   - A goblin cloak fools eyes but not noses.
   - Den muck fools noses but draws looks.
@@ -240,7 +240,7 @@ This is also how a success produces something interesting.
 
 ## 7. Running it
 
-These are execution jobs. In this project, most of them belong to the engine (code computes, AI judges).
+These are execution jobs. In this project the engine keeps the clock and the routines, and the DM does the rest (code computes, AI judges).
 
 - **Work out positions in advance.** A cycle table should be small, six rows or fewer. Nobody should be calculating where a guard is during play.
 - **Keep the clock visible.** Players should never have to ask what time it is.
@@ -332,7 +332,7 @@ A room has no objective and no danger, and the party leaves when it likes (D121)
 - **The worked example:** the Cells, rebuilt as a packet, in `fixtures/cells/walkthrough.md`.
 - **The generator** (`docs/spec/generation.md`) builds from motifs: short patterns taken from encounters like the ones below, such as the moving key, the alarm with a weakness, the witness with an ultimatum, the arrival deadline and the hidden exit an NPC knows. They live in `content/motifs.js` (D118). Its critique call is §8's step 10, done by a separate call (D120).
 
-Everything the engine can't check stays as judgment. Improve that judgment with better information (the purpose line, the table read, worked examples), not with more rules in the prompt.
+Everything the engine can't check stays as judgment. Improve that judgment with better information (the purpose line, the notes, worked examples), not with more rules in the prompt.
 
 ---
 

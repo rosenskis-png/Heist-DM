@@ -8,35 +8,30 @@ What each AI call is given, in what order, and how it's sent.
 
 | Tier | Blocks | Changes |
 |---|---|---|
-| **Campaign** | Role and judgment for the call, the shared style guide, worked examples for this act, invariants in play this act, character sheets (stable part), the companion's profile (companion calls) | When the act changes |
-| **Encounter** | Intent, people, map, opening description | Per encounter |
-| **Live** | State, canon added, event log, table read, draft card, recent raw exchanges, the request | Every call |
+| **Campaign** | The call's job, the shared style guide, worked examples for this act, invariants in play this act, the output format | When the act changes |
+| **Encounter** | Character sheets, the encounter as plain lines, the opening | Per encounter |
+| **Live** | The ledger, what's coming, recent narration and log, the draft or card, the conversation, the request | Every call |
 
 Prompts are always ordered campaign → encounter → live. `sample` gives no prompt-caching control (D2), but the ordering costs nothing and helps if the platform caches prefixes on its own.
 
 ## 2. Who gets what
 
-| Block | Step | Pricing | World | Narration | Moment | Companion |
-|---|---|---|---|---|---|---|
-| Character sheets | full | full | condition | voice notes | full | own full; others' known abilities |
-| Intent | ✓ | ✓ | ✓ | ✓ | — | — |
-| People | ✓ | ✓ | ✓ | ✓ | ✓ | learned only |
-| Map (relationships and derived facts) | full | full | full | full | full, hidden marked | known only |
-| Opening description | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
-| State, canon, event log | full | full | full | full | full | known only |
-| Engine route and observer facts | — | ✓, foreseen and unforeseen kept apart (D36) | — | — | — | — |
-| Engine perception facts (what each member sees and hears now, and from each known zone) | — | — | — | — | ✓ (D39) | — |
-| Table read | — | — | ✓ | — | — | — |
-| Card | plan + decided stances | validated steps (internal facts kept apart) | results | steps with their results + world actions | draft | draft and card as shown (D40) |
-| Recent raw exchanges | few | — | — | few | current conversation | visible huddle this encounter, plus recent narration the party witnessed |
-| Huddle content | — | — | — | — | — | own channels |
-| Companion secrets and relationships | — | — | — | — | — | own only, gated (`docs/spec/companions.md`) |
+The encounter reaches the DM's calls as plain lines, not the packet's JSON (`encounterText`, D76): places, ways between them, things where they are now, fixed facts, people's sheets and routines, the packet's prose `notes` on how they react, what's coming, and hidden things listed apart and marked. The ledger comes the same way (`ledgerText`), with the last 16 log entries and the last 10 lines of texture.
 
-- **Allowlists** (D59): each column above is built from an explicit list. Abilities go without their `declared` blocks; the party's map has no size categories; the world call gets only the people present, routines as labels, and the ids of the engine's reactions, with no prose style guide.
-- **Coordinates never go to any call** (D9). The map block is relationships plus `layout`: facts the engine derives from geometry (each zone's size, how far apart its connections and placed things are). Code: `src/context.js`.
-- **Hidden things** go only to the plan calls and the Moment AI, marked hidden.
+| Call | Gets |
+|---|---|
+| Adjudicate | Characters; the encounter with only the routines and events the party knows; the ledger; what the party expects next; the plan and its stances |
+| Resolve | Characters; the whole encounter; the ledger; what really happens tick by tick; the plan, the card and which rolls succeeded |
+| Scene | Characters; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
+| Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); the huddle or her private channel |
+| Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
+
+- **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks.
+- **Coordinates never go to any call** (D9). Zones come with their size in feet, and openings in rough real dimensions. Code: `src/context.js`.
+- **Hidden things** go only to the resolve and scene calls, marked hidden. The card names nothing the party doesn't know.
 - **Companions** see only what the party knows, plus their own data.
-- Generation's calls (sketch, critique, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet. The campfire call is in `docs/spec/calls/campfire.md`.
+- **Budgets** (D76): every call has an input budget (`BUDGET` in `src/ask.js`). One that crosses it still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` holds every DM and companion call under its budget with the ledger at its limits.
+- Generation's calls (sketch, critique, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet.
 
 ## 3. Act gates
 
@@ -51,19 +46,16 @@ An invariant or worked example can carry an act gate: the first act it applies i
 
 | Call | Method | Replay cache | Starting tier |
 |---|---|---|---|
+| Adjudicate | `sample.json` | on | `default` |
+| Resolve | `sample.json` | off | `default` |
+| Scene | `sample.json` | off | `default` |
+| Companion | `sample.json` | off | `quick` (D58) |
+| Campfire | `sample.json` | off | `complex` |
 | Sketch | `sample.json` | off | `complex` |
 | Critique | `sample.json` | off | `complex` |
 | Encode | `sample.json` | off | `default` |
-| Step | `sample.json` | on | `default` |
-| Pricing | `sample.json` | on | `default` |
-| World | `sample.json` | on | `default` |
-| Narration | `sample.json` | off | `default` |
-| Moment | `sample.json` | off | `default` |
-| Companion | `sample.json` | off | `quick` (D58) |
-| Campfire | `sample.json` | off | `complex` |
-| Ruling | `sample.json` | on | `quick` |
 
-- **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same state and plan get the same ruling, for free. Conversation and prose must never repeat, so their replay is off.
+- **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same ledger and plan get the same card, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
 - **Tiers are a player setting** (D48). The table gives the middle position, Balanced; Faster moves every call one tier down and Smarter one tier up (D71). Code: `src/ask.js`.

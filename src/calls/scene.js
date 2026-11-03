@@ -1,4 +1,4 @@
-// The scene call (docs/spec/calls/scene.md), in ruled mode (D75).
+// The scene call (docs/spec/calls/scene.md).
 import { ask } from "../ask.js";
 import { sceneSchema } from "../../schemas/calls/scene.js";
 import { sceneInput } from "../context.js";

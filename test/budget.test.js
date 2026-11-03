@@ -17,7 +17,7 @@ const line = (n) => `${"Snag is sick from the fouled ale and keeps glancing at t
 
 // A late game: the ledger at its limits, a long log and plenty of texture.
 function lateGame() {
-  const session = newSession({ packet, player: { name: "Sneako", class: "rogue" }, mode: "ruled" });
+  const session = newSession({ packet, player: { name: "Sneako", class: "rogue" }, companions: ["fern", "nadia"] });
   const s = session.state;
   s.facts = Array.from({ length: LEDGER.facts }, (_, i) => ({ id: `fact_${i}`, text: line(160), about: ["snag", "cask"], known: true, since: i }));
   s.canon = Array.from({ length: 40 }, () => ({ kind: "texture", text: line(140) }));
@@ -26,7 +26,7 @@ function lateGame() {
   return session;
 }
 
-test("every ruled call stays under its budget at the ledger's limits", () => {
+test("every DM and companion call stays under its budget at the ledger's limits", () => {
   const session = lateGame();
   const s = session.state;
   const env = envFor(session, prompts);

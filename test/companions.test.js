@@ -12,6 +12,7 @@ import { validate } from "../src/validate.js";
 import { partyProblems, pairings, resolveParty } from "../src/campaign/roster.js";
 import * as Rel from "../src/campaign/relationship.js";
 import * as A from "../src/context.js";
+import { load } from "../src/engine/index.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const all = Object.values(companions);
@@ -32,7 +33,9 @@ const newcomer = (over = {}) => {
   delete base.tie;
   return { ...base, id: "wren", name: "Wren", ...over };
 };
-const huddle = (self, other, e = env()) => A.companionInput(e, { draft: null }, self, [other], [], companionSchema);
+// An encounter with these two in the cells, for the calls that read live state.
+const withState = (e, self, other) => (e.state ? e : { ...e, state: load({ packet, party: [e.party[0], self, other] }) });
+const huddle = (self, other, e = env()) => A.companionInput(withState(e, self, other), { draft: null }, self, [other], [], companionSchema);
 const camp = (self, other, withIds, e = env()) => A.campfireInput(e, { with: withIds, scene: [] }, self, [other], campfireSchema);
 // A payoff in a test means they're lovers now, unless the test says otherwise.
 const rel = (over = {}) => ({ ...Rel.newRel(), ...(over.payoff ? { involved: true } : {}), ...over });
@@ -349,7 +352,7 @@ test("a second voice is relayed in company, speaks in private, and may take her 
     const due = sv.manifestsAfter ? { [c.id]: { payoff: true } } : {};
     const group = huddle(c, o, e(romance(m, due)));
     assert.ok(group.includes(JSON.stringify(sv.relayed)) && !group.includes(JSON.stringify(sv.voice)));
-    const rings = A.companionInput(e(romance(m, due)), { channel: "private" }, c, [o], [], companionSchema);
+    const rings = A.companionInput(withState(e(romance(m, due)), c, o), { channel: "private" }, c, [o], [], companionSchema);
     assert.ok(rings.includes(JSON.stringify(sv.voice)) && !rings.includes(JSON.stringify(sv.look))); // over the rings: no body
     assert.ok(camp(c, o, [c.id], e(romance(m, due))).includes(`"may_take_her_own_body":${JSON.stringify(sv.look)}`));
     assert.equal(camp(c, o, [c.id], e(romance(m))).includes(JSON.stringify(sv.look)), !sv.manifestsAfter);
@@ -484,7 +487,9 @@ test("with both at the fire, the first speaker alternates, and one of the two mu
 // ---------- what her call knows about herself ----------
 
 test("her call knows a form an ability put her in", () => {
-  const e = env({ state: { flags: { [P.id]: { form: "animal" } } } });
+  const state = load({ packet, party: [env().party[0], P, Q] });
+  state.flags[P.id] = { form: "animal" };
+  const e = env({ state });
   assert.ok(huddle(P, Q, e).includes('## You, right now\n\n```json\n{"form":"animal"}'));
   assert.ok(!huddle(P, Q).includes("You, right now"));
 });
@@ -492,7 +497,7 @@ test("her call knows a form an ability put her in", () => {
 test("a second voice's own tastes reach her call in company and in private", { skip: !voiced?.secondVoice.admires }, () => {
   const o = all.find((c) => c !== voiced && !partyProblems([voiced, c]).length);
   const sv = voiced.secondVoice;
-  const rings = A.companionInput(env(), { channel: "private" }, voiced, [o], [], companionSchema);
+  const rings = A.companionInput(withState(env(), voiced, o), { channel: "private" }, voiced, [o], [], companionSchema);
   for (const input of [huddle(voiced, o), rings]) assert.ok(input.includes(JSON.stringify(sv.admires)) && input.includes(JSON.stringify(sv.despises)));
 });
 

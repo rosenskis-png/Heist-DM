@@ -1,4 +1,4 @@
-// The resolve call (docs/spec/calls/resolve.md), in ruled mode (D75).
+// The resolve call (docs/spec/calls/resolve.md).
 import { ask } from "../ask.js";
 import { resolveSchema } from "../../schemas/calls/resolve.js";
 import { resolveInput } from "../context.js";

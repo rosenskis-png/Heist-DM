@@ -645,3 +645,20 @@ Its plans also count ticks, which sizes the deadline: some exploring plus two re
 **Decided:** Every encounter and room is bounded. A large cavern, or a field ringed by cliffs, is one large zone with its ways out at the edges.
 **Why:** The designer's call (2026-11-03). It keeps every packet inside the size ceiling (D26) and the map's walls honest (D28), and it's where this game's decisions happen.
 **Rules out:** Generated wilderness, towns and cities.
+
+### D125. The DM rules: the engine's pipeline is retired
+**Decided:** Supersedes D75's choice between two modes. The game is played one way: the DM rules and the engine keeps the books (`docs/spec/engine.md`, `docs/spec/architecture.md`). The engine's pipeline is gone:
+- **calls:** step, pricing, world, narration, ruling, and the Moment call that the scene call replaced;
+- **the engine as rule-keeper:** projecting and executing plans, routes and fit as rules, perception as a rule, plan conditions, interruptions, reaction triggers, meters and their ladders, the engine's combat rounds, and the table read;
+- **in the packet:** triggers and meters. How people react, and anything that used to be a meter, is the packet's prose `notes`, which the DM applies. Sense links are optional, for the DM to read.
+
+Deadlines are written in the DM's time, so the Cells' Uzga arrives at tick 32, and the 1.5 multiplier is gone (supersedes that part of D77).
+
+These decisions now apply only as history: D16, D18, D19, D29, D34, D39, D42, D46, D47, D55, D57, D61, D62, D66 and D67. D51, D53, D54, D56, D63 and D64 now govern only the moves a packet's own rules make, such as a routine's beat or an event. D36's rule lives on in the DM's calls: the card is ruled from what the party knows, and the account plays it against the world as it really is.
+**Why:** The designer's call (2026-11-03), after the third playtest preferred the DM ruling by a lot (Phase 4). Keeping both meant every new feature was built twice, and the pipeline's rules were the competing rules principle 1 warns about, moved into code. The engine still owns what code is good at: the clock, routines, placed events, dice, the ledger's consistency, the objective, slack, saves and the hand-off.
+**Rules out:** Rebuilding a rule-running engine mode; engine checks that judge whether an action is possible.
+
+### D126. The player chooses both companions, and a packet places them by slot
+**Decided:** Supersedes D65 and the part of D103 that kept Lyra as the Cells' party member. Lyra is gone. At setup the player chooses two companions from the roster. A packet never names a companion: it places them by slot (`companion_a`, `companion_b`), and loading binds each slot to the party's companions in order (`bindParty` in `src/engine/load.js`). The Cells puts `companion_a` in the middle cell and `companion_b` in the near cell, and its fail-forward ending takes whoever is in the middle cell.
+**Why:** The roster is open (D8), and a packet that names companions works only for that party. The generator needs the same mechanism for every packet it writes (D121).
+**Rules out:** Companion ids in packets; a fixed party for any encounter.

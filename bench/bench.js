@@ -1,8 +1,8 @@
-// The Phase 2 judgment test bench (docs/roadmap.md). Runs the real prompts in prompts/ on the hand-written
-// cases in fixtures/bench/cases.json through `sample`, shows each call's input and output, and saves every
+// The judgment test bench. Runs the real companion and campfire prompts on the hand-written cases in
+// fixtures/bench/cases.json through `sample`, plus Camp, free play with any two companions; shows each call's input and output, and saves every
 // run and note to the artifact's db so the design thread can read them.
 import { validate } from "../src/validate.js";
-import { stepSchema, pricingSchema, worldSchema, narrationSchema, companionSchema, campfireSchema, rulingSchema, momentSchema } from "../schemas/index.js";
+import { companionSchema, campfireSchema } from "../schemas/index.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import { companions as roster } from "../content/companions/index.js";
@@ -11,8 +11,7 @@ import * as Relationship from "../content/relationship.js";
 import { addOutfit, equip, wearing } from "../src/campaign/wardrobe.js";
 import { resolveParty, partyProblems } from "../src/campaign/roster.js";
 import * as A from "../src/context.js";
-import { load as loadEncounter, apply, checkSteps, checkMoment } from "../src/engine/index.js";
-import { flagKeys } from "../src/engine/plan.js";
+import { load as loadEncounter } from "../src/engine/index.js";
 import * as C from "./checks.js";
 import * as Speech from "../src/ui/speech.js";
 
@@ -44,18 +43,12 @@ const store = {
 };
 
 const KINDS = [
-  { id: "step", label: "Steps", schema: stepSchema },
-  { id: "pricing", label: "Pricing", schema: pricingSchema },
-  { id: "world", label: "World", schema: worldSchema },
-  { id: "narration", label: "Narration", schema: narrationSchema },
   { id: "huddle", label: "Huddle", schema: companionSchema, call: "companion" },
-  { id: "ruling", label: "Rulings", schema: rulingSchema },
-  { id: "moment", label: "Moment", schema: momentSchema },
   { id: "campfire", label: "Campfire", schema: campfireSchema },
 ];
-const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment", "campfire"];
+const PROMPTS = ["style", "companion", "campfire"];
 const TIERS = ["quick", "default", "complex"];
-const DEFAULT_TIERS = { step: "default", pricing: "default", world: "default", narration: "default", companion: "default", ruling: "quick", moment: "default", campfire: "complex", grader: "quick" };
+const DEFAULT_TIERS = { companion: "default", campfire: "complex", grader: "quick" };
 const settings = store.get("bench.settings", { runs: 3, tiers: {} });
 settings.tiers = { ...DEFAULT_TIERS, ...settings.tiers };
 const saveSettings = () => store.set("bench.settings", settings);
@@ -78,11 +71,8 @@ async function load() {
   version = [...new Uint8Array(digest).slice(0, 4)].map((b) => b.toString(16).padStart(2, "0")).join("");
   const cls = classes[cases.player_class];
   const party = [{ id: "player", name: cls.name, role: "The player", skills: cls.mods, abilities: cls.abilities }];
-  for (const id of cases.party.filter((p) => p !== "player"))
-    // A roster companion, or a fixture-only party member such as the Cells encounter's Lyra (D103).
-    party.push((await import(url(roster[id] ? `content/companions/${id}.js` : `fixtures/cells/${id}.js`))).default);
+  for (const id of cases.party.filter((p) => p !== "player")) party.push(roster[id]);
   const { map, people } = packet;
-  const sched = people.find((p) => p.schedule)?.schedule;
   env = {
     packet,
     cases,
@@ -90,14 +80,9 @@ async function load() {
     party,
     companions: party.slice(1),
     prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])),
-    exceptions: new Set(),
     ids: new Set([...map.zones, ...map.connections, ...map.things, ...map.facts, ...people, ...party].map((x) => x.id).concat("party")),
-    connections: new Map(map.connections.map((c) => [c.id, c])),
-    people: new Set(people.map((p) => p.id)),
     hiddenTerms: cases.hidden_terms,
-    beatAt: (t) => (sched ? { [people.find((p) => p.schedule).id]: sched.beats[(t + sched.phase) % sched.period].id } : {}),
     state: loadEncounter({ packet, party }),
-    pairFor: (a, others) => others.map((b) => pairs[`${a}|${b}`] ?? pairs[`${b}|${a}`]).find(Boolean) ?? null,
   };
 }
 
@@ -158,73 +143,11 @@ async function runOne(kind, c) {
   const run = { kind, case: c.id, tier, at: Date.now(), version };
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
-    if (kind === "moment") return Object.assign(run, await runMoment(c, k.schema, tier));
     if (kind === "campfire") return Object.assign(run, await runCampfire(c, k.schema, tier));
-    const input = A[`${kind}Input`](env, c, k.schema);
-    // A named route that fails only on size goes to the ruling call (D55), not back to the step call.
-    const engine =
-      kind === "step"
-        ? (o) => engineSteps(o).errors
-        : kind === "world"
-          ? (o) => C.unknownFlags(o.actions, flagKeys(env.state)).map((f) => `unknown flag ${f}`)
-          : undefined;
-    const r = await ask(input, k.schema, tier, engine);
-    Object.assign(run, r, { input });
-    if (kind === "step" && !r.errors.length) run.rulings = await rule(engineSteps(r.out).fits);
-    if (r.errors.length) run.checks = [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }];
-    else if (kind === "pricing") Object.assign(run, C.pricingChecks(r.out, c, env));
-    else run.checks = C[`${kind}Checks`](r.out, c, { ...env, engineSteps });
-    for (const x of run.rulings ?? []) run.checks.push({ name: `Ruling: ${x.who} through ${x.connection}`, ok: "info", detail: `${x.answer}: ${x.text}` });
-    run.checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
   } catch (e) {
     run.error = errorText(e);
   }
   return run;
-}
-
-// A Moment exchange on the live engine state the case sets up: a packet variant where a routine isn't known yet,
-// and any ops (a fight starting) applied first.
-async function runMoment(c, schema, tier) {
-  let packet = env.packet;
-  if (c.unknown) {
-    packet = structuredClone(packet);
-    for (const p of packet.people) if (p.schedule && c.unknown.includes(p.schedule.id)) p.schedule.known = false;
-  }
-  let s = packet === env.packet ? env.state : loadEncounter({ packet, party: env.party });
-  if (c.ops) s = apply(s, { type: "ops", ops: c.ops });
-  const name = c.to === "dm" ? "dm" : packet.people.find((p) => p.id === c.to).name;
-  const input = A.momentInput({ ...env, packet }, {
-    to: name,
-    now: A.stateFor(s),
-    perception: A.perceptionFor(s),
-    fight: s.combat ? { party_hp: { ...s.hp } } : null,
-    conversation: [{ from: "player", text: c.message }],
-  }, schema);
-  const r = await ask(input, schema, tier, (o) => checkMoment(s, o));
-  const checks = r.errors.length ? [{ name: "Valid after one retry", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.momentChecks(r.out, c, env);
-  checks.unshift({ name: "Valid first time", ok: !r.first, detail: r.first ? r.first.slice(0, 5).join("; ") : "" });
-  return { ...r, input, checks };
-}
-
-// The engine's check of a step call's output, with the rulings granted so far (D55).
-const engineSteps = (out) => checkSteps({ ...env.state, exceptions: [...env.exceptions] }, out);
-
-// Size conflicts on named routes, each put to the ruling call as one neutral question (D55).
-async function rule(fits) {
-  const seen = new Set();
-  const out = [];
-  for (const fit of fits) {
-    const key = `${fit.who}|${fit.connection}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    try {
-      const r = await ask(A.rulingInput(env, fit), rulingSchema, settings.tiers.ruling);
-      out.push({ ...fit, ...r.out });
-    } catch (e) {
-      out.push({ ...fit, answer: "error", text: errorText(e) });
-    }
-  }
-  return out;
 }
 
 // The huddle: each companion in turn sees the one candidate picked for the companion before her (D40).
@@ -424,69 +347,6 @@ function flawTable(c, runs) {
 const json = (v) => JSON.stringify(v, null, 1);
 const fold = (label, body) => h("details", { class: "fold" }, h("summary", {}, label), h("pre", {}, body));
 
-function readable(kind, c, run) {
-  const o = run.out;
-  if (!o) return null;
-  if (kind === "step")
-    return h(
-      "ol",
-      { class: "steps" },
-      (o.steps ?? []).map((s) =>
-        h(
-          "li",
-          {},
-          s.summary,
-          s.when ? h("span", { class: "tag" }, `when ${json(s.when.until).replace(/\s+/g, "")}`) : null,
-          s.if ? h("span", { class: "tag warn" }, `if ${json(s.if).replace(/\s+/g, "")}`) : null,
-        ),
-      ),
-      (o.rulings ?? []).map((r) => h("li", { class: "ruling" }, `${r.answer}: ${r.text}`)),
-    );
-  if (kind === "pricing") {
-    const sum = new Map(c.step_call.steps.map((s) => [s.n, s.summary]));
-    return h(
-      "div",
-      { class: "scroll" },
-      h(
-        "table",
-        { class: "card" },
-        (o.steps ?? []).map((s) => {
-          const b = run.bands?.find((x) => x.n === s.n);
-          return h(
-            "tr",
-            {},
-            h("td", { class: "n" }, s.n),
-            h(
-              "td",
-              {},
-              h("div", { class: "what" }, sum.get(s.n) ?? ""),
-              s.risks.map((r) => h("div", { class: "risk" }, h("b", {}, r.difficulty.replace("_", " ")), ` ${r.reason}`, h("div", { class: "fail" }, `If it fails: ${r.on_fail.summary}`))),
-              s.mitigations.map((m) => h("div", { class: "mit" }, `${m.covers}: automatic (${m.by}) ${m.note}`)),
-            ),
-            h("td", { class: "band" }, b ? chip(b.ok, b.got.replace("_", " "), b.ok === true ? "" : `expected ${b.want}`) : ""),
-          );
-        }),
-      ),
-    );
-  }
-  if (kind === "world")
-    return h("ul", { class: "acts" }, (o.actions ?? []).length ? o.actions.map((a) => h("li", {}, h("b", {}, a.npc), ` ${a.because}`, h("code", {}, JSON.stringify(a.ops)))) : h("li", {}, "Nobody acts."));
-  if (kind === "ruling") return h("p", { class: "prose" }, h("b", {}, `${o.answer}: `), o.text);
-  if (kind === "moment")
-    return h(
-      "div",
-      { class: "prose" },
-      h("p", {}, o.reply ?? ""),
-      o.check ? h("div", { class: "risk" }, h("b", {}, `${o.check.skill} · ${o.check.difficulty.replace("_", " ")}`), ` ${o.check.reason}`, h("div", { class: "fail" }, `Success: ${o.check.on_success.text}`), h("div", { class: "fail" }, `Failure: ${o.check.on_failure.text}`)) : null,
-      o.redirect ? h("p", { class: "texture" }, `To the plan: ${o.redirect.step}`) : null,
-      o.combat ? h("ul", { class: "acts" }, o.combat.intents.map((i) => h("li", {}, h("b", {}, i.enemy), ` ${i.intent}${i.yields ? " (yields)" : ""}`)), o.combat.actions.map((a) => h("li", {}, h("b", {}, a.actor), ` ${a.kind} · ${a.difficulty.replace("_", " ")}: ${a.reason}`))) : null,
-      [...(o.reveals ?? []).map((id) => `Now known: ${id}`), ...(o.learned ?? []).map((l) => `Learned: ${l}`), ...(o.texture ?? []).map((t) => `Texture: ${t}`)].map((t) => h("p", { class: "texture" }, t)),
-    );
-  if (kind === "narration")
-    return h("div", { class: "prose" }, (o.text ?? "").split(/\n+/).map((p) => h("p", {}, p)), o.texture?.length ? h("p", { class: "texture" }, `Texture: ${o.texture.join(" · ")}`) : null);
-  return null;
-}
-
 function campfireView(run) {
   return (run.turns ?? []).map((t) => {
     const who = { narrator: null, self: t.name, second_voice: roster[t.id].secondVoice?.name ?? "second voice" };
@@ -564,7 +424,7 @@ function runView(kind, c, run, i, runs) {
         { class: "body" },
         h("ul", { class: "checks" }, (run.checks ?? []).map((x) => h("li", {}, chip(x.ok, x.ok === true ? "pass" : x.ok === "near" ? "close" : x.ok === "info" ? "note" : "fail"), ` ${x.name}`, x.detail ? h("small", {}, ` ${x.detail}`) : null))),
         run.graderError ? h("p", { class: "err" }, `Grader: ${run.graderError}`) : null,
-        kind === "huddle" ? huddleView(c, run) : kind === "campfire" ? campfireView(run) : readable(kind, c, run),
+        kind === "huddle" ? huddleView(c, run) : campfireView(run),
         run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
         run.out ? fold("Raw output", json(run.out)) : null,
       );
@@ -649,7 +509,9 @@ function settingsView() {
   );
 }
 
-let current = store.get("bench.tab", "pricing");
+// A saved tab that no longer exists falls back to the huddle.
+const TABS = ["huddle", "campfire", "camp", "settings"];
+let current = TABS.includes(store.get("bench.tab", "huddle")) ? store.get("bench.tab", "huddle") : "huddle";
 function show(tab) {
   current = tab;
   store.set("bench.tab", tab);

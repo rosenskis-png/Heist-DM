@@ -1,6 +1,6 @@
-// The ledger's changes (D75): what a ruling DM writes. Open on purpose: any fact can be recorded, any flag
-// set, anyone moved. The engine checks only that the ids are real, then keeps the record. Semantics:
-// docs/spec/ruled.md.
+// The ledger's changes (D75): what the DM writes. Open on purpose: any fact can be recorded, any flag set,
+// anyone moved. The engine checks only that the ids are real, then keeps the record. Semantics:
+// docs/spec/engine.md §2.
 import { r, list, obj } from "./shape.js";
 
 export const changes = obj([], {

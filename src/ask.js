@@ -6,17 +6,17 @@ import { validate } from "./validate.js";
 export const TIERS = ["quick", "default", "complex"];
 
 // The middle position of the speed and quality setting (D58). The other two move every call one tier (D70).
-export const MIDDLE = { step: "default", pricing: "default", world: "default", narration: "default", moment: "default", companion: "quick", ruling: "quick", campfire: "complex", generator: "complex", adjudicate: "default", resolve: "default", scene: "default" };
+export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", companion: "quick", campfire: "complex", sketch: "complex", critique: "complex", encode: "default" };
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 
 // How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
 // runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
-// `test/budget.test.js` holds every ruled call under its budget at the ledger's limits.
-export const BUDGET = { adjudicate: 25600, resolve: 25600, scene: 25600, companion: 20480, narration: 49152, step: 49152, pricing: 49152, world: 49152, moment: 49152, ruling: 8192 };
+// `test/budget.test.js` holds every DM call under its budget at the ledger's limits.
+export const BUDGET = { adjudicate: 25600, resolve: 25600, scene: 25600, companion: 20480 };
 
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
-const REPLAY = new Set(["step", "pricing", "world", "ruling", "adjudicate"]);
+const REPLAY = new Set(["adjudicate"]);
 const LIMIT = 256 * 1024;
 
 export class CallFailed extends Error {

@@ -8,7 +8,7 @@ The pillar Gravenhold proved (D23). This file covers what a companion is in data
 
 Companions act like fellow players: opinions, reasoning, disagreement, in-character values. They **never** hold the plan hostage, gatekeep, invent conditions, or take actions that aren't on the card. If one won't do something, she takes a **stance** and the player rules on it.
 
-- **Huddle:** time is paused. Each companion gets her own call; the second sees the first's reply (`docs/spec/calls/companion.md`). She sees what the player sees, including the draft card and the priced card. She thinks about a plan through her `planning` bias (D38), and the engine picks one of three things she might say (D40).
+- **Huddle:** time is paused. Each companion gets her own call; the second sees the first's reply (`docs/spec/calls/companion.md`). She sees what the player sees, including the draft card and the DM's card. She thinks about a plan through her `planning` bias (D38), and the engine picks one of three things she might say (D40).
 - **Private channel:** only the addressed companion is called. The whisper rings make this possible in the fiction (`content/setting.js`).
 - **Stances:** refuse, insist, or conditional, with conditional triggers written in the condition language. They're traced to her profile (beliefs, despises, rules). Only the player writes plan content.
 - **Campfire:** between encounters, with the full relationship picture: talk and action together, one on one or with both, one call per companion (D45; `docs/spec/calls/campfire.md`).
@@ -107,7 +107,7 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 - A reaction is tagged with the profile field it touches (`heatActs`, `turnoffs`, `admires`, `despises`, `darkTriggers`, `suppressed`), which item, a sign, an intensity (1–2), and a one-line reason.
 - The engine maps each field to a track (`heatActs` and `turnoffs` → heat; `admires`, `despises` and `suppressed` → intimacy and regard; `darkTriggers` → lean) and applies the caps.
-- Events from plan execution (a step tagged `lethal`, a stance overridden) reach her through the event log. She reacts at the next huddle or world turn.
+- What happened in a plan (a killing, a stance overridden) reaches her through the DM's narration. She reacts at the next huddle.
 - Campfire returns relationship changes directly, within the same caps.
 
 ## 6. Adding or removing a companion (D8)
@@ -148,4 +148,4 @@ She comes to own more in play (a gift, a find, a purchase, and the one outfit ev
 ## 8. Not carried over
 - Betrayal (D7).
 - The group-dynamic hints (`DYN_PHASE`, `pickDynamic`) and the hidden deliberation phase. Both shaped the companions' talk from outside; the huddle now lets them talk as themselves.
-- The DM writing companion dialogue inside narration. The narration call gets voice notes for montage lines, but the companions' own talk happens in their own calls.
+- The DM writing companion dialogue inside narration. The companions' own talk happens in their own calls.

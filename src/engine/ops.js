@@ -1,16 +1,15 @@
 // State-change operations (docs/spec/engine.md §9). Each mutates the working copy of state that `apply` owns.
 // Validation happens before an operation gets here; these only do what they say.
-import { bind, sheet, carried, conn, person } from "./world.js";
+import { bind, sheet, carried, conn } from "./world.js";
 import { test } from "./cond.js";
 import { crossings, route, unlocksInPassing } from "./map.js";
-import { enemyTiers } from "../../content/rules.js";
 
 export function run(s, ops, ctx = {}) {
   for (const op of ops ?? []) one(s, op, ctx);
   settle(s);
 }
 
-// Rules ({if, then, else}) wrap operations in events, triggers and beats' on_start.
+// Rules ({if, then, else}) wrap operations in events and beats' on_start.
 export function runRules(s, rules, ctx = {}) {
   for (const r of rules ?? []) run(s, !r.if || test(s, r.if, ctx) ? r.then : r.else ?? [], ctx);
 }
@@ -60,7 +59,6 @@ function one(s, op, ctx) {
       if (raw.until) s.untils.push({ until: raw.until, undo: { flag: [v.entity, v.key, before ?? null] } });
       return;
     }
-    case "meter_add": return meterAdd(s, v.meter, v.by, ctx);
     case "set_disposition":
       s.disposition[v.npc] = v.value;
       return;
@@ -70,14 +68,8 @@ function one(s, op, ctx) {
         sc.dropped.push(v.drop_beat);
         if (raw.until) s.untils.push({ until: raw.until, undo: { undrop: [v.npc, v.drop_beat] } });
       }
-      // An override starts on the next tick: "noise heard → investigate next tick" (engine.md §5).
+      // An override starts on the next tick.
       if (v.override) sc.override = { position: bind(v.override.position, ctx), from: s.tick + 1, to: s.tick + v.override.ticks };
-      return;
-    }
-    case "set_sense": {
-      const key = s.senseEdits.length ? Math.max(...s.senseEdits.map((e) => e.key)) + 1 : 1;
-      s.senseEdits.push({ key, npc: v.npc, beat: v.beat ?? null, change: v.change ?? {} });
-      if (raw.until) s.untils.push({ until: raw.until, undo: { sense: key } });
       return;
     }
     case "reveal":
@@ -96,18 +88,6 @@ function one(s, op, ctx) {
     case "add_ticks":
       s.pending += v.ticks;
       return;
-    // Enemies join a fight with their HP: the sheet's, or their tier's (content/rules.js).
-    case "start_combat":
-      s.combat ??= { enemies: [], since: s.tick, round: 0, hp: {}, out: [] };
-      for (const e of v.enemies) {
-        if (!s.combat.enemies.includes(e)) s.combat.enemies.push(e);
-        s.combat.hp[e] ??= person(s, e)?.hp ?? enemyTiers[person(s, e)?.tier]?.hp ?? 1;
-      }
-      return;
-    case "damage":
-      if (s.combat?.hp[v.actor] !== undefined) s.combat.hp[v.actor] = Math.max(0, s.combat.hp[v.actor] - v.amount);
-      else s.hp[v.actor] = Math.max(0, (s.hp[v.actor] ?? 0) - v.amount);
-      return;
     case "end_encounter":
       s.ended ??= { outcome: v.outcome, tick: s.tick };
       return;
@@ -123,16 +103,6 @@ export const abilityOf = (s, actor, id) => {
   return [a?.combat, a?.noncombat].find((x) => x?.id === id);
 };
 
-// Raising a meter applies each ladder level it reaches. Falling lets `until` undo them (engine.md §4).
-function meterAdd(s, id, by, ctx) {
-  const m = s.packet.clock.meters.find((x) => x.id === id);
-  const old = s.meters[id];
-  const now = Math.max(0, Math.min(m.max, old + by));
-  s.meters[id] = now;
-  for (let l = old + 1; l <= now; l++) run(s, m.levels[l] ?? [], ctx);
-  settle(s);
-}
-
 // Undo every change whose `until` now holds. Repeats, since one undo can satisfy another.
 export function settle(s) {
   for (let guard = 0; guard < 20; guard++) {
@@ -146,6 +116,6 @@ export function settle(s) {
     } else if (undo.undrop) {
       const sc = s.sched[undo.undrop[0]];
       sc.dropped = sc.dropped.filter((b) => b !== undo.undrop[1]);
-    } else if (undo.sense) s.senseEdits = s.senseEdits.filter((e) => e.key !== undo.sense);
+    }
   }
 }

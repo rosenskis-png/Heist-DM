@@ -67,7 +67,7 @@ const thing = obj(["id", "name", "properties", "location"], {
 
 const senses = obj(["sees", "hears"], { sees: list(r("id")), hears: r("hearing") });
 
-const beat = obj(["id", "position", "senses"], {
+const beat = obj(["id", "position"], {
   id: r("id"),
   label: r("text"),
   position: r("id"),
@@ -115,29 +115,6 @@ const event = obj(["id", "do"], {
   do: list(r("rule"), 1),
 });
 
-const meter = obj(["id", "scope", "start", "max", "levels"], {
-  id: r("id"),
-  name: r("text"),
-  scope: { anyOf: [r("id"), { enum: ["encounter", "campaign"] }] },
-  start: { type: "integer", minimum: 0 },
-  max: { type: "integer", minimum: 1 },
-  // Ops applied on reaching each level. Anything that should lapse when the meter falls carries `until`.
-  levels: { type: "object", propertyNames: { pattern: "^[1-9][0-9]*$" }, additionalProperties: r("operations") },
-  decay: obj(["by", "after_ticks", "quiet_if"], {
-    by: { type: "integer", minimum: 1 },
-    after_ticks: { type: "integer", minimum: 1 },
-    quiet_if: r("condition"),
-    blocked_by: r("condition"),
-  }),
-});
-
-const trigger = obj(["id", "when", "do"], {
-  id: r("id"),
-  when: r("condition"),
-  once: { type: "boolean" },
-  do: list(r("rule"), 1),
-});
-
 const objective = obj(["id", "condition"], {
   id: r("id"),
   label: r("text"),
@@ -153,8 +130,7 @@ export const packetSchema = withDefs({
     id: r("id"),
     // What the player sees it called.
     name: r("text"),
-    // How people react, in plain words, for a DM who rules (D76). The engine's triggers and meters say the same as
-    // rules; ruled mode sends these instead.
+    // How people react, in plain words, for the DM to apply (D76).
     notes: { type: "array", items: r("text") },
     mode: { enum: ["encounter", "room"] },
     act: { type: "integer", minimum: 1 },
@@ -173,10 +149,8 @@ export const packetSchema = withDefs({
       things: list(thing),
       facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), hidden: { type: "boolean" } })),
     }),
-    clock: obj(["events", "meters", "triggers"], {
+    clock: obj(["events"], {
       events: list(event),
-      meters: list(meter),
-      triggers: list(trigger),
     }),
     start: obj(["tick", "positions"], {
       tick: { type: "integer", minimum: 0 },

@@ -31,7 +31,7 @@ Don't design from `legacy/`. Use `legacy/README.md` to find what to port and wha
 - **One name per AI call everywhere:** `docs/spec/calls/<call>.md`, `schemas/calls/<call>.js`, `prompts/<call>.md` and `src/calls/<call>.js`.
 - **`node --test` passes before every commit.**
 - **Never edit an old decision.** Supersede it with a new one.
-- **The roster is open** (D8). Engine code and prompts never name a companion id. A companion is one file in `content/companions/` plus one line in its `index.js`.
+- **The roster is open** (D8). Engine code, prompts and packets never name a companion id; packets place companions by slot (D126). A companion is one file in `content/companions/` plus one line in its `index.js`.
 - **No companion betrays the party** (D7).
 - **The engine is pure** (D12): no DOM, no AI calls, seeded randomness, runnable with `node --test`.
 - **`legacy/` is read-only.**

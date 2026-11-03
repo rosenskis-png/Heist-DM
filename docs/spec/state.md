@@ -18,35 +18,27 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **The hand-off** from the last encounter (below).
 
 ## Live encounter state (bounded by the encounter)
-- **Positions** of every party member, NPC and item.
-- **Flags:** locked, broken, alerted, and the like.
+- **The ledger** (`docs/spec/engine.md` §2): positions and holdings, flags, the DM's facts, HP and moods, who's off their routine, and what the party has revealed.
 - **Tick and pending ticks.**
-- **Meter values,** e.g. Snag's suspicion.
-- **NPC dispositions.**
-- **Ability uses spent,** and one-way states (Fern stays a rat until the encounter ends).
-- **Known flags:** what the party has perceived or learned, including routines and events (marked `known` in the packet, or revealed in play). These drive the map, the companions' view, and which observers a card foresees (D36).
-- **Canon added:** texture introduced after the opening (anything narrated is real once said) and **rulings** ("rats can drag the ring, slowly, and it scrapes"). Append-only; later calls may not contradict them.
-- **Event log:** one line per resolved card, roll, fight or conversation. The engine writes it from structured results. The only AI-written lines are the Moment AI's "learned" facts.
-- **Table read:** plans committed vs. expected length, roll outcomes and any streak, consequences that landed, and the player's last 2–3 messages word for word. Facts only, no verdicts. Sent only to the world call (`docs/spec/engine.md` §7).
-- **Draft card:** the plan the player is writing, plus steps the Moment AI has redirected and pending companion stances. Everyone at the table sees it, companions included (D40). Once committed and priced, it becomes the card.
-- **Objective status,** e.g. "in the archway: 0 of 3".
+- **Known:** the routines and events marked `known` in the packet, plus everything revealed in play. These drive the map, the companions' view, and what the card is ruled from (D36).
+- **Canon added:** texture narrated after the opening (anything narrated is real once said). The card's rulings become facts. Later calls may not contradict either.
+- **Event log:** one line per step played out, check and event. The engine writes it from the DM's validated outputs.
+- **Draft card:** the plan the player is writing, plus pending companion stances. Everyone at the table sees it, companions included (D40). Once committed and ruled on, it becomes the card, with its dice once they're rolled.
 
-Raw transcripts are kept within an encounter, but only the last few messages of the relevant channel go into prompts. Anything consequential is already in state, canon or the event log.
+Raw transcripts are kept within an encounter, but only the last few messages of the relevant channel go into prompts. Anything consequential is already in the ledger, canon or the event log.
 
 ## Writeback
 
-The engine validates every write against the map and state before committing it. Every write uses the shared state-change operations (D17).
+The engine checks that every write names real things before committing it (`docs/spec/engine.md` §2).
 
 | Source | Writes |
 |---|---|
-| Step call | Effects, tags, rulings, internal checks |
-| Pricing call | Odds, consequences, rulings |
-| World call | NPC actions and reactions |
-| Narration call | Texture (canon) |
-| Moment AI | Learned facts, dispositions, promises, texture, check results |
-| Companion AI | Stances, tagged reactions (D20) |
+| Adjudicate call | The card: steps, ticks, rolls and their stakes, rulings (which become facts), notes |
+| Resolve call | Each step's account and ledger changes, people's response, texture (canon) |
+| Scene call | Ledger changes, checks with both outcomes, the time it took, a plan to send to the draft |
+| Companion call | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
-| Engine | Ticks, schedules, rolls, consequences applied, effects, objective status, event log, table read |
+| Engine | Ticks, routines, events, rolls, objective status, the event log, the hand-off |
 | Campfire | Relationship changes (including each one's view of the other), beliefs, storm level, caught asides, beats, memories, revealed secrets, commitments, her outfit |
 
 ## The hand-off (D21)

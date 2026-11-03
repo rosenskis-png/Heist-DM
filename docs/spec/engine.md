@@ -1,161 +1,93 @@
 # Engine
 
-What the engine computes. **Code computes, AI judges** (principle 2): the engine owns every fact, number and rule that can be checked. The AIs get its *results* as facts, and return structured decisions that the engine validates before applying.
-
-The acceptance test is `fixtures/cells/acceptance.md`.
+What the engine does. **Code computes, AI judges** (principle 2): the DM rules and the engine keeps the books (D75, D125). The engine owns every fact and number that can be kept consistent, checks that the DM's rulings name real things, and never judges whether anything is possible. Code: `src/engine/`, a reducer (D60).
 
 ---
 
-## 1. Validation
-- **Packets:** the consistency checks (reject) and quality checks (warn) in `docs/spec/packet.md`.
-- **AI output:** every structured output is checked against its schema and against current state before anything is applied. A failure gets one retry, with the errors listed (D13).
+## 1. Loading a packet
+- **The consistency checks** in `docs/spec/packet.md` reject a packet; the quality checks only warn.
+- **Party slots** (D126): the packet places companions as `companion_a` and `companion_b`, and loading binds each to the party's companions in order (`bindParty`).
+- **Slack** (D41, D43): each event marked `deadline` moves by 2% of its tick per point of the campaign's slack (−10 to +10), rounded once to the nearest tick. Nothing moves once the encounter has started, and the player never sees slack.
 
-## 2. Map and perception
-- **From geometry** (D9, D28): zone sizes, distances along connections, distances between placed things, and adjacency. These go to the AIs as facts.
-- **Routes** (D54): a move without a `path` takes the shortest route that everything moving fits through. A route the player named that fails the fit check goes to the ruling call (D55); an exception it grants is kept for that thing and connection. A move longer than two crossings is split into consecutive steps, and someone carrying a connection's `key` unlocks it in passing, if something moving with them doesn't fit while it's locked (D56, D63).
-- **Fit:** an actor or thing crosses a connection only if its size (`tiny` < `small` < `medium` < `large`) is no bigger than the connection's `fits`, or its `fits_unlocked` once it's unlocked (D53). People are `medium` unless a flag says otherwise (Fern as a rat is `tiny`).
-- **Working a connection** (setting its flags, unlocking it in passing) takes an actor with hands, on a side it's worked from (D64). Everyone has hands unless a flag says otherwise (Fern as a rat has none). A step that breaks this is interrupted at that effect (`cant_work`).
-- **Routing on the zone graph:** routes and travel time in ticks; whether a zone is reachable given the current connection flags; which side a barrier can be operated from.
-- **Observers per step:** every NPC not acting in the plan (D61) who, at the step's tick, is in a zone on the step's route, sees one, or hears one at the step's noise level or louder (`silent` < `quiet` < `speech` < `loud`). Senses come from the NPC's sheet or current beat, edited by meters. Example: at Suspicion 1, Snag can see the far cell's back corner. The route is every zone an actor or moved thing occupies during the step.
-- **The perceivable set:** what the party can perceive right now, pooled across party members (the whisper rings make sharing free). This is what the companions and the map are given, and what a plan's conditions are checked against (D39). Each member:
-  - **sees** their own zone, any zone joined to it by a `see_through` connection or an open one, and any zone its `sees` list names (the cells look down the corridor into the guardroom), if that zone isn't `dark` (or the member has the `sees_in_dark` trait);
-  - **hears** their own zone, and speech or louder in any zone joined to it by a connection (with `hears_through_walls`, any zone that shares a wall with theirs);
-  - perceives an NPC's beat if they can see the NPC or hear its cue.
-- **What the party knows:** everything it has perceived or learned, plus the routines and events marked `known` in the packet or revealed in play. Foreseen observers on the card come from this (§6).
+## 2. The ledger
+What the DM writes, and what every later call reads back. Shape: `schemas/ledger.js`; code: `src/engine/ledger.js`.
 
-## 3. Time and schedules
-- **Ticks,** per the table in `docs/spec/architecture.md`, with D16's rule that a step takes place in the tick it starts in.
-- **Pending ticks** are applied one at a time, checking for arrivals after each.
-- **Cycles:** a period, a phase offset, and a state per beat. A beat can move things, not just people: the keys are on Snag's belt during Pace and on the peg during Sit and Drink.
-- **One-time events:** fire at a given tick, or when a condition is met.
-- **Projection:** the state at any future tick, as it will really be and as the party expects it to be. The card needs both (§6).
-- **Edits:** meters and triggers can change schedules. At Suspicion 2, Snag's Drink beat is dropped, and his cycle is the beats left: Pace, Sit. An override moves an NPC for some ticks, starting on the next one.
-- **Slack** (D41): when a packet is loaded, each event marked `deadline` moves by 2% of its tick per point of the campaign's slack (−10 to +10, so at most ±20%), rounded once to the nearest tick. When an encounter with a deadline ends, slack goes up by 1 after the fail-forward ending or with 15% or less of the deadline to spare, and down by 1 with 50% or more to spare. Nothing moves during an encounter, and the player never sees slack.
+| Part | Holds |
+|---|---|
+| Positions and holdings | Where every person and thing is, and who holds what |
+| Flags | Any key on any person, thing or connection; doors use `locked`, which the map shows |
+| Facts | Anything else that's true and matters: "Snag is drunk", "the far cell's bars are bent apart". Each has an id, and the party knows it unless it's marked otherwise. A fact is replaced by writing its id again, and ends when it's retired |
+| HP and moods | For the party and the people in the encounter |
+| Off routine | People with a routine whom the DM has moved. The clock leaves them where they are until a ruling puts them back on it |
+| Revealed | Hidden things, routines and events the party now knows |
 
-## 4. Meters
-- **A meter has** a scope (one NPC, the encounter, or the campaign), a current value, and a ladder.
-- **The ladder:** each level applies state changes, such as a schedule edit, a sense change, a connection closing, or a keys-stay-on-belt rule.
-- **Decay:** e.g. −1 after one full cycle with no anomaly and every prisoner still. A decay can be blocked by a condition, e.g. while the peg is empty.
+**The engine checks only that a change names real zones, people and things.** A card or an account that names something the party doesn't know yet, steps out of order, a step that happened in full after its roll failed, or a change that breaks a limit goes back for the one retry (D13).
 
-## 5. Reaction triggers
-The engine runs deterministic reactions written in the packet:
-- noise heard → investigate next tick, suspicion +1;
-- keys touched → keys stay on belt until suspicion is 0;
-- Uzga arrives at tick 21.
+**Limits** (D76, `LEDGER`): at most 20 facts, each at most 160 characters, and at most 6 new ones per output. Facts are how things are now; what happened goes to the log, one line per step.
 
-**The boundary** (D18): if a reaction can be written as condition → operations with no "unless he decides", it's an engine rule. Anything that chooses between options (how Snag bargains, what he'll accept) goes to the world call.
+## 3. The clock
+- **Time passes** when a card or a Moment exchange takes it (`docs/spec/architecture.md`).
+- **Routines:** a period, a phase and one beat per tick. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat puts its person somewhere and runs its `on_start` rules: the keys go on Snag's belt as he starts to pace. People the DM has taken off their routine stay put.
+- **Placed events** fire at their tick, or when their condition first holds, and run their rules.
+- **The objective,** alternates and fail-forward ending are checked after every change and every tick.
 
-## 6. The plan pipeline
-The card prices the plan the party expects; reality interrupts it (D36).
+## 4. Dice
+The DM judges a band; the engine rolls a d100 against the band's number (D33). The engine rolls every roll on a card before the DM plays it out, keeps them with the card so a retry can't reroll, and tells the DM only which succeeded. No AI reads or writes these numbers, and the player never sees them. The generator is seeded, so tests and replays are reproducible.
 
-1. **Validate the step call's output:**
-   - every move follows a connection;
-   - every id is real;
-   - every `when` and `if` is a `plan_condition` (only things someone could perceive, D39) and refers only to things the party knows, including learned routines (D35).
-2. **Project each step.** Each step is projected as if the earlier steps went as planned:
-   - **its tick:** right after the previous step, or, with a `when`, the first tick its condition holds, waiting at most `max_wait` ticks (default 6);
-   - **its route,** and the barriers it crosses;
-   - **`as_if`** (internal): the step's own preconditions that won't hold at that tick, written as what the pricing call should assume instead ("the key ring is on the peg"; D42);
-   - **foreseen observers and hazards:** those the party knows will be there at that tick (NPCs it knows of, on routines and events it knows). Observers include anyone who perceives the actors while they wait;
-   - **interrupts** (internal): where reality is projected to differ from what the party expects. An NPC the party didn't foresee would see or hear the step (`arrival`); an effect can't happen at that tick (the keys aren't on the peg, the ring is too big for the gutter); a hidden fact defeats it; a trigger fires first; a wait runs out; no one can perceive a `when` or `if` when it's checked.
-3. **Check the pricing call's output.**
-   - Every step is priced, including steps with interrupts, as if their preconditions held (`as_if`).
-   - Every foreseen observer, barrier and hazard has a priced risk or a named mitigation, and nothing else is priced. Anything uncovered is sent back.
-   - Every `arrival` has a warning band.
-   - A shown reason or failure summary that names something the party doesn't know is sent back.
-4. **Strip the internal fields** (`as_if`, interrupts, internal checks, warnings) before the card is shown.
-5. **Execute each step in order:**
-   - apply the tick's schedules (each beat's `on_start` rules), meters and triggers;
-   - if the step has a `when` that doesn't hold yet, the actors wait: the tick passes and the line above repeats. If `max_wait` runs out first, the plan is interrupted (`wait_expired`);
-   - evaluate its `if`; when it's false, apply `otherwise`: skip the step, stop the plan, or run the alternative instead;
-   - a `when` or `if` is checked only if someone in the party can perceive what it's about at that tick (§2). If no one can, the plan is interrupted (`cant_perceive`) instead of guessing;
-   - **interrupt before the step begins** if the party can already see that it won't go as planned, if something the card didn't foresee would perceive it, a trigger has fired that changes the situation, or an internal check reveals a hidden fact. For an arrival, roll the warning: on a success, the party's next plan gets one step before it lands (the arrival resolves at the end of that tick instead of the start); on a failure, it lands as the scene opens. An arrival the card never projected (the world changed mid-plan) rolls at Medium;
-   - skip risks whose conditions no longer hold;
-   - roll the remaining risks;
-   - apply the consequences of failed risks: their operations, minus the step effects they `cancel`;
-   - apply the step's effects in order;
-   - **an interruption happens at the first instant anyone in the party could recognize that a remaining step won't work** (D46, D47, D62), not when a character runs into it. Before the step begins and before each of its effects, the engine re-projects the plan's remaining steps from what the party perceives right now plus what it knows (learned routines, known events). If that projection shows a step failing, the plan stops there. Something merely different right now isn't enough: an empty peg during Snag's Pace doesn't stop a plan that takes the keys on his Drink, because the party knows they'll be back by then. Moves already made stand, and what they noticed becomes known. Recognizing takes seeing: the party must see the spot where the plan expects a thing, and see it isn't there (D62). If no one could notice it until the effect itself, it interrupts at that effect;
-   - run triggers; stop if a failed risk had `stops_plan`;
-   - check the objective, any combat start, kept stance triggers and player checkpoints. A checkpoint stops the plan after its step (D69).
-6. **Log every result as structured data** for the narration call, including each interrupt and its warning roll.
+| Band | Easy | Medium | Hard | Very hard | Near impossible |
+|---|---|---|---|---|---|
+| Succeeds on d100 ≤ | 80 | 65 | 45 | 25 | 10 |
 
-An interrupt is not a failure. The world turn picks up at that moment, and the player plans from there.
+Skill numbers are on the sheets the DM reads when it chooses a band. The engine never adds them to a roll (D68).
 
-## 7. Dice, combat, abilities, stances
-- **Dice:** the AIs judge a difficulty band; the engine rolls a d100 against the band's number (D33). No AI reads or writes these numbers, and the player never sees them. The random number generator is seedable, so tests and replays are reproducible.
+## 5. What the party perceives
+Used for the map and for who the player can talk to, never as a rule (`src/engine/perceive.js`). Pooled across the party, since the whisper rings make sharing free. Each member sees their own zone, any zone joined to it by a `see_through` or open connection, and any zone its `sees` list names, unless it's dark (or they have `sees_in_dark`). They hear their own zone and any zone joined to theirs by a connection (with `hears_through_walls`, any zone that shares a wall with theirs).
 
-  | Band | Easy | Medium | Hard | Very hard | Near impossible |
-  |---|---|---|---|---|---|
-  | Succeeds on d100 ≤ | 80 | 65 | 45 | 25 | 10 |
-- **Skill numbers** are on the sheets the AIs read when they choose a band. The engine never adds them to a roll (D68).
-- **Moments** (`src/engine/moment.js`): the engine applies a validated Moment output. What the party learned is marked known and logged, dispositions and promises are recorded, texture becomes canon, and a check rolls its band, applies the matching outcome and adds a pending tick. A conversation adds a pending tick when it ends (D70).
-- **Combat** (Gravenhold's rule, `content/rules.js`, rolled as bands, D67):
-  - enemies join a fight with the HP on their sheet, or their tier's;
-  - each round, every declared action rolls its band; an ability whose conditions are met is automatic;
-  - a strike that lands deals 1, or 2 with a real weapon; one that misses is hit back for 1;
-  - an ability that succeeds takes its target out of the fight, and an enemy that yields leaves it;
-  - each enemy nobody engaged hits its target for 1;
-  - a character at 0 HP is down, not dead;
-  - the fight ends when no enemy is left in it, or the whole party is down;
-  - ticks accrue on rounds 2, 4, 6….
-- **Abilities:** the engine tracks uses per encounter and per rest, and one-way states, from each ability's `declared` block (D30). Whether an ability's conditions are met in the fiction is judged by the AI, with the engine's facts in hand.
-- **Stances:** the engine checks stance triggers (conditions), applies keep / resolved / override, and writes overrides to the relationship tracks.
-- **Objectives** are checked after every step and at the end of every combat.
-- **The table read** (`src/engine/table.js`): plans committed against the expected length, every roll and any streak, the failure consequences that landed, interruptions, and the player's last three messages. Facts, no verdicts; only the world call gets it.
+## 6. The hand-off
+When an encounter ends, the engine writes the hand-off (`docs/spec/state.md`, `src/engine/handoff.js`), and moves slack by 1: up after the fail-forward ending or with 15% or less of the deadline to spare, down with 50% or more to spare.
+
+## 7. Replay (D60)
+The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, slack, seed) plus every action in order: the DM's validated outputs, rolls, operations and time passing. Applying it again gives deep-equal state.
 
 ## 8. Condition language (D17)
-JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, preconditions (`requires`), triggers, rule guards, stance triggers, meter decay and `until`. Shapes: `schemas/defs.js`.
+JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, events' `when`, rule guards and `until`. Shapes: `schemas/defs.js`.
 
 | Atom | True when |
 |---|---|
 | `in_zone: [entity, zone]` | the entity is in the zone |
 | `party_all_in: zone` | every party member is in the zone |
-| `holds: [holder, item]` | the holder (an actor, a thing such as the peg, or `party` for any member) has the item |
-| `flag: [entity, key, value]` | the flag on an entity, connection or thing has that value (`locked`, `gnawed`, `form`) |
-| `meter: [meter, op, n]` | the meter compares true |
+| `holds: [holder, item]` | the holder (a person, a thing such as the peg, or `party` for any member) has the item |
+| `flag: [entity, key, value]` | the flag on a person, connection or thing has that value |
 | `tick: [op, n]` | the current tick compares true |
-| `beat: [npc, beat]` | the NPC's schedule is on that beat |
+| `beat: [npc, beat]` | the person's routine is on that beat |
 | `revealed: id` | the hidden thing has been revealed |
 | `hp_below: [actor, n]` | the actor's HP is below n |
-| `disposition: [npc, value]` | the NPC's disposition is that value |
-| `step_tagged: tag` | the step being resolved carries the tag |
-| `noticed_by: npc` | during this tick, a risk covering that NPC failed, or a `loud` step reached their hearing |
+| `disposition: [npc, value]` | the person's disposition is that value |
 
-**Bindings:** `@self` is the actor using an ability; `@step_zone` is the zone of the step being resolved.
-
-## 9. State-change operations (D17)
-One list, used by triggers, rules, ladders, events, consequences, effects, abilities and every AI write. Shapes: `schemas/defs.js`.
+## 9. Operations (D17)
+What a packet's events, beats and start run. Shapes: `schemas/defs.js`. The DM's own writes are ledger changes (§2).
 
 | Operation | Does |
 |---|---|
-| `move` | moves an actor to a zone, along a `path` of at most two crossings, each named by the zone it enters or, where two connections join the same zones, by the connection (D51) |
-| `give` | puts an item in a holder's hands, along a `path` (as for `move`) if it travels |
+| `move` | moves a person to a zone; someone carrying a door's key unlocks it in passing |
+| `give` | puts an item in a holder's hands |
 | `place` | puts an item down in a zone |
 | `consume` | removes an item from play |
-| `set_flag` | sets a flag; the key must be one the packet or a sheet already uses (D52) |
-| `meter_add` | changes a meter, then applies the ladder levels it reaches |
-| `set_disposition` | changes an NPC's disposition |
-| `edit_schedule` | drops a beat, or overrides an NPC's position for some ticks |
-| `set_sense` | changes what an NPC sees or hears on a beat |
-| `reveal` | makes a hidden thing, or an NPC's routine, known to the party |
-| `add_canon` | records texture or a ruling |
+| `set_flag` | sets a flag |
+| `set_disposition` | changes a person's disposition |
+| `edit_schedule` | drops a beat, or overrides a person's position for some ticks |
+| `reveal` | makes a hidden thing, a routine or an event known to the party |
+| `add_canon` | records texture |
 | `use_ability` | spends a use and applies the ability's declared effects (D30) |
-| `add_ticks` | adds pending ticks (an extra-time consequence) |
-| `start_combat` | starts a fight with the listed enemies |
-| `damage` | removes HP |
+| `add_ticks` | adds pending ticks |
 | `end_encounter` | ends the encounter with a named outcome |
 
-`set_flag`, `edit_schedule` and `set_sense` can carry `until`: a condition that, once true, undoes the change. That's how a ladder level lapses when its meter falls.
-
-**Rules** (`{if, then, else}`) wrap operations wherever the packet runs them unconditionally otherwise: in events, triggers and beats' `on_start`.
-
-There is no operation that adds a zone, a connection or a hidden thing (D29).
+`set_flag` and `edit_schedule` can carry `until`: a condition that, once true, undoes the change.
 
 ## 10. What the engine must not do
-- **Judge** plausibility, progress, "solved", NPC motives, or odds.
+- **Judge** plausibility, progress, "solved", NPC motives, odds, or whether an action can happen.
 - **Write prose.**
 - **Hold pacing formulas,** risk budgets or escalation curves (D4).
 - **Store or send routes.** The critique call's plans are thrown away (D120).
-- **Invent entities or events.** It only runs what the packet and the AIs' validated outputs say.
-- **Name a companion.** Companion behaviour comes from her file (D8).
-- **Call an AI.** The call layer does that; the engine stays pure (D12).
+- **Invent people or events.** It runs only what the packet and the DM's validated outputs say.
+- **Name a companion.** Companion behaviour comes from her file (D8); packets use slots (D126).

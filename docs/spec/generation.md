@@ -1,6 +1,6 @@
 # Generation
 
-How the game builds its next encounter, room or campfire (D117). Built in Phase 7; until then the Cells is the only packet. Generated packets are written for ruled mode (D116). How to design a *good* one is in `docs/design/encounter-craft.md`.
+How the game builds its next encounter, room or campfire (D117). Built in Phase 7; until then the Cells is the only packet. Generated packets carry only what the DM reads (D116). How to design a *good* one is in `docs/design/encounter-craft.md`.
 
 ---
 
@@ -42,4 +42,5 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **Every attachment it was handed resolves** in it (D123), or the packet is rejected.
 - **Every exit carries a next-scene stub** (D119).
 - **A room holds exactly one outfit,** for a companion in the party, and has no objective or deadline (D121).
-- **It fits ruled mode's budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
+- **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
+- **It places companions by slot,** never by name (D126).

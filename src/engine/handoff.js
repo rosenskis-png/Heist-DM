@@ -31,10 +31,9 @@ export function handoff(s) {
     conditions: Object.fromEntries(party.filter((id) => s.flags[id]).map((id) => [id, s.flags[id]])),
     fates,
     companions: party.filter((id) => id !== "player"),
-    combat: s.combat ? s.combat.enemies : null,
     tick: s.tick,
     spare,
     slack,
-    log: `${s.packet.id}: ${label ?? outcome} at tick ${s.tick}; ${party.map((id) => nameOf(s, id)).join(", ")} in ${exit.map((z) => nameOf(s, z)).join(", ")}${s.combat ? `, fighting ${s.combat.enemies.map((e) => person(s, e)?.name.split(",")[0] ?? e).join(", ")}` : ""}.`,
+    log: `${s.packet.id}: ${label ?? outcome} at tick ${s.tick}; ${party.map((id) => nameOf(s, id)).join(", ")} in ${exit.map((z) => nameOf(s, z)).join(", ")}.`,
   };
 }
