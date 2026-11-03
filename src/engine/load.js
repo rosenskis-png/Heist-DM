@@ -6,7 +6,7 @@ import { beginTick } from "./clock.js";
 import { run } from "./ops.js";
 
 // Every id-valued field in the packet, with where it was found.
-const REF_KEYS = new Set(["entity", "to", "item", "npc", "holder", "zone", "actor", "drop_beat", "key", "position", "beat"]);
+const REF_KEYS = new Set(["entity", "to", "item", "npc", "holder", "zone", "actor", "key", "position", "beat"]);
 function refs(node, path, out) {
   if (Array.isArray(node)) node.forEach((n, i) => refs(n, `${path}[${i}]`, out));
   else if (node && typeof node === "object")
@@ -33,7 +33,7 @@ export function checkPacket(packet, party = []) {
     ...people.flatMap((p) => (p.schedule ? [p.schedule, ...p.schedule.beats] : [])),
     ...party,
   ].map((x) => x.id));
-  for (const id of ["party", "@self", "@step_zone"]) ids.add(id);
+  for (const id of ["party", "@self"]) ids.add(id);
   const skip = /\.(start\.positions|key)$/; // flag keys and position maps aren't references
   for (const [id, at] of refs({ people, map, clock, intent: packet.intent, start: packet.start }, "$", []))
     if (typeof id === "string" && !ids.has(id) && !at.endsWith(".key") && !skip.test(at)) problems.push(`${at}: unknown id ${id}`);
@@ -83,16 +83,12 @@ export function load({ packet: unbound, party, slack = 0, seed = 1 }) {
     flags: {},
     disposition: Object.fromEntries(people.map((p) => [p.id, p.disposition])),
     hp: Object.fromEntries(party.map((p) => [p.id, p.abilities?.hp ?? 4])),
-    uses: {},
-    sched: {},
-    untils: [],
     known: { revealed: [] },
     due: Object.fromEntries(
       clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick]),
     ),
     slack,
     fired: [],
-    consumed: [],
     canon: [],
     log: [],
     // The DM's facts, and the NPCs it has taken off their routines (D75).

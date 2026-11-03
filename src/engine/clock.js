@@ -6,29 +6,18 @@ import { runRules } from "./ops.js";
 
 const scheduled = (s) => s.packet.people.filter((p) => p.schedule);
 
-// The beat an NPC on a routine is on, minus any beats a ruling has dropped.
+// The beat a person on a routine is on at tick t.
 export function beatOf(s, npc, t = s.tick) {
   const sch = person(s, npc)?.schedule;
-  if (!sch || s.at[npc] == null || s.offRoutine?.includes(npc)) return null;
-  const dropped = s.sched[npc]?.dropped ?? [];
-  if (!dropped.length) return sch.beats[(t + sch.phase) % sch.period];
-  const beats = sch.beats.filter((b) => !dropped.includes(b.id));
-  return beats.length ? beats[(t + sch.phase) % beats.length] : null;
-}
-
-// An NPC's senses right now: its beat's or its sheet's.
-export function sensesOf(s, npc) {
-  return beatOf(s, npc)?.senses ?? person(s, npc)?.senses ?? { sees: [], hears: { zones: [], level: "loud" } };
+  if (!sch || s.at[npc] == null || s.offRoutine.includes(npc)) return null;
+  return sch.beats[(t + sch.phase) % sch.period];
 }
 
 // Begin the current tick: positions from schedules, each beat's on_start rules, events, the objective.
 export function beginTick(s) {
   for (const p of scheduled(s)) {
     if (s.at[p.id] == null || s.offRoutine.includes(p.id)) continue;
-    const o = s.sched[p.id]?.override;
-    if (o && s.tick > o.to) s.sched[p.id].override = null;
-    const active = o && s.tick >= o.from && s.tick <= o.to;
-    s.at[p.id] = active ? o.position : beatOf(s, p.id).position;
+    s.at[p.id] = beatOf(s, p.id).position;
   }
   for (const p of scheduled(s)) {
     if (s.at[p.id] == null || s.offRoutine.includes(p.id)) continue;

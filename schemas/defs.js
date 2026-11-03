@@ -3,9 +3,8 @@
 
 const id = { type: "string", pattern: "^[a-z][a-z0-9_]*$" };
 
-// An id, or a binding the engine fills in when a rule runs: @self (the actor using an ability),
-// @step_zone (the zone of the step being resolved).
-const ref = { type: "string", pattern: "^([a-z][a-z0-9_]*|@self|@step_zone)$" };
+// An id, or @self: the companion an ability's effects are about.
+const ref = { type: "string", pattern: "^([a-z][a-z0-9_]*|@self)$" };
 
 const scalar = { type: ["string", "number", "boolean"] };
 const compare = { enum: ["<", "<=", "=", ">=", ">"] };
@@ -39,31 +38,14 @@ const condition = {
 const op = (name, required, properties) =>
   atom(name, { type: "object", required, additionalProperties: false, properties });
 
-const until = { $ref: "#/$defs/condition" };
 const operation = {
   oneOf: [
-    // A path is one entry per crossing: the zone entered, or the connection where two join the same zones (D51).
-    op("move", ["entity", "to"], { entity: ref, to: id, path: { type: "array", minItems: 1, maxItems: 2, items: id } }),
-    op("give", ["item", "to"], { item: id, to: ref, path: { type: "array", minItems: 1, maxItems: 2, items: id } }),
+    op("move", ["entity", "to"], { entity: ref, to: id }),
+    op("give", ["item", "to"], { item: id, to: ref }),
     op("place", ["item", "zone"], { item: id, zone: ref }),
-    op("consume", ["item"], { item: id }),
-    op("set_flag", ["entity", "key", "value"], { entity: ref, key: id, value: scalar, until }),
-    op("set_disposition", ["npc", "value"], { npc: id, value: id }),
-    op("edit_schedule", ["npc"], {
-      npc: id,
-      drop_beat: id,
-      override: {
-        type: "object",
-        required: ["position", "ticks"],
-        additionalProperties: false,
-        properties: { position: ref, ticks: { type: "integer", minimum: 1 } },
-      },
-      until,
-    }),
+    op("set_flag", ["entity", "key", "value"], { entity: ref, key: id, value: scalar }),
     op("reveal", ["id"], { id }),
     op("add_canon", ["kind", "text"], { kind: { enum: ["texture", "ruling"] }, text }),
-    op("use_ability", ["actor", "ability"], { actor: ref, ability: id }),
-    op("add_ticks", ["ticks"], { ticks: { type: "integer", minimum: 1 } }),
     op("end_encounter", ["outcome"], { outcome: id }),
   ],
 };

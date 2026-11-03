@@ -50,7 +50,7 @@ When an encounter ends, the engine writes the hand-off (`docs/spec/state.md`, `s
 The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, slack, seed) plus every action in order: the DM's validated outputs, rolls, operations and time passing. Applying it again gives deep-equal state.
 
 ## 8. Condition language (D17)
-JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, events' `when`, rule guards and `until`. Shapes: `schemas/defs.js`.
+JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, events' `when` and rule guards. Shapes: `schemas/defs.js`.
 
 | Atom | True when |
 |---|---|
@@ -69,20 +69,15 @@ What a packet's events, beats and start run. Shapes: `schemas/defs.js`. The DM's
 
 | Operation | Does |
 |---|---|
-| `move` | moves a person to a zone; someone carrying a door's key unlocks it in passing |
+| `move` | puts a person in a zone (D129) |
 | `give` | puts an item in a holder's hands |
 | `place` | puts an item down in a zone |
-| `consume` | removes an item from play |
 | `set_flag` | sets a flag |
-| `set_disposition` | changes a person's disposition |
-| `edit_schedule` | drops a beat, or overrides a person's position for some ticks |
 | `reveal` | makes a hidden thing, a routine or an event known to the party |
 | `add_canon` | records texture |
-| `use_ability` | spends a use and applies the ability's declared effects (D30) |
-| `add_ticks` | adds pending ticks |
 | `end_encounter` | ends the encounter with a named outcome |
 
-`set_flag` and `edit_schedule` can carry `until`: a condition that, once true, undoes the change.
+An ability's declared effects use the same operations, with `@self` for the companion they're about.
 
 ## 10. What the engine must not do
 - **Judge** plausibility, progress, "solved", NPC motives, odds, or whether an action can happen.

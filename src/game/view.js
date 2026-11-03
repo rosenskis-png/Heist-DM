@@ -74,7 +74,7 @@ export function mapView(s) {
     const z = s.at[p.id];
     if (z && seen.has(z)) tokens.push({ id: p.id, name: p.name.split(",")[0], zone: z, down: s.flags[p.id]?.down === true });
   }
-  const held = (id) => Object.keys(s.holder).filter((i) => s.holder[i] === id && !s.consumed.includes(i)).map((i) => map.things.find((t) => t.id === i)?.name ?? i);
+  const held = (id) => Object.keys(s.holder).filter((i) => s.holder[i] === id).map((i) => map.things.find((t) => t.id === i)?.name ?? i);
   for (const t of tokens) t.holds = held(t.id);
   const things = map.things
     .filter((t) => known(s, t) && t.location.at && s.at[t.id] === t.location.zone && seen.has(s.at[t.id]))

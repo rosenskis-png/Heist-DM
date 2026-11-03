@@ -1,75 +1,7 @@
-// Geometry checks and routes for the moves a packet makes (docs/spec/engine.md §9, D28).
+// Geometry checks for a packet (docs/spec/packet.md, Validation; D28).
 // Coordinates stay in here; the AIs get only the facts derived from them (D9).
-import { SIZES, conn, sizeOf, carried, flag, zoneOf, isParty, isNpc } from "./world.js";
 
 export const other = (c, z) => c.between.find((x) => x !== z);
-
-export function between(s, a, b) {
-  const found = s.packet.map.connections.filter((c) => c.between.includes(a) && c.between.includes(b));
-  return found.length === 1 ? found[0] : null;
-}
-
-// A path names each crossing by the zone it enters, or by the connection where two join the same zones (D51).
-// Returns the connections crossed, or the first entry that doesn't follow on.
-export function crossings(s, from, path) {
-  const out = [];
-  let here = from;
-  for (const p of path) {
-    if (p === here) continue; // a connection followed by the zone it leads into names one crossing twice
-    const c = conn(s, p) ?? between(s, here, p);
-    if (!c || !c.between.includes(here)) return { error: p, at: here, conns: out };
-    out.push(c.id);
-    here = other(c, here);
-  }
-  return { conns: out, end: here };
-}
-
-// Working a connection (locking, unlocking, opening) takes someone with hands, on a side it's worked from (D64).
-// Anyone a sheet or a flag hasn't taken hands from has them: a rat doesn't.
-export const hasHands = (s, id) => (isParty(s, id) || isNpc(s, id)) && flag(s, id, "hands") !== false;
-export const workedFrom = (c, z) => c.between.includes(z) && (c.operated_from === "both" || c.operated_from === z || c.reachable_from_other_side === true);
-
-// Someone moving who carries a connection's key, has hands, and comes at it from a side it's worked from.
-const opener = (s, c, movers, from) =>
-  c.key && workedFrom(c, from) && movers.some((m) => hasHands(s, m) && carried(s, m).includes(c.key));
-
-// What fits through a connection now: `fits`, or `fits_unlocked` once it's unlocked or someone moving can
-// unlock it in passing (D53, D56).
-export function fitsNow(s, c, movers, from) {
-  const locked = flag(s, c.id, "locked") === true && !opener(s, c, movers, from);
-  return !locked && c.fits_unlocked ? c.fits_unlocked : c.fits;
-}
-
-// Why a mover can't cross from `from`: null if it can.
-export function blocked(s, c, mover, movers, from) {
-  if (SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(fitsNow(s, c, movers, from))) return null;
-  const opens = c.fits_unlocked && SIZES.indexOf(sizeOf(s, mover)) <= SIZES.indexOf(c.fits_unlocked);
-  return opens ? "locked" : "too_big";
-}
-
-// Only when someone moving needs it open: a rat carrying the ring slips through the bars without unlocking them (D63).
-export const unlocksInPassing = (s, c, movers, from) =>
-  flag(s, c.id, "locked") === true && opener(s, c, movers, from) && movers.some((m) => SIZES.indexOf(sizeOf(s, m)) > SIZES.indexOf(c.fits));
-
-// The shortest way everything moving fits through, as connection ids (D54). Hidden connections count only
-// once revealed; the party can't take a way it doesn't know.
-export function route(s, from, to, movers) {
-  const seen = new Map([[from, []]]);
-  const queue = [from];
-  while (queue.length) {
-    const here = queue.shift();
-    if (here === to) return seen.get(here);
-    for (const c of s.packet.map.connections) {
-      if (!c.between.includes(here) || (c.hidden && !s.known.revealed.includes(c.id))) continue;
-      if (movers.some((m) => blocked(s, c, m, movers, here))) continue;
-      const next = other(c, here);
-      if (!seen.has(next)) seen.set(next, [...seen.get(here), c.id]), queue.push(next);
-    }
-  }
-  return null;
-}
-
-// ---- Geometry ----
 
 const cells = (z) => z.rects.flatMap(([x, y, w, h]) => Array.from({ length: w * h }, (_, i) => [x + (i % w), y + Math.floor(i / w)]));
 const box = (z) => {

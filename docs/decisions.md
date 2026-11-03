@@ -691,3 +691,7 @@ The specs change when this is built (`docs/roadmap.md`); until then they describ
 ### D128. The engine counts ability uses, and rest refills them
 **Decided:** The DM's changes gain a `used` list (who, which ability). The engine counts each against the ability's `declared` uses (D30) and sends back one past its limit, for the retry. Every DM call and the character sheet show what's left ("Wild Shape: 0 of 1"). Per-encounter uses refill when an encounter ends, and per-rest uses at a campfire (D122). Whether an ability fits the situation stays the DM's judgment.
 **Why:** With the engine's pipeline gone (D125), nothing counted a use, so a limited ability was unlimited, and campfires had nothing to refill. The count is bookkeeping, so it belongs in code (principle 2).
+
+### D129. A packet runs seven operations, and its moves don't route
+**Decided:** A packet's events, beats and start can move, give, place, set a flag, reveal, add canon and end the encounter (`schemas/defs.js`). A move puts a person straight into the zone it names. Gone: routes, fit and unlocking in passing for those moves, schedule edits, `until` and its undoing, and the other operations no packet used. D51, D54, D56, D63 and D64 now apply only as history; D53's second size stays, as a fact the DM reads.
+**Why:** After D125 these ran only for a routine's or an event's own moves, where they did nothing a DM needs. Fewer shapes also leave the generator's encode call less to get wrong (D117).

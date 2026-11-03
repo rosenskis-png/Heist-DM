@@ -4,7 +4,7 @@
 1. `README.md`: the vision and the map.
 2. `docs/principles.md`, especially the reflexes to resist, before proposing any system or mechanic.
 3. `docs/roadmap.md`: the current phase and its open questions.
-4. `docs/decisions.md`: before reopening anything, read why it was decided.
+4. `docs/decisions.md`: skim the titles (`grep "^### D" docs/decisions.md`), then read the entries in your area, and any one before reopening it. The specs say what's current; the log says why.
 5. Only the `docs/spec/` files your task touches. They're split small so you can load just your slice.
 
 Don't design from `legacy/`. Use `legacy/README.md` to find what to port and what is banned.
