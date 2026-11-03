@@ -6,7 +6,7 @@ import { beginTick } from "./clock.js";
 import { run } from "./ops.js";
 
 // Every id-valued field in the packet, with where it was found.
-const REF_KEYS = new Set(["entity", "to", "item", "npc", "holder", "zone", "actor", "meter", "drop_beat", "key", "position", "beat"]);
+const REF_KEYS = new Set(["entity", "to", "item", "npc", "holder", "zone", "actor", "key", "position", "beat"]);
 function refs(node, path, out) {
   if (Array.isArray(node)) node.forEach((n, i) => refs(n, `${path}[${i}]`, out));
   else if (node && typeof node === "object")
@@ -14,8 +14,8 @@ function refs(node, path, out) {
       const at = `${path}.${k}`;
       if (["in_zone", "holds", "flag", "hp_below"].includes(k) && Array.isArray(v)) out.push([v[0], at], ...(k === "in_zone" || k === "holds" ? [[v[1], at]] : []));
       else if (k === "beat" && Array.isArray(v)) out.push([v[0], at]);
-      else if (["party_all_in", "noticed_by", "revealed"].includes(k)) out.push([v, at]);
-      else if (["between", "sees", "zones", "sees_add", "sees_remove", "enemies"].includes(k) && Array.isArray(v)) v.forEach((x) => out.push([x, at]));
+      else if (["party_all_in", "revealed"].includes(k)) out.push([v, at]);
+      else if (["between", "sees", "zones"].includes(k) && Array.isArray(v)) v.forEach((x) => out.push([x, at]));
       else if (REF_KEYS.has(k) && typeof v === "string") out.push([v, at]);
       else refs(v, at, out);
     }
@@ -29,18 +29,16 @@ export function checkPacket(packet, party = []) {
   const { map, people, clock } = packet;
   const ids = new Set([
     ...map.zones, ...map.connections, ...map.things, ...map.facts, ...people,
-    ...clock.events, ...clock.meters, ...clock.triggers,
+    ...clock.events,
     ...people.flatMap((p) => (p.schedule ? [p.schedule, ...p.schedule.beats] : [])),
     ...party,
   ].map((x) => x.id));
-  for (const id of ["party", "@self", "@step_zone"]) ids.add(id);
+  for (const id of ["party", "@self"]) ids.add(id);
   const skip = /\.(start\.positions|key)$/; // flag keys and position maps aren't references
   for (const [id, at] of refs({ people, map, clock, intent: packet.intent, start: packet.start }, "$", []))
     if (typeof id === "string" && !ids.has(id) && !at.endsWith(".key") && !skip.test(at)) problems.push(`${at}: unknown id ${id}`);
   for (const id of Object.keys(packet.start.positions)) if (!ids.has(id)) problems.push(`start.positions: unknown id ${id}`);
   for (const c of map.connections) if (c.key && !ids.has(c.key)) problems.push(`connection ${c.id}: unknown key ${c.key}`);
-  // Every observer says what it can see and hear: anyone present, or brought in by an event.
-  for (const p of people) if (!p.senses && !p.schedule) problems.push(`person ${p.id} has no senses`);
   problems.push(...geometryProblems(packet));
   // No visible text names a hidden thing.
   const all = [...map.zones, ...map.connections, ...map.things, ...map.facts];
@@ -59,8 +57,18 @@ export function packetWarnings(packet, reference) {
 // A deadline moves by 2% of its tick per point of slack, rounded once (D41, D43).
 export const deadlineTick = (tick, slack) => Math.round(tick * (1 + 0.02 * slack));
 
+// A packet places the party's companions by slot, in party order, so it never names one (D8): the slots are
+// replaced by the companions' ids wherever the packet names them.
+export const SLOTS = ["companion_a", "companion_b"];
+export function bindParty(packet, party) {
+  const ids = Object.fromEntries(party.slice(1).map((p, i) => [SLOTS[i], p.id]));
+  const bind = (x) => (Array.isArray(x) ? x.map(bind) : x && typeof x === "object" ? Object.fromEntries(Object.entries(x).map(([k, v]) => [ids[k] ?? k, bind(v)])) : (ids[x] ?? x));
+  return bind(packet);
+}
+
 // The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's.
-export function load({ packet, party, slack = 0, seed = 1 }) {
+export function load({ packet: unbound, party, slack = 0, seed = 1 }) {
+  const packet = bindParty(unbound, party);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
   const { map, people, clock, start } = packet;
@@ -73,27 +81,19 @@ export function load({ packet, party, slack = 0, seed = 1 }) {
     at: {},
     holder: {},
     flags: {},
-    meters: Object.fromEntries(clock.meters.map((m) => [m.id, m.start])),
-    quiet: {},
     disposition: Object.fromEntries(people.map((p) => [p.id, p.disposition])),
     hp: Object.fromEntries(party.map((p) => [p.id, p.abilities?.hp ?? 4])),
-    uses: {},
-    sched: {},
-    senseEdits: [],
-    untils: [],
     known: { revealed: [] },
-    due: Object.fromEntries(clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick])),
+    due: Object.fromEntries(
+      clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick]),
+    ),
     slack,
     fired: [],
-    on: [],
-    firedNow: [],
-    noticed: [],
-    warned: null,
-    consumed: [],
     canon: [],
-    exceptions: [],
     log: [],
-    combat: null,
+    // The DM's facts, and the NPCs it has taken off their routines (D75).
+    facts: [],
+    offRoutine: [],
     ended: null,
   };
   for (const p of people) s.at[p.id] = p.position;
@@ -106,6 +106,5 @@ export function load({ packet, party, slack = 0, seed = 1 }) {
   for (const c of map.connections) if (c.flags) s.flags[c.id] = { ...c.flags };
   run(s, start.ops);
   beginTick(s);
-  s.firedNow = [];
   return s;
 }

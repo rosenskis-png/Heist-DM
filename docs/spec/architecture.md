@@ -1,6 +1,6 @@
 # Architecture
 
-Who does what, the encounter loop, and time. For why it's shaped this way, see `docs/principles.md`.
+Who does what, the encounter loop, and time. For why it's shaped this way, see `docs/principles.md`. The DM rules and the engine keeps the books (D75, D125).
 
 ---
 
@@ -8,48 +8,39 @@ Who does what, the encounter loop, and time. For why it's shaped this way, see `
 
 | Actor | Calls | Job |
 |---|---|---|
-| **Engine** | none | Owns all state. Does geometry, dice, ticks, schedules, validation, objective checks, the event log and the table read. Pure code: no DOM, no AI calls (D12). |
-| **Generator** | Once per encounter, plus a validation retry | Builds the encounter packet (`docs/spec/packet.md`). Hand-authored packets replace it until Phase 7 (D25). |
-| **Plan AI** | Step, pricing, world and narration calls | Turns committed plans into resolvable steps, prices them, plays the world's response, and narrates. |
-| **Moment AI** | One call per exchange; one per combat round | Answers questions, runs checks, plays NPCs, runs combat, and redirects actions to the draft card. |
-| **Companion AI** | One call per companion per message; campfire | Voices each companion in the huddle and at the campfire. |
+| **Engine** | none | Owns all state: the clock, routines and placed events, dice, the ledger's consistency, the objective, slack, saves and the hand-off (`docs/spec/engine.md`). Pure code: no DOM, no AI calls (D12). It never judges whether an action is possible. |
+| **The DM** | Adjudicate, resolve and scene | Rules on plans and makes the card, plays a card out against the world as it really is and narrates it, and runs every exchange in the Moment tab: questions, talk, quick actions and fight rounds. |
+| **Companions** | One call per companion per message; the campfire | Voice each companion in the huddle, in private channels and at the campfire. |
+| **Generation** | Sketch, critique and encode, once per packet | Builds the next encounter, room or campfire from a seed code picks (`docs/spec/generation.md`). |
 
-Every AI call goes through the artifact runtime's `sample` (D2). Each call's contract is in `docs/spec/calls/`.
-
-The plan side is split into several small sequential calls (decide → validate → narrate). The player expects to wait when committing a plan, so the extra latency is acceptable there. Moment and huddle calls stay single and fast because they're conversational.
+Every AI call goes through the artifact runtime's `sample` (D2). Each call's contract is in `docs/spec/calls/`, and what each sees is in `docs/spec/context.md`.
 
 ## Modes
 
 | Mode | Cards | Ticks | Calls |
 |---|---|---|---|
-| **Encounter** | yes | yes | all |
-| **Room** (exploration, social, respite; D22) | no | no | moment, companion |
-| **Campfire** (between encounters) | no | no, time passes freely | campfire, one call per companion (D45) |
+| **Encounter** | yes | yes | adjudicate, resolve, scene, companion |
+| **Room** (exploration, social, respite; D22, D121) | no | only for events the room places | scene, companion |
+| **Campfire** (a room where the party rests; D122) | no | no, time passes freely | campfire, one call per companion (D45) |
 
 ## Encounter loop
 
-1. **World turn.** The engine applies pending ticks and schedules. The world call decides NPC reactions and arrivals; the narration call describes the situation.
-2. **Huddle** (time paused). The player talks with the companions. Their stances go onto the draft card as pending.
-3. **Moments** (optional). Questions, checks, conversations and fights (`docs/spec/calls/moment.md`). Actions are redirected to the draft card.
-4. **Commit.** The player writes the plan, with any timing and conditions (D35), and decides each pending stance (keep / resolved / override). Only the player writes plan content.
-5. **Card.** The step call, engine validation and the pricing call. Every step is priced as the party expects the world to be; the card warns about nothing (D36). The player confirms or edits.
-6. **Execute.** The engine resolves the card step by step (`docs/spec/engine.md` §6). Narration covers everything up to the end of the plan or the first stop.
-7. **Stop, interruption or finish.** A failed risk can stop the plan. Reality can interrupt it: something the party didn't foresee, a step that can't happen as they expected. Either way, go back to step 1 from that moment. The engine checks the objective after every step, and the encounter ends when it's met.
+1. **Huddle** (time paused). The player talks with the companions, all together or one at a time over the rings. Their stances go onto the draft card as pending.
+2. **The Moment** (optional). One scene call per exchange (`docs/spec/calls/scene.md`): the DM answers, rules on what the player tries, rolls a check where failure is possible and interesting, and says how long it took. Questions and talk take no time; only physical work does (D77). A fight runs here, a round at a time. Anything that's really a plan of several steps goes to the draft card.
+3. **Commit.** The player writes the plan, with any timing and conditions (D35), and decides each pending stance (keep / resolved / override). Only the player writes plan content.
+4. **The card** (`docs/spec/calls/adjudicate.md`). The DM rules on the plan as a DM would: each step's tick, when the whole plan is done, a roll only where failure is possible and interesting, its band and what failure costs, and up to three lasting rulings the plan depends on. It reads the plan the way the player means it, and adds no waits, safety steps or better ideas (D77). It's ruled from what the party knows, and names nothing hidden. The player confirms, edits, or marks checkpoints (D69).
+5. **The dice.** The engine rolls every roll on the card before anything is played out. The DM never sees the numbers, and a retry never rerolls.
+6. **Playing it out** (`docs/spec/calls/resolve.md`). One call sees everything and plays the card against the world as it really is. It honours the dice and the card's stated costs, stops the plan where reality differs, has people act from their sheets and the packet's notes, records every change in the ledger, and then narrates from that record (D78). The engine lands each step's changes at that step's tick.
+7. **Finish.** The engine checks the objective after every change, and the encounter ends when it's met, an alternate or the fail-forward ending holds, or the player leaves.
 
 ## Time
 
-Ticks exist only in encounters. Schedules are written in ticks when the packet is built.
+Ticks exist only in encounters and in rooms that place events. A tick is about a minute of real work (D77). Routines and events are written in ticks when the packet is built.
 
-| Event | Ticks |
+| What | Ticks |
 |---|---|
-| Plan step | 1 |
-| Waiting in a plan (`when`) | 1 per tick waited |
-| Extra-time consequence | as stated |
-| Check | 1 (added to pending) |
-| Conversation | 1 when it ends |
-| Combat | 1 on rounds 2, 4, 6, … |
-| Question, huddle, card review | 0 |
+| A plan | the card's `ends_at`, step by step |
+| A Moment exchange | what the DM says it took: none for questions, talk and social rolls |
+| Huddle, card review | 0 |
 
-**A step takes place in the tick it starts in** (D16). A committed plan's first step happens on the current beat, and the tick advances when the step ends. The engine projects every later step's tick from that.
-
-Pending ticks are applied one at a time at the next world turn, checking for arrivals after each.
+When time passes, routines move the people still following them and their beats' rules run, and placed events fire on their tick.

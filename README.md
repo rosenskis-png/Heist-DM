@@ -47,21 +47,22 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/principles.md` | Lessons from Gravenhold, the 8 design principles, and the reflexes to resist |
 | `docs/roadmap.md` | Phases, exit tests, and **every open question** with a recommendation |
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
-| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
+| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
-| `src/` | Code: the engine (`src/engine/`, D60), context assembly (`src/context.js`) and the contract validator |
+| `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
+| `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |
 | `test/` | `node --test` suites |
 | `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
-| `fixtures/cells/` | The worked example, the Cells packet and cards as data, and the engine's first acceptance test |
-| `content/` | Game data: companions, pairs, classes, rules, setting. The source of truth for content. |
+| `fixtures/cells/` | The Cells worked example, and a recorded card and account for the rat plan |
+| `content/` | Game data: companions, pairs, classes, rules, setting, the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
-| `bench/` | The Phase 2 judgment test bench: an artifact page that runs the real prompts on hand-written inputs, checked by the engine |
-| `fixtures/bench/` | The bench's test cases beyond the Cells cards |
+| `bench/` | The judgment test bench: an artifact page that runs the companion and campfire prompts on hand-written cases, plus Camp, free play with any two companions |
+| `fixtures/bench/` | The bench's huddle and campfire cases |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
 The design before this layout (specs v3 and v4, the engine brief) is preserved on branch `design-archive` (commit `53a65be`).
 
 ## Status
 
-**Phase 3: Engine core,** done: `src/engine/`, checked by `test/engine.test.js` against `fixtures/cells/acceptance.md`. **Phase 4: The Cells, playable** is next. See `docs/roadmap.md`.
+**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is next, and Act 1 will be generated rather than written by hand (`docs/spec/generation.md`, D115–D124). See `docs/roadmap.md`.

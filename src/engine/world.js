@@ -1,8 +1,5 @@
 // Lookups over the packet and live state that every module shares.
 
-export const SIZES = ["tiny", "small", "medium", "large"];
-export const NOISE = ["silent", "quiet", "speech", "loud"];
-
 export const person = (s, id) => s.packet.people.find((p) => p.id === id);
 export const thing = (s, id) => s.packet.map.things.find((t) => t.id === id);
 export const conn = (s, id) => s.packet.map.connections.find((c) => c.id === id);
@@ -20,15 +17,8 @@ export function zoneOf(s, id, seen = 0) {
   return h && seen < 8 ? zoneOf(s, h, seen + 1) : null;
 }
 
-export const carried = (s, id) => Object.keys(s.holder).filter((item) => s.holder[item] === id);
-
-// People are medium unless a flag says otherwise (Fern as a rat is tiny); things have their packet size.
-export const sizeOf = (s, id) => s.flags[id]?.size ?? thing(s, id)?.size ?? "medium";
-
-export const flag = (s, id, key) => s.flags[id]?.[key];
-
-// The engine's bindings (engine.md §8).
-export const bind = (v, ctx = {}) => (v === "@self" ? ctx.self : v === "@step_zone" ? ctx.stepZone : v);
+// The engine's binding (engine.md §8): @self is the companion an ability's effects are about.
+export const bind = (v, ctx = {}) => (v === "@self" ? ctx.self : v);
 
 export const clone = (x) => structuredClone(x);
 

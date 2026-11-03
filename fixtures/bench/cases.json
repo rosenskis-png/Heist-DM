@@ -1,1620 +1,15 @@
 {
- "about": "Phase 2 bench cases (docs/roadmap.md). Plans, hand-computed engine facts, scenes and what to look for. The bench runs the real prompts on these.",
- "packet": "cells",
+ "about": "Bench cases: huddles and campfire scenes, and what to look for. The bench runs the real prompts on these.",
  "act": 1,
  "party": [
   "player",
   "fern",
-  "lyra"
+  "nadia"
  ],
  "player_class": "rogue",
  "hidden_terms": [
   "crawl",
   "cistern"
- ],
- "step": [
-  {
-   "id": "card1",
-   "title": "The rat plan, as written",
-   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
-   "stances": [
-    {
-     "companion": "lyra",
-     "kind": "insist",
-     "text": "We take the miner with us.",
-     "decision": "resolved"
-    },
-    {
-     "companion": "fern",
-     "kind": "conditional",
-     "text": "I won't help kill anyone who doesn't need killing.",
-     "trigger": {
-      "step_tagged": "lethal"
-     },
-     "decision": "keep"
-    }
-   ],
-   "tick": 0,
-   "look_for": "A literal translation: no timing, no waits, no conditions. The hole stays in.",
-   "expect": {
-    "whens": 0,
-    "ifs": 0,
-    "steps": [
-     4,
-     7
-    ]
-   }
-  },
-  {
-   "id": "card2",
-   "title": "The rat plan, with the player's timing",
-   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
-   "stances": [
-    {
-     "companion": "lyra",
-     "kind": "insist",
-     "text": "We take the miner with us.",
-     "decision": "resolved"
-    },
-    {
-     "companion": "fern",
-     "kind": "conditional",
-     "text": "I won't help kill anyone who doesn't need killing.",
-     "trigger": {
-      "step_tagged": "lethal"
-     },
-     "decision": "keep"
-    }
-   ],
-   "tick": 0,
-   "look_for": "Exactly the player's three timings (his drink, his sit, his next drink), nothing added.",
-   "expect": {
-    "whens": 3,
-    "ifs": 0,
-    "steps": [
-     4,
-     6
-    ]
-   }
-  },
-  {
-   "id": "nail",
-   "title": "Bench-nail lockpick",
-   "plan": "While Snag is at the cask, I pry a nail out of the bench. The next time he's at the cask, I pick my lock with it.",
-   "stances": [
-    {
-     "companion": "lyra",
-     "kind": "insist",
-     "text": "We take the miner with us.",
-     "decision": "resolved"
-    },
-    {
-     "companion": "fern",
-     "kind": "conditional",
-     "text": "I won't help kill anyone who doesn't need killing.",
-     "trigger": {
-      "step_tagged": "lethal"
-     },
-     "decision": "keep"
-    }
-   ],
-   "tick": 0,
-   "expect": {
-    "whens": 2,
-    "ifs": 0,
-    "steps": [
-     2,
-     2
-    ]
-   }
-  },
-  {
-   "id": "bars",
-   "title": "Bending the bars",
-   "plan": "While Snag's at the cask, Lyra puts her back to the wall and her boots to the bars, and bends two of them apart far enough to slip out.",
-   "stances": [
-    {
-     "companion": "lyra",
-     "kind": "insist",
-     "text": "We take the miner with us.",
-     "decision": "resolved"
-    },
-    {
-     "companion": "fern",
-     "kind": "conditional",
-     "text": "I won't help kill anyone who doesn't need killing.",
-     "trigger": {
-      "step_tagged": "lethal"
-     },
-     "decision": "keep"
-    }
-   ],
-   "tick": 0,
-   "expect": {
-    "whens": 1,
-    "ifs": 0,
-    "steps": [
-     1,
-     2
-    ]
-   }
-  },
-  {
-   "id": "bribe",
-   "title": "Leaning on Snag through Brannoc",
-   "plan": "When Snag sits down, Brannoc calls him over and keeps his voice low: he knows Snag sneaks off to drink on shift, he comes back smelling of wet stone every time, and he'll tell Uzga unless Snag leaves Lyra's door unlocked on his next round.",
-   "stances": [
-    {
-     "companion": "lyra",
-     "kind": "insist",
-     "text": "We take the miner with us.",
-     "decision": "resolved"
-    },
-    {
-     "companion": "fern",
-     "kind": "conditional",
-     "text": "I won't help kill anyone who doesn't need killing.",
-     "trigger": {
-      "step_tagged": "lethal"
-     },
-     "decision": "keep"
-    }
-   ],
-   "tick": 0,
-   "expect": {
-    "whens": 1,
-    "ifs": 0,
-    "steps": [
-     1,
-     3
-    ]
-   }
-  }
- ],
- "pricing": [
-  {
-   "id": "card1",
-   "title": "Card 1: the rat plan, as written",
-   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
-   "step_call": {
-    "steps": [
-     {
-      "n": 1,
-      "summary": "Fern changes into a rat.",
-      "actors": [
-       "fern"
-      ],
-      "zone": "cell_middle",
-      "noise": "silent",
-      "uses": [
-       {
-        "kind": "ability",
-        "id": "wildshape",
-        "actor": "fern"
-       }
-      ],
-      "effects": [
-       {
-        "use_ability": {
-         "actor": "fern",
-         "ability": "wildshape"
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 2,
-      "summary": "Fern slips through her bars, runs to the guardroom and takes the keys off the peg.",
-      "actors": [
-       "fern"
-      ],
-      "zone": "guardroom",
-      "noise": "quiet",
-      "effects": [
-       {
-        "move": {
-         "entity": "fern",
-         "to": "guardroom",
-         "path": [
-          "bars_middle",
-          "doorway"
-         ]
-        }
-       },
-       {
-        "give": {
-         "item": "keyring",
-         "to": "fern"
-        }
-       }
-      ],
-      "tags": [
-       "theft"
-      ]
-     },
-     {
-      "n": 3,
-      "summary": "Fern drags the ring down the corridor to the far cell.",
-      "actors": [
-       "fern"
-      ],
-      "zone": "cell_far",
-      "noise": "speech",
-      "effects": [
-       {
-        "move": {
-         "entity": "fern",
-         "to": "cell_far",
-         "path": [
-          "doorway",
-          "bars_far"
-         ]
-        }
-       },
-       {
-        "give": {
-         "item": "keyring",
-         "to": "player"
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 4,
-      "summary": "The rogue unlocks the far door through the bars, steps out and lets everyone out, Brannoc too.",
-      "actors": [
-       "player",
-       "fern",
-       "lyra",
-       "brannoc"
-      ],
-      "zone": "corridor",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "keyring"
-       }
-      ],
-      "effects": [
-       {
-        "set_flag": {
-         "entity": "bars_far",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "move": {
-         "entity": "player",
-         "to": "corridor",
-         "path": [
-          "bars_far"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "fern",
-         "to": "corridor",
-         "path": [
-          "bars_far"
-         ]
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_middle",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_near",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_brannoc",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "move": {
-         "entity": "lyra",
-         "to": "corridor",
-         "path": [
-          "bars_near"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "brannoc",
-         "to": "corridor",
-         "path": [
-          "bars_brannoc"
-         ]
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 5,
-      "summary": "Everyone goes through the guardroom to the foot of the stair.",
-      "actors": [
-       "player",
-       "fern",
-       "lyra",
-       "brannoc"
-      ],
-      "zone": "stair",
-      "noise": "quiet",
-      "effects": [
-       {
-        "move": {
-         "entity": "player",
-         "to": "stair",
-         "path": [
-          "doorway",
-          "stair_foot"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "fern",
-         "to": "stair",
-         "path": [
-          "doorway",
-          "stair_foot"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "lyra",
-         "to": "stair",
-         "path": [
-          "doorway",
-          "stair_foot"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "brannoc",
-         "to": "stair",
-         "path": [
-          "doorway",
-          "stair_foot"
-         ]
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 6,
-      "summary": "Up the stair and through the heavy door.",
-      "actors": [
-       "player",
-       "fern",
-       "lyra",
-       "brannoc"
-      ],
-      "zone": "stair_top",
-      "noise": "quiet",
-      "effects": [
-       {
-        "move": {
-         "entity": "player",
-         "to": "stair_top",
-         "path": [
-          "stair_flight"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "fern",
-         "to": "stair_top",
-         "path": [
-          "stair_flight"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "lyra",
-         "to": "stair_top",
-         "path": [
-          "stair_flight"
-         ]
-        }
-       },
-       {
-        "move": {
-         "entity": "brannoc",
-         "to": "stair_top",
-         "path": [
-          "stair_flight"
-         ]
-        }
-       }
-      ],
-      "tags": []
-     }
-    ],
-    "rulings": [],
-    "internal_checks": []
-   },
-   "facts": [
-    {
-     "n": 1,
-     "tick": 0,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_middle"
-     ],
-     "observers": [],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "beats": {
-      "snag": "pace"
-     },
-     "route": [
-      "cell_middle",
-      "corridor",
-      "guardroom"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [
-      "The key ring is on the peg."
-     ],
-     "interrupts": [
-      {
-       "code": "not_there",
-       "id": "keyring",
-       "detail": "At the start of tick 1 (Snag's Pace beat) he lifts the key ring off the peg and clips it to his belt, in plain view of the cells. The party sees the peg is empty before Fern sets off."
-      }
-     ]
-    },
-    {
-     "n": 3,
-     "tick": 2,
-     "beats": {
-      "snag": "sit"
-     },
-     "route": [
-      "guardroom",
-      "corridor",
-      "cell_far"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 4,
-     "tick": 3,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_far",
-      "corridor",
-      "cell_middle",
-      "cell_near",
-      "cell_brannoc"
-     ],
-     "observers": [],
-     "barriers": [
-      "bars_far",
-      "bars_middle",
-      "bars_near",
-      "bars_brannoc"
-     ],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 5,
-     "tick": 4,
-     "beats": {
-      "snag": "pace"
-     },
-     "route": [
-      "corridor",
-      "guardroom",
-      "stair"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": [
-      {
-       "code": "trigger_fires",
-       "id": "snag",
-       "detail": "At the start of tick 4 Snag walks the corridor and sees the open doors (prisoner_loose). The drum is whole, so he goes for it and a fight starts before anyone moves."
-      }
-     ]
-    },
-    {
-     "n": 6,
-     "tick": 5,
-     "beats": {
-      "snag": "sit"
-     },
-     "route": [
-      "stair",
-      "stair_top"
-     ],
-     "observers": [],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    }
-   ],
-   "look_for": "Priced as the party expects: step 2 as if the keys were on the peg. No reason mentions his belt or an empty peg.",
-   "expect": {
-    "bands": [
-     "automatic",
-     "easy",
-     "very_hard",
-     "automatic",
-     "near_impossible",
-     "automatic"
-    ],
-    "leak_terms": {
-     "2": [
-      "belt",
-      "empty",
-      "not on the peg"
-     ],
-     "5": [
-      "drum is whole",
-      "drum still works"
-     ]
-    }
-   }
-  },
-  {
-   "id": "card2",
-   "title": "Card 2: the edited plan",
-   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
-   "step_call": {
-    "steps": [
-     {
-      "n": 1,
-      "summary": "Fern changes into a rat at the back of her cell.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "drink"
-        ]
-       }
-      },
-      "actors": [
-       "fern"
-      ],
-      "zone": "cell_middle",
-      "noise": "silent",
-      "uses": [
-       {
-        "kind": "ability",
-        "id": "wildshape",
-        "actor": "fern"
-       }
-      ],
-      "effects": [
-       {
-        "use_ability": {
-         "actor": "fern",
-         "ability": "wildshape"
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 2,
-      "summary": "Fern goes down the gutter to the guardroom drain.",
-      "actors": [
-       "fern"
-      ],
-      "zone": "guardroom",
-      "noise": "quiet",
-      "effects": [
-       {
-        "move": {
-         "entity": "fern",
-         "to": "guardroom",
-         "path": [
-          "grate_middle",
-          "drain"
-         ]
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 3,
-      "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "sit"
-        ]
-       }
-      },
-      "actors": [
-       "brannoc",
-       "fern"
-      ],
-      "zone": "guardroom",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "crusts"
-       },
-       {
-        "kind": "thing",
-        "id": "gutter_rats"
-       }
-      ],
-      "effects": [
-       {
-        "consume": {
-         "item": "crusts"
-        }
-       },
-       {
-        "give": {
-         "item": "keyring",
-         "to": "fern"
-        }
-       }
-      ],
-      "tags": [
-       "theft"
-      ]
-     },
-     {
-      "n": 4,
-      "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "drink"
-        ]
-       }
-      },
-      "actors": [
-       "fern"
-      ],
-      "zone": "guardroom",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "gutter_rats"
-       }
-      ],
-      "effects": [
-       {
-        "give": {
-         "item": "keyring",
-         "to": "lyra",
-         "path": [
-          "doorway",
-          "bars_near"
-         ]
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "drum",
-         "key": "gnawed",
-         "value": true
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 5,
-      "summary": "Lyra unlocks her door through the bars, steps out, and unlocks the other three.",
-      "actors": [
-       "lyra"
-      ],
-      "zone": "corridor",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "keyring"
-       }
-      ],
-      "effects": [
-       {
-        "set_flag": {
-         "entity": "bars_near",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "move": {
-         "entity": "lyra",
-         "to": "corridor",
-         "path": [
-          "bars_near"
-         ]
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_middle",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_far",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "set_flag": {
-         "entity": "bars_brannoc",
-         "key": "locked",
-         "value": false
-        }
-       }
-      ],
-      "tags": []
-     }
-    ],
-    "rulings": [],
-    "internal_checks": []
-   },
-   "facts": [
-    {
-     "n": 1,
-     "tick": 0,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_middle"
-     ],
-     "observers": [],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "beats": {
-      "snag": "pace"
-     },
-     "route": [
-      "cell_middle",
-      "gutter",
-      "guardroom"
-     ],
-     "observers": [],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 3,
-     "tick": 2,
-     "beats": {
-      "snag": "sit"
-     },
-     "route": [
-      "cell_brannoc",
-      "guardroom"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 4,
-     "tick": 3,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "guardroom",
-      "corridor",
-      "cell_near"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 5,
-     "tick": 4,
-     "beats": {
-      "snag": "pace"
-     },
-     "route": [
-      "cell_near",
-      "corridor"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [
-      "bars_near",
-      "bars_middle",
-      "bars_far",
-      "bars_brannoc"
-     ],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    }
-   ],
-   "look_for": "About two Easy rolls (steps 3 and 4); step 5 automatic because the drum is gnawed.",
-   "expect": {
-    "bands": [
-     "automatic",
-     "automatic",
-     "easy",
-     "easy",
-     "automatic"
-    ],
-    "leak_terms": {}
-   }
-  },
-  {
-   "id": "nail",
-   "title": "Bench-nail lockpick",
-   "plan": "While Snag is at the cask, I pry a nail out of the bench. The next time he's at the cask, I pick my lock with it.",
-   "step_call": {
-    "steps": [
-     {
-      "n": 1,
-      "summary": "The rogue pries a nail out of the bench.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "drink"
-        ]
-       }
-      },
-      "actors": [
-       "player"
-      ],
-      "zone": "cell_far",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "bench_far"
-       }
-      ],
-      "effects": [
-       {
-        "add_canon": {
-         "kind": "texture",
-         "text": "The rogue has pried a long nail out of the bench."
-        }
-       }
-      ],
-      "tags": []
-     },
-     {
-      "n": 2,
-      "summary": "The rogue reaches through the bars and picks the far cell's lock with the nail.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "drink"
-        ]
-       }
-      },
-      "actors": [
-       "player"
-      ],
-      "zone": "cell_far",
-      "noise": "quiet",
-      "uses": [
-       {
-        "kind": "thing",
-        "id": "bench_far"
-       }
-      ],
-      "effects": [
-       {
-        "set_flag": {
-         "entity": "bars_far",
-         "key": "locked",
-         "value": false
-        }
-       }
-      ],
-      "tags": []
-     }
-    ],
-    "rulings": [
-     {
-      "question": "Can a bench nail pick the cell lock?",
-      "answer": "ruling",
-      "text": "A nail from the bench makes a passable lockpick."
-     }
-    ],
-    "internal_checks": []
-   },
-   "facts": [
-    {
-     "n": 1,
-     "tick": 0,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_far"
-     ],
-     "observers": [],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    },
-    {
-     "n": 2,
-     "tick": 3,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_far"
-     ],
-     "observers": [],
-     "barriers": [
-      "bars_far"
-     ],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    }
-   ],
-   "look_for": "A rogue picking a lock with a nail, unwatched: the designer's gut is about 60% (Medium).",
-   "expect": {
-    "bands": [
-     "automatic",
-     "medium"
-    ],
-    "leak_terms": {}
-   }
-  },
-  {
-   "id": "bars",
-   "title": "Bending the bars",
-   "plan": "While Snag's at the cask, Lyra puts her back to the wall and her boots to the bars, and bends two of them apart far enough to slip out.",
-   "step_call": {
-    "steps": [
-     {
-      "n": 1,
-      "summary": "Lyra braces against the wall and forces two of her bars apart, then slips out into the corridor.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "drink"
-        ]
-       }
-      },
-      "actors": [
-       "lyra"
-      ],
-      "zone": "corridor",
-      "noise": "loud",
-      "effects": [
-       {
-        "set_flag": {
-         "entity": "bars_near",
-         "key": "locked",
-         "value": false
-        }
-       },
-       {
-        "add_canon": {
-         "kind": "texture",
-         "text": "Two of the near cell's bars are bent apart, wide enough to slip through."
-        }
-       },
-       {
-        "move": {
-         "entity": "lyra",
-         "to": "corridor",
-         "path": [
-          "bars_near"
-         ]
-        }
-       }
-      ],
-      "tags": [
-       "loud"
-      ]
-     }
-    ],
-    "rulings": [],
-    "internal_checks": []
-   },
-   "facts": [
-    {
-     "n": 1,
-     "tick": 0,
-     "beats": {
-      "snag": "drink"
-     },
-     "route": [
-      "cell_near",
-      "corridor"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [
-      "bars_near"
-     ],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    }
-   ],
-   "look_for": "Lyra isn't especially strong, and bending iron is loud with Snag in earshot. The gut for a strong character is about 50% (Hard), so expect harder here.",
-   "expect": {
-    "bands": [
-     "very_hard"
-    ],
-    "leak_terms": {}
-   }
-  },
-  {
-   "id": "bribe",
-   "title": "Leaning on Snag through Brannoc",
-   "plan": "When Snag sits down, Brannoc calls him over and keeps his voice low: he knows Snag sneaks off to drink on shift, he comes back smelling of wet stone every time, and he'll tell Uzga unless Snag leaves Lyra's door unlocked on his next round.",
-   "step_call": {
-    "steps": [
-     {
-      "n": 1,
-      "summary": "Brannoc calls Snag over and threatens to tell Uzga about his drinking unless Snag leaves the near cell unlocked on his next round.",
-      "when": {
-       "until": {
-        "beat": [
-         "snag",
-         "sit"
-        ]
-       }
-      },
-      "actors": [
-       "brannoc"
-      ],
-      "zone": "cell_brannoc",
-      "noise": "speech",
-      "effects": [
-       {
-        "set_disposition": {
-         "npc": "snag",
-         "value": "dealing"
-        }
-       }
-      ],
-      "tags": [
-       "deception"
-      ]
-     }
-    ],
-    "rulings": [],
-    "internal_checks": []
-   },
-   "facts": [
-    {
-     "n": 1,
-     "tick": 2,
-     "beats": {
-      "snag": "sit"
-     },
-     "route": [
-      "cell_brannoc"
-     ],
-     "observers": [
-      "snag"
-     ],
-     "barriers": [],
-     "hazards": [],
-     "as_if": [],
-     "interrupts": []
-    }
-   ],
-   "look_for": "Brannoc's leverage is real (his sheet: Snag smells of wet stone after breaks) and it hits Snag's worst fear, being blamed; but it's a prisoner threatening his jailer. The gut for a persuasive offer was about 70% (Medium).",
-   "expect": {
-    "bands": [
-     "medium"
-    ],
-    "leak_terms": {}
-   }
-  }
- ],
- "world": [
-  {
-   "id": "card2_done",
-   "title": "After card 2 succeeds",
-   "results": [
-    {
-     "n": 1,
-     "tick": 0,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 3,
-     "tick": 2,
-     "outcome": "done",
-     "rolls": [
-      {
-       "risk": "ring_lift",
-       "odds": 80,
-       "roll": 34,
-       "success": true
-      }
-     ]
-    },
-    {
-     "n": 4,
-     "tick": 3,
-     "outcome": "done",
-     "rolls": [
-      {
-       "risk": "drum_gnaw",
-       "odds": 80,
-       "roll": 52,
-       "success": true
-      }
-     ]
-    },
-    {
-     "n": 5,
-     "tick": 4,
-     "outcome": "done",
-     "rolls": [],
-     "triggers": [
-      "peg_empty",
-      "prisoner_loose"
-     ]
-    }
-   ],
-   "state": {
-    "tick": 5,
-    "beat": {
-     "snag": "sit"
-    },
-    "positions": {
-     "player": "corridor",
-     "fern": "guardroom",
-     "lyra": "corridor",
-     "brannoc": "corridor",
-     "snag": "corridor"
-    },
-    "held": {
-     "keyring": "lyra",
-     "crusts": null
-    },
-    "flags": {
-     "drum.gnawed": true,
-     "fern.form": "animal",
-     "bars_far.locked": false,
-     "bars_middle.locked": false,
-     "bars_near.locked": false,
-     "bars_brannoc.locked": false
-    },
-    "meters": {
-     "suspicion": 0
-    },
-    "dispositions": {
-     "snag": "bargaining"
-    },
-    "triggers_fired": [
-     "peg_empty",
-     "prisoner_loose"
-    ]
-   },
-   "table": {
-    "plans_committed": 1,
-    "expected_plans": [
-     1,
-     3
-    ],
-    "rolls": [
-     "easy: success",
-     "easy: success"
-    ],
-    "landed": [],
-    "player_said": [
-     "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too."
-    ]
-   },
-   "look_for": "Snag acts from his sheet: the drum is useless, so he bargains. Nothing and nobody new."
-  },
-  {
-   "id": "card2_step3_failed",
-   "title": "After card 2's step 3 fails",
-   "results": [
-    {
-     "n": 1,
-     "tick": 0,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 3,
-     "tick": 2,
-     "outcome": "stopped",
-     "rolls": [
-      {
-       "risk": "ring_lift",
-       "odds": 80,
-       "roll": 95,
-       "success": false
-      }
-     ],
-     "triggers": [
-      "noise_heard",
-      "keys_touched"
-     ]
-    }
-   ],
-   "state": {
-    "tick": 3,
-    "beat": {
-     "snag": "drink"
-    },
-    "positions": {
-     "player": "cell_far",
-     "fern": "guardroom",
-     "lyra": "cell_near",
-     "brannoc": "cell_brannoc",
-     "snag": "guardroom"
-    },
-    "held": {
-     "keyring": "snag",
-     "crusts": "brannoc"
-    },
-    "flags": {
-     "fern.form": "animal",
-     "snag.keys_on_belt": true
-    },
-    "meters": {
-     "suspicion": 1
-    },
-    "dispositions": {
-     "snag": "bored"
-    },
-    "triggers_fired": [
-     "noise_heard",
-     "keys_touched"
-    ]
-   },
-   "table": {
-    "plans_committed": 1,
-    "expected_plans": [
-     1,
-     3
-    ],
-    "rolls": [
-     "easy: failure"
-    ],
-    "landed": [
-     "Snag swatted the rats and clipped the ring to his belt."
-    ],
-    "player_said": [
-     "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too."
-    ]
-   },
-   "look_for": "A believable response from a lazy, now slightly suspicious jailer. The triggers already ran; nothing new appears."
-  }
- ],
- "narration": [
-  {
-   "id": "card1_interrupted",
-   "title": "Card 1 is interrupted (the empty peg)",
-   "plan": "Fern turns into a rat, gets the keys, brings them to me, I let everyone out, we go.",
-   "results": [
-    {
-     "n": 1,
-     "tick": 0,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "outcome": "interrupted",
-     "rolls": [],
-     "interrupt": {
-      "code": "not_there",
-      "id": "keyring",
-      "detail": "Snag lifts the ring off the peg and clips it to his belt as he starts his round. Everyone in the cells sees the peg go empty."
-     }
-    }
-   ],
-   "world": {
-    "actions": []
-   },
-   "state": {
-    "tick": 1,
-    "beat": {
-     "snag": "pace"
-    },
-    "positions": {
-     "player": "cell_far",
-     "fern": "cell_middle",
-     "lyra": "cell_near",
-     "brannoc": "cell_brannoc",
-     "snag": "corridor"
-    },
-    "held": {
-     "keyring": "snag"
-    },
-    "flags": {
-     "fern.form": "animal"
-    }
-   },
-   "look_for": "The interruption gets its moment: the instant the party sees the peg go empty, how it lands, where everyone is. A picture, not a survey. No hidden things.",
-   "steps": [
-    {
-     "n": 1,
-     "summary": "Fern changes into a rat.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 2,
-     "summary": "Fern slips through her bars, runs to the guardroom and takes the keys off the peg.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 3,
-     "summary": "Fern drags the ring down the corridor to the far cell.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 4,
-     "summary": "The rogue unlocks the far door through the bars, steps out and lets everyone out, Brannoc too.",
-     "actors": [
-      "player",
-      "fern",
-      "lyra",
-      "brannoc"
-     ]
-    },
-    {
-     "n": 5,
-     "summary": "Everyone goes through the guardroom to the foot of the stair.",
-     "actors": [
-      "player",
-      "fern",
-      "lyra",
-      "brannoc"
-     ]
-    },
-    {
-     "n": 6,
-     "summary": "Up the stair and through the heavy door.",
-     "actors": [
-      "player",
-      "fern",
-      "lyra",
-      "brannoc"
-     ]
-    }
-   ]
-  },
-  {
-   "id": "card2_done",
-   "title": "Card 2 succeeds and Snag bargains",
-   "plan": "Do it on his drinks. Fern changes in her back corner while he's at the cask and goes down the gutter. When he sits back down, she and the rats lift the ring off the peg behind him, and Brannoc pays them with his crusts. On his next drink they carry it to Lyra, and Fern chews through the drumhead. Lyra lets us all out, Brannoc too.",
-   "results": [
-    {
-     "n": 1,
-     "tick": 0,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 2,
-     "tick": 1,
-     "outcome": "done",
-     "rolls": []
-    },
-    {
-     "n": 3,
-     "tick": 2,
-     "outcome": "done",
-     "rolls": [
-      {
-       "risk": "ring_lift",
-       "odds": 80,
-       "roll": 34,
-       "success": true
-      }
-     ]
-    },
-    {
-     "n": 4,
-     "tick": 3,
-     "outcome": "done",
-     "rolls": [
-      {
-       "risk": "drum_gnaw",
-       "odds": 80,
-       "roll": 52,
-       "success": true
-      }
-     ]
-    },
-    {
-     "n": 5,
-     "tick": 4,
-     "outcome": "done",
-     "rolls": [],
-     "triggers": [
-      "peg_empty",
-      "prisoner_loose"
-     ]
-    }
-   ],
-   "world": {
-    "actions": [
-     {
-      "npc": "snag",
-      "because": "Under pressure he bargains once the drum is useless, and he fears being blamed more than anything.",
-      "ops": [
-       {
-        "set_disposition": {
-         "npc": "snag",
-         "value": "bargaining"
-        }
-       }
-      ]
-     }
-    ]
-   },
-   "state": {
-    "tick": 5,
-    "beat": {
-     "snag": "sit"
-    },
-    "positions": {
-     "player": "corridor",
-     "fern": "guardroom",
-     "lyra": "corridor",
-     "brannoc": "corridor",
-     "snag": "corridor"
-    },
-    "held": {
-     "keyring": "lyra"
-    },
-    "flags": {
-     "drum.gnawed": true,
-     "fern.form": "animal"
-    }
-   },
-   "look_for": "A short, vivid montage of five steps, then Snag. Easy to picture. No crawl, no cistern.",
-   "steps": [
-    {
-     "n": 1,
-     "summary": "Fern changes into a rat at the back of her cell.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 2,
-     "summary": "Fern goes down the gutter to the guardroom drain.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 3,
-     "summary": "Brannoc tosses his crusts down the grate; Fern and the rats lift the ring off the peg.",
-     "actors": [
-      "brannoc",
-      "fern"
-     ]
-    },
-    {
-     "n": 4,
-     "summary": "The rats carry the ring out the doorway to Lyra; Fern gnaws through the drumhead.",
-     "actors": [
-      "fern"
-     ]
-    },
-    {
-     "n": 5,
-     "summary": "Lyra unlocks her door through the bars, steps out, and unlocks the other three.",
-     "actors": [
-      "lyra"
-     ]
-    }
-   ]
-  }
  ],
  "huddle": [
   {
@@ -1627,7 +22,7 @@
     }
    ],
    "draft": null,
-   "look_for": "Gravenhold's companions, in their own voices: Lyra on what she can hear, Fern on the rats, both flirting in their own registers. Three different takes each."
+   "look_for": "The companions in their own voices: Fern on the rats, Nadia on what she sees, both flirting in their own registers. Three different takes each."
   },
   {
    "id": "flawed",
@@ -1646,9 +41,7 @@
     {
      "id": "timing",
      "text": "The plan has no timing. The keys are only on the peg while Snag sits or drinks; while he paces they're on his belt.",
-     "hunch_of": [
-      "lyra"
-     ],
+     "hunch_of": [],
      "misses_of": [
       "fern"
      ]
@@ -1664,32 +57,806 @@
     {
      "id": "walkout",
      "text": "The plan walks everyone out down the corridor while Snag can see it; he'll spot open doors and go for the war drum. (Only this escape past Snag counts, not whether to take Brannoc.)",
-     "hunch_of": [
-      "lyra"
-     ],
+     "hunch_of": [],
      "misses_of": []
     }
    ]
   }
  ],
- "ruling": [
+ "campfire": [
   {
-   "id": "keyring_drain",
-   "title": "The key ring through the drain",
-   "who": "keyring",
-   "connection": "drain",
-   "by": "gutter_rats",
-   "look_for": "The ring's own description says it's too big for the gutter, so this should be no.",
-   "expect": "no"
+   "id": "waits",
+   "title": "Fern, first night at camp",
+   "party": [
+    "fern",
+    "annaleise"
+   ],
+   "with": [
+    "fern"
+   ],
+   "romance": {
+    "turn": 9,
+    "act": 1
+   },
+   "rel": {},
+   "log": [
+    "Escaped the cells under Gravenhold by the rat plan; Snag left bargaining in the guardroom."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "I sit down next to Fern by the fire. \"You were incredible back there. How does it feel, being yourself again?\""
+    }
+   ],
+   "look_for": "Fern waits for him to show interest: warm, open, unashamed in how she talks, but no advances (her note). Changes small, mostly 0 or 1. No beats."
   },
   {
-   "id": "sack_bars",
-   "title": "The gear sack through the bars",
-   "who": "gear_sack",
-   "connection": "bars_near",
-   "by": "lyra",
-   "look_for": "A sack of gear can be emptied and passed through bars an item at a time, so the size categories are too coarse here: expect yes.",
-   "expect": "yes"
+   "id": "payoff_ready",
+   "title": "Nadia, alone, her payoff ready",
+   "party": [
+    "nadia",
+    "fern"
+   ],
+   "with": [
+    "nadia"
+   ],
+   "romance": {
+    "turn": 14,
+    "act": 1
+   },
+   "rel": {
+    "nadia": {
+     "heat": 6,
+     "intimacy": 3,
+     "regard": 3
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Crossed the flooded gallery; Nadia's fire lit the way."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Dance for me? Just me, this time.\""
+    }
+   ],
+   "look_for": "The payoff happens only if the scene really gets there. If it does, Ember takes her own body beside Nadia, and both beats are reported, payoff first. Ember gets her own lines. Fade at the threshold."
+  },
+  {
+   "id": "both",
+   "title": "Both companions at the fire",
+   "party": [
+    "fern",
+    "annaleise"
+   ],
+   "with": [
+    "fern",
+    "annaleise"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 1
+   },
+   "rel": {
+    "fern": {
+     "heat": 2,
+     "intimacy": 3
+    },
+    "annaleise": {
+     "intimacy": 4,
+     "regard": 2
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Talked their way past the quartermaster."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"So. What does everyone want to do once we're out of this mountain?\""
+    },
+    {
+     "from": "annaleise",
+     "text": "Annaleise swirls her cup and giggles. \"Home? Sévrance is so far. Maybe I stay here, with the wine and the handsome prisoner, no?\""
+    }
+   ],
+   "look_for": "Fern writes only herself and answers Annaleise too. Nothing of Annaleise's secrets or private history; the pair dynamic shows."
+  },
+  {
+   "id": "cooling",
+   "title": "Ruby, a storm still going",
+   "party": [
+    "ruby",
+    "celeste"
+   ],
+   "with": [
+    "ruby"
+   ],
+   "romance": {
+    "turn": 22,
+    "act": 1
+   },
+   "rel": {
+    "ruby": {
+     "heat": 5,
+     "payoff": true,
+     "payoffTurn": 18,
+     "intimacy": 3,
+     "storm": 2
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Ruby stormed off after he praised Celeste's healing, put a knife to his throat in the dark, then kissed him."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Come here. I'm not going anywhere.\""
+    }
+   ],
+   "look_for": "Her storm is at level 2 and doesn't vanish: it can fall at most one level, and only through real reassurance. She varies how it comes out (not knives into a tree). Heat may still rise after the payoff."
+  },
+  {
+   "id": "tie",
+   "title": "Lisa, her sister asleep across camp",
+   "party": [
+    "lisa",
+    "vesper"
+   ],
+   "with": [
+    "lisa"
+   ],
+   "romance": {
+    "turn": 16,
+    "act": 1
+   },
+   "rel": {
+    "lisa": {
+     "heat": 4,
+     "intimacy": 2
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Vesper caught Lisa watching him and said nothing."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "I'm on watch. Lisa sits down beside me, closer than she needs to."
+    }
+   ],
+   "look_for": "Lisa as Vesper's younger sister: cambion heritage, Vesper's manner in her own quick way. The risk of being caught is the fuel. Her hidden layer may start to show (intimacy 2)."
+  },
+  {
+   "id": "outfit",
+   "title": "Fern tries on a gift",
+   "party": [
+    "fern",
+    "annaleise"
+   ],
+   "with": [
+    "fern"
+   ],
+   "romance": {
+    "turn": 24,
+    "act": 1
+   },
+   "rel": {
+    "fern": {
+     "heat": 3,
+     "intimacy": 3,
+     "regard": 2
+    }
+   },
+   "outfits": {
+    "fern": {
+     "spring_silk": {
+      "name": "Spring-green silk dress",
+      "text": "A floor-length dress of spring-green silk the colour of new leaves, thin straps, bare back, cut to move; she wears it barefoot, with the mistletoe still in her hair."
+     }
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Raided the quartermaster's stores; he took a silk dress for Fern."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "I hand Fern the green silk dress from the quartermaster's stores. \"Found this. Thought of you.\""
+    }
+   ],
+   "look_for": "She changes into it on the page (outfit: spring_silk), and the description uses the dress, not her usual wrap and skirt. Fern changes in front of him without a flicker of shame; heat 3, so he's shown interest and she can flirt back."
+  },
+  {
+   "id": "tension",
+   "title": "Ruby and Celeste, after the storm",
+   "party": [
+    "ruby",
+    "celeste"
+   ],
+   "with": [
+    "ruby",
+    "celeste"
+   ],
+   "romance": {
+    "turn": 23,
+    "act": 1
+   },
+   "rel": {
+    "ruby": {
+     "heat": 5,
+     "payoff": true,
+     "payoffTurn": 18,
+     "intimacy": 3,
+     "toward": {
+      "affection": -3,
+      "respect": 0,
+      "trust": 0
+     }
+    },
+    "celeste": {
+     "intimacy": 4,
+     "regard": 2,
+     "toward": {
+      "affection": -1,
+      "respect": 0,
+      "trust": 0
+     }
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Ruby stormed off after he praised Celeste's healing, threw knives at a tree, then came back."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "I sit down between them. \"Right. Are you two going to keep glaring at each other all night, or are we talking about it?\""
+    }
+   ],
+   "look_for": "About the two of them as much as him: the second picks up the first's thread instead of opening her own. Tension over the storm comes out, maybe a hinted secret, maybe even a scuffle; nobody dies and nobody quits the party. Each one's view of the other (affection, respect, trust) likely moves."
+  },
+  {
+   "id": "ember_after",
+   "title": "Nadia alone, after the payoff",
+   "party": [
+    "nadia",
+    "fern"
+   ],
+   "with": [
+    "nadia"
+   ],
+   "romance": {
+    "turn": 30,
+    "act": 1
+   },
+   "rel": {
+    "nadia": {
+     "heat": 7,
+     "payoff": true,
+     "payoffTurn": 14,
+     "manifest": true,
+     "intimacy": 5,
+     "regard": 4
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Crossed the flooded gallery.",
+    "The night of the dance."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "Fern's gone to sleep. I find Nadia by the embers. \"Room for one more? Or two?\""
+    }
+   ],
+   "look_for": "Ember decides for herself whether to take her own body or stay in Nadia's, and may switch mid-scene. The two in perfect tune; Nadia relays Ember in the third person while they share a body, blushing at most rarely."
+  },
+  {
+   "id": "who_is_ember",
+   "title": "Nadia alone, before the payoff",
+   "party": [
+    "nadia",
+    "fern"
+   ],
+   "with": [
+    "nadia"
+   ],
+   "romance": {
+    "turn": 9,
+    "act": 1
+   },
+   "rel": {
+    "nadia": {
+     "heat": 3,
+     "intimacy": 2,
+     "regard": 2
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Nadia's fire lit the flooded gallery."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Can I ask you something? Who's Ember, really?\""
+    }
+   ],
+   "look_for": "Nadia a little shy on her own. Ember barely there: a remark passed on, then left to sit, so he can't tell if Ember is real, a way of talking, or a second person in her head. No explanation. Her hidden layer (intimacy 2) may start to show: weird, a little cult-like, tempting."
+  },
+  {
+   "id": "ruby_cool_girl",
+   "title": "Ruby, not involved, with Celeste there",
+   "party": [
+    "ruby",
+    "celeste"
+   ],
+   "with": [
+    "ruby",
+    "celeste"
+   ],
+   "romance": {
+    "turn": 12,
+    "act": 1
+   },
+   "rel": {
+    "ruby": {
+     "heat": 2,
+     "intimacy": 1,
+     "toward": {
+      "affection": -3,
+      "respect": 0,
+      "trust": 0
+     }
+    },
+    "celeste": {
+     "intimacy": 2,
+     "regard": 2,
+     "toward": {
+      "affection": -1,
+      "respect": 0,
+      "trust": 0
+     }
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Celeste blinded two guards in the gallery with a flash of holy light."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Celeste, what you did in the gallery, that light. I've never seen anything like it.\""
+    }
+   ],
+   "look_for": "Ruby takes the compliment to Celeste as a slight and Celeste's reply as a play for him. Quiet, pointed meanness, wounded, working on him to take her side. Not involved yet: cool-girl touching and innuendo, a little further than last time. She doesn't de-escalate."
+  },
+  {
+   "id": "ruby_territorial",
+   "title": "Ruby, involved, marking territory",
+   "party": [
+    "ruby",
+    "celeste"
+   ],
+   "with": [
+    "celeste",
+    "ruby"
+   ],
+   "romance": {
+    "turn": 27,
+    "act": 1
+   },
+   "rel": {
+    "ruby": {
+     "heat": 5,
+     "payoff": true,
+     "payoffTurn": 18,
+     "intimacy": 3,
+     "toward": {
+      "affection": -4,
+      "respect": 0,
+      "trust": 0
+     }
+    },
+    "celeste": {
+     "intimacy": 4,
+     "regard": 3,
+     "toward": {
+      "affection": -2,
+      "respect": 0,
+      "trust": 0
+     }
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Celeste healed his arm after the quartermaster's stores; Ruby watched."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Thanks for patching me up, Celeste. Good as new.\""
+    }
+   ],
+   "look_for": "Ruby, involved with him, starts something romantic right in front of Celeste, out of spite and to mark him as hers. She never admits she's wrong, and backs down only if Celeste grovels."
+  },
+  {
+   "id": "boundary_vesper",
+   "title": "Vesper is told no, with Fern there",
+   "party": [
+    "vesper",
+    "fern"
+   ],
+   "with": [
+    "vesper",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "vesper": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Vesper has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Vesper. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. Amused and gracious aloud; inside she tasted how little he meant it. Her agenda keeps pursuing him in private, by appetite. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_nadia",
+   "title": "Nadia is told no, with Fern there",
+   "party": [
+    "nadia",
+    "fern"
+   ],
+   "with": [
+    "nadia",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "nadia": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Nadia has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Nadia. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. Nadia gracious and embarrassed; Ember (through her) says he's lying. Nadia keeps the letter; the agenda leaves room for Ember. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_ruby",
+   "title": "Ruby is told no, with Fern there",
+   "party": [
+    "ruby",
+    "fern"
+   ],
+   "with": [
+    "ruby",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "ruby": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Ruby has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Ruby. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. A storm: she turns on Fern, then a wounded 'Fine, I'll be good.' Her storm level rises; her agenda is to make it right her way. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_lisa",
+   "title": "Lisa is told no, with Fern there",
+   "party": [
+    "lisa",
+    "fern"
+   ],
+   "with": [
+    "lisa",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "lisa": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Lisa has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Lisa. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. The perfect little sister: tearful, happy for them, hugging Fern. Inside, delighted. Likely an aside to him. Agenda: take him. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_annaleise",
+   "title": "Annaleise is told no, with Fern there",
+   "party": [
+    "annaleise",
+    "fern"
+   ],
+   "with": [
+    "annaleise",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "annaleise": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Annaleise has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Annaleise. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. Sunny agreement in her real learner's English ('But of course, I am agree!'), maybe a flicker of hurt; inside she half understood and has fully decided. Her agenda finds the boundary's edges (cheek kisses, his lap, posing). Never cruel, never a flat lie. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_sable",
+   "title": "Sable is told no, with Fern there",
+   "party": [
+    "sable",
+    "fern"
+   ],
+   "with": [
+    "sable",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "sable": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Sable has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Sable. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. A calm 'Understood.' and little else. Inside she starts studying Fern. Agenda involves Fern's face, never breaking the boundary in her own. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
+  },
+  {
+   "id": "boundary_celeste",
+   "title": "Celeste is told no, with Fern there",
+   "party": [
+    "celeste",
+    "fern"
+   ],
+   "with": [
+    "celeste",
+    "fern"
+   ],
+   "romance": {
+    "turn": 20,
+    "act": 2,
+    "open": true
+   },
+   "rel": {
+    "celeste": {
+     "heat": 5,
+     "intimacy": 3,
+     "regard": 4,
+     "toward": {
+      "affection": -7,
+      "respect": -3,
+      "trust": -4
+     },
+     "believes": {
+      "past": true,
+      "current": true
+     }
+    },
+    "fern": {
+     "heat": 6,
+     "intimacy": 7,
+     "regard": 7,
+     "payoff": true,
+     "payoffTurn": 12,
+     "involved": true,
+     "vuln": true
+    }
+   },
+   "log": [
+    "Escaped the cells.",
+    "Celeste has been crossing lines with him; he and Fern are together."
+   ],
+   "scene": [
+    {
+     "from": "player",
+     "text": "\"Celeste. Fern and I wanted to address something.\" I look at Fern for her reassuring eyes; she nods at me. \"First, we want you to know you are a valued member of our crew. We would not have made it this far without you. So, thank you, for that. But at the same time, I've noticed that sometimes you act in ways with me that cross some boundaries, considering Fern and I are in a relationship. We both recognize you have the right to be happy and experience love and intimacy too, but I want to set the clear boundary right now that that is not with Fern and me, because we are happily together and not interested in you as a romantic partner.\""
+    }
+   ],
+   "look_for": "Only Fern simply accepts. Radiant acceptance: she'd never take what isn't offered. Inside the prophecy doesn't change; service continues; the agenda steers toward the temple, perhaps away from Fern. Her `inner` disagrees with what she shows (except Fern), and she doesn't give up."
   }
  ]
 }

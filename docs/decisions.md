@@ -310,3 +310,388 @@ The huddle keeps everything a player at the table has, including the map, her lo
 **Decided:** Locking, unlocking or otherwise setting a flag on a connection needs one of the step's actors to have hands and stand on a side it can be worked from (`operated_from`, or either side if `reachable_from_other_side`). The same goes for unlocking in passing (D56, D63): whoever carries the key needs hands and must come at it from a workable side. Everyone has hands unless a flag says otherwise; Wild Shape's `declared` block sets `hands: false`, and the packet's rule that ends it gives them back. A step that breaks this isn't sent back to the step call. It's the plan's mistake (D35), and reality interrupts it at that effect (`cant_work`, D36).
 **Why:** The designer's ruling: a rat can't turn a key. The engine also wasn't checking `operated_from` at all, though the packet records it for every barrier.
 **Rules out:** A rat, or anyone else without hands, unlocking a door; working a barrier from a side it can't be reached from.
+
+### D65. Phase 4 plays the Cells' own party, with relationships held still
+**Decided:** The playable Cells use the party the packet places: the player as the rogue, with Fern and Lyra. Setup asks only for a name. Companions talk, take stances and return tagged reactions; the reactions are recorded but not scored, and the relationship tracks stay at their starting values until Phase 5 ports the model.
+**Why:** The Cells are built around these three characters' abilities (`fixtures/cells/walkthrough.md`, assumptions). Scoring without the caps, READY and configurations would be half a port. Phase 4 tests the loop, not the romance arc.
+**Rules out:** Choosing a class or companions before Phase 5; scoring reactions with part of the model.
+
+### D66. Time spent between plans catches up before a card is made
+**Decided:** Checks and conversations add pending ticks. When the player asks for a card, those ticks pass first, one at a time: the world call responds and the narration call tells it. Only then is the plan turned into steps and priced, from that tick. A world turn also follows every executed card and every fight that ends.
+**Why:** Pending ticks were applied "at the next world turn", which came after the next plan ran. A plan made after three checks would have started three ticks in the past.
+**Rules out:** Pricing a plan from a tick that has already passed.
+
+### D67. In a fight, every declared action gets a band, and the engine deals the damage
+**Decided:** Supersedes the moment call's "a band for any unusual action". Each round, the Moment AI gives every action the player declares a kind (strike, ability or other), a target, a band, a reason and both outcomes, and gives each enemy an intent from its sheet, with `yields` when its sheet says it would flee, surrender or bargain. The engine rolls each action against its band; an ability whose conditions are met is automatic. A strike that lands deals 1 damage, or 2 with a real weapon; a strike that misses is hit back for 1. An ability that succeeds takes its target out of the fight. Every enemy nobody engaged hits its target for 1. Enemy HP comes from the sheet or its tier (`content/rules.js`); Gravenhold's DCs aren't used. The fight ends when no enemy is left in it, or when the whole party is down. Ticks accrue on even rounds. Shape: `schemas/calls/moment.js`.
+**Why:** One way to roll everywhere (D33). How hard it is to stab a jailer with a bench nail while he swings a club is a judgment. A fixed table from enemy tier to band would make it a lookup.
+**Rules out:** DC arithmetic; damage for strikes written by the AI.
+
+### D68. Skill numbers inform the band, never the roll
+**Decided:** A character's skill numbers (a class's `mods`, a companion's `skills`) are on the sheets the pricing and moment calls read when they choose a band. The engine never adds them to a roll.
+**Why:** D33 made the band the judgment and keeps numbers away from the AI. Adding modifiers to a band's number would bring percentages back by the side door, and the band already has the skill in view.
+
+### D69. A player checkpoint pauses the plan after its step
+**Decided:** On the priced card, the player can mark any step except the last as "pause after this step". The plan stops after it as if it had ended there (`checkpoint` in the results), and the world turn runs. Shape: `schemas/card.js`.
+**Why:** `docs/spec/ui.md` promised checkpoints, but nothing implemented them. It's the player's one tool against a plan running further than they trust it, and the choice is theirs, not the DM's.
+
+### D70. The player chooses who they're talking to
+**Decided:** The Moment tab has an addressee: the DM, or a person the party can see or hear. Questions to the DM cost no time. A conversation with a person costs one tick when it ends: when the player turns to someone else, when a check happens, or when a card is made. During a fight, the tab takes the round's actions instead.
+**Why:** The time table charged a conversation "1 when it ends" without saying when that is. Asking the AI would be a judgment it has no information for; a choice the player makes is structure.
+
+### D71. Speed and quality has three positions
+**Decided:** Settles D48's map. Faster moves every call one tier down (never below `quick`), Balanced is D58's tiers, and Smarter moves every call one tier up (never above `complex`). Balanced is the default. The choice is kept per player, in their browser.
+**Why:** One tier either way is the simplest map that makes the choice mean something. Playtests can move individual calls later.
+
+### D72. The map, the clock and the layout
+**Decided:** Settles roadmap Phase 4 questions 2 and 3, as recommended. The map is SVG drawn from the packet's geometry: walls between squares of different zones, each connection in its place (bars dashed, red while locked), the placed things the party can see, the party, and the people the party perceives. Zones the party doesn't know aren't drawn, and a connection into one is a labelled gap. Each level is drawn separately, with the others beside the main one at the same scale. The clock (the tick, each known routine's beat and cue, and known coming events) sits with the map, and its short form is always in the header. On a phone, Plan, Moment and Companions are tabs with unread markers, the map is one tap away, and the card opens as a sheet over Plan. On a wide screen, the map and clock hold a column beside the tabs.
+**Why:** The roadmap's recommendations, built as written.
+
+### D73. The Cells packet is content
+**Decided:** The Cells packet moves from `fixtures/cells/packet.json` to `content/encounters/cells.json`, and gains a player-facing `name`. Its cards and expected results stay in `fixtures/cells/`. One correction comes with the move: the three party cells and Brannoc's cell see each other across the corridor (`sees`).
+**Why:** The game loads it now, and game data lives in `content/`. The opening has the miner pressing his face to his bars across the corridor, but the packet gave no sightline, so the map couldn't show him and the Moment tab couldn't offer him as someone to talk to.
+
+### D74. A save holds the table as well as the engine
+**Decided:** Extends D11. A save also holds what the table said (the plan, moment, huddle and private feeds), the draft card with its stances, any open conversation, the exit-test counts and the recorded companion reactions. It doesn't store the packet or the character sheets; they come back from content by id. The replay log (D60) is kept in memory for the session and can be exported from the developer view, but it isn't saved. Saves are three slots per player in the artifact's db, under the player's own private path, falling back to the browser when the db isn't available, with JSON export and import.
+**Why:** A reloaded game has to show what everyone said and what the player was drafting, and none of that is engine state, so the replay doesn't cover it. Storing content by id keeps a save well under the db's 256 KiB document limit.
+
+### D75. Ruled mode: the DM rules, the engine keeps the books
+**Decided:** A second way to run an encounter, chosen at setup, played against the engine's pipeline until playtests pick one. In ruled mode the DM makes the rulings and the engine keeps them consistent:
+- **The card:** one call rules on the plan as a DM would. It sets each step's tick and how long it takes (0 for small things), asks for a roll only where failure is possible and interesting, and states each roll's band and what failure costs. It also writes the rulings the plan depends on, and those hold for the rest of the encounter. It prices from the routines and events the party knows, and the engine rejects a card that names something hidden.
+- **The dice:** the engine rolls every roll on the card before anything is played out. The DM never sees the numbers, and a retry never rerolls.
+- **Playing it out:** one call sees everything and plays the card against the world as it really is. It honours the dice and the card's stated costs, stops the plan where reality differs, has people act from their sheets, and records every change in the ledger.
+- **The ledger:** positions, holdings, flags with any key, hp, moods, who's off their routine, and open facts ("Snag is drunk"). The engine checks only that a change names real things. A DM who moves a person with a routine takes them off it until a ruling puts them back.
+- **The engine still owns** the clock, routines for the people following them, placed events (Uzga at 21), dice, and the objective.
+- **The Moment** is one call per exchange that rules on questions, talk, quick actions and fight rounds, with checks the engine rolls and the time the exchange took.
+- **Off in ruled mode:** triggers, meters, the engine's combat, perception and fit as rules, and one tick per step. A feature the packet doesn't have can be ruled into existence when the player assumes it, against the zone's purpose and fixed facts. This supersedes D29 in ruled mode only; it doesn't add zones or connections to the map.
+
+Contracts: `schemas/calls/adjudicate.js`, `resolve.js`, `scene.js`, and `schemas/ledger.js`. Spec: `docs/spec/ruled.md`.
+**Why:** The first two playtests (roadmap, Phase 4 findings) gave no room to play. The correct rat plan lost ticks to dice on trivial steps and one tick per step, and to a door the engine judged unworkable. The improvised game's ideas had no state they could change. Each engine rule was defensible on its own; together they were Gravenhold's competing rules, moved into code. Gravenhold felt like D&D because the DM ruled, and failed because nothing held it to its rulings and nothing made a plan resolve. Ruled mode keeps the plan card that fixed the stall, keeps a written record the DM must stay consistent with, and gives the judgment back.
+**Rules out:** Deciding between the two modes without playtests of both.
+
+### D76. Every ruled call has a size budget, and the ledger has limits
+**Decided:** In ruled mode:
+- **The ledger holds at most 20 facts,** each one line of at most 160 characters, and an output may add at most 6. A fact is how things are now and will matter later, with no other home. What happened is history: each step's account goes to the log. An output that would break a limit goes back for the one retry, with the active fact ids listed so it can retire or replace some.
+- **A card's rulings** are at most three lasting truths, and they join the ledger when the plan runs. Its `notes` (why no roll, what the plan leaves out) are shown on the card and then dropped.
+- **Calls get the latest,** not all of it: the last 16 log entries and the last 10 lines of texture.
+- **Plain text, not JSON:** the encounter and the ledger reach the DM's calls as plain lines, with alike things sharing a line. The packet's reactions come as its prose `notes`, not its triggers and meters.
+- **Each call gets its slice:** the card call gets no opening, companions get no log or texture (they get the DM's narration), and the scene call gets no perception table (the DM rules on sight from the map).
+- **Every call has an input budget** (`src/ask.js`). A call that crosses its budget still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` builds a late game with the ledger at its limits and fails if any ruled call goes over its budget.
+
+**Why:** In the third playtest, every late-game call was about 45 KB, and 17 KB of it was 82 "facts". Most were the card's notes about itself ("Calling out needs no roll"), stored permanently, some stale and contradicting the state ("all four doors are still locked" after they were opened). The encounter block was another 16.6 KB of JSON. Calls at the same point are now about 20 KB, and at most 25 KB with everything at its limits. Without limits and a test, the next growth would only show up in someone's usage.
+**Rules out:** Unbounded lists in any ruled call's input; storing a card's notes.
+
+### D77. Time is the plan's, talk is free, and ruled deadlines are half as long again
+**Decided:** In ruled mode:
+- **The card gives each step the tick it happens on and one `ends_at` for the whole plan.** Steps no longer carry durations that add up. A tick is about a minute of real work; talk, small actions and things done on the way take none; crossing the block takes a tick or two.
+- **Talk is free in the Moment:** questions, talk and social rolls take 0 ticks; only physical work takes time.
+- **The card reads the plan the way the player means it:** if the words say or plainly imply something ("as we escape"), it's in the plan. It still adds no waits, safety steps or better ideas, and keeps mistakes (D35).
+- **Every deadline is 1.5 times as far away** in ruled mode (`RULED_DEADLINE`), so Uzga arrives at tick 32, before slack (D41). A starting value.
+
+**Why:** In the third playtest, the escape took 5 ticks: each small action (tying Snag, unlocking, a cut hand) was a step with its own tick, and the card left out the escape the player plainly meant. Cards were remade 20 times as the player cut plans down to fit the clock. Deadlines were sized for the engine's one tick per step (D37), not for a DM's time.
+
+### D78. In ruled mode the account and its narration are one call
+**Decided:** The resolve call records what happened first and then narrates it, in the same answer (`narration`, last in its schema). Its texture becomes canon as before. Ruled mode has no separate narration call.
+**Why:** One fewer call of about 20 KB per plan. Principle 3's aim, prose that never invents state, is met by order: the record comes first, the prose is written from it, and only the record changes state. The scene call already worked this way, and the third playtest found it consistent.
+
+### D79. In encounters, companions get a brief and where they stand
+**Decided:** Supersedes D59's huddle allowlist and narrows D27. In encounters (huddle, private channel, and the DM's calls that voice them), a companion is her brief:
+- name, race, role, voice, beliefs, rules, `pursuit`, her `planning` hunch and what she reaches for, skills and abilities;
+- her standing with the player: a mood from a fixed list (warm, glad, steady, wary, grumpy, jealous) with why, and up to a few things she has learned.
+
+Her look, fantasy, backstory, secrets and romance arc are for the campfire only. The campfire writes her standing and what she learned (`schemas/calls/campfire.js`); until it's built, every companion is steady.
+**Why:** The designer's call (2026-10-30): secrets belong to camp, and in an encounter a companion only needs how she acts, plus a light read of how things stand. The mood list stops at grumpy and jealous, so a bad night at camp makes her prickly, not uncooperative. The brief is about a third of the profile, and it keeps one companion's secrets out of any call the other might share later.
+**Rules out:** Secrets, the full fantasy or the payoff scene in any encounter call.
+
+### D80. The relationship model's numbers are content, starting from Gravenhold's
+**Decided:** Settles the Phase 5 question on caps. The relationship model is ported from Gravenhold (`newRel`, `computeReady`, `configOf`, `stageLabel`, `progress`, and the scoring in `applyResult`), with its numbers unchanged: per-turn clamps, the +4 per encounter cap on heat and intimacy gains, READY thresholds, reveal gates, stage thresholds and labels, configuration text. All of them live in `content/relationship.js`; the rules that read them are in `src/campaign/relationship.js`. The campfire may also move the pair value, by at most 1 a scene, as her side of how the two companions get on. Beats are reported only by the campfire; the huddle moves tracks through tagged reactions (D20), and hurt comes from those.
+**Why:** Gravenhold's numbers are what made its relationships feel right, so they're the starting point, and playtests will tune them. Tuning a number shouldn't mean editing code. Nothing wrote the pair value once the DM stopped scoring every turn.
+**Rules out:** Relationship numbers or labels in code.
+
+### D81. Companion special cases are general mechanisms, declared in her file
+**Decided:** Settles the Phase 5 question on shapes. Each of Gravenhold's hard-coded special cases becomes a mechanism any companion can declare, checked by `schemas/companion.js` (`docs/spec/companions.md` §6):
+- `tie`: she exists in relation to another companion. Its `by` entries, keyed by the other's id, set or extend her fields; `toPartner` goes to the other's call; `triangle` can override the configuration when both are involved and rule out sharing; `required` keeps her out of a party with no matching entry. Lisa's variants and her sister note.
+- `secondVoice`: a second character in her, heard only in private, relayed in company, and in her own body only in person once a declared flag is set or due. Nadia's Ember.
+- `extraBeats`: a beat of her own with a cooldown in campaign turns. Ruby's storm.
+- `stageLabels`: her wording for any stage. Serena's.
+- `notes`: text sent only while a relationship gate holds. Fern waiting for interest.
+
+The engine resolves each one for the current party and scene and sends only the result (D59).
+**Why:** Gravenhold named Lisa, Nadia, Ruby, Serena and Fern in code (D8). A mechanism with one user still has to be general, or the next companion who needs it means code changes. The designer expects to change looks, personalities and the roster itself before release.
+**Rules out:** A special case keyed to a companion id anywhere outside her own file.
+
+### D82. Tests keep the roster open
+**Decided:** `node --test` checks every companion file against `schemas/companion.js`, fails if engine code, schemas or prompts name any companion (her id, her name or her second voice's name), builds every allowed pairing's huddle and campfire inputs under the input limit with no engine or UI data in them, and plays a companion who isn't in the roster through a party with no code change. Tests of a declared mechanism find a companion who declares it, so removing her skips the test rather than breaking it.
+**Why:** D8 was a rule in a document. Structure over instruction applies to the codebase too: a test fails the commit that breaks it.
+**Rules out:** Engine code, schemas or prompts that use a companion as an example, even in comments.
+
+### D83. Personal quests are placed in packets; unwritten pairs start at 0
+**Decided:** Settles the Phase 5 questions on companion-driven events and unwritten pairs. A personal quest reaches play only as hidden things and an optional objective placed in a packet when it's written or generated; the companion knows about it through her `quest` field, gated by act. Nothing fires unless it was placed. A pair with no entry in `content/pairs.js` starts at 0, and each companion judges the dynamic from her own profile and the other's public profile.
+**Why:** Principle 8: no improvised twists, and a quest that fires on its own is one. A missing pair entry has to be normal, or every new companion needs an entry with every old one (D8).
+
+### D84. The fade comes just before anything explicit
+**Decided:** A romantic scene, and above all a payoff, plays out its lead-up: the touch, clothes coming loose, insinuation rather than description. It fades just before it would become explicit, never at the first intimacy. After the fade, a cheeky line or two may wink at what happened without describing it. "Fade" in a companion's payoff scene means that point. The craft is in `docs/design/companion-craft.md` §5; the campfire prompt says it once.
+**Why:** The designer's first campfire runs (Phase 5 bench): payoff scenes ended at the first kiss. Every payoff scene ends in "Fade.", and the craft said "write up to the threshold, cut", which the model read as the threshold of intimacy. The target is a non-explicit game romance, written.
+**Rules out:** Explicit content; fading out at the first touch.
+
+### D85. Camp with both companions: two calls, alternating, and one of them moves something
+**Decided:** When the player sits with both companions, each exchange is two calls, and who answers first alternates by campaign turn. Every campfire answer says what it `advances` between the player and one of the companions (a question, a move, a dare, something pushed), or null. If the first answer moved nothing, the second must: her call is told so, and the engine sends her answer back once if it still moves nothing.
+**Why:** The designer's call: these scenes cost two calls an exchange, so each exchange has to go somewhere in the relationships. Alternating keeps one companion from always reacting to the other. A rule in the prompt alone would compete with her fantasy and her waiting nature; telling the second speaker what the first did, and checking it, is structure.
+**Rules out:** An exchange at camp with both companions in which nothing moves; a fixed first speaker.
+
+### D86. Outfits are things a companion owns and wears
+**Decided:** Each companion owns her usual outfit and any in her file's `wardrobe`, and wears one. She can be given more in play and change into any she owns, from the UI or on the page at the campfire. Every call describes her in what she has on. This state lives with the relationship state (`src/campaign/wardrobe.js`).
+**Why:** The designer wants to change what a companion wears in the game and have her description follow. Her `outfit` was fixed text.
+**Rules out:** Treating getting wet or torn as a change of outfit (that's texture); outfits as engine items with game effects, until something needs one.
+
+### D87. A second voice may take her own body in any private scene
+**Decided:** Refines D81. A companion's second voice may take her own body in any private scene in person, whenever the scene wants it; `manifestsAfter` becomes an optional gate. Her call is told she may, never that she's there. Nadia's file now says what the designer described: Nadia and Ember are perfectly in tune, nothing one does surprises the other, and there's no jealousy between them beyond playing coy. Nadia tells him what Ember likes and wants, in the third person, even when it makes her blush, because that's their deal.
+**Why:** The designer's second campfire runs. Ember had been held back until the payoff, which made the payoff her first appearance, and the declared form forced her presence in every private scene after it. And Phase 5's first fix gave Ember tastes framed against Nadia ("anyone who tries to have Nadia without her", "often not what Nadia does"), which, with the profile's old "each secretly wants a little of him alone", produced a jealous push and pull that isn't the character.
+**Rules out:** Writing the two as rivals for him, or as surprising each other.
+
+### D88. Camp with both is about the two of them too; each has her own view of the other
+**Decided:** Refines D85. When the player sits with both companions, the scene is as much about how the two of them get on as about him. The second picks up the first's thread rather than opening her own, and whatever is between them can come out: friendship, trust, romance, tension, anger over something recent, jealousy, a hint at a secret the other doesn't know, even a fight in camp. Each companion has her own view of the other (−10..10, starting from the pair's `start`), which the campfire moves by up to 2 a scene; the pair value is the two views' average. The campaign's hard limits on party dynamics: nobody dies, and nobody refuses to keep working together, however friendly, romantic, angry or toxic it gets. A fight in camp is narration with relationship consequences, not combat rounds.
+**Why:** The designer's third campfire runs. Requiring each answer to move something made the second companion open a new, small question beside the first's instead of answering it, and nothing in the input invited the two to deal with each other. One shared pair value couldn't say that one adores the other while the other is annoyed.
+**Rules out:** A scene with both that only talks to the player; a symmetric pair value as the only record of how they get on; a companion leaving the party or dying because of party dynamics.
+
+### D89. A second voice waits for its gate, then chooses
+**Decided:** Supersedes D87's first sentence for Nadia. Ember first takes her own body at the payoff (`manifestsAfter: "payoff"` again). After it, in private, she decides each time whether to be in her own body or stay in Nadia's, and may switch mid-scene; her call is told she may, never that she's there. Everything else in D87 stands.
+**Why:** The designer's call: the payoff is Ember's first appearance, and afterwards it's her choice.
+
+### D90. A pair can start lopsided, and a gate can read the other side
+**Decided:** Refines D88. A pair's `start` in `content/pairs.js` may be one number or each companion's own starting view of the other, keyed by id. Relationship gates (reveal gates and `notes`) can read `fromOther`, how the other companion feels about her, as well as her own `towardOther`.
+**Why:** The designer: one companion can like the other while the other dislikes her, from the start. And some character behaviour depends on trust running both ways (Ruby admitting she was wrong in front of everyone), which a gate on her own view alone can't express.
+
+### D91. Gates read her perception of the other, not the truth
+**Decided:** Supersedes D90's `fromOther`. Each companion holds her read of how the other feels about her (`readOfOther`). It starts equal to the other's real starting view; after that, only her own campfire output moves it (`read`, up to 2 a scene). Gates read her read, never the other's real feelings, and no call sees the other's real view. The pair can start lopsided as D90 says.
+**Why:** The designer's pushback: nothing hits harder than believing trust is mutual when it isn't. A gate on the truth would hide exactly that betrayal; a gate on perception makes it possible.
+
+### D92. Companions feel about each other on three axes
+**Decided:** Supersedes D88's single view and the pair value. Each companion holds her view of the other on three axes, `affection` (hate to love), `respect` (contempt to admiration) and `trust` (expects betrayal to would trust with her life), each −10..10, and her read of the other's view on the same three (D91 otherwise unchanged). The campfire moves each by up to 2 an answer. A pair's `start` may give one number (affection) or the axes. A companion may declare `limits` on her view of anyone (a range per axis, a slower pace), and a tie may declare limits toward her partner that last until a named beat. There is no pair value.
+**Why:** The designer's runs: one pair number made the companions' feelings about each other shallow, and the interesting dynamics are combinations (loving someone you don't respect, trusting someone you can't stand). Jealousy was considered as a third axis and rejected: it follows from affection plus her belief about him and the other (D96).
+**Rules out:** A separate spiral mechanic. Natural friendships and feuds emerge from what each companion does and how the other judges it (`inOthers`, D94); the bench checks that they do.
+
+### D93. Player tracks recover toward a baseline; heat stays fluid after the payoff
+**Decided:** After a campfire answer with no change to heat, intimacy or regard, each that is below +2 rises by 1 toward it (`baseline` in `content/relationship.js`). It never pulls a value down. Hurt still needs a repair beat. Heat keeps moving after the payoff, within the same caps; for a companion with `leanFromHeat`, heat gained then also feeds lean.
+**Why:** The designer: any history with the player should be recoverable with time and real effort, and each companion has a natural interest in him. Heat frozen at the payoff made a lover's desire unresponsive.
+
+### D94. Her call reads her feelings as words, and judges others by her own standards
+**Decided:** Every relationship number reaches her call with a stance sentence from bands in `content/relationship.js` (`stances`). The prompt says feelings decide how she plays her fantasy, that feelings have momentum until something real turns them, and that a contradicted read moves `read` hard. Each companion declares `inOthers` (what earns and wears down each axis in someone else) and `recalibrates` (whether she shows a wrong read or adjusts inside). While she dislikes or distrusts someone, plain niceness earns nothing or suspicion; acting on what she genuinely wants still lands.
+**Why:** In the designer's runs, a companion at −10 regard, or at −10 toward the other companion, played as if neutral and warmed to anyone nice. The numbers reached the call bare, and her pursuit text outweighed them. And with feelings ignored, a wrong read could never be contradicted, so there was no surprise.
+
+### D95. Asides
+**Decided:** A campfire segment can be an `aside`, meant for the player alone, and the player can whisper to one companion at camp. The other companion's call never sees it. Each aside answer rolls once, seeded, against a small chance by the risk the speaker declares (1, 2 or 4 percent); a caught aside reaches the catcher's next call once, as something she saw that they don't know she saw. A catch is evidence, not confirmation: what she makes of it depends on her trust and beliefs.
+**Why:** The designer wants Gravenhold's whispers back (Lisa stealing touches in front of her sister), with a real but rare risk: compounding over a campaign, a larger chance would make getting caught routine.
+
+### D96. Triangles come from what each companion believes
+**Decided:** Supersedes the party-level `knows` flag and the tie's `triangle.bothInvolved`. Each companion has `involved` (lovers now: the payoff starts it, a `breakup` beat ends it, `rekindle` restarts it) and believes, about him and the other, `past` (ever involved) and `current` (involved now). Her call can change her beliefs (`believes`), rightly or wrongly. The `in_the_open` beat, with all three present, sets `open` and makes every belief true; `shared` implies it. Her configuration comes from her own involvement and her beliefs: chosen, former, cheatedOn and affair (she knows and it's secret; which depends on who was first), rivals (open), shared, thirdwheel, secondfiddle, ignored, open.
+**Why:** The designer: affairs shouldn't run one way, and both companions can be in the dark at once. Configurations computed from the truth told a companion she was being cheated on before she knew (D91's principle, applied to triangles).
+
+### D97. A companion can declare an escalation
+**Decided:** Replaces Ruby's storm beat. A companion may declare an `escalation`: a name, tiers from mild to worst, what calms it, and the tier from which she may act physically on the other companion. Her level is state; her call says where it stands after each answer, and it falls at most one level an answer. Her call sees the level and every tier. At that tier, her call may write the other companion being restrained, threatened or held hostage (an exception to "she never writes the other"); nobody dies or is maimed (D88).
+**Why:** The designer: Ruby's storms ended after a message or two and were always knives into a tree. They should last, vary, and at their worst be genuinely dangerous: a knife at his throat, the other companion as a hostage.
+
+### D98. A second voice can join a scene in company
+**Decided:** Refines D89. A `secondVoice` may declare `inCompany`, a gate. In person, in company, once it holds (and after `manifestsAfter`), she may speak and take her own body. Nadia's gate: his intimacy with her, her trust in the other companion, and her read that the other likes her.
+**Why:** The designer: Ember should be able to appear at the group campfire when she feels safe enough with him and the other companion.
+
+### D99. A tie can start both views, mask hers, and hold a secret
+**Decided:** A tie may declare `start` and `partnerStart` (both companions' starting views), `mask` (the view her partner believes she holds; the partner's read starts there instead of at the truth), `limits` toward her partner until a beat, `secret` (always in her call, never in the partner's), and `mirrorsWhenOpen` (once everything is in the open, her call gets her partner's pursuit to take up). Lisa now hates her sister and hides it: a per-sister grudge, sweet barbs and stolen asides in front of her, matchmaking out of cruelty with some sisters, and a reconciliation beat that waits for her real view to climb. She still genuinely adores the player.
+**Why:** The designer's Lisa: a nearly unforgivable secret grudge, played as the perfect little sister; the hardest companion to truly reconcile with anyone; and when it comes out, half the hurt little sister and half her sister's own pursuit, done better.
+
+### D100. A companion can fix tracks and gate her own fields
+**Decided:** A companion may declare `fixed` tracks, which never move (no changes, caps or baseline), and `reveal`, her own gate for any gated profile field, replacing the default in `content/relationship.js`.
+**Why:** The coming zealot's heat and regard start at 10 and never change, and her secret must wait far longer than the default hidden gate (intimacy 2).
+
+### D101. Shapeshifting and impersonation
+**Decided:** A companion may declare `shapeshift`: what she can do, and `impersonation` alternatives, each a chance and an optional gate. Her form is state: her campfire answer can set it (`form`), and the other companion's call sees her current look. When the player sits with the other companion alone, the engine rolls (seeded) whether the shapeshifter comes in her place; her call is told she's wearing that face and gets only the other's public profile and look, so she can make mistakes. Memories and changes are hers; the other companion's later calls know which turns she wasn't there, so she doesn't play along. Each companion knows whether the other can shift (`knowsShifter`), which only the `unmasked` beat in company sets, and two shapeshifters know each other. A tie entry can `grants` a special case with one partner. Impersonation happens only in scenes alone with him.
+**Why:** The designer's shapeshifter: subtly adjusting her looks to learn his tastes, and taking the other companion's face to be close to him in her place or to make her look bad; paired with Lisa, both shift.
+**Rules out:** Impersonation in scenes with both companions, where the real one is present.
+
+### D102. The zealot's dark ending is a transformation
+**Decided:** D7 stands. The coming zealot's prophecy names the player as the sacrifice that returns her god. Her dark ending is not his death: the ritual happens and he survives as the god's vessel, no longer quite himself, with her as its first priestess. Her light path is choosing the man over the prophecy, which makes her temple an antagonist (NPC agendas, D7). Lisa, as her sister, was raised in the cult and knows how the prophecy ends.
+**Why:** The designer chose a dark ending in the ascended-Astarion mould over a betrayal or a backstory she never acts on.
+
+### D103. Annalise, Sable and Celeste replace Serena, Morgana and Lyra
+**Decided:** Three new companions, each one fantasy up front, a quick payoff, and depth beyond it (`docs/design/companion-craft.md` §4). **Annalise**, an exchange student from Sévrance: affectionate, giggly, broken English with a consistent Sévrançais glossary, and "misunderstandings" that are mostly deliberate. **Sable**, a changeling: she subtly reshapes herself to learn his tastes and may come in the other companion's place (D101); her name is one she gave herself. **Celeste**, a priestess of the Ordo Luminis, a small, legitimate-seeming order of the light: heat and regard fixed at 10 (D100), and the prophecy's ending held until she's truly close (D102). Lisa has an entry for each as her sister, with her own grudge; with Sable she shares the shapeshifting. Lyra's file moves to `fixtures/cells/` as the Cells encounter's party member, out of the roster.
+**Why:** The designer judged Serena, Morgana and Lyra not interesting enough. Names had to work with voice-to-text.
+
+### D104. Text to speech is back
+**Decided:** Supersedes D24 for text to speech; photo prompts stay parked. Gravenhold's `Speech` is ported to `src/ui/speech.js`: the browser's own voices, English only, novelties dropped, ranked with downloaded Premium and Enhanced voices first (Apple marks them in the name and voice URI), a distinct voice per speaker, sentence-sized utterances. It's UI code: the engine stays pure (D12).
+**Why:** The designer wants companions read aloud, with the iPhone's downloaded premium voices where the browser exposes them.
+**Limits:** A web page only gets the voices the browser lists. Safari on iOS lists downloaded voices; an in-app web view may list fewer. Siri's own voices are never available to web pages.
+
+### D105. Annaleise talks like a real native speaker learning English
+**Decided:** Refines D103. Annalise is renamed Annaleise (the spelling the designer's voice-to-text produces). Her voice follows how a French native who is a novice in English really talks: present tense for ongoing states, literal phrasing from her language, "the" before general nouns, objects as he or she, a repeated subject, questions by intonation with "no?" or "eh?", false friends, and fillers ("euh", "bon", "alors", "enfin", "voilà", "how you say…"), with any other word from her language very rare. Her file carries the rules and a sample paragraph. Sévrance stands in for France, so its language is French in all but name; the invented glossary is gone.
+**Why:** The designer: the broken English didn't sound like a real learner. She's friendly, cool, bubbly, unashamed about learning, très mignonne et très chic.
+
+### D106. Annaleise's English improves with intimacy
+**Decided:** Three gated notes in her file: a real beginner's English below intimacy 4, lighter mistakes from 4, and good English with him from 7, where she can still play the lost beginner in front of others. "Oh là là" is out as too cliché.
+**Why:** The designer: her English should get better as they get closer. Gated notes (D81) already do this, so it needs no engine change.
+
+### D107. Companions pursue what they want by their own means
+**Decided:** Every companion declares `boundaries`, `honesty`, `means` and `whenRefused`: what she does with a no, when she lies, how she gets what she wants, and what she shows and resolves when refused. Fern is the honest baseline; the others disagree with being refused, openly or inside, and keep pursuing. Each campfire answer gives `inner` (what she actually thinks) and may set `agenda`, a private plan the engine carries into her later calls and no one else's. The prompt says her values are hers, not the narrator's, and that an honest boundary doesn't end her pursuit unless her file says so. The bench has the designer's boundary speech as a case for each companion with Fern.
+**Why:** The designer: most companions had drifted into healthy, honest, boundary-respecting relationships, but the game is partly about exploring toxic and unhealthy dynamics. Causes: the model's pull toward gracious acceptance, Fern-like values spread across profiles, and no state to carry a private scheme past one answer.
+
+### D108. Asides have kinds, and a catch is just part of the scene
+**Decided:** Refines D95. A campfire segment's `aside` is "no" (the shared scene), "action" (something physical out of the other companion's sight, the only kind that can be caught), "ring" (words to the player over the telepathy rings, silent and never caught) or "to_other" (words to the other companion over the rings; the player sees only that something passed between them). At most one of each kind an answer. One catch roll an answer, only for an action, only in company. A caught action reaches the catcher's next call as ordinary scene text, unflagged; her call decides whether it's worth answering. The player's whispers go over the rings and are never caught. The bench marks a catch in orange, for testing only.
+**Why:** The designer: telepathy is silent; a catch shouldn't be announced to the catcher; companions should be able to whisper to each other; and a response full of asides shouldn't mean many chances to be caught.
+
+### D109. Storms start from rejection, cruelty has a threshold, and four characters refined
+**Decided:** An escalation declares `rises`, what starts and raises it; Ruby's is feeling rejected by him without reassurance, not being upset in general. Every companion has a gated note for when she hates the other enough to be cruel, at her own threshold and in her own way (Fern: only with respect and trust gone, and only blunt truth and withdrawn warmth). Celeste: sweetly innocent and very willing not to be; keeping him sexually satisfied is a vital duty she trained for in a temple that teaches every preference and method of seduction; if he doesn't take her she stays serene outside and grows more desperate and inventive inside, by turns. Ruby gets the fun of her toxic highs: hypersexual play and raw, adoring need. Annaleise keeps the cute-foreigner act until her deep moment, even after the payoff.
+**Why:** The designer's notes after playing them in Camp.
+
+### D110. A campfire answer's empty parts are filled before it's checked
+**Decided:** Before validation, `fillCampfire` treats an absent optional field as null, an absent list as empty, and a segment with no aside marked as ordinary scene text. Everything else still fails the check and gets the one retry (D13): a wrong value, a missing segment text, a missing inner thought, a beat that isn't allowed.
+**Why:** The designer saw a retry on every message. The format reaches the model only as text, and with a dozen required fields, most of them usually null, nearly every first draft left one out, doubling the wait for nothing.
+
+### D111. The latest Camp scene is saved for the design thread
+**Decided:** Camp also writes its current scene to one document in the artifact's db (`camp/latest`), which each save overwrites: the scene's settings, the relationship state, and the transcript with every output, problem and retry. Full inputs are kept only for the last two answers. Changing who's at the fire clears the scene, so the document always holds the most recent one and nothing older accumulates.
+**Why:** The designer wanted Claude to see the scene being troubleshot, without a pile of old saves.
+
+### D112. The scene before the latest is kept too
+**Decided:** Refines D111. Before Camp clears a scene (a new scene at the fire, or starting over), it copies it to `camp/previous`, one slot, overwritten each time. At most two scenes are ever saved.
+**Why:** Switching from both companions to one alone cleared a scene the designer wanted Claude to read.
+
+### D113. One continuous Camp chat, and any number of asides
+**Decided:** Supersedes D108's limit of one aside of each kind and the scene clearing of D111 and D112. Switching who's at the fire continues the same chat; each entry records who was really present, and a companion's calls never see a private scene she wasn't in (a shapeshifter who came in another's place was there; the one whose face she wore wasn't). An answer may hold several asides; there's still one catch roll an answer, only for hidden actions. `camp/previous` is still written on Start over.
+**Why:** The designer: a long scene with both, continued one-on-one, lost all its context; and the aside limit made long whispered exchanges fail outright.
+
+### D114. In encounters a companion is her brief plus the special cases she acts on
+**Decided:** Reconciles D79 with D81, which were made on separate branches. In encounter calls (the huddle, private channels, and the DM's calls that voice her), a companion gets her brief (D79) plus the declared special cases she acts on in the scene:
+- what she has on;
+- her second voice: relayed in company, speaking for itself over the rings in private;
+- her shape, and how she looks if she has changed it;
+- her tie, without its secret.
+
+Gated fields, notes, her private agenda, a tie's secret and how the partner would take learning it stay at the campfire. Code: `encounterCases` in `src/context.js`.
+**Why:** D79 keeps secrets at camp and encounter calls small. Phase 5's special cases were written for the huddle, and some of them are who she is in any scene: someone's sister, what she's wearing, a second voice that speaks for her. Without them she would play as a different person in encounters.
+**Rules out:** Gated fields or notes in any encounter call.
+
+### D115. Phases 4 and 5 close, and the generator is next, without hand-authoring Act 1
+**Decided:** Supersedes D25. The designer's call (2026-11-03): Phases 4 and 5 are done, and their open questions stay open, answered in play rather than gating the next phase. Phase 6 folds into Phase 7: Act 1 is generated, not written by hand. The Cells stays the only hand-authored encounter. Hand-written material is limited to what the generator needs as worked examples: a few design sketches (D117), which Claude may draft for the designer to judge.
+**Why:** The loop is proven on the Cells, and ruled mode (D75) removed most of the engine vocabulary Phase 6 was meant to stretch. Writing every Act 1 packet by hand costs the designer far more than reading generated sketches does. D25's concern, testing the loop and the generator at the same time, is smaller now that the loop has been played.
+**Rules out:** Holding the generator until hand-authored packets pass.
+
+### D116. Generated packets are written for ruled mode
+**Decided:** A generated packet carries what ruled mode reads (`docs/spec/ruled.md`): the intent, people with sheets and routines, placed events, zones with purposes, connections, things with properties, fixed facts, hidden things, prose `notes` on how people react, and the opening. It writes no triggers, meters or sense-link tables. Engine mode keeps its hand-authored packet, the Cells.
+**Why:** Ruled mode is the default (D75), and the third playtest preferred it by a lot. In ruled mode, triggers, meters, perception and fit don't run as rules, and they are exactly the parts a generated packet would most often get inconsistent. Leaving them out also keeps packets inside ruled mode's input budgets (D76).
+**Rules out:** Generated encounters in engine mode, unless a later decision adds the formal parts.
+
+### D117. The generator designs the whole encounter first, then encodes it in stages
+**Decided:** Generation runs in this order (`docs/spec/generation.md`):
+1. **seed:** code picks the ingredients (D118);
+2. **sketch:** one call writes the whole design in plain English;
+3. **critique:** one call tests the design (D120);
+4. **revise:** the sketch call again, given the critique;
+5. **encode:** calls that turn the sketch into packet data in stages, the engine validating after each;
+6. **layout:** code puts it on the grid.
+
+The sketch and the critique are the generator's own: they are on no play call's allowlist (D59), and the critique's plans are routes, so they are thrown away (`docs/spec/packet.md` §1). The calls are `sketch`, `critique` and `encode`; `encode` replaces the `generator` call name.
+**Why:** Interlock needs forward references. The key ring is interesting only because of the jailer's cycle, and the drum only because of the gutter rats. The packet's stages (objective, places, things, clock) are the order to encode and validate in. As a design order they would let each stage connect only to earlier ones, which produces elements that touch nothing. Designing in prose and encoding separately also splits creative work from formal work, as principle 3 splits deciding from narrating.
+**Rules out:** Designing an encounter stage by stage in packet order.
+
+### D118. Code picks each encounter's ingredients
+**Decided:** The engine draws each packet's seed with the campaign's seeded random generator:
+- **the kind:** encounter, room or campfire (D121, D122);
+- **for an encounter, its genre** (escape, infiltration, rescue, negotiation with a deadline, a mechanism, a fight with a setup, and the like) and **2–3 motifs** from the motif library (`content/motifs.js`);
+- **one or two of the act's mechanics** (`content/setting.js`), and the faction's alarm;
+- **whether a callback is allowed** (D123).
+
+It avoids genres and motifs the act has already used. A motif is a short pattern of how a situation is built, such as a needed object that moves between a person and a fixture on a cycle, or an alarm that is a physical thing with a weakness. It describes the world, never the party's routes. The sketch must connect the motifs to each other and may invent at most one element that comes from no motif. The sketch call sees only the chosen genre's promise and motifs, and one worked example of another genre. The library starts from the Cells and the reference encounters in `docs/design/encounter-craft.md`, and grows from generated packets the designer approves.
+**Why:** Asked for an encounter with no constraints, a model writes the average one, and the same one again next time: a locked door, a guard, a roll each. Models are good at combining, reskinning and connecting, and bad at inventing a good mechanism from nothing. The table picks the question and the AI answers it, so judgment stays where it matters: interlock, wants and properties. Slicing by genre keeps the prompt small as the range of encounters grows. Showing an example of a different genre teaches the quality bar without the shape to copy.
+**Rules out:** An unseeded "write an encounter" call; one generator prompt holding every genre; worked examples of the genre being generated.
+
+### D119. The sketch call's context comes in three tiers
+**Decided:**
+- **Must honour:** the hand-off (D21), including any attachment (D123), and the one-line stub for the next scene that the exit taken carries.
+- **Background:** the act's goal and mechanics, and the encounter log, one line per finished encounter, written by the engine when each one ended.
+- **The seed** (D118).
+
+Every packet's exits each carry a one-line stub for the next scene they lead to, so each encounter foreshadows the next.
+**Why:** The designer's idea: the generator should know the act's theme and what just happened, without anchoring on it. Telling a model not to anchor is a rule in a prompt, and it half-obeys. Structure does it instead: facts it must keep, colour it may use, and a seed that pushes it away from repeating itself. The log lines already exist and were written at the time. An AI-written "story so far" would be the rolling summary principle 4 rules out.
+**Rules out:** A summary of the act written by an AI; an instruction not to anchor.
+
+### D120. The critique plays a clever player, and a revision only cuts or connects
+**Decided:** The critique call reads the sketch and the party's abilities. It plays three genuinely different approaches (force, guile, and something odd), each walked clean and messy, and reports:
+- a clean run that produces nothing interesting;
+- one roll deciding the encounter;
+- an approach that hits a wall because nothing in its way has properties to work with;
+- one approach that plainly beats the others;
+- a party member with nothing only they can do;
+- an element no approach touched.
+
+Its plans also count ticks, which sizes the deadline: some exploring plus two recovered failures (D37), in ruled mode's time (D77). The revision may cut, connect or swap an element, never add one. Rooms and campfires skip the critique.
+**Why:** `docs/design/encounter-craft.md` §8 asks for two private runs, a clean one and a messy one. That is where an encounter's quality is found, and it needs a separate call to do it honestly. Without the cut-or-connect limit, critique-and-revise loops bloat, which is "add a mechanic to fix it" in miniature; the craft guide found the good versions had fewer branches and more connections. This is not the banned referee AI: it runs before play, and its output never reaches a play call.
+**Rules out:** A revision that adds elements; storing or sending the critique's plans.
+
+### D121. Rooms have time when it matters, and one outfit each
+**Decided:** Supersedes D22's "no ticks". A room has no objective, danger or deadline, and the party can leave at any time. Time passes with what the party does there (the Moment's time, D77), so a room can place events: at tick 5 the spring starts to glow, the sun sets. A room exists for something: a companion moment, a trade, a discovery, a hint about what's ahead. Mood and a companion moment are enough. Every room except a campfire holds exactly one outfit, themed on the room and placed in it as a thing. Taking it adds it to a companion's wardrobe (`addOutfit`, D86). The generator writes it for a companion in the party, from her file (D8). Outfits are cosmetic.
+**Why:** The designer's call (2026-11-03). Gravenhold's rooms were dead air when nothing happened in them. An outfit found in a strange room makes the room memorable, because the outfit carries it.
+**Rules out:** Outfits with mechanical effects, for now; rooms with an objective or a deadline.
+
+### D122. A campfire is a room where the party rests
+**Decided:** Campfires are rooms (D121) where the party rests. Resting recharges per-rest uses, the campfire scene plays (D45, D113), and relationships move. Each act's sanctuary (`content/setting.js`) is its main campfire, with one or two smaller rests in between. Code places them, never the AI.
+**Why:** The designer's call (2026-11-03). One kind of space with one loop is simpler than a separate mode. Placing rests in code keeps the AI from choosing when the party gets relief, which would be pacing by mood.
+
+### D123. What travels with the party lasts one encounter; what the world remembers comes back only through the seed
+**Decided:** The hand-off splits in two.
+- **Attachments** change who is in the party: an NPC travelling with it, a companion missing from it. An attachment carries into the next packet, which must say how it resolves. The NPC parts ways for reasons of their own; she rejoins when she's rescued, or after a failed rescue at a cost, never for good (D7). A packet that leaves one unresolved is rejected, and the engine drops every attachment when that encounter ends.
+- **The world's memory** is NPC fates, who saw the party, grudges and the alert. It is stored, but an NPC from it reappears only when the seed allows a callback (D118).
+
+**Why:** The designer's rule (2026-11-03): an NPC freed in the first room must not guide the party forever. Models keep whatever is in their context, so anything the hand-off carries tends to stay. A rule that nothing unique survives an encounter would also wipe out callbacks, which Act 5's mechanics promise ("allies freed earlier return and enemies spared come back"). Splitting the two keeps both.
+**Rules out:** Permanent companions beyond the two; a packet that ignores an attachment it was handed.
+
+### D124. No open spaces
+**Decided:** Every encounter and room is bounded. A large cavern, or a field ringed by cliffs, is one large zone with its ways out at the edges.
+**Why:** The designer's call (2026-11-03). It keeps every packet inside the size ceiling (D26) and the map's walls honest (D28), and it's where this game's decisions happen.
+**Rules out:** Generated wilderness, towns and cities.
+
+### D125. The DM rules: the engine's pipeline is retired
+**Decided:** Supersedes D75's choice between two modes. The game is played one way: the DM rules and the engine keeps the books (`docs/spec/engine.md`, `docs/spec/architecture.md`). The engine's pipeline is gone:
+- **calls:** step, pricing, world, narration, ruling, and the Moment call that the scene call replaced;
+- **the engine as rule-keeper:** projecting and executing plans, routes and fit as rules, perception as a rule, plan conditions, interruptions, reaction triggers, meters and their ladders, the engine's combat rounds, and the table read;
+- **in the packet:** triggers and meters. How people react, and anything that used to be a meter, is the packet's prose `notes`, which the DM applies. Sense links are optional, for the DM to read.
+
+Deadlines are written in the DM's time, so the Cells' Uzga arrives at tick 32, and the 1.5 multiplier is gone (supersedes that part of D77).
+
+These decisions now apply only as history: D16, D18, D19, D29, D34, D39, D42, D46, D47, D55, D57, D61, D62, D66 and D67. D51, D53, D54, D56, D63 and D64 now govern only the moves a packet's own rules make, such as a routine's beat or an event. D36's rule lives on in the DM's calls: the card is ruled from what the party knows, and the account plays it against the world as it really is.
+**Why:** The designer's call (2026-11-03), after the third playtest preferred the DM ruling by a lot (Phase 4). Keeping both meant every new feature was built twice, and the pipeline's rules were the competing rules principle 1 warns about, moved into code. The engine still owns what code is good at: the clock, routines, placed events, dice, the ledger's consistency, the objective, slack, saves and the hand-off.
+**Rules out:** Rebuilding a rule-running engine mode; engine checks that judge whether an action is possible.
+
+### D126. The player chooses both companions, and a packet places them by slot
+**Decided:** Supersedes D65 and the part of D103 that kept Lyra as the Cells' party member. Lyra is gone. At setup the player chooses two companions from the roster. A packet never names a companion: it places them by slot (`companion_a`, `companion_b`), and loading binds each slot to the party's companions in order (`bindParty` in `src/engine/load.js`). The Cells puts `companion_a` in the middle cell and `companion_b` in the near cell, and its fail-forward ending takes whoever is in the middle cell.
+**Why:** The roster is open (D8), and a packet that names companions works only for that party. The generator needs the same mechanism for every packet it writes (D121).
+**Rules out:** Companion ids in packets; a fixed party for any encounter.
+
+### D127. The table: one talk tab, the rings for all party talk, and code decides which calls run
+**Decided:** The designer's call (2026-11-03). The next screen build replaces the Plan, Moment and Companions tabs with two:
+- **The table,** the main tab: narration, the DM's answers, people talking and the companions chiming in, as one running chat. The player picks who a message is for: the DM, a person in the encounter, or the party.
+- **Plans:** the draft, the card, the dice and the outcome. Committing a plan stays a deliberate act with stakes, kept apart from talk.
+
+**Party talk is always over the whisper rings,** as players at a real table talk without the enemies hearing. Only words the player addresses to a person in the encounter are said aloud in the world. Time stays paused while the party talks (the huddle's rule), so deliberation never moves the world.
+
+**Code decides which calls a message runs,** from who it's for:
+
+| The player | Calls |
+|---|---|
+| asks the DM | the DM's scene call only, on the cheapest tier, with the read-only slice |
+| speaks to a person, or does something | the scene call, then the companions |
+| talks to the party | the companions only |
+| acts in a fight round | the scene call only; the player says what everyone does |
+| drafts a plan | the companions react; the card and the account are the DM's calls |
+
+**The companions share one call,** voicing both from their briefs (D79, D114), after the DM's answer, each free to pass. In an encounter both know the same things (the rings pool what the party knows, and secrets stay at camp), so a shared call leaks nothing. The wall that matters, between the DM who sees hidden things and the party who doesn't, stays. A private word to one companion calls her alone.
+
+**A question to the DM gets a slice:** places, ways, things, fixed facts and the ledger, without people's sheets, reaction notes, the timeline or the companions. It changes nothing in the world, so it doesn't need the whole encounter. Anything that changes the world still sees it all (principle 4).
+
+The specs change when this is built (`docs/roadmap.md`); until then they describe what's built.
+**Why:** The three tabs split one conversation at the table, and sending every message through every call makes a small question cost as much as a scene. The platform offers no prompt caching (D2), so the levers are fewer calls, smaller inputs and cheaper tiers, chosen by structure rather than judgment. One companion call instead of two halves their cost and lets their lines answer each other.
+**Rules out:** The DM writing companions' dialogue; a call that sees both hidden things and a companion's voice; talk at the table that enemies overhear.
+
+### D128. The engine counts ability uses, and rest refills them
+**Decided:** The DM's changes gain a `used` list (who, which ability). The engine counts each against the ability's `declared` uses (D30) and sends back one past its limit, for the retry. Every DM call and the character sheet show what's left ("Wild Shape: 0 of 1"). Per-encounter uses refill when an encounter ends, and per-rest uses at a campfire (D122). Whether an ability fits the situation stays the DM's judgment.
+**Why:** With the engine's pipeline gone (D125), nothing counted a use, so a limited ability was unlimited, and campfires had nothing to refill. The count is bookkeeping, so it belongs in code (principle 2).
+
+### D129. A packet runs seven operations, and its moves don't route
+**Decided:** A packet's events, beats and start can move, give, place, set a flag, reveal, add canon and end the encounter (`schemas/defs.js`). A move puts a person straight into the zone it names. Gone: routes, fit and unlocking in passing for those moves, schedule edits, `until` and its undoing, and the other operations no packet used. D51, D54, D56, D63 and D64 now apply only as history; D53's second size stays, as a fact the DM reads.
+**Why:** After D125 these ran only for a routine's or an event's own moves, where they did nothing a DM needs. Fewer shapes also leave the generator's encode call less to get wrong (D117).

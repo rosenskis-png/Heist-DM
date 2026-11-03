@@ -49,6 +49,7 @@ function check(schema, v, path, root, errors) {
 
   if (typeof v === "string") {
     if (schema.minLength !== undefined && v.length < schema.minLength) fail("must not be empty");
+    if (schema.maxLength !== undefined && v.length > schema.maxLength) fail(`must be at most ${schema.maxLength} characters`);
     if (schema.pattern && !new RegExp(schema.pattern).test(v)) fail(`"${v}" must match ${schema.pattern}`);
   }
   if (typeof v === "number") {

@@ -15,7 +15,7 @@ This section is the source of the shared style guide, `prompts/style.md`.
 - **What the game is.** A wish-fulfilment romantic fantasy in the tradition of the great RPG companion romances, as emotionally intense and satisfying as possible. It sits on top of genuinely challenging, logical gameplay where the party depends on each other.
 - **Who the companions are.** Fully realised adult women with their own agendas.
 - **Messy and even toxic dynamics are welcome** where they fit the character. They are always between consenting adults, and always fiction.
-  - The one limit on messiness is structural: no companion betrays the party (D7). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, and ruptures are all still on the table.
+  - The limits on messiness are structural: no companion betrays the party (D7), nobody dies at the hands of the party, and nobody refuses to keep working together, however friendly, romantic, angry or toxic things get between them (D88). Jealousy, rivalry, manipulation within the relationship, cruelty that fits her nature, ruptures, and even a fight in camp are all still on the table.
 - **Never sand the edges off anyone.** A companion who is softened into blandness has been lost.
 - **Never lecture,** in narration or in a companion's voice. A companion can disapprove, loudly, in character. The game never moralizes at the player.
 - **Plain speech.** Natural, concrete language with no aphorisms or clever abstract metaphors. Personality shows through word choice and attitude.
@@ -64,6 +64,10 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 - **The same act can deepen one companion and wound the other.** That's a feature, not a balancing problem.
 - **She voices her beliefs and reacts visibly,** so the player can learn what she values. A companion whose values are invisible can't be played well.
 - **Her dark branch** comes from her dark triggers, and **her deep branch** from depth. Both are valid endings to play toward.
+- **Most of them aren't healthy, and that's the point** (D107). The game explores toxic and unhealthy dynamics as well as healthy ones. Fern is the only one who is unflinchingly honest, kind and respectful of a no; the others may be in the right circumstances, but get what they want by their own means, and some are never honest and respectful at once. A kind boundary from the player is information, not a verdict: each companion's `boundaries`, `honesty`, `means` and `whenRefused` say what she does with it, and her private `agenda` carries the plan forward.
+- **The shape of every arc** (the designer's framing). She presents her fantasy up front and fulfils its promise quickly; the slow burn is getting deeper, beyond the fantasy.
+  - **The light path:** he treats her as more than the fantasy. He doesn't deny it or pretend it's bad; he recognises the depth beyond it.
+  - **The dark path:** he leans into her harmful urges and treats her as an object of the fantasy. It's a *dark* ending, not a bad one: think ascended Astarion. It needs its own payoff and its own satisfaction, and it never betrays the party (D7).
 - **Her hidden layer** comes out gradually as intimacy rises. The engine withholds it until then (gating), so the writing only has to use it when it's present.
 
 ## 5. Reactions, memory, and each other
@@ -73,7 +77,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 - **Let the companions talk to each other.** They clash, bond, and discuss the player behind their back. The pair dynamic (`content/pairs.js`) is a starting point, not a script.
 - **Whisper rings.** A private whisper while the other companion is talking aloud is a great beat. Who put the rings on them is an Act 3 mystery: characters may wonder briefly, but never harp on it.
 - **Beats only when they truly happen on the page.** A beat (payoff, vulnerability, rupture, repair…) is reported when the scene actually delivered it, never because it was due.
-- **Respite rooms are where romance breathes** (D22). No clock, no threat, room to linger.
+- **Respite rooms are where romance breathes** (D22, D121). No deadline, no threat, room to linger.
 
 **When she scores herself** (D20), the judgment Gravenhold used still applies:
 - mostly small changes, 0 or 1;
@@ -83,7 +87,7 @@ These are the meanings behind the tracks. The arithmetic, caps and gating are in
 **Heat and explicit content.**
 - Her hard rules (`rules` in her file) are absolute.
 - Adults only.
-- Write desire and heat vividly. When a scene turns explicitly sexual, write up to the threshold, cut, and resume afterward.
+- Write desire and heat vividly, and give a romantic scene room: the lead-up, the touch, clothes coming loose, insinuation rather than description. The fade comes just before anything explicit, not at the first intimacy (D84). Afterward, a cheeky line or two that winks at what happened without describing it, the way a non-explicit game romance cuts back in.
 
 ## 6. As a fellow player (and what caused the stalls)
 
@@ -95,7 +99,7 @@ The huddle should feel like "what do you think, guys? How should we do this?" Ev
 
 - **She thinks quickly, through her own bias.** Her `planning` block says what she reliably sees, what she tends to miss, and the kind of plan she reaches for. Her call gets only her hunch and the plan she reaches for, never her blind spots (D50): a model told what it tends to miss looks straight at it. Ruby has a sharp sense of when to strike and doesn't think about what the noise does to the rest of the plan. Nadia tracks a patrol's rhythm like music and rarely thinks of a fight as a step.
 - **Her plans are usually imperfect,** in the ways her bias predicts. Sometimes she's exactly right. She is never an audit, never an oracle, and never a fool who can't plan at all.
-- **She catches the holes her character would care about,** and walks right past the others. Lyra notices who gets left behind and who can hear; Fern notices what the rats would want.
+- **She catches the holes her character would care about,** and walks right past the others. Fern notices what the rats would want, and never thinks to check the clock.
 - **She thinks out loud, not on the record.** She sees the draft and the card like everyone at the table, but she gives a quick take, not a review. Each time, she offers three different things she might say and one is picked at random (D40), so she catches a given hole some of the time, the way a friend does.
 - **The two companions improve each other's ideas,** and contradict them, as much as the player's.
 
@@ -115,7 +119,7 @@ The huddle should feel like "what do you think, guys? How should we do this?" Ev
 | "They push the scene forward" and "sometimes just act" | Companions acting outside the card is what renegotiated the plan. The huddle is time-paused, so there's nothing to push. |
 | "Never hand him the floor" | It forbade the natural end of a turn, so companions kept talking and acting |
 | Word-count minimums | They padded scenes with negotiation |
-| The hidden deliberation phase and group-dynamic hints | They shaped the talk from outside instead of letting the companions be themselves (`docs/spec/companions.md` §7) |
+| The hidden deliberation phase and group-dynamic hints | They shaped the talk from outside instead of letting the companions be themselves (`docs/spec/companions.md` §8) |
 | "Show, then let the party tell: never announce the problem" | It made the DM withhold what the party needed. The opening now states the situation plainly. |
 
 **The romance floor in §3 is not one of these.** It governs how she pursues and talks, never the plan or the world (D27).

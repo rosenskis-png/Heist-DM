@@ -4,7 +4,7 @@
 1. `README.md`: the vision and the map.
 2. `docs/principles.md`, especially the reflexes to resist, before proposing any system or mechanic.
 3. `docs/roadmap.md`: the current phase and its open questions.
-4. `docs/decisions.md`: before reopening anything, read why it was decided.
+4. `docs/decisions.md`: skim the titles (`grep "^### D" docs/decisions.md`), then read the entries in your area, and any one before reopening it. The specs say what's current; the log says why.
 5. Only the `docs/spec/` files your task touches. They're split small so you can load just your slice.
 
 Don't design from `legacy/`. Use `legacy/README.md` to find what to port and what is banned.
@@ -20,17 +20,18 @@ Don't design from `legacy/`. Use `legacy/README.md` to find what to port and wha
 | The exact shape of a packet, card or call output | `schemas/`; the spec links to it |
 | Encounter design theory | `docs/design/encounter-craft.md` |
 | How to play the companions (tone, romance, table behaviour) | `docs/design/companion-craft.md` |
-| Game data | `content/` |
+| Game data, including encounter packets | `content/` |
+| The game page | `app/`; the logic it draws lives in `src/game/` |
 | Prompt text | `prompts/<call>.md` |
 | A worked example or test fixture | `fixtures/` |
 
 ## Rules
 - **One home per fact.** Link to it; don't restate it.
 - **Specs describe only the current design.** No version numbers in filenames, no "previously" or "removed" text. History goes in `docs/decisions.md`; old text is in git.
-- **One name per AI call everywhere:** `docs/spec/calls/<call>.md`, `schemas/calls/<call>.js`, `prompts/<call>.md`, and later `src/calls/<call>.js` and its tests.
+- **One name per AI call everywhere:** `docs/spec/calls/<call>.md`, `schemas/calls/<call>.js`, `prompts/<call>.md` and `src/calls/<call>.js`.
 - **`node --test` passes before every commit.**
 - **Never edit an old decision.** Supersede it with a new one.
-- **The roster is open** (D8). Engine code and prompts never name a companion id. A companion is one file in `content/companions/` plus one line in its `index.js`.
+- **The roster is open** (D8). Engine code, prompts and packets never name a companion id; packets place companions by slot (D126). A companion is one file in `content/companions/` plus one line in its `index.js`.
 - **No companion betrays the party** (D7).
 - **The engine is pure** (D12): no DOM, no AI calls, seeded randomness, runnable with `node --test`.
 - **`legacy/` is read-only.**
