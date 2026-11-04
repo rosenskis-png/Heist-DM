@@ -12,7 +12,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "step", "pricing", "world", "narration", "companion", "ruling", "moment", "adjudicate", "resolve", "scene"];
+const PROMPTS = ["style", "companion", "campfire", "adjudicate", "resolve", "scene"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
