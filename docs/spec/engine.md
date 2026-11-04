@@ -23,15 +23,16 @@ What the DM writes, and what every later call reads back. Shape: `schemas/ledger
 | Moods | The people in the encounter's dispositions |
 | Off routine | People with a routine whom the DM has moved. The clock leaves them where they are until a ruling puts them back on it |
 | Revealed | Hidden things, routines and events the party now knows |
+| Ability uses | Each limited ability the party has used this encounter (`used`, D128), counted against its `declared` uses per encounter and per rest. Per-encounter uses refill when the next encounter loads; per-rest uses spent travel in the hand-off until a rest (`rest` in `src/engine/handoff.js`), which also clears conditions |
 
-**The engine checks only that a change names real zones, people and things.** A card or an account that names something the party doesn't know yet, steps out of order, a step that happened in full after its roll failed, or a change that breaks a limit goes back for the one retry (D13).
+**The engine checks only that a change names real zones, people and things.** A card, an account or a question's answer (D133) that names something the party doesn't know yet, a use past what's left of an ability, steps out of order, a step that happened in full after its roll failed, or a change that breaks a limit goes back for the one retry (D13).
 
 **Limits** (D76, `LEDGER`): at most 20 facts, each at most 160 characters, and at most 6 new ones per output. Facts are how things are now; what happened goes to the log, one line per step. At most 6 conditions, each at most 80 characters, and at most 6 threats, each at most 100 (`CONDITIONS`, `THREATS`).
 
 **A fight is a plan** (D130): once anyone is fighting the party, a scene with a check or time in it goes back, since what the party does goes on the card.
 
 ## 3. The clock
-- **Time passes** when a card or a Moment exchange takes it (`docs/spec/architecture.md`).
+- **Time passes** when a card or a scene exchange takes it (`docs/spec/architecture.md`).
 - **Routines:** a period, a phase and one beat per tick. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat puts its person somewhere and runs its `on_start` rules: the keys go on Snag's belt as he starts to pace. People the DM has taken off their routine stay put.
 - **Placed events** fire at their tick, or when their condition first holds, and run their rules.
 - **The objective,** alternates and fail-forward ending are checked after every change and every tick. Before them, every encounter's last ending: with the whole party down, it ends as `captured` (D131).

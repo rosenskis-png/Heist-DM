@@ -3,6 +3,7 @@
 import { nameOf, zoneOf, person } from "../engine/world.js";
 import { beatOf } from "../engine/clock.js";
 import { partyPerceives } from "../engine/perceive.js";
+import { usesText } from "../engine/ledger.js";
 
 export const BAND = { automatic: "Automatic", easy: "Easy", medium: "Medium", hard: "Hard", very_hard: "Very hard", near_impossible: "Near impossible" };
 
@@ -140,3 +141,12 @@ export function clockView(s) {
 // The party for the header: each member's conditions, form, and whether they're down (D130).
 export const partyView = (s) =>
   s.party.map((p) => ({ id: p.id, name: p.name, conditions: s.conditions.filter((c) => c.who === p.id).map((c) => c.text), form: s.flags[p.id]?.form ?? null, down: s.flags[p.id]?.down === true }));
+
+// The party's sheet (D128): each member's abilities with what's left of the limited ones, and their conditions.
+export const sheetView = (s) =>
+  s.party.map((p) => ({
+    id: p.id,
+    name: p.name,
+    abilities: [p.abilities?.combat, p.abilities?.noncombat].filter(Boolean).map((a) => ({ id: a.id, name: a.name, effect: a.effect, left: usesText(s, p.id, a.id) ?? a.uses ?? "at will" })),
+    conditions: s.conditions.filter((c) => c.who === p.id).map((c) => c.text),
+  }));

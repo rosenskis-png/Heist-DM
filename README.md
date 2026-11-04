@@ -34,7 +34,7 @@ In Gravenhold's opening cell-block escape, a good first-turn plan took ten excha
 
 **The two breakthroughs (keep these):**
 1. **The plan card.** The player commits a whole plan, and the DM walks it step by step until something doesn't work. Stakes are stated before the dice, the engine rolls, and the stated consequences are the only things that happen. This takes the "when does the plan run?" decision away from the DM, which is exactly the decision it stalled on.
-2. **Three separate interfaces.** The single chat with competing demands is split into **Plan** (the committed action and its resolution), **Moment** (questions, checks, conversation) and **Companions** (the huddle, plus the campfire). Each AI does one job with a small, focused prompt. Deliberation in the huddle doesn't move the world.
+2. **Talk apart from commitment.** The single chat with competing demands is split into **the table** (questions, talk, quick actions and the companions over the rings) and **Plans** (the committed plan and its resolution), plus the campfire. Code decides which AI calls a message runs, from who it's for, so each call does one job with a small, focused prompt (D127). Talk over the rings doesn't move the world.
 
 Together these also give **context economy**: a lot of story per call, each call complete on its own.
 

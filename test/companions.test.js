@@ -7,7 +7,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { companions } from "../content/companions/index.js";
 import { pairs } from "../content/pairs.js";
 import { classes } from "../content/classes.js";
-import { companionFileSchema, companionSchema, campfireSchema } from "../schemas/index.js";
+import { companionFileSchema, companionSchema, campfireSchema, partySchema } from "../schemas/index.js";
 import { validate } from "../src/validate.js";
 import { partyProblems, pairings, resolveParty } from "../src/campaign/roster.js";
 import * as Rel from "../src/campaign/relationship.js";
@@ -17,7 +17,7 @@ import { load } from "../src/engine/index.js";
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const all = Object.values(companions);
 const packet = JSON.parse(file("content/encounters/cells.json"));
-const PROMPTS = ["style", "companion", "campfire"];
+const PROMPTS = ["style", "companion", "campfire", "party"];
 const env = (extra = {}) => ({
   packet,
   act: 1,
@@ -36,6 +36,7 @@ const newcomer = (over = {}) => {
 // An encounter with these two in the cells, for the calls that read live state.
 const withState = (e, self, other) => (e.state ? e : { ...e, state: load({ packet, party: [e.party[0], self, other] }) });
 const huddle = (self, other, e = env()) => A.companionInput(withState(e, self, other), { draft: null }, self, [other], [], companionSchema);
+const party = (self, other, e = env()) => A.partyInput(withState(e, self, other), { draft: null }, [self, other], [], partySchema);
 const camp = (self, other, withIds, e = env()) => A.campfireInput(e, { with: withIds, scene: [] }, self, [other], campfireSchema);
 // A payoff in a test means they're lovers now, unless the test says otherwise.
 const rel = (over = {}) => ({ ...Rel.newRel(), ...(over.payoff ? { involved: true } : {}), ...over });
@@ -322,6 +323,16 @@ test("gated fields appear only when their gate opens, and only at camp (D79, D11
   for (const c of all) for (const k of ["sees", "misses"]) assert.ok(!huddle(c, c === P ? Q : P).includes(JSON.stringify(c.planning[k])), `${c.id} ${k}`);
 });
 
+test("the party call carries exactly the two briefs the companion calls do, for every pairing (D127)", () => {
+  const brief = (input, title) => JSON.parse(input.match(new RegExp(`## ${title}\\n\\n\`\`\`json\\n(.*)\\n\`\`\``))[1]);
+  for (const [a, b] of pairings(companions)) {
+    const [x, y] = [companions[a], companions[b]];
+    const input = party(x, y);
+    assert.deepEqual(brief(input, "The companions you play"), [brief(huddle(x, y), "You are"), brief(huddle(y, x), "You are")], `${a}|${b}`);
+    assert.ok(input.length < 256 * 1024, `${a}|${b}`);
+  }
+});
+
 // ---------- declared special cases (docs/spec/companions.md §6) ----------
 
 test("a note is sent only while its gate holds, including gates on derived terms", () => {
@@ -604,4 +615,12 @@ test("a campfire answer's nothing parts are filled before it's checked; real mis
   assert.deepEqual(out.segments.map((g) => g.aside), ["no", "action"]);
   assert.ok(validate(campfireSchema, Rel.fillCampfire({ ...bare, storm: "high" })).length); // wrong, not absent
   assert.ok(validate(campfireSchema, Rel.fillCampfire({ segments: bare.segments })).length); // her inner thought is required
+});
+
+test("a party call's lines and reactions must come from the two companions", async () => {
+  const { speakerProblems: problems } = await import("../src/calls/party.js");
+  const line = (from) => ({ from, message: "m" });
+  const out = { exchanges: [{ lines: [line("a"), line("b")] }, { lines: [] }, { lines: [line("player")] }], reactions: [{ from: "dm", field: "admires", item: "i", sign: 1, intensity: 1, reason: "r" }] };
+  assert.deepEqual(validate(partySchema, out), []);
+  assert.deepEqual(problems(out, ["a", "b"]).length, 2);
 });

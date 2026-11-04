@@ -23,7 +23,8 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **Known:** the routines and events marked `known` in the packet, plus everything revealed in play. These drive the map, the companions' view, and what the card is ruled from (D36).
 - **Canon added:** texture narrated after the opening (anything narrated is real once said). The card's rulings become facts. Later calls may not contradict either.
 - **Event log:** one line per step played out, check and event. The engine writes it from the DM's validated outputs.
-- **Draft card:** the plan the player is writing, plus pending companion stances. Everyone at the table sees it, companions included (D40). Once committed and ruled on, it becomes the card, with its dice once they're rolled.
+- **Ability uses** this encounter, and the per-rest uses spent before it (D128).
+- **Draft:** the plan the player is writing, as an ordered list of actions (D134), plus pending companion stances. Everyone at the table sees it, companions included (D40). Once ruled on, it becomes the card, with its dice once they're rolled. The list stays as written after the plan runs.
 
 Raw transcripts are kept within an encounter, but only the last few messages of the relevant channel go into prompts. Anything consequential is already in the ledger, canon or the event log.
 
@@ -36,6 +37,8 @@ The engine checks that every write names real things before committing it (`docs
 | Adjudicate call | The card: steps, ticks, rolls and their stakes, rulings (which become facts), notes |
 | Resolve call | Each step's account and ledger changes, people's response, threats, texture (canon) |
 | Scene call | Ledger changes, checks with both outcomes, threats, the time it took, a plan to send to the draft |
+| Question call | Rulings, which become facts the party knows; what the party learned (D133) |
+| Party call | Lines over the rings, stances, tagged reactions |
 | Companion call | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
 | Engine | Ticks, routines, events, rolls, objective status, `down` at no toughness left, the event log, the hand-off |
@@ -46,7 +49,7 @@ The engine checks that every write names real things before committing it (`docs
 When an encounter ends, the engine writes a hand-off object, and the next packet's starting conditions are built from it:
 
 - alert and days;
-- gear, and the conditions the party carries until a campfire (D130);
+- gear, the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
 - companions present;
 - the exit used, and its next-scene stub (D119);
 - **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;

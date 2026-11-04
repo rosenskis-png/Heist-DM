@@ -3,7 +3,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Spectral:ital,wght@0,200;0,300;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: one column on a phone (sticky clock, three tabs, the card as a sheet); on a wide screen the map and clock
+/* Layout: one column on a phone (sticky clock, two tabs, the card as a sheet); on a wide screen the map, clock and sheet
    hold a left column and the tabs the right. Gravenhold's plum, gold and rose (docs/spec/ui.md). */
 :root {
   --bg: #ece5ea; --surface: #f7f2f5; --surface2: #e2d8df; --ink: #2a1d2c; --muted: #6e5d6c; --line: #cdbfc9;
@@ -102,6 +102,7 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .feed { display: grid; gap: 12px; }
 .say { display: grid; gap: 2px; max-width: 68ch; }
 .say .from { font-size: 13px; color: var(--muted); letter-spacing: .04em; text-transform: uppercase; }
+.say .text { white-space: pre-line; }
 .say.player { justify-self: end; text-align: right; }
 .say.player .text { background: var(--surface2); border-radius: 14px 14px 4px 14px; padding: 8px 12px; }
 .say.comp .from { color: var(--cc, var(--rose)); }
@@ -130,6 +131,34 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .choices { display: flex; gap: 6px; flex-wrap: wrap; }
 .choices button { border: 1px solid var(--line); background: none; border-radius: 999px; padding: 3px 12px; font-size: 14px; }
 .choices button[aria-pressed="true"] { border-color: var(--gold); color: var(--gold); background: var(--gold-bg); }
+
+.hint { font-size: 13px; color: var(--muted); }
+.to .sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 2px; }
+.say .ruled { display: grid; gap: 2px; font-size: 13px; color: var(--trust); margin-top: 2px; }
+
+/* The plan, as a list of actions (D134) */
+.plan-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.plan-item { display: grid; grid-template-columns: 1.6em minmax(0, 1fr) auto; gap: 6px; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 4px 4px 4px 8px; }
+.plan-item .n { font: 500 14px var(--mono); color: var(--muted); text-align: center; }
+.plan-item .text { background: none; border: 0; text-align: left; padding: 6px 2px; min-width: 0; overflow-wrap: anywhere; }
+.plan-item input { width: 100%; min-width: 0; padding: 6px 8px; }
+.plan-item .tools { display: flex; gap: 2px; }
+.plan-item .tools button { background: none; border: 1px solid transparent; border-radius: 8px; min-width: 34px; height: 34px; padding: 0; color: var(--muted); font-size: 16px; }
+.plan-item .tools button:not(:disabled):hover { border-color: var(--line); color: var(--ink); }
+
+/* A plan played out, a step at a time */
+.outcome { display: grid; gap: 10px; padding-top: 6px; }
+.step.reveal { animation: rise .35s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.outcome .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+
+/* The party's sheet */
+.partysheet { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 10px 12px; display: grid; gap: 10px; font-size: 14px; }
+.partysheet .member { display: grid; gap: 3px; border-left: 3px solid var(--cc, var(--gold)); padding-left: 8px; }
+.partysheet .ab summary { display: flex; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; }
+.partysheet .ab summary::-webkit-details-marker { display: none; }
+.partysheet .left { font: 12px var(--mono); color: var(--muted); text-align: right; }
+.partysheet .cond { color: var(--danger); font-size: 13px; }
 
 /* The card */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }

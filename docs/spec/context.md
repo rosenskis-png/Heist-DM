@@ -23,10 +23,12 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 | Adjudicate | Characters; the encounter with only the routines and events the party knows; the ledger; what the party expects next; the plan and its stances |
 | Resolve | Characters; the whole encounter; the ledger; what really happens tick by tick; the plan, the card and which rolls succeeded |
 | Scene | Characters; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
-| Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); the huddle or her private channel |
+| Question | The read-only slice (D127, D133): the party and its abilities, with what's left of them; the encounter without the objective, sheets or reaction notes, with only the routines and events the party knows; the opening; the ledger without its event log; the DM's recent answers; the question |
+| Party | Both companions' briefs, each exactly as her companion call has it (D132); the party's view of the encounter and the ledger, as for the companion call; the DM's last two narrations; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
+| Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); her private channel |
 | Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
 
-- **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks.
+- **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks; a limited one says what's left of it instead (D128).
 - **Coordinates never go to any call** (D9). Zones come with their size in feet, and openings in rough real dimensions. Code: `src/context.js`.
 - **Hidden things** go only to the resolve and scene calls, marked hidden. The card names nothing the party doesn't know.
 - **Companions** see only what the party knows, plus their own data.
@@ -49,6 +51,8 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Adjudicate | `sample.json` | on | `default` |
 | Resolve | `sample.json` | off | `default` |
 | Scene | `sample.json` | off | `default` |
+| Question | `sample.json` | off | `quick` (D133) |
+| Party | `sample.json` | off | `quick` (D132) |
 | Companion | `sample.json` | off | `quick` (D58) |
 | Campfire | `sample.json` | off | `complex` |
 | Sketch | `sample.json` | off | `complex` |
@@ -56,7 +60,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Encode | `sample.json` | off | `default` |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same ledger and plan get the same card, for free. Conversation and prose must never repeat, so their replay is off.
-- **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, and call only the addressed companion on a private channel.
+- **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, answer questions on the cheap tier from the slice, voice both companions in one call, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
 - **Tiers are a player setting** (D48). The table gives the middle position, Balanced; Faster moves every call one tier down and Smarter one tier up (D71). Code: `src/ask.js`.
 - **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`. Each call has one module in `src/calls/`.

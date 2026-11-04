@@ -5,19 +5,20 @@ import { load } from "./load.js";
 import { run } from "./ops.js";
 import { nextTick, objectives } from "./clock.js";
 import { handoff } from "./handoff.js";
-import { resolve, scene, rollCard } from "./ledger.js";
+import { resolve, scene, answer, rollCard } from "./ledger.js";
 
 export { load, checkPacket, deadlineTick, bindParty, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
-export { handoff, endingOf } from "./handoff.js";
+export { handoff, endingOf, rest } from "./handoff.js";
 export { CAPTURED } from "./clock.js";
-export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, toughnessOf, revealable, LEDGER } from "./ledger.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, checkUses, usesLeft, usesText, toughnessOf, revealable, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions (the DM rules and the engine keeps the books, D75):
 // - {type: "roll", card, rolls?}: roll every roll on the DM's card, before the DM plays it out (`s.dice`).
 // - {type: "resolve", card, dice, out}: the card, its dice, and the DM's account of what happened.
-// - {type: "scene", out, rolls?}: one Moment exchange the DM ruled; the engine rolls its checks.
+// - {type: "scene", out, rolls?}: one exchange the DM ruled; the engine rolls its checks.
+// - {type: "answer", out}: the DM answered a question; its rulings become facts (D133).
 // - {type: "ops", source, ops}: apply engine-written operations, e.g. narration's texture as canon.
 // - {type: "ticks", n}: time passes.
 // - {type: "end", outcome}: the encounter ends without its objective (the player leaves).
@@ -34,6 +35,9 @@ export function apply(state, action) {
       break;
     case "scene":
       s.scene = scene(s, action.out);
+      break;
+    case "answer":
+      answer(s, action.out);
       break;
     case "ops":
       run(s, action.ops, action.ctx ?? {});

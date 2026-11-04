@@ -4,12 +4,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newSession, envFor } from "../src/game/session.js";
-import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput } from "../src/context.js";
+import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput, partyInput, questionInput } from "../src/context.js";
 import { narrated } from "../src/game/turns.js";
 import { LEDGER } from "../src/engine/index.js";
 import { CONDITIONS, THREATS } from "../content/rules.js";
 import { BUDGET } from "../src/ask.js";
-import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema } from "../schemas/index.js";
+import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema, partySchema, questionSchema } from "../schemas/index.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const packet = JSON.parse(file("content/encounters/cells.json"));
@@ -26,7 +26,7 @@ function lateGame() {
   // A fight at its limits too: the party carrying every condition it can, and a threat from everyone (D130).
   s.conditions = Array.from({ length: CONDITIONS.max }, (_, i) => ({ id: `hurt_${i}`, who: s.party[i % 3].id, text: line(CONDITIONS.length) }));
   s.threats = s.packet.people.slice(0, THREATS.max).map((p) => ({ who: p.id, does: line(THREATS.length) }));
-  for (let i = 0; i < 6; i++) session.feeds.plan.push({ at: 100 + i, who: "dm", kind: "narration", text: line(300).repeat(4) });
+  for (let i = 0; i < 6; i++) session.feeds.table.push({ at: 100 + i, ch: "narration", who: "dm", text: line(300).repeat(4) });
   return session;
 }
 
@@ -40,6 +40,8 @@ test("every DM and companion call stays under its budget at the ledger's limits"
     resolve: resolveInput(env, { plan, card: { steps: [{ n: 1, summary: line(120), who: ["player"], at: 0 }], ends_at: 2, rulings: [] }, dice: [], now: ledgerText(s), timeline: aheadText(s, { ticks: 8 }) }, resolveSchema),
     scene: sceneInput(env, { to: "dm", now: ledgerText(s), timeline: aheadText(s, { ticks: 8 }), conversation: [{ from: "player", text: plan }] }, sceneSchema),
     companion: companionInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party[1], [s.party[2]], [{ from: "player", text: plan }], companionSchema),
+    question: questionInput(env, { now: ledgerText(s, { log: false }), recent: Array.from({ length: 6 }, () => ({ from: "dm", text: line(300) })), question: plan }, questionSchema),
+    party: partyInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party.slice(1), [{ from: "player", text: plan }], partySchema),
   };
   const over = [];
   for (const [call, input] of Object.entries(sizes)) {

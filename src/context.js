@@ -3,6 +3,7 @@
 import { beatOf } from "./engine/clock.js";
 import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
+import { usesText } from "./engine/ledger.js";
 import { invariants } from "../content/setting.js";
 import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
@@ -20,14 +21,20 @@ export function promptFor(text, act) {
 // Invariants in play this act: a gated one is absent before its act, not forbidden (docs/spec/context.md §3).
 export const invariantsFor = (act, list = invariants) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
 
-// Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59).
-const abilitiesFor = ({ combat, noncombat, ...rest }) => {
-  const strip = (a) => a && (({ declared, ...x }) => x)(a);
+// Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59). With live state
+// `s` and whose they are, each limited one says what's left (D128).
+const abilitiesFor = ({ combat, noncombat, ...rest }, s, who) => {
+  const strip = (a) => {
+    if (!a) return a;
+    const { declared, ...x } = a;
+    const left = s && who ? usesText(s, who, a.id) : null;
+    return left ? { ...x, left } : x;
+  };
   return { ...rest, combat: strip(combat), noncombat: strip(noncombat) };
 };
 
-// The rules-facing part of a sheet: who they are and what they can do.
-const playSheet = (s) => ({ id: s.id, name: s.name, role: s.role, skills: s.skills, abilities: abilitiesFor(s.abilities) });
+// The rules-facing part of a sheet: who they are and what they can do, with what's left of it.
+const playSheet = (p, s) => ({ id: p.id, name: p.name, role: p.role, skills: p.skills, abilities: abilitiesFor(p.abilities, s, p.id) });
 
 // Where a companion stands with the player, as encounters see it (D79): a mood from a short fixed list, why, and
 // what she has learned, all written at camp. Never her secrets, history or romance arc: those stay at the campfire.
@@ -35,7 +42,7 @@ export const standingOf = (env, id) => env.standing?.[id] ?? { mood: "steady", l
 
 // A companion in an encounter (D79): how she talks, thinks and acts, what she can do, and her standing. The rest
 // of her profile (look, fantasy, backstory, secrets) is for the campfire.
-export function briefProfile(c, standing) {
+export function briefProfile(c, standing, s) {
   const { mood, why, learned } = standing;
   return {
     id: c.id,
@@ -48,7 +55,7 @@ export function briefProfile(c, standing) {
     pursuit: c.pursuit,
     planning: { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch },
     skills: c.skills,
-    abilities: abilitiesFor(c.abilities),
+    abilities: abilitiesFor(c.abilities, s, c.id),
     mood: why ? `${mood}: ${why}` : mood,
     ...(learned?.length ? { learned } : {}),
   };
@@ -235,7 +242,7 @@ function campaign(env, call, schema) {
 }
 
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
-const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p) : { ...playSheet(p), voice: p.voice, mood: standingOf(env, p.id).mood }));
+const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p, env.state) : { ...playSheet(p, env.state), voice: p.voice, mood: standingOf(env, p.id).mood }));
 
 // A companion in the huddle or a private channel, in an encounter: her brief, not her full profile (D79), with the
 // special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The encounter and
@@ -249,7 +256,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
   const form = env.state?.flags?.[me.id]?.form;
   return compose([
     ...campaign(env, "companion", schema),
-    block("You are", { ...briefProfile(me, standingOf(env, me.id)), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
+    block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
     form ? block("You, right now", { form }) : null,
     block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
     block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
@@ -260,6 +267,37 @@ export function companionInput(env, c, self, others, huddle, schema) {
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.card ? block("The plan as the card shows it", c.card) : null,
     privately ? `The player is talking to you alone. It's your turn, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
+  ]);
+}
+
+// Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
+// companionInput gives them, and the table as both of them see it.
+export function partyInput(env, c, companions, huddle, schema) {
+  const members = resolveParty(companions);
+  const [a, b] = members;
+  const pair = b ? pairEntry(env.pairs ?? pairs, a.id, b.id) : null;
+  const rom = romanceOf(env, members);
+  const entry = (me) => {
+    const form = env.state?.flags?.[me.id]?.form;
+    const order = [me, ...members.filter((o) => o !== me)];
+    return {
+      ...briefProfile(me, standingOf(env, me.id), env.state),
+      ...encounterCases(me, rom, order, { private: false, inPerson: false }),
+      ...(form ? { right_now: { form } } : {}),
+    };
+  };
+  return compose([
+    ...campaign(env, "party", schema),
+    block("The companions you play", members.map(entry)),
+    block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
+    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
+    c.now ? block("What the party can see right now", c.now) : null,
+    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    pair ? block("The two of them", { dynamic: pair.dynamic }) : null,
+    block("The table so far", huddle),
+    c.draft ? block("The plan the player is drafting", c.draft) : null,
+    c.card ? block("The plan as the card shows it", c.card) : null,
+    `It's the companions' turn, over the rings: ${members.map((m) => m.name).join(" and ")}.`,
   ]);
 }
 
@@ -390,7 +428,7 @@ function timelineFor(s, { ticks = 12, party = false } = {}) {
 // The ledger as plain lines (D76): where everyone and everything is, doors and flags, hurt, moods, the facts, and
 // the latest of the log and texture. With `party`, only what the party can see or knows (the companions' view);
 // `history: false` leaves out the log and texture, for a call that gets the DM's narration instead.
-export function ledgerText(s, { party = false, history = true } = {}) {
+export function ledgerText(s, { party = false, history = true, log = history } = {}) {
   const st = stateFor(s, { party });
   const pairs = (o, f = (k, v) => `${k} ${v}`) => Object.entries(o).map(([k, v]) => f(k, v)).join("; ");
   const flags = Object.entries(st.flags)
@@ -408,7 +446,7 @@ export function ledgerText(s, { party = false, history = true } = {}) {
     st.dispositions ? `Moods: ${pairs(st.dispositions)}.` : null,
     st.revealed?.length ? `The party has found: ${st.revealed.join(", ")}.` : null,
     st.facts?.length ? `Facts:\n${st.facts.map((f) => `- ${f.id}: ${f.text}`).join("\n")}` : "Facts: none yet.",
-    history ? `Lately, oldest first:\n${st.log.slice(-LOG).map(logLine).join("\n")}` : null,
+    log ? `Lately, oldest first:\n${st.log.slice(-LOG).map(logLine).join("\n")}` : null,
     history && st.canon.length ? `Said so far (texture):\n${st.canon.map((c) => `- ${c.text}`).join("\n")}` : null,
     st.ended ? `The encounter has ended: ${st.ended}.` : null,
   ];
@@ -495,6 +533,24 @@ function dmEncounter(env, { intent = true, party = false, opening = false } = {}
   return [block("The encounter", encounterText(env.packet, env.state, { intent, party })), opening ? block("Opening description", env.packet.opening) : null];
 }
 
+// A question to the DM (D127, D133): the read-only slice. The places, ways, things and fixed facts, with hidden things
+// so the answer never contradicts them; who's there and the routines the party knows, without their sheets or how
+// they react; the party's abilities and what's left of them; the opening; the ledger; and the DM's recent answers.
+// Nothing about what's coming or the companions' voices: a question changes nothing in the world.
+export function questionInput(env, c, schema) {
+  const party = env.party.map((p) => ({ id: p.id, name: p.name, role: p.role, abilities: abilitiesFor(p.abilities, env.state, p.id) }));
+  return compose([
+    ...campaign(env, "question", schema),
+    block("The party", party),
+    block("The encounter", encounterText(env.packet, env.state, { intent: false, party: true, sheets: false })),
+    block("Opening description", env.packet.opening),
+    block("The ledger now", c.now),
+    c.recent?.length ? block("What the DM has told the party lately", c.recent) : null,
+    block("The player asks", c.question),
+    "Answer the question.",
+  ]);
+}
+
 export function adjudicateInput(env, c, schema) {
   return compose([
     ...campaign(env, "adjudicate", schema),
@@ -533,7 +589,7 @@ export function sceneInput(env, c, schema) {
     block("What is really happening, tick by tick", c.timeline),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.recent?.length ? block("Recent exchanges", c.recent) : null,
-    block(c.to === "dm" ? "The player asks the DM" : `The player is talking to ${c.to}`, c.conversation),
+    block(c.to === "do" ? "The player does something" : `The player is talking to ${c.to}`, c.conversation),
     "Answer the player.",
   ]);
 }

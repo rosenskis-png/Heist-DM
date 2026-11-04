@@ -21,7 +21,7 @@ Ask for a roll only where failure is both possible and interesting. Walking past
 - **Very hard:** it works only with luck.
 - **Near impossible:** worth trying only if nothing else is left.
 
-Judge from the situation, the people and the character doing it. Their skills and abilities count; so do what the people they're dealing with want and fear. An ability used as its sheet says, with what it needs in place, does what it says with no roll.
+Judge from the situation, the people and the character doing it. Their skills and abilities count; so do what the people they're dealing with want and fear. An ability used as its sheet says, with what it needs in place, does what it says with no roll. A limited ability says what's left of it; one with none left can't be used, so say so in `notes`.
 
 ## Fights
 A fight is a plan: what everyone does over the next few moments, with any "if" the player likes. Each blow, shove or trick that could go either way is a step with a roll.

@@ -1,18 +1,19 @@
-// The game page (docs/spec/ui.md): the title screen and saves, setup, and the three interfaces (Plan, Moment,
-// Companions) around the map and clock. All game logic lives in src/; this file draws it and handles input.
+// The game page (docs/spec/ui.md): the title screen and saves, setup, and the two tabs (the table and plans) around
+// the map, the clock and the party's sheet. All game logic lives in src/; this file draws it and handles input.
 import { html, useState, useEffect, useRef } from "./h.js";
 import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor } from "../src/game/session.js";
-import { huddle, makeCard, commit, talk, shown } from "../src/game/turns.js";
+import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker } from "../src/game/turns.js";
+import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as roster } from "../content/companions/index.js";
 import { partyProblems } from "../src/campaign/roster.js";
-import { mapView, clockView, partyView, BAND } from "../src/game/view.js";
+import { mapView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "campfire", "adjudicate", "resolve", "scene"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -22,6 +23,8 @@ const STATUS = {
   narration: "The DM tells what happens…",
   moment: "The DM considers…",
   companion: "Your companions are thinking…",
+  party: "Your companions are thinking…",
+  question: "The DM considers…",
   adjudicate: "The DM rules on your plan…",
   resolve: "The dice are down. The DM plays it out…",
   scene: "The DM considers…",
@@ -140,9 +143,8 @@ function Setup({ env, slot, onBack, onBegin }) {
 // ---------- the game ----------
 
 const TABS = [
-  ["plan", "Plan"],
-  ["moment", "Moment"],
-  ["companions", "Companions"],
+  ["table", "Table"],
+  ["plans", "Plans"],
 ];
 
 function Game({ env, slot, initial, onQuit }) {
@@ -150,8 +152,8 @@ function Game({ env, slot, initial, onQuit }) {
   const session = ref.current;
   const [, setV] = useState(0);
   const refresh = () => setV((v) => v + 1);
-  const [tab, setTab] = useState("plan");
-  const [seen, setSeen] = useState({ plan: session.seq, moment: session.seq, companions: session.seq });
+  const [tab, setTab] = useState("table");
+  const [seen, setSeen] = useState({ table: session.seq, plans: session.seq });
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState(null);
   const [menu, setMenu] = useState(false);
@@ -159,7 +161,10 @@ function Game({ env, slot, initial, onQuit }) {
   const [sideOpen, setSideOpen] = useState(false);
   const [speed, setSpeed] = useState(prefs.get().speed);
   const [saved, setSaved] = useState(null);
+  // The plan whose dice are being shown one step at a time.
+  const [fresh, setFresh] = useState(null);
   const calls = useRef([]);
+  const later = useRef(null);
   const s = session.state;
 
   // A call whose input crossed its budget is recorded in the save, so growth never goes unnoticed (D76).
@@ -177,6 +182,12 @@ function Game({ env, slot, initial, onQuit }) {
   useEffect(() => {
     save();
   }, []);
+  // Editing the draft calls nothing, so it's saved a moment after the last change.
+  const touch = () => {
+    refresh();
+    clearTimeout(later.current);
+    later.current = setTimeout(save, 1200);
+  };
 
   const run = async (where, fn) => {
     if (busy) return;
@@ -194,9 +205,8 @@ function Game({ env, slot, initial, onQuit }) {
   };
 
   const feedSeq = {
-    plan: Math.max(0, ...session.feeds.plan.map((e) => e.at)),
-    moment: Math.max(0, ...session.feeds.moment.map((e) => e.at)),
-    companions: Math.max(0, ...[session.feeds.huddle, ...Object.values(session.feeds.private)].flat().map((e) => e.at)),
+    table: Math.max(0, ...session.feeds.table.map((e) => e.at)),
+    plans: Math.max(0, ...session.feeds.plans.map((e) => e.at)),
   };
   useEffect(() => {
     setSeen((x) => ({ ...x, [tab]: feedSeq[tab] }));
@@ -211,6 +221,7 @@ function Game({ env, slot, initial, onQuit }) {
       if (e?.code !== "declined") setSaved(errorText(e));
     }
   };
+  const props = { session, env, io, run, busy, refresh, touch, colors, onQuit };
 
   return html`<div className="game">
     <header className="top">
@@ -219,7 +230,7 @@ function Game({ env, slot, initial, onQuit }) {
         <${Clock} clock=${clockView(s)} compact=${true} />
         <button className="iconbtn" aria-expanded=${menu} onClick=${() => setMenu(!menu)}>Menu</button>
       </div>
-      <div className="gutter"><div className="roster" style=${{ maxWidth: "1240px", margin: "0 auto 6px" }}>${partyView(s).map((p) => html`<span key=${p.id} className=${p.down ? "down" : ""}>${p.name}${p.form === "animal" ? " · a rat" : ""}${p.down ? " · down" : ""}${p.conditions.map((c) => ` · ${c}`).join("")}</span>`)}</div></div>
+      <div className="gutter"><div className="roster" style=${{ maxWidth: "1240px", margin: "0 auto 6px" }}>${partyView(s).map((p) => html`<span key=${p.id} className=${p.down ? "down" : ""}>${p.name}${p.form ? ` · ${p.form === "animal" ? "in animal form" : p.form}` : ""}${p.down ? " · down" : ""}${p.conditions.map((c) => ` · ${c}`).join("")}</span>`)}</div></div>
       ${menu
         ? html`<div className="gutter"><div className="menu">
             <div><b>Speed and quality.</b> <span className="muted small">Every call is charged to your own Claude usage.</span></div>
@@ -235,56 +246,176 @@ function Game({ env, slot, initial, onQuit }) {
         : null}
       <div className="gutter"><nav className="tabs" aria-label="Interfaces">
         ${TABS.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
-        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Map</button>
+        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Map & party</button>
       </nav></div>
     </header>
     <div className="body gutter">
       <aside className=${`side${sideOpen ? "" : " closed"}`}>
         <${MapPanel} view=${mapView(s)} clock=${clockView(s)} colors=${colors} />
+        <${PartySheet} sheet=${sheetView(s)} colors=${colors} />
       </aside>
       <main className="pane">
-        ${tab === "plan" ? html`<${PlanTab} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${error?.where === "plan" ? error.text : null} refresh=${refresh} onQuit=${onQuit} />` : null}
-        ${tab === "moment" ? html`<${MomentTab} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${error?.where === "moment" ? error.text : null} refresh=${refresh} />` : null}
-        ${tab === "companions" ? html`<${CompanionsTab} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${error?.where === "companions" ? error.text : null} colors=${colors} />` : null}
+        ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
+        ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
       </main>
     </div>
   </div>`;
 }
 
-// ---------- Plan ----------
+// The party's abilities and what's left of them (D128), and what each is carrying until a rest.
+function PartySheet({ sheet, colors }) {
+  return html`<section className="partysheet" aria-label="The party">
+    ${sheet.map((p) => html`<div key=${p.id} className="member" style=${{ "--cc": colors[p.id] }}>
+      <b>${p.id === "player" ? `${p.name} (you)` : p.name}</b>
+      ${p.abilities.map((a) => html`<details key=${a.id} className="ab"><summary><span>${a.name}</span><span className="left">${a.left}</span></summary><span className="muted">${a.effect}</span></details>`)}
+      ${p.conditions.length ? html`<span className="cond">${p.conditions.join(" · ")}</span>` : null}
+    </div>`)}
+  </section>`;
+}
 
 function Narration({ text }) {
   return html`<div className="narr">${paras(text).map((p, i) => html`<p key=${i}>${p}</p>`)}</div>`;
 }
 
-function PlanTab({ session, env, io, run, busy, error, refresh, onQuit }) {
+// ---------- The table ----------
+
+// What each addressee means, under the picker.
+function hintFor(target, s) {
+  if (target === "dm") return "A question. Nothing happens in the world, and what the DM tells you holds from now on.";
+  if (target === "do") return "Something quick. The DM rules on it, and it may take time.";
+  if (target === "party") return "Over the rings: only the party hears, and time stands still.";
+  if (s.party.some((p) => p.id === target)) return "Only she hears this, through her ring.";
+  return "Said aloud. They hear it, and so might anyone nearby.";
+}
+const PLACEHOLDER = { dm: "From her cell, could she see the key peg?", do: "I feel along the bench for a loose nail.", party: "How do we get those keys?" };
+
+function TableTab({ session, env, io, run, busy, error, refresh, colors, onQuit, goPlans }) {
   const s = session.state;
-  const [editing, setEditing] = useState(false);
+  const [to, setTo] = useState("dm");
+  const [text, setText] = useState("");
   const end = useRef(null);
   useEffect(() => {
     end.current?.scrollIntoView?.({ block: "nearest" });
-  }, [session.feeds.plan.length]);
-  const showCard = session.card && !editing;
-  return html`<section className="feed" aria-label="Plan">
-    ${session.feeds.plan.map((e) =>
-      e.kind === "narration"
-        ? html`<${Narration} key=${e.at} text=${e.text} />`
-        : e.kind === "card"
-          ? html`<details key=${e.at} className="check"><summary><span className="pill gold">Plan</span> ${e.text.length > 90 ? `${e.text.slice(0, 90)}…` : e.text}</summary><${CardBody} view=${e.card} /></details>`
-          : html`<p key=${e.at} className="system">${e.text}</p>`,
-    )}
+  }, [session.feeds.table.length]);
+  const { seen, heard } = partyPerceives(s);
+  const people = s.packet.people.filter((p) => s.at[p.id] && (seen.has(s.at[p.id]) || heard.has(s.at[p.id])) && !s.flags[p.id]?.down);
+  const companions = s.party.slice(1);
+  const valid = ["dm", "do", "party", ...people.map((p) => p.id), ...companions.map((c) => c.id)];
+  const target = valid.includes(to) ? to : "dm";
+  const ringed = target === "party" || companions.some((c) => c.id === target);
+  const ended = !!session.ended;
+  const send = () => {
+    const t = text.trim();
+    if (!t) return;
+    setText("");
+    run("table", () => (target === "dm" ? question(session, io, env.prompts, { text: t }) : ringed ? rings(session, io, env.prompts, { to: target, text: t }) : talk(session, io, env.prompts, { to: target, text: t })));
+  };
+  const who = (id) => speaker(s, id);
+  const mine = (e) => (e.ch === "dm" ? "You, to the DM" : e.ch === "rings" ? "You, over the rings" : e.ch === "private" ? `You, privately to ${who(e.with)}` : e.to === "do" ? "You" : `You, to ${who(e.to)}`);
+  const chip = (id, label) => html`<button key=${id} aria-pressed=${target === id} onClick=${() => setTo(id)}>${label}</button>`;
+  return html`<section className="feed" aria-label="Table">
+    ${session.feeds.table.map((e) => {
+      if (e.ch === "narration") return html`<${Narration} key=${e.at} text=${e.text} />`;
+      if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">${mine(e)}</span><span className="text">${e.text}</span></div>`;
+      if (e.kind === "check")
+        return html`<div key=${e.at} className="check"><span><span className=${`pill ${e.success ? "ok" : "bad"}`}>${e.success ? "Success" : "Failure"}</span> <span className="small muted">${who(e.actor)}, ${BAND[e.difficulty]}</span></span><span>${e.text}</span></div>`;
+      if (e.kind === "redirect")
+        return html`<div key=${e.at} className="redirect"><span className="small muted">That's a plan:</span><q>${e.text}</q>${e.added ? html`<button className="link" onClick=${goPlans}>On your plan</button>` : html`<button className="ghost" onClick=${() => (addToPlan(session, e), refresh())}>Add to the plan</button>`}</div>`;
+      if (e.kind === "time") return html`<p key=${e.at} className="small muted">${e.text}</p>`;
+      if (s.party.some((p) => p.id === e.who))
+        return html`<div key=${e.at} className=${`say comp${e.text ? "" : " pass"}`} style=${{ "--cc": colors[e.who] }}>
+          <span className="from">${who(e.who)}${e.ch === "private" ? ", privately" : ""}</span>
+          <span className="text">${e.text ?? `${who(e.who)} lets it go.`}</span>
+          ${e.stance ? html`<span className="stance">${e.stance.kind === "refuse" ? "Refuses" : e.stance.kind === "insist" ? "Insists" : "On one condition"}: ${e.stance.text}. It's on your plan for you to decide.</span>` : null}
+        </div>`;
+      return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span>${e.rulings ? html`<span className="ruled">${e.rulings.map((r, i) => html`<span key=${i}>Holds from now on: ${r}</span>`)}</span>` : null}</div>`;
+    })}
     <div ref=${end}></div>
-    ${session.ended
+    ${ended
       ? html`<${Ending} session=${session} onQuit=${onQuit} />`
-      : showCard
-        ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setEditing(true)} onRun=${(checkpoints) => run("plan", () => commit(session, io, env.prompts, { checkpoints }))} />`
-        : html`<${Draft} session=${session} busy=${busy} error=${error} refresh=${refresh} editing=${!!session.card} onCancel=${() => setEditing(false)}
-            onMake=${() => run("plan", async () => (await makeCard(session, io, env.prompts), setEditing(false)))} />`}
+      : html`<div className="composer">
+          <div className="to" role="group" aria-label="Who it's for">
+            ${chip("dm", "Ask the DM")}${chip("do", "Do something")}
+            ${people.map((p) => chip(p.id, p.name.split(",")[0]))}
+            <span className="sep" aria-hidden="true"></span>
+            ${chip("party", "The party")}
+            ${companions.map((c) => chip(c.id, `${c.name}, privately`))}
+          </div>
+          <span className="hint">${hintFor(target, s)}</span>
+          <textarea id="table-input" rows="2" value=${text} disabled=${!!busy} onChange=${(e) => setText(e.target.value)}
+            onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
+            placeholder=${PLACEHOLDER[target] ?? (ringed ? "Just between us…" : "What do you say?")}></textarea>
+          ${error ? html`<p className="error">${error}</p>` : null}
+          <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
+        </div>`}
   </section>`;
 }
 
-function Stances({ session, refresh }) {
+// ---------- Plans ----------
+
+const HAPPENED = { yes: "Done", partly: "Partly done", no: "Didn't happen" };
+
+// A plan that ran: its steps one at a time, each with its roll (already rolled, so showing them costs nothing),
+// then the DM's telling.
+function Outcome({ o, animate, onDone }) {
+  const total = o.steps.length;
+  const [n, setN] = useState(animate ? 0 : total);
+  useEffect(() => {
+    if (n >= total) return void (animate && onDone?.());
+    const t = setTimeout(() => setN(n + 1), 900);
+    return () => clearTimeout(t);
+  }, [n, total]);
+  return html`<div className="outcome">
+    <ol className="steps">
+      ${o.steps.slice(0, n).map((st) => html`<li key=${st.n} className="step reveal">
+        <span className="n">${st.n}</span>
+        <div className="main">
+          <span>${st.summary}</span>
+          <div className="timing">
+            ${st.roll ? html`<span className=${`pill ${st.roll.success ? "ok" : "bad"}`}>${BAND[st.roll.band]} · ${st.roll.success ? "made it" : "failed"}</span>` : html`<span className="pill">No roll</span>`}
+            <span className="small muted">${HAPPENED[st.happened]}</span>
+          </div>
+          ${o.stopped?.at === st.n ? html`<span className="fails">The plan stopped here: ${o.stopped.why}</span>` : null}
+        </div>
+      </li>`)}
+    </ol>
+    ${n < total ? html`<div className="row"><span className="status">Rolling…</span><button className="link" onClick=${() => setN(total)}>Show it all</button></div>` : html`<${Narration} text=${o.narration} />`}
+  </div>`;
+}
+
+function PlanRun({ entry, open, animate, onDone }) {
+  return html`<details className="check" open=${open}>
+    <summary><span className="pill gold">Plan</span> ${entry.text.length > 90 ? `${entry.text.slice(0, 90)}…` : entry.text}</summary>
+    ${entry.outcome ? html`<${Outcome} o=${entry.outcome} animate=${animate} onDone=${onDone} />` : html`<${CardBody} view=${entry.card} />`}
+  </details>`;
+}
+
+function PlansTab({ session, env, io, run, busy, error, refresh, touch, onQuit, fresh, setFresh }) {
+  const [onCard, setOnCard] = useState(true);
+  const stale = cardStale(session);
+  const runs = session.feeds.plans;
+  const make = () => run("plans", async () => (await makeCard(session, io, env.prompts), setOnCard(true)));
+  const play = (checkpoints) =>
+    run("plans", async () => {
+      await commit(session, io, env.prompts, { checkpoints });
+      setFresh(session.feeds.plans.at(-1)?.at ?? null);
+    });
+  return html`<section className="feed" aria-label="Plans">
+    ${runs.map((e, i) => html`<${PlanRun} key=${e.at} entry=${e} open=${i === runs.length - 1} animate=${fresh === e.at} onDone=${() => setFresh(null)} />`)}
+    ${fresh !== null
+      ? null
+      : session.ended
+      ? html`<${Ending} session=${session} onQuit=${onQuit} />`
+      : session.card && !stale && onCard
+        ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setOnCard(false)} onRun=${play} />`
+        : html`<${DraftBuilder} session=${session} busy=${busy} error=${error} touch=${touch} stale=${stale}
+            onBack=${session.card && !stale ? () => setOnCard(true) : null} onMake=${make}
+            onTalk=${() => run("plans", () => talkOver(session, io, env.prompts))} />`}
+  </section>`;
+}
+
+function Stances({ session, touch }) {
   const s = session.state;
   if (!session.draft.stances.length) return null;
   const color = (id) => s.party.find((p) => p.id === id)?.color;
@@ -297,25 +428,69 @@ function Stances({ session, refresh }) {
           ["keep", "Keep it", "It stands: if it trips, she won't do that step."],
           ["resolved", "It's handled", "The plan already deals with it."],
           ["override", "Override", "Go ahead anyway. She'll remember."],
-        ].map(([d, label, note]) => html`<button key=${d} title=${note} aria-pressed=${st.decision === d} onClick=${() => ((st.decision = d), refresh())}>${label}</button>`)}
-        <button className="link" onClick=${() => (session.draft.stances.splice(i, 1), refresh())}>Drop</button>
+        ].map(([d, label, note]) => html`<button key=${d} title=${note} aria-pressed=${st.decision === d} onClick=${() => ((st.decision = d), touch())}>${label}</button>`)}
+        <button className="link" onClick=${() => (session.draft.stances.splice(i, 1), touch())}>Drop</button>
       </div>
     </div>`)}
   </div>`;
 }
 
-function Draft({ session, busy, error, refresh, editing, onCancel, onMake }) {
+// The plan as a list of actions (D134): Enter adds one, nothing is sent until the card is made, and the list stays
+// as written after the plan runs.
+function DraftBuilder({ session, busy, error, touch, stale, onBack, onMake, onTalk }) {
+  const d = session.draft;
+  const [text, setText] = useState("");
+  const [editing, setEditing] = useState(null);
+  const [clearing, setClearing] = useState(false);
+  const add = () => {
+    if (!text.trim()) return;
+    addItem(d, text);
+    setText("");
+    touch();
+  };
+  const saveEdit = () => {
+    if (editing) editItem(d, editing.id, editing.text);
+    setEditing(null);
+    touch();
+  };
+  const n = d.items.length;
   return html`<div className="composer">
-    <label htmlFor="plan-draft" className="small muted">The plan, in your words. Number the steps if you like, and say when ("when he sits down…") and what if ("if the cask is unguarded…, otherwise…").</label>
-    <textarea id="plan-draft" rows="6" value=${session.draft.plan} disabled=${!!busy} onChange=${(e) => ((session.draft.plan = e.target.value), refresh())}
-      placeholder="1. While Snag is at the cask, we…"></textarea>
-    <${Stances} session=${session} refresh=${refresh} />
+    <div className="row"><b>The plan</b>${n ? html`<span className="small muted">Tap an action to change it.</span>` : null}</div>
+    ${n
+      ? html`<ol className="plan-list">
+          ${d.items.map((x, i) =>
+            editing?.id === x.id
+              ? html`<li key=${x.id} className="plan-item"><span className="n">${i + 1}</span>
+                  <input id=${`plan-edit-${x.id}`} autoFocus value=${editing.text} onChange=${(e) => setEditing({ id: x.id, text: e.target.value })} onBlur=${saveEdit}
+                    onKeyDown=${(e) => (e.key === "Enter" ? (e.preventDefault(), saveEdit()) : e.key === "Escape" ? setEditing(null) : null)} />
+                  <span className="tools"><button aria-label="Done" onMouseDown=${(e) => e.preventDefault()} onClick=${saveEdit}>✓</button></span></li>`
+              : html`<li key=${x.id} className="plan-item"><span className="n">${i + 1}</span>
+                  <button className="text" disabled=${!!busy} onClick=${() => setEditing({ id: x.id, text: x.text })}>${x.text}</button>
+                  <span className="tools">
+                    <button aria-label="Move up" disabled=${!!busy || i === 0} onClick=${() => (moveItem(d, x.id, -1), touch())}>↑</button>
+                    <button aria-label="Move down" disabled=${!!busy || i === n - 1} onClick=${() => (moveItem(d, x.id, 1), touch())}>↓</button>
+                    <button aria-label="Delete" disabled=${!!busy} onClick=${() => (removeItem(d, x.id), touch())}>×</button>
+                  </span></li>`,
+          )}
+        </ol>`
+      : html`<p className="small muted" style=${{ margin: 0 }}>Add the plan one action at a time: who does what, in order, with any "when" or "if". Nothing goes to the DM until you make the card.</p>`}
+    ${stale ? html`<p className="small muted" style=${{ margin: 0 }}>You've changed the plan since its card was made. Make the card again to price it.</p>` : null}
+    <textarea id="plan-input" rows="2" value=${text} disabled=${!!busy} onChange=${(e) => setText(e.target.value)}
+      onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), add())} placeholder="Fern turns into a rat while Snag drinks."></textarea>
+    <${Stances} session=${session} touch=${touch} />
     ${error ? html`<p className="error">${error}</p>` : null}
     <div className="row">
-      <span className="status">${busy ?? ""}</span>
-      <span style=${{ display: "flex", gap: "8px" }}>
-        ${editing ? html`<button className="ghost" disabled=${!!busy} onClick=${onCancel}>Back to the card</button>` : null}
-        <button className="primary" disabled=${!!busy || !session.draft.plan.trim()} onClick=${onMake}>${editing ? "Remake the card" : "Make the card"}</button>
+      <span style=${{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+        <button className="ghost" disabled=${!!busy || !text.trim()} onClick=${add}>Add</button>
+        ${clearing
+          ? html`<span><button className="link danger" onClick=${() => (clearDraft(d), setClearing(false), touch())}>Clear it all</button><button className="link" onClick=${() => setClearing(false)}>Keep</button></span>`
+          : html`<button className="link" disabled=${!!busy || !n} onClick=${() => setClearing(true)}>Clear the plan</button>`}
+      </span>
+      <span style=${{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
+        <span className="status">${busy ?? ""}</span>
+        <button className="ghost" disabled=${!!busy || !n} title="Say it over the rings; both companions react." onClick=${onTalk}>Talk it over</button>
+        ${onBack ? html`<button className="ghost" disabled=${!!busy} onClick=${onBack}>Back to the card</button>` : null}
+        <button className="primary" disabled=${!!busy || !n} onClick=${onMake}>${session.card ? "Make the card again" : "Make the card"}</button>
       </span>
     </div>
   </div>`;
@@ -373,93 +548,6 @@ function Ending({ session, onQuit }) {
     <p className="muted">${h.log}</p>
     <p className="small muted">The next encounter isn't built yet. Your save keeps this ending.</p>
     <button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>
-  </section>`;
-}
-
-// ---------- Moment ----------
-
-function MomentTab({ session, env, io, run, busy, error, refresh }) {
-  const s = session.state;
-  const [to, setTo] = useState("dm");
-  const [text, setText] = useState("");
-  const { seen, heard } = partyPerceives(s);
-  const people = s.packet.people.filter((p) => s.at[p.id] && (seen.has(s.at[p.id]) || heard.has(s.at[p.id])) && !s.flags[p.id]?.down);
-  const target = people.some((p) => p.id === to) ? to : "dm";
-  const send = () => {
-    const t = text.trim();
-    if (!t) return;
-    setText("");
-    run("moment", () => talk(session, io, env.prompts, { to: target, text: t }));
-  };
-  const addToPlan = (e) => {
-    session.draft.plan = `${session.draft.plan.trim()}${session.draft.plan.trim() ? "\n" : ""}${e.text}`;
-    e.added = true;
-    refresh();
-  };
-  const who = (id) => (id === "dm" ? "DM" : id === "player" ? "You" : nameOf(s, id));
-  return html`<section className="feed" aria-label="Moment">
-    ${!session.feeds.moment.length
-      ? html`<p className="muted">Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A plan of several steps goes on the card, and so does a fight: say what everyone does.</p>`
-      : null}
-    ${session.feeds.moment.map((e) => {
-      if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">You${e.to && e.to !== "dm" ? ` to ${who(e.to)}` : ""}</span><span className="text">${e.text}</span></div>`;
-      if (e.kind === "check" || e.kind === "action")
-        return html`<div key=${e.at} className="check"><span><span className=${`pill ${e.success ? "ok" : "bad"}`}>${e.success ? "Success" : "Failure"}</span> <span className="small muted">${who(e.actor)}${e.skill ? `, ${e.skill}` : ""}, ${BAND[e.difficulty]}</span></span><span>${e.text}</span></div>`;
-      if (e.kind === "redirect")
-        return html`<div key=${e.at} className="redirect"><span className="small muted">For the plan:</span><q>${e.text}</q>${e.added ? html`<span className="small muted">Added to your draft.</span>` : html`<button className="ghost" onClick=${() => addToPlan(e)}>Add to the plan</button>`}</div>`;
-      if (e.kind === "time") return html`<p key=${e.at} className="small muted">${e.text}</p>`;
-      return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span></div>`;
-    })}
-    <div className="composer">
-      <div className="to" role="group" aria-label="Talk to">
-        <button aria-pressed=${target === "dm"} onClick=${() => setTo("dm")}>Ask the DM</button>
-        ${people.map((p) => html`<button key=${p.id} aria-pressed=${target === p.id} onClick=${() => setTo(p.id)}>${p.name.split(",")[0]}</button>`)}
-      </div>
-      <textarea id="moment-input" rows="2" value=${text} disabled=${!!busy || !!session.ended} onChange=${(e) => setText(e.target.value)}
-        onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
-        placeholder=${target === "dm" ? "From her cell, could she see the key peg?" : "What do you say?"}></textarea>
-      ${error ? html`<p className="error">${error}</p>` : null}
-      <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim() || !!session.ended} onClick=${send}>Send</button></div>
-    </div>
-  </section>`;
-}
-
-// ---------- Companions ----------
-
-function CompanionsTab({ session, env, io, run, busy, error, colors }) {
-  const s = session.state;
-  const [channel, setChannel] = useState("all");
-  const [text, setText] = useState("");
-  const companions = s.party.slice(1);
-  const feed = channel === "all" ? session.feeds.huddle : session.feeds.private[channel];
-  const send = () => {
-    const t = text.trim();
-    if (!t) return;
-    setText("");
-    run("companions", () => huddle(session, io, env.prompts, { to: channel, text: t }));
-  };
-  const name = (id) => (id === "player" ? "You" : nameOf(s, id));
-  return html`<section className="feed" aria-label="Companions">
-    <div className="to" role="group" aria-label="Channel">
-      <button aria-pressed=${channel === "all"} onClick=${() => setChannel("all")}>Everyone</button>
-      ${companions.map((c) => html`<button key=${c.id} aria-pressed=${channel === c.id} onClick=${() => setChannel(c.id)}>${c.name}, privately</button>`)}
-    </div>
-    ${!feed.length ? html`<p className="muted">${channel === "all" ? "Time stops while you talk it over. Nothing said here moves the world; only the plan you commit does." : "Only she hears this, through her ring."}</p>` : null}
-    ${feed.map((e) =>
-      e.who === "player"
-        ? html`<div key=${e.at} className="say player"><span className="from">You</span><span className="text">${e.text}</span></div>`
-        : html`<div key=${e.at} className=${`say comp${e.text ? "" : " pass"}`} style=${{ "--cc": colors[e.who] }}>
-            <span className="from">${name(e.who)}</span>
-            <span className="text">${e.text ?? `${name(e.who)} lets it go.`}</span>
-            ${e.stance ? html`<span className="stance">${e.stance.kind === "refuse" ? "Refuses" : e.stance.kind === "insist" ? "Insists" : "On one condition"}: ${e.stance.text}. It's on your draft for you to decide.</span>` : null}
-          </div>`,
-    )}
-    <div className="composer">
-      <textarea id="huddle-input" rows="2" value=${text} disabled=${!!busy} onChange=${(e) => setText(e.target.value)}
-        onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())} placeholder=${channel === "all" ? "How do we get those keys?" : "Just between us…"}></textarea>
-      ${error ? html`<p className="error">${error}</p>` : null}
-      <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
-    </div>
   </section>`;
 }
 

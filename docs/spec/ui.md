@@ -4,27 +4,29 @@ What the player sees. The page is `app/`; what it draws is derived in `src/game/
 
 ---
 
-## Three interfaces
-Splitting the single chat into three is one of the project's two breakthroughs. Each has one job, and deliberation in one never moves the world in another.
+## Two tabs (D127)
+Deliberation never moves the world, and committing a plan stays a deliberate act with stakes, kept apart from talk.
 
-| Interface | Job | Moves time? |
+| Tab | Job | Moves time? |
 |---|---|---|
-| **Plan** | The draft card, committing, the DM's card, the narration of each plan played out | Yes, through committed cards |
-| **Moment** | Questions, talk, quick actions; in a fight, only questions and talk (D130) | Only physical work takes time (`docs/spec/architecture.md`) |
-| **Companions** | The huddle, private channels, the campfire | No |
+| **The table** | One running chat: the DM's narration and answers, people talking, the companions chiming in over the rings, private words | Only what the player does or says aloud, and only physical work takes time (`docs/spec/architecture.md`) |
+| **Plans** | The draft, the card, the dice and the outcome of each plan that ran | Yes, through committed cards |
 
-On a phone the three are tabs, each with an unread marker, and the map is one tap away. On a wide screen the map and clock hold a column beside the tabs (D72).
+On a phone the two are tabs, each with an unread marker, and the map and the party's sheet are one tap away ("Map & party"). On a wide screen they hold a column beside the tabs (D72).
 
-- **Plan** shows the narration, each committed card, and the draft: the plan text and the stances waiting on the player.
-- **Moment** has an addressee: the DM, or a person the party can see or hear (D70). A plan the DM sends back shows with "Add to the plan".
-- **Companions** has the huddle and one private channel per companion. A stance a companion takes goes onto the draft for the player to decide.
+- **The table** has an addressee picker: ask the DM, do something, a person the party can see or hear (D70), the party, or one companion privately. Code decides which calls each one runs (D127; `src/game/turns.js`), and a line under the picker says what it means. The DM's answers show what they settled ("Holds from now on", D133). A plan the DM sends back shows with "Add to the plan". Party talk is over the rings; only words to a person are said aloud in the world.
+- **Plans** shows each plan that ran, then the card or the draft.
+- **The draft** is a list of actions (D134): Enter adds one, and each can be moved up or down, edited by tapping it, or deleted. Under it: clear the plan, talk it over (over the rings, both companions react), and make the card. The stances waiting on the player sit with it. The list stays as written after the plan runs.
+- **A plan that ran** shows its steps one at a time, each as the card put it with its roll ("Medium · made it") and whether it happened, then where it stopped if it did, then the DM's telling. The dice were rolled before it played out, so showing them costs nothing. Never the DM's own record of a step, which can name what the party hasn't found.
+- **The party's sheet** lists each member's abilities, with what's left of the limited ones ("1 of 1 this encounter, 3 of 3 until a rest", D128), and the conditions they carry.
+- A companion's stance goes onto the draft for the player to decide.
 
 ## The card
 - **The plan is the player's prose,** usually numbered steps, with any timing and conditions they wrote (D35).
 - **Shown:** the DM's steps, the tick each happens on and the beats of the routines the party knows at that tick, when the whole plan is done (D77), each roll's band ("Easy", never a percentage; D33) with its one-line reason and what failure costs, the rulings it depends on, the DM's notes on it, and the stances with keep / resolved / override.
 - **Never shown:** anything the party doesn't know. The card never says a plan will go wrong (D36).
-- The player can confirm, edit the plan text (which makes a new card), or mark steps "pause after this step" (D69).
-- On a phone the card opens as a sheet over the Plan tab (D72).
+- The player can run it, go back to the draft (a changed draft needs a new card before it can run, D134), or mark steps "pause after this step" (D69).
+- On a phone the card opens as a sheet over the Plans tab (D72).
 
 ## The map (D9)
 **Exact layout or no map.** The map is drawn from the packet's geometry, so it matches the real layout.
@@ -41,7 +43,7 @@ On a phone the three are tabs, each with an unread marker, and the map is one ta
 ## Carried over from Gravenhold (legacy `Title`, `Setup`, `Drawer`, `AbilitySheet`, `Bar`, `Sigil`)
 - The title screen with save slots, and the setup screen: a name and the two companions (D126). Class and faction come later.
 - The theme tokens and light and dark styles.
-- The relationship drawer and the ability sheet.
+- The relationship drawer.
 - Safe-area handling for phones.
 
 Gravenhold's `Game` component is built around one chat log and is not reused. Its `MapSVG` draws rectangles that don't follow the real layout and is not reused.

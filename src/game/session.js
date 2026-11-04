@@ -3,6 +3,7 @@
 import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
 import { companions as roster } from "../../content/companions/index.js";
+import { emptyDraft, draftFrom } from "./draft.js";
 
 // The player's sheet: their name, their class's skills and abilities.
 export function playerSheet(player) {
@@ -18,7 +19,7 @@ export function newSession({ packet, player, companions, seed = 1, slack = 0, ac
   const party = partyFor(player, companions);
   const state = load({ packet, party, slack, seed });
   const session = {
-    v: 2,
+    v: 3,
     player,
     companions,
     act,
@@ -27,8 +28,11 @@ export function newSession({ packet, player, companions, seed = 1, slack = 0, ac
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
     state,
-    feeds: { plan: [], moment: [], huddle: [], private: Object.fromEntries(companions.map((id) => [id, []])) },
-    draft: { plan: "", stances: [] },
+    // The table is one running chat; each entry's `ch` says which: the DM's answers ("dm"), scene exchanges
+    // ("scene"), party talk over the rings ("rings"), a private word with one companion ("private", `with`), and
+    // the DM's narration ("narration"). Plans holds each card that ran, with its outcome (D127).
+    feeds: { table: [], plans: [] },
+    draft: emptyDraft(),
     card: null,
     counts: { exchanges: 0, edits: 0, out: null },
     reactions: [],
@@ -36,13 +40,13 @@ export function newSession({ packet, player, companions, seed = 1, slack = 0, ac
     standing: Object.fromEntries(companions.map((id) => [id, { mood: "steady", learned: [] }])),
     actions: [],
   };
-  post(session, "plan", { who: "dm", kind: "narration", text: packet.opening });
+  post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;
 }
 
-// Adds an entry to a feed: plan, moment, huddle, or a companion's private channel.
+// Adds an entry to a feed: the table or plans.
 export function post(session, feed, entry) {
-  const list = session.feeds[feed] ?? session.feeds.private[feed];
+  const list = session.feeds[feed];
   const e = { at: ++session.seq, tick: session.state.tick, ...entry };
   list.push(e);
   return e;
@@ -88,5 +92,23 @@ export function restore(json, packet) {
   state.toughness ??= Object.fromEntries(packet.people.map((p) => [p.id, toughnessOf(p)]));
   state.conditions ??= [];
   state.threats ??= [];
-  return { ...saved, actions: [], state: { ...state, packet: bindParty(packet, party), party } };
+  // A save from before ability uses were counted (D128).
+  state.used ??= {};
+  state.spent ??= {};
+  return { ...tableFrom(saved), actions: [], state: { ...state, packet: bindParty(packet, party), party } };
+}
+
+// A save from before the table (D127): its Plan, Moment and Companions feeds merge into one table, in the order
+// they were said, and its plan text becomes a list of actions (D134).
+function tableFrom(saved) {
+  if (saved.feeds.table) return saved;
+  const { plan = [], moment = [], huddle = [], private: priv = {} } = saved.feeds;
+  const table = [
+    ...plan.filter((e) => e.kind === "narration").map((e) => ({ ...e, ch: "narration" })),
+    ...moment.map((e) => ({ ...e, ch: "scene", to: e.to === "dm" ? "do" : e.to })),
+    ...huddle.map((e) => ({ ...e, ch: "rings", ...(e.who === "player" ? { to: "party" } : {}) })),
+    ...Object.entries(priv).flatMap(([id, list]) => list.map((e) => ({ ...e, ch: "private", with: id }))),
+  ].sort((a, b) => a.at - b.at);
+  const plans = plan.filter((e) => e.kind === "card").map(({ who, ...e }) => e);
+  return { ...saved, v: 3, feeds: { table, plans }, draft: draftFrom(saved.draft) };
 }
