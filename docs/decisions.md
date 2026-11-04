@@ -719,3 +719,8 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 
 **Why:** The designer's aim: a party that wins and takes its chances arrives at camp happier and closer; one that fails every time still arrives, but angry and distrustful. Using the relationship numbers the campfire already reads makes that mood real at camp without a new mechanic or a prompt rule, and its words come from her stances (D94). Sending the party back to the start of something they failed is a treadmill, and losing a character for good breaks the romance pillar (D23).
 **Rules out:** A game over; returning the party to an earlier place after a failure; permanent death, injury or penalty for anyone in the party.
+
+### D132. The huddle keeps one shared companion call
+**Decided:** The designer's call (2026-11-04), after the bench ran the same huddle cases as one party call and as two companion calls (`docs/spec/calls/party.md`). The party call voices both companions in the huddle, as D127 planned; a private word to one is still her companion call. Its input is about 42% smaller than two calls at the ledger's limits. The game switches to it with the table's tabs (`docs/roadmap.md`).
+**Why:** On the bench the two stayed distinct people and still caught the flawed plan's holes some of the time. One hole (the walkout) was never in the line picked across five runs, but it turned up in lines not picked, so that's sample size, not a lost catch. Splitting back into two calls stays open if playtests show the voices blurring or their catches moving together.
+**Rules out:** Nothing for good; two calls remain the fallback.
