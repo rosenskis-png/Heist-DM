@@ -1,6 +1,7 @@
 // Every contract, by name. One name per AI call (CLAUDE.md).
 export { packetSchema } from "./packet.js";
 export { companionSchema } from "./calls/companion.js";
+export { partySchema } from "./calls/party.js";
 export { campfireSchema } from "./calls/campfire.js";
 export { encodeSchema } from "./calls/encode.js";
 export { adjudicateSchema } from "./calls/adjudicate.js";

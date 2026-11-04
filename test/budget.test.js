@@ -4,12 +4,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newSession, envFor } from "../src/game/session.js";
-import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput } from "../src/context.js";
+import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput, partyInput } from "../src/context.js";
 import { narrated } from "../src/game/turns.js";
 import { LEDGER } from "../src/engine/index.js";
 import { CONDITIONS, THREATS } from "../content/rules.js";
 import { BUDGET } from "../src/ask.js";
-import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema } from "../schemas/index.js";
+import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema, partySchema } from "../schemas/index.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const packet = JSON.parse(file("content/encounters/cells.json"));
@@ -40,6 +40,7 @@ test("every DM and companion call stays under its budget at the ledger's limits"
     resolve: resolveInput(env, { plan, card: { steps: [{ n: 1, summary: line(120), who: ["player"], at: 0 }], ends_at: 2, rulings: [] }, dice: [], now: ledgerText(s), timeline: aheadText(s, { ticks: 8 }) }, resolveSchema),
     scene: sceneInput(env, { to: "dm", now: ledgerText(s), timeline: aheadText(s, { ticks: 8 }), conversation: [{ from: "player", text: plan }] }, sceneSchema),
     companion: companionInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party[1], [s.party[2]], [{ from: "player", text: plan }], companionSchema),
+    party: partyInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party.slice(1), [{ from: "player", text: plan }], partySchema),
   };
   const over = [];
   for (const [call, input] of Object.entries(sizes)) {

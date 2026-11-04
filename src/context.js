@@ -263,6 +263,37 @@ export function companionInput(env, c, self, others, huddle, schema) {
   ]);
 }
 
+// Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
+// companionInput gives them, and the table as both of them see it.
+export function partyInput(env, c, companions, huddle, schema) {
+  const members = resolveParty(companions);
+  const [a, b] = members;
+  const pair = b ? pairEntry(env.pairs ?? pairs, a.id, b.id) : null;
+  const rom = romanceOf(env, members);
+  const entry = (me) => {
+    const form = env.state?.flags?.[me.id]?.form;
+    const order = [me, ...members.filter((o) => o !== me)];
+    return {
+      ...briefProfile(me, standingOf(env, me.id)),
+      ...encounterCases(me, rom, order, { private: false, inPerson: false }),
+      ...(form ? { right_now: { form } } : {}),
+    };
+  };
+  return compose([
+    ...campaign(env, "party", schema),
+    block("The companions you play", members.map(entry)),
+    block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
+    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
+    c.now ? block("What the party can see right now", c.now) : null,
+    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    pair ? block("The two of them", { dynamic: pair.dynamic }) : null,
+    block("The huddle so far", huddle),
+    c.draft ? block("The plan the player is drafting", c.draft) : null,
+    c.card ? block("The plan as the card shows it", c.card) : null,
+    `It's the companions' turn in the huddle: ${members.map((m) => m.name).join(" and ")}.`,
+  ]);
+}
+
 // Her declared special cases that shape how she acts in an encounter (D114): what she has on, her second voice,
 // her shape, and her tie without its secret. Gated fields, notes and her private agenda stay at camp (D79).
 function encounterCases(c, rom, members, scene) {

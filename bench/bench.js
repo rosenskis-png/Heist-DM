@@ -2,7 +2,8 @@
 // fixtures/bench/cases.json through `sample`, plus Camp, free play with any two companions; shows each call's input and output, and saves every
 // run and note to the artifact's db so the design thread can read them.
 import { validate } from "../src/validate.js";
-import { companionSchema, campfireSchema } from "../schemas/index.js";
+import { companionSchema, campfireSchema, partySchema } from "../schemas/index.js";
+import { speakerProblems } from "../src/calls/party.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
 import { companions as roster } from "../content/companions/index.js";
@@ -43,12 +44,14 @@ const store = {
 };
 
 const KINDS = [
-  { id: "huddle", label: "Huddle", schema: companionSchema, call: "companion" },
+  { id: "huddle", label: "Huddle, two calls", schema: companionSchema, call: "companion" },
+  // The same huddle cases, both companions in one call (D127), to judge against two.
+  { id: "party", label: "Huddle, one call", schema: partySchema, call: "party", cases: "huddle" },
   { id: "campfire", label: "Campfire", schema: campfireSchema },
 ];
-const PROMPTS = ["style", "companion", "campfire"];
+const PROMPTS = ["style", "companion", "party", "campfire"];
 const TIERS = ["quick", "default", "complex"];
-const DEFAULT_TIERS = { companion: "default", campfire: "complex", grader: "quick" };
+const DEFAULT_TIERS = { companion: "default", party: "default", campfire: "complex", grader: "quick" };
 const settings = store.get("bench.settings", { runs: 3, tiers: {} });
 settings.tiers = { ...DEFAULT_TIERS, ...settings.tiers };
 const saveSettings = () => store.set("bench.settings", settings);
@@ -62,7 +65,7 @@ let controller = new AbortController();
 async function load() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
   const sources = ["content/encounters/cells.json", "fixtures/bench/cases.json", ...PROMPTS.map((n) => `prompts/${n}.md`)];
-  const code = ["src/context.js", "src/campaign/relationship.js", "src/campaign/roster.js", "content/relationship.js", "bench/checks.js"];
+  const code = ["src/context.js", "src/calls/party.js", "src/campaign/relationship.js", "src/campaign/roster.js", "content/relationship.js", "bench/checks.js"];
   const texts = await Promise.all([...sources, ...code].map(text));
   const [packet, cases] = texts.slice(0, 2).map(JSON.parse);
   const prompts = texts.slice(2, sources.length);
@@ -143,6 +146,7 @@ async function runOne(kind, c) {
   const run = { kind, case: c.id, tier, at: Date.now(), version };
   try {
     if (kind === "huddle") return Object.assign(run, await runHuddle(c, k.schema, tier));
+    if (kind === "party") return Object.assign(run, await runParty(c, k.schema, tier));
     if (kind === "campfire") return Object.assign(run, await runCampfire(c, k.schema, tier));
   } catch (e) {
     run.error = errorText(e);
@@ -182,6 +186,33 @@ async function runHuddle(c, schema, tier) {
     }
   }
   run.checks = turns.flatMap((t) => t.checks.map((x) => ({ ...x, name: `${t.name}: ${x.name}` })));
+  return run;
+}
+
+// The huddle in one call: three exchanges between both companions, one picked at random (D40). Each companion's
+// row in the holes table counts her own lines, so it reads the same as the two-call tab's.
+async function runParty(c, schema, tier) {
+  const ids = env.companions.map((x) => x.id);
+  const input = A.partyInput(env, c, env.companions, [...c.huddle], schema);
+  const r = await ask(input, schema, tier, (o) => speakerProblems(o, ids));
+  const pick = Math.floor(Math.random() * 3);
+  const exchanges = r.out.exchanges ?? [];
+  const run = { input, out: r.out, pick, ms: r.ms, inputChars: r.inputChars, retried: r.retried };
+  run.turns = env.companions.map((comp) => ({ id: comp.id, name: comp.name, pick }));
+  run.checks = r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.partyChecks(r.out, env.companions);
+  if (c.flaws && !r.errors.length) {
+    const lines = exchanges.flatMap((x, i) => x.lines.map((l) => ({ ...l, i })));
+    try {
+      const g = await slot(() =>
+        sample.json(A.graderInput(c.flaws, lines.map((l) => l.message)), { modelTier: settings.tiers.grader, cache: false, signal: controller.signal }),
+      );
+      lines.forEach((l, j) => (l.caught = g.caught?.[j] ?? []));
+      run.caught = exchanges.map((_, i) => lines.filter((l) => l.i === i).map((l) => l.caught));
+      for (const t of run.turns) t.caught = exchanges.map((_, i) => [...new Set(lines.filter((l) => l.i === i && l.from === t.id).flatMap((l) => l.caught))]);
+    } catch (e) {
+      run.graderError = errorText(e);
+    }
+  }
   return run;
 }
 
@@ -269,7 +300,7 @@ async function runCase(kind, c, n, ui) {
 async function save(key, run) {
   if (!db) return;
   const strip = ({ input, ...rest }) => rest;
-  const body = run.turns ? { ...run, turns: run.turns.map(strip) } : strip(run);
+  const body = run.turns ? { ...strip(run), turns: run.turns.map(strip) } : strip(run);
   try {
     await db.collection("runs").add({ key, kind: run.kind, tier: run.tier, at: run.at, data: JSON.stringify(body).slice(0, 200000) });
   } catch {}
@@ -391,6 +422,33 @@ function huddleView(c, run) {
   );
 }
 
+function partyView(c, run) {
+  const name = (id) => roster[id]?.name ?? id;
+  return h(
+    "div",
+    { class: "turn" },
+    (run.out.exchanges ?? []).map((x, i) =>
+      h(
+        "div",
+        { class: `cand${i === run.pick ? " picked" : ""}` },
+        h("span", { class: "mark" }, i === run.pick ? "said" : ""),
+        x.lines.length
+          ? x.lines.map((l, j) =>
+              h(
+                "div",
+                {},
+                h("b", {}, `${name(l.from)}: `),
+                l.message,
+                l.stance ? h("div", { class: "tag" }, `${l.stance.kind}: ${l.stance.text}`) : null,
+                run.caught?.[i]?.[j]?.length ? h("div", { class: "caught" }, run.caught[i][j].map((id) => h("span", { class: "chip info" }, id))) : null,
+              ),
+            )
+          : h("i", {}, "both pass"),
+      ),
+    ),
+  );
+}
+
 function renderRuns(kind, c, ui) {
   const runs = results[`${kind}-${c.id}`] ?? [];
   // Only runs from this version of the bench count; older ones stay visible, dimmed.
@@ -424,7 +482,7 @@ function runView(kind, c, run, i, runs) {
         { class: "body" },
         h("ul", { class: "checks" }, (run.checks ?? []).map((x) => h("li", {}, chip(x.ok, x.ok === true ? "pass" : x.ok === "near" ? "close" : x.ok === "info" ? "note" : "fail"), ` ${x.name}`, x.detail ? h("small", {}, ` ${x.detail}`) : null))),
         run.graderError ? h("p", { class: "err" }, `Grader: ${run.graderError}`) : null,
-        kind === "huddle" ? huddleView(c, run) : campfireView(run),
+        kind === "huddle" ? huddleView(c, run) : kind === "party" ? partyView(c, run) : campfireView(run),
         run.input ? fold(`Input · ${(run.input.length / 1024).toFixed(1)} KB`, run.input) : null,
         run.out ? fold("Raw output", json(run.out)) : null,
       );
@@ -477,14 +535,17 @@ function settingsView() {
     ),
   );
   const sizes = KINDS.map((k) => {
-    const c = env.cases[k.id][0];
+    const c = env.cases[k.cases ?? k.id][0];
     const input =
       k.id === "huddle"
         ? A.companionInput(env, c, env.companions[0], env.companions.slice(1), c.huddle, k.schema)
+        : k.id === "party"
+          ? A.partyInput(env, c, env.companions, c.huddle, k.schema)
         : k.id === "campfire"
           ? A.campfireInput({ ...env, romance: campfireSetup(c).romance }, c, roster[c.with[0]], c.party.filter((id) => id !== c.with[0]).map((id) => roster[id]), k.schema)
           : A[`${k.id}Input`](env, c, k.schema);
-    return h("li", {}, `${k.label}: ${(input.length / 1024).toFixed(1)} KB input, prompt ${(env.prompts[k.call ?? k.id].length / 1024).toFixed(1)} KB`);
+    const calls = k.id === "huddle" ? env.companions.length : 1;
+    return h("li", {}, `${k.label}: ${(input.length / 1024).toFixed(1)} KB input${calls > 1 ? ` × ${calls} calls` : ""}, prompt ${(env.prompts[k.call ?? k.id].length / 1024).toFixed(1)} KB`);
   });
   return h(
     "section",
@@ -510,7 +571,7 @@ function settingsView() {
 }
 
 // A saved tab that no longer exists falls back to the huddle.
-const TABS = ["huddle", "campfire", "camp", "settings"];
+const TABS = ["huddle", "party", "campfire", "camp", "settings"];
 let current = TABS.includes(store.get("bench.tab", "huddle")) ? store.get("bench.tab", "huddle") : "huddle";
 function show(tab) {
   current = tab;
@@ -519,7 +580,7 @@ function show(tab) {
   const main = $("#cases");
   if (tab === "settings") return main.replaceChildren(settingsView());
   if (tab === "camp") return main.replaceChildren(...campView());
-  main.replaceChildren(...env.cases[tab].map((c) => caseCard(tab, c)));
+  main.replaceChildren(...env.cases[KINDS.find((k) => k.id === tab)?.cases ?? tab].map((c) => caseCard(tab, c)));
 }
 
 async function start() {
