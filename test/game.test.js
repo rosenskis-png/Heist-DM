@@ -2,7 +2,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { newSession, serialize, restore, post } from "../src/game/session.js";
+import { newSession, serialize, restore, post, recordCall, act, CALL_RECORDS, SAVE_ROOM } from "../src/game/session.js";
 import { makeCard, commit, talk, shown, question, rings, talkOver, cardStale } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft, planText } from "../src/game/draft.js";
 import { mapView, clockView } from "../src/game/view.js";
@@ -225,4 +225,27 @@ test("a save from before the table merges its feeds in order, and its plan text 
   assert.deepEqual(back.feeds.table.map((e) => [e.at, e.ch]), [[1, "narration"], [2, "rings"], [3, "scene"], [4, "scene"], [6, "private"]]);
   assert.deepEqual(back.feeds.plans.map((e) => e.at), [5]);
   assert.deepEqual(back.draft.items.map((x) => x.text), ["First", "Second"]);
+});
+
+test("a save keeps the replay log and the last call outputs, never their inputs (D135)", () => {
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY, seed: 3 });
+  act(session, { type: "answer", out: { reply: "Yes.", rulings: [], learned: [] } });
+  for (let i = 0; i < CALL_RECORDS + 5; i++) recordCall(session, { call: "scene", tier: "default", at: i, input: "SECRET INPUT", size: 12, out: { n: i }, first: { n: i }, errors: [], ms: 5 });
+  const json = serialize(session);
+  assert.ok(!json.includes("SECRET INPUT"));
+  const back = restore(json, packet);
+  assert.equal(back.calls.length, CALL_RECORDS);
+  assert.deepEqual(back.calls.at(-1).out, { n: CALL_RECORDS + 4 });
+  assert.equal(back.calls.at(-1).first, undefined);
+  assert.deepEqual(back.actions, session.actions);
+});
+
+test("a save too big for its slot drops the oldest call outputs first (D135)", () => {
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY, seed: 3 });
+  for (let i = 0; i < CALL_RECORDS; i++) recordCall(session, { call: "scene", at: i, out: { text: "x".repeat(8000), n: i } });
+  const json = serialize(session);
+  assert.ok(json.length <= SAVE_ROOM);
+  const kept = JSON.parse(json).calls;
+  assert.ok(kept.length > 0 && kept.length < CALL_RECORDS);
+  assert.equal(kept.at(-1).out.n, CALL_RECORDS - 1);
 });

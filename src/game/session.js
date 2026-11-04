@@ -39,6 +39,8 @@ export function newSession({ packet, player, companions, seed = 1, slack = 0, ac
     // Where each companion stands with the player (D79): written at camp, read in encounters.
     standing: Object.fromEntries(companions.map((id) => [id, { mood: "steady", learned: [] }])),
     actions: [],
+    // The last few dozen call outputs, for a playtest's post-mortem (D135). Outputs only, never inputs.
+    calls: [],
   };
   post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;
@@ -59,6 +61,17 @@ export function act(session, action) {
   return session.state;
 }
 
+// A call's output, kept in the save for a post-mortem (D135): what it said, not what it was given.
+export const CALL_RECORDS = 40;
+export function recordCall(session, r) {
+  const { input, ...rest } = r;
+  const rec = { ...rest, tick: session.state.tick };
+  // The first try matters only when it was sent back.
+  if (!rec.firstErrors) delete rec.first;
+  (session.calls ??= []).push(rec);
+  if (session.calls.length > CALL_RECORDS) session.calls.splice(0, session.calls.length - CALL_RECORDS);
+}
+
 // What the calls are given that doesn't change during an encounter (docs/spec/context.md §1).
 export function envFor(session, prompts) {
   const { packet, party } = session.state;
@@ -76,11 +89,18 @@ export function envFor(session, prompts) {
   };
 }
 
-// A save: everything but the packet and the sheets, which come back from content by id (D11).
+// A save: everything but the packet and the sheets, which come back from content by id (D11). It keeps the
+// replay log and the recent call outputs (D135), dropping the oldest outputs first if the save would be too big.
+export const SAVE_ROOM = 200 * 1024;
 export function serialize(session) {
   const { packet, party, ...state } = session.state;
-  const { actions, ...rest } = session;
-  return JSON.stringify({ ...rest, state });
+  let calls = session.calls ?? [];
+  let json = JSON.stringify({ ...session, calls, state });
+  while (calls.length && json.length > SAVE_ROOM) {
+    calls = calls.slice(Math.ceil(calls.length / 4));
+    json = JSON.stringify({ ...session, calls, state });
+  }
+  return json;
 }
 
 export function restore(json, packet) {
@@ -95,7 +115,7 @@ export function restore(json, packet) {
   // A save from before ability uses were counted (D128).
   state.used ??= {};
   state.spent ??= {};
-  return { ...tableFrom(saved), actions: [], state: { ...state, packet: bindParty(packet, party), party } };
+  return { ...tableFrom(saved), actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: bindParty(packet, party), party } };
 }
 
 // A save from before the table (D127): its Plan, Moment and Companions feeds merge into one table, in the order
