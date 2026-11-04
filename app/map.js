@@ -97,11 +97,11 @@ export function MapPanel({ view, clock, colors }) {
 
 export function Clock({ clock, compact = false }) {
   if (compact)
-    return html`<div className="clock"><span>Tick <b>${clock.tick}</b></span>${clock.beats.map((b) => html`<span key=${b.who}>${b.who}: <b>${b.beat}</b></span>`)}${clock.coming.map((e) => html`<span key=${e.what} className=${e.in <= 3 ? "soon" : ""}>${e.what} in ${e.in}</span>`)}${clock.fight ? html`<span className="soon">Fighting</span>` : null}</div>`;
+    return html`<div className="clock"><span>Tick <b>${clock.tick}</b></span>${clock.beats.map((b) => html`<span key=${b.who}>${b.who}: <b>${b.beat}</b></span>`)}${clock.coming.map((e) => html`<span key=${e.what} className=${e.in <= 3 ? "soon" : ""}>${e.what} in ${e.in}</span>`)}${clock.threats.length ? html`<span className="soon" title=${clock.threats.map((x) => `${x.who}: ${x.does}`).join("\n")}>${clock.threats.length} coming at you</span>` : null}</div>`;
   return html`<div className="beatbox">
     <div><b>Tick ${clock.tick}</b>${clock.pending ? html`<span className="muted"> (${clock.pending} more passing)</span>` : null}</div>
     ${clock.beats.map((b) => html`<div key=${b.who}><b>${b.who}: ${b.beat}.</b> ${b.does}. <span className="cue">${b.cue}</span></div>`)}
     ${clock.coming.map((e) => html`<div key=${e.what} className=${e.in <= 3 ? "system" : ""}>${e.what} at tick ${e.at} (in ${e.in}).</div>`)}
-    ${clock.fight ? html`<div className="system">Fighting ${clock.fight.map((f) => `${f.name} (${f.hp} HP)`).join(", ")}.</div>` : null}
+    ${clock.threats.map((x) => html`<div key=${x.who} className="system"><b>${x.who}:</b> ${x.does}</div>`)}
   </div>`;
 }

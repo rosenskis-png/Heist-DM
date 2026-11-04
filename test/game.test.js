@@ -47,6 +47,16 @@ test("a save restores to the same state, without the packet or the sheets in it"
   assert.deepEqual(back.feeds, session.feeds);
 });
 
+test("a save from before fights were plans restores with toughness, and no conditions or threats", () => {
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY, seed: 3 });
+  const old = JSON.parse(serialize(session));
+  for (const k of ["toughness", "conditions", "threats"]) delete old.state[k];
+  old.state.hp = { player: 4 };
+  const back = restore(old, packet);
+  assert.equal(back.state.hp, undefined);
+  assert.deepEqual(back.state, session.state);
+});
+
 test("the map draws known zones only, and the clock shows known routines and events", () => {
   const session = newSession({ packet, player: { name: "", class: "rogue" }, companions: PARTY });
   const m = mapView(session.state);

@@ -2,7 +2,7 @@
 // from that record (D75, D78). Contract: docs/spec/calls/resolve.md.
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
-import { changes, band } from "../ledger.js";
+import { changes, band, threats } from "../ledger.js";
 
 export const resolveSchema = withDefs({
   $id: "resolve",
@@ -21,6 +21,8 @@ export const resolveSchema = withDefs({
     stopped: obj(["at", "why"], { at: { type: "integer", minimum: 1 }, why: r("text") }),
     // How the people in the encounter respond once the plan is done or stopped.
     after: r("changes"),
+    // What each person still fighting the party is visibly about to do; empty when nobody is (D130).
+    threats,
     ends_at: { type: "integer", minimum: 0 },
     // Last: prose for the player from what was just recorded, and any texture it added (canon).
     narration: obj(["text", "texture"], { text: r("text"), texture: { ...list(r("text")), maxItems: 3 } }),

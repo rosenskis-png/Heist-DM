@@ -121,7 +121,6 @@ export default {
   },
   outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles; a fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "burst",
       name: "Burst",

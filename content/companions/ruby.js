@@ -113,13 +113,12 @@ export default {
   darkTriggers: `appeasing every storm; letting her hurt rivals; encouraging violence done for him`,
   outfit: `A black leather corset vest laced with red cord over a loose, cropped white linen shirt sliding off one shoulder; high-waisted black leather breeches; worn thigh-high buckled boots; a thigh harness of throwing knives; a red silk sash knotted at her hip; a stolen dagger with a glowing red gem in the pommel; a short crimson half-cape taken off an enemy officer.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "mine",
       name: "Mine",
       uses: "once per encounter",
       perRest: 2,
-      effect: `If an enemy attacks or seizes the player, she kills that enemy, whatever the odds. Reckless: she breaks cover and the plan, and if other enemies are near she loses 1 HP doing it.`,
+      effect: `If an enemy attacks or seizes the player, she kills that enemy, whatever the odds. Reckless: she breaks cover and the plan, and if other enemies are near she is hurt doing it (a condition until camp).`,
       declared: { uses: { encounter: 1, rest: 2 }, effects: [] },
     },
     noncombat: {

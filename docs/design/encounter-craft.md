@@ -21,6 +21,7 @@ The third fails most often. In a merely competent encounter, a group that plans 
 **Genres make promises.**
 - A heist promises a competent crew, a clever plan, the plan going sideways, improvisation, and a payoff.
 - A prison break promises being stuck, noticing things, and getting out by your own wits.
+- A fight with a setup promises choosing the ground, preparation that pays off, a beat where it goes wrong, and a win the setup made possible.
 
 Design so the encounter can deliver every beat of its genre's promise.
 
@@ -111,6 +112,7 @@ This is also how a success produces something interesting.
 ### 3.7 Failure changes the situation
 - **Failure is partial and clear to the players:** suspicion rises, a window closes, a resource is spent, someone is taken.
 - **It never ends the encounter, and it never adds busywork** (new sub-steps nobody needs). Busywork complications were one of Gravenhold's root problems.
+- **It never sends the party back.** Reaching the next campfire is never in question; how they arrive is (D131). Captured means taken on to somewhere new, not returned to the cell.
 - **Design failure as a new problem made of the same parts.**
   - The deadline arrives and the cell door opens, but now there are two guards.
   - A party member taken upstairs turns an escape into a rescue.
@@ -125,6 +127,16 @@ This is also how a success produces something interesting.
   - If the guard is cooperating, discovery of the escape is delayed.
   - If the party kept their deal with the guard, they have a guide.
 - **The climax can be a choice instead of a roll.** Deciding what to do with the stolen ledger is a better ending than one more check.
+- **The bill is paid in story, never in permanent loss:** hurts that last until camp, optional objectives missed, who saw them, a companion separated, and how the party feels about each other when it gets there (D131).
+
+### 3.9 Fights
+A fight is a plan (D130), so everything above applies to it. What's particular to fights:
+- **Fights are for something.** Hold the door until the portcullis is up, stop the horn, get the keys off the sergeant. "Everyone down" is the dullest objective a fight can have, and it rewards a slog.
+- **The setup is the fun.** Choosing the ground, the trap, the bait, who takes whom: the fight itself should take a few beats, and the setup decides how they go.
+- **Fights end on morale.** Most people stop before they're beaten: they yield, run, or bargain when the fight turns. Each sheet says when (`breaks`), and talking or scaring someone out of a fight is a real way to win it.
+- **Numbers count.** Outnumbered is the worst place to be. The decisions are about splitting them up, drawing one off, and catching one alone or unaware.
+- **Threats are shown before they land.** The party sees what each enemy is about to do, and gets to answer it. An ambush is placed or comes from a failed roll's stated cost, never improvised (principle 8).
+- **Violence costs.** Noise, bodies, the alarm, and how the companions feel about what you did. That makes avoiding a fight the clever play, as a heist should, without forbidding it.
 
 ---
 
@@ -178,7 +190,7 @@ This is also how a success produces something interesting.
 ### 4.6 Zoom
 - **Match the tick size to the size of the decisions:**
   - coarse ticks while sneaking;
-  - combat rounds as soon as anyone is within sight or earshot;
+  - in a fight, a card is a beat of about a tick: what everyone does in the next few moments;
   - coarse again once the party is clear.
 
 ---

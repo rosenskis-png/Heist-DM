@@ -12,8 +12,8 @@ export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(
 
 // How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
 // runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
-// `test/budget.test.js` holds every DM call under its budget at the ledger's limits.
-export const BUDGET = { adjudicate: 25600, resolve: 25600, scene: 25600, companion: 20480 };
+// `test/budget.test.js` holds every DM call under its budget at the ledger's limits, mid-fight (D130).
+export const BUDGET = { adjudicate: 28672, resolve: 28672, scene: 28672, companion: 21504 };
 
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
 const REPLAY = new Set(["adjudicate"]);

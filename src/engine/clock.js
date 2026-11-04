@@ -1,6 +1,6 @@
 // Ticks, schedules and events (docs/spec/engine.md). The DM decides how people react (D75); an NPC the DM has
 // taken off their routine (`s.offRoutine`) stays where the DM put them.
-import { person } from "./world.js";
+import { person, partyIds } from "./world.js";
 import { test } from "./cond.js";
 import { runRules } from "./ops.js";
 
@@ -39,9 +39,18 @@ export function events(s) {
   }
 }
 
-// The objective, alternates and fail-forward ending, checked after every change and tick.
+// Every encounter's last ending (D131): the whole party is down, so they're taken, and the story moves on.
+export const CAPTURED = { id: "captured", label: "The whole party is down: captured and taken on" };
+
+// The objective, alternates and fail-forward ending, checked after every change and tick, and the whole party
+// down, which ends any encounter.
 export function objectives(s) {
   if (s.ended) return;
+  if (partyIds(s).every((id) => s.flags[id]?.down)) {
+    s.ended = { outcome: CAPTURED.id, tick: s.tick };
+    log(s, { ended: CAPTURED.id });
+    return;
+  }
   const { objective, alternates = [], fail_forward } = s.packet.intent;
   for (const o of [objective, ...alternates, fail_forward].filter(Boolean))
     if (o.condition && test(s, o.condition)) {

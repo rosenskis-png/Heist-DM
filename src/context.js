@@ -1,6 +1,7 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the game and the bench page.
 import { beatOf } from "./engine/clock.js";
+import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { invariants } from "../content/setting.js";
 import { pairs } from "../content/pairs.js";
@@ -356,14 +357,18 @@ function stateFor(s, { party = false } = {}) {
     positions: entries(s.at, (id) => s.at[id] != null && (!party || visible(id))),
     held: entries(s.holder, (id) => !party || visible(id) || visible(s.holder[id])),
     flags: party ? entries(s.flags, (id) => partyIds.includes(id) || (!hidden.has(id) && s.packet.map.connections.some((c) => c.id === id))) : s.flags,
-    hp: entries(s.hp, (id) => partyIds.includes(id)),
+    // The party's hurts and hindrances, and what anyone fighting the party is about to do (D130): both are things
+    // the party knows.
+    conditions: s.conditions,
+    threats: s.threats,
     // Texture keeps its truth in state; calls get the latest (D76). Rulings that matter later are facts.
     canon: s.canon.slice(-CANON),
     log: logFor(s, party),
   };
-  // The DM's facts (the party's view keeps the ones it knows), who's off their routine, and NPC hurt (D75).
+  // The DM's facts (the party's view keeps the ones it knows), who's off their routine, and the telling blows each
+  // person still standing can take (D75, D130).
   out.facts = (party ? s.facts.filter((f) => f.known) : s.facts).map(({ id, text, about }) => ({ id, text, ...(about.length ? { about } : {}) }));
-  if (!party) Object.assign(out, { pending_ticks: s.pending, dispositions: s.disposition, revealed: s.known.revealed, off_routine: s.offRoutine, hurt: entries(s.hp, (id) => !partyIds.includes(id)) });
+  if (!party) Object.assign(out, { pending_ticks: s.pending, dispositions: s.disposition, revealed: s.known.revealed, off_routine: s.offRoutine, toughness: Object.fromEntries(s.packet.people.filter((p) => s.at[p.id] != null && !s.flags[p.id]?.down).map((p) => [p.id, `${s.toughness[p.id]}/${toughnessOf(p)}`])) });
   if (s.ended) out.ended = s.ended.outcome;
   return out;
 }
@@ -392,13 +397,14 @@ export function ledgerText(s, { party = false, history = true } = {}) {
     .map(([id, f]) => `${id} ${Object.entries(f).map(([k, v]) => (v === true ? k : v === false ? `not ${k}` : `${k} ${v}`)).join(", ")}`)
     .join("; ");
   const beats = Object.entries(st.beats).map(([npc, b]) => `${npc} on ${b}`);
-  const max = (id) => s.party.find((p) => p.id === id)?.abilities?.hp ?? 4;
   const lines = [
     `Tick ${st.tick}.${beats.length ? ` ${beats.join(", ")}.` : ""}${st.off_routine?.length ? ` Off their routine: ${st.off_routine.join(", ")}.` : ""}`,
     `Where: ${pairs(st.positions)}.`,
     Object.keys(st.held).length ? `Held: ${pairs(st.held, (k, v) => `${k} by ${v}`)}.` : null,
     flags ? `Flags: ${flags}.` : null,
-    `HP: ${pairs(st.hp, (k, v) => `${k} ${v}/${max(k)}`)}.${st.hurt && Object.keys(st.hurt).length ? ` Hurt: ${pairs(st.hurt)}.` : ""}`,
+    st.conditions.length ? `The party's conditions:\n${st.conditions.map((c) => `- ${c.id} (${c.who}): ${c.text}`).join("\n")}` : null,
+    st.toughness && Object.keys(st.toughness).length ? `Telling blows each can still take: ${pairs(st.toughness)}.` : null,
+    st.threats.length ? `About to happen, as the party sees it:\n${st.threats.map((x) => `- ${x.who}: ${x.does}`).join("\n")}` : null,
     st.dispositions ? `Moods: ${pairs(st.dispositions)}.` : null,
     st.revealed?.length ? `The party has found: ${st.revealed.join(", ")}.` : null,
     st.facts?.length ? `Facts:\n${st.facts.map((f) => `- ${f.id}: ${f.text}`).join("\n")}` : "Facts: none yet.",
@@ -465,7 +471,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     const sch = p.schedule && (!party || p.schedule.known || knows(p.schedule.id)) ? p.schedule : null;
     const routine = sch ? `\n  Routine, one beat a tick: ${sch.beats.map((b) => `${b.id}: ${b.label}, in ${b.position}${b.cue ? ` (cue: ${b.cue})` : ""}`).join("; ")}.` : "";
     if (!sheets) return `- ${p.id} (${p.name})${routine}`;
-    return `- ${p.id} (${p.name}${p.tier ? `, ${p.tier}` : ""}): wants ${p.wants} Fears ${p.fears} Knows ${p.knows} Will never ${p.will_never} Temper: ${p.temper} Under pressure: ${p.under_pressure}${routine}`;
+    return `- ${p.id} (${p.name}${p.tier ? `, ${p.tier}` : ""}): wants ${p.wants} Fears ${p.fears} Knows ${p.knows} Will never ${p.will_never} Temper: ${p.temper} Under pressure: ${p.under_pressure}${p.breaks ? ` Stops fighting: ${p.breaks}` : ""}${routine}`;
   };
   const events = clock.events.filter((e) => !party || e.known || knows(e.id)).map((e) => `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}${e.deadline ? " (the deadline)" : ""}`);
   const goal = (o) => o && `${o.label}${o.id ? ` (${o.id})` : ""}`;

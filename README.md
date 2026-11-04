@@ -34,7 +34,7 @@ In Gravenhold's opening cell-block escape, a good first-turn plan took ten excha
 
 **The two breakthroughs (keep these):**
 1. **The plan card.** The player commits a whole plan, and the DM walks it step by step until something doesn't work. Stakes are stated before the dice, the engine rolls, and the stated consequences are the only things that happen. This takes the "when does the plan run?" decision away from the DM, which is exactly the decision it stalled on.
-2. **Three separate interfaces.** The single chat with competing demands is split into **Plan** (the committed action and its resolution), **Moment** (questions, checks, conversation, combat) and **Companions** (the huddle, plus the campfire). Each AI does one job with a small, focused prompt. Deliberation in the huddle doesn't move the world.
+2. **Three separate interfaces.** The single chat with competing demands is split into **Plan** (the committed action and its resolution), **Moment** (questions, checks, conversation) and **Companions** (the huddle, plus the campfire). Each AI does one job with a small, focused prompt. Deliberation in the huddle doesn't move the world.
 
 Together these also give **context economy**: a lot of story per call, each call complete on its own.
 
@@ -65,4 +65,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is next, and Act 1 will be generated rather than written by hand (`docs/spec/generation.md`, D115–D124). See `docs/roadmap.md`.
+**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is the current phase, and Act 1 will be generated rather than written by hand (`docs/spec/generation.md`, D115–D124). Combat is decided (a fight is a plan, and the party always moves on: D130, D131), so the table (D127) is the next build. See `docs/roadmap.md`.

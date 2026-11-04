@@ -4,6 +4,7 @@ import { packetSchema } from "../../schemas/index.js";
 import { geometryProblems } from "./map.js";
 import { beginTick } from "./clock.js";
 import { run } from "./ops.js";
+import { toughnessOf } from "./ledger.js";
 
 // Every id-valued field in the packet, with where it was found.
 const REF_KEYS = new Set(["entity", "to", "item", "npc", "holder", "zone", "actor", "key", "position", "beat"]);
@@ -12,7 +13,7 @@ function refs(node, path, out) {
   else if (node && typeof node === "object")
     for (const [k, v] of Object.entries(node)) {
       const at = `${path}.${k}`;
-      if (["in_zone", "holds", "flag", "hp_below"].includes(k) && Array.isArray(v)) out.push([v[0], at], ...(k === "in_zone" || k === "holds" ? [[v[1], at]] : []));
+      if (["in_zone", "holds", "flag"].includes(k) && Array.isArray(v)) out.push([v[0], at], ...(k === "in_zone" || k === "holds" ? [[v[1], at]] : []));
       else if (k === "beat" && Array.isArray(v)) out.push([v[0], at]);
       else if (["party_all_in", "revealed"].includes(k)) out.push([v, at]);
       else if (["between", "sees", "zones"].includes(k) && Array.isArray(v)) v.forEach((x) => out.push([x, at]));
@@ -66,8 +67,9 @@ export function bindParty(packet, party) {
   return bind(packet);
 }
 
-// The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's.
-export function load({ packet: unbound, party, slack = 0, seed = 1 }) {
+// The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's;
+// `conditions` are the ones the party carries in from the last hand-off (D130).
+export function load({ packet: unbound, party, slack = 0, seed = 1, conditions = [] }) {
   const packet = bindParty(unbound, party);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
@@ -82,7 +84,11 @@ export function load({ packet: unbound, party, slack = 0, seed = 1 }) {
     holder: {},
     flags: {},
     disposition: Object.fromEntries(people.map((p) => [p.id, p.disposition])),
-    hp: Object.fromEntries(party.map((p) => [p.id, p.abilities?.hp ?? 4])),
+    // Telling blows each person can still take (D130), the party's conditions, and what anyone fighting the party
+    // is about to do.
+    toughness: Object.fromEntries(people.map((p) => [p.id, toughnessOf(p)])),
+    conditions: conditions.filter((c) => party.some((p) => p.id === c.who)).map(({ id, who, text }) => ({ id, who, text })),
+    threats: [],
     known: { revealed: [] },
     due: Object.fromEntries(
       clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick]),

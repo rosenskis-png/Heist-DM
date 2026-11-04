@@ -24,7 +24,6 @@ export function test(s, c, ctx = {}) {
     case "tick": return cmp[v[0]](s.tick, v[1]);
     case "beat": return beatOf(s, v[0])?.id === v[1];
     case "revealed": return s.known.revealed.includes(v);
-    case "hp_below": return (s.hp[b(v[0])] ?? Infinity) < v[1];
     case "disposition": return s.disposition[v[0]] === v[1];
   }
   throw new Error(`unknown condition ${k}`);

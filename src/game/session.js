@@ -1,6 +1,6 @@
 // A game in progress: campaign values, the engine's encounter state, and what the table has said (D11, D74).
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
-import { load, apply, bindParty } from "../engine/index.js";
+import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
 import { companions as roster } from "../../content/companions/index.js";
 
@@ -83,5 +83,10 @@ export function restore(json, packet) {
   const saved = typeof json === "string" ? JSON.parse(json) : json;
   if (saved.start.packet !== packet.id) throw new Error(`this save is for ${saved.start.packet}, not ${packet.id}`);
   const party = partyFor(saved.player, saved.companions);
-  return { ...saved, actions: [], state: { ...saved.state, packet: bindParty(packet, party), party } };
+  // A save from before fights were plans (D130) has HP instead of toughness, conditions and threats.
+  const { hp, ...state } = saved.state;
+  state.toughness ??= Object.fromEntries(packet.people.map((p) => [p.id, toughnessOf(p)]));
+  state.conditions ??= [];
+  state.threats ??= [];
+  return { ...saved, actions: [], state: { ...state, packet: bindParty(packet, party), party } };
 }

@@ -12,7 +12,6 @@ export const classes = {
     },
     blurb: "Hard to stop, hard to hide.",
     abilities: {
-      hp: 6,
       combat: {
         id: "overpower",
         name: "Overpower",
@@ -42,7 +41,6 @@ export const classes = {
     },
     blurb: "Every lock is a question with an answer.",
     abilities: {
-      hp: 4,
       combat: {
         id: "backstab",
         name: "Backstab",
@@ -75,7 +73,6 @@ export const classes = {
     },
     blurb: "Knows things that get people killed.",
     abilities: {
-      hp: 4,
       combat: {
         id: "sleep",
         name: "Sleep",
@@ -106,7 +103,6 @@ export const classes = {
     },
     blurb: "Faith as a tool and a burden.",
     abilities: {
-      hp: 4,
       combat: {
         id: "command",
         name: "Command",
@@ -120,7 +116,7 @@ export const classes = {
         name: "Laying On of Hands",
         uses: "once per encounter",
         perRest: 3,
-        effect: `Touch a person or thing to restore 2 HP, cure poison or disease, or learn whether it is cursed, possessed or undead.`,
+        effect: `Touch a person or thing to heal a hurt (end a condition), cure poison or disease, or learn whether it is cursed, possessed or undead.`,
         declared: { uses: { encounter: 1, rest: 3 }, effects: [] },
       },
       limits: ["Command needs the target to understand you"],
@@ -138,7 +134,6 @@ export const classes = {
     },
     blurb: "Notices what moved, and when.",
     abilities: {
-      hp: 4,
       combat: {
         id: "shot",
         name: "Marked Shot",
@@ -169,7 +164,6 @@ export const classes = {
     },
     blurb: "Words are the sharpest thing in the room.",
     abilities: {
-      hp: 4,
       combat: {
         id: "captivate",
         name: "Captivate",

@@ -98,7 +98,6 @@ export default {
   darkTriggers: `asking her to be someone else; interest in the other companion; rewarding her deceptions`,
   outfit: `A close-fitting charcoal tunic, sleeveless and high-collared; dark leather leggings; soft-soled boots; a plain belt of many small pockets. Nothing anyone would remember.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "quiet_knife",
       name: "Quiet Knife",

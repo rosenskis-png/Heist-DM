@@ -93,7 +93,6 @@ export default {
   darkTriggers: "lies; possessiveness; cruelty to living things; neglect",
   outfit: `A leaf-green linen wrap top tied at the back, leaving her shoulders and midriff bare; a long, flowing skirt of layered green and cream gauze slit to the thigh; a braided leather belt hung with herb pouches; wooden and bone bangles; a thin gold anklet; bare feet; a sprig of silver mistletoe woven into her hair as her druidic focus.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "entangle",
       name: "Entangle",

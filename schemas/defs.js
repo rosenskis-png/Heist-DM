@@ -30,7 +30,6 @@ const condition = {
     atom("tick", tuple(compare, { type: "integer" })),
     atom("beat", tuple(id, id)),
     atom("revealed", id),
-    atom("hp_below", tuple(ref, { type: "integer" })),
     atom("disposition", tuple(id, id)),
   ],
 };

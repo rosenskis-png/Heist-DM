@@ -107,7 +107,7 @@ export const companionFileSchema = withDefs({
       honesty: t,
       means: t,
       whenRefused: t,
-      abilities: obj(["hp", "combat", "noncombat", "limits"], { hp: { type: "integer", minimum: 1 }, combat: ability, noncombat: ability, limits: list(t) }),
+      abilities: obj(["combat", "noncombat", "limits"], { combat: ability, noncombat: ability, limits: list(t) }),
 
       // How she judges the other companion on each axis: what earns it and what wears it down (D94).
       inOthers: some(axes, t),

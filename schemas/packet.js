@@ -90,7 +90,9 @@ const schedule = obj(["id", "period", "phase", "beats"], {
 const npc = obj(["id", "name", "wants", "fears", "knows", "will_never", "temper", "under_pressure", "disposition", "position"], {
   id: r("id"),
   name: r("text"),
-  tier: { enum: ["minion", "guard", "elite", "civilian"] },
+  // How tough they are in a fight (content/rules.js), and when they stop fighting: yield, flee or bargain (D130).
+  tier: { enum: ["civilian", "minion", "guard", "elite", "boss"] },
+  breaks: r("text"),
   wants: r("text"),
   fears: r("text"),
   knows: r("text"),

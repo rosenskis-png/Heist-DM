@@ -96,7 +96,6 @@ export default {
   ],
   outfit: `Her sister's style in a skimpier, flirtier cut: a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, knee boots, and one piece of jewellery she has clearly borrowed from her sister.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "helpless",
       name: "Helpless",
