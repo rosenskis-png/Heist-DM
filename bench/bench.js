@@ -110,9 +110,15 @@ async function ask(input, schema, tier, engine = () => [], prepare = (o) => o) {
   const opts = () => ({ modelTier: tier, cache: false, signal: controller.signal });
   return slot(async () => {
     const t0 = performance.now();
-    // One backoff on rate_limited, never a loop.
+    // One backoff on rate_limited, never a loop. A reply with no JSON in it gets one more try, counted, so how
+    // often the model answers in prose stays visible instead of failing the whole run.
+    let noJson = 0;
     const call = (x) =>
       sample.json(x, opts()).catch(async (e) => {
+        if (e?.code === "invalid_json" && !noJson) {
+          noJson++;
+          return sample.json(x, opts());
+        }
         if (e?.code !== "rate_limited") throw e;
         await new Promise((r) => setTimeout(r, 15000));
         return sample.json(x, opts());
@@ -134,7 +140,7 @@ async function ask(input, schema, tier, engine = () => [], prepare = (o) => o) {
       errors = validate(schema, out);
       if (!errors.length) errors = engine(out);
     }
-    return { out, errors, retried, first, ms: Math.round(performance.now() - t0), inputChars: input.length };
+    return { out, errors, retried, first, noJson, ms: Math.round(performance.now() - t0), inputChars: input.length };
   });
 }
 
@@ -169,7 +175,7 @@ async function runHuddle(c, schema, tier) {
     const pick = Math.floor(Math.random() * 3);
     const picked = r.out.candidates?.[pick];
     if (picked?.message) huddle.push({ from: self.id, text: picked.message });
-    const checks = r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.companionChecks(r.out);
+    const checks = [...(r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.companionChecks(r.out)), { name: "JSON first time", ok: r.noJson ? "near" : true, detail: r.noJson ? "the first reply held no JSON" : "" }];
     turns.push({ id: self.id, name: self.name, input, out: r.out, errors: r.errors, retried: r.retried, pick, checks });
   }
   const run = { turns, ms, inputChars };
@@ -199,7 +205,7 @@ async function runParty(c, schema, tier) {
   const exchanges = r.out.exchanges ?? [];
   const run = { input, out: r.out, pick, ms: r.ms, inputChars: r.inputChars, retried: r.retried };
   run.turns = env.companions.map((comp) => ({ id: comp.id, name: comp.name, pick }));
-  run.checks = r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.partyChecks(r.out, env.companions);
+  run.checks = [...(r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.partyChecks(r.out, env.companions)), { name: "JSON first time", ok: r.noJson ? "near" : true, detail: r.noJson ? "the first reply held no JSON" : "" }];
   if (c.flaws && !r.errors.length) {
     const lines = exchanges.flatMap((x, i) => x.lines.map((l) => ({ ...l, i })));
     try {
