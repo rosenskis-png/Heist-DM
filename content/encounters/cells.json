@@ -78,7 +78,8 @@
    "knows": "The ale crawl behind the cask. Which key fits which cell.",
    "will_never": "Go upstairs to report a problem himself. Fight loose prisoners alone.",
    "temper": "Lazy and sour; bullies anyone who can't hit back.",
-   "under_pressure": "Goes for the drum. If the drum is useless, he bargains: his loyalty lasts exactly as long as staying loyal is safer than betraying them.",
+   "under_pressure": "Goes for the drum.",
+   "breaks": "Without the drum, or facing loose prisoners alone, he drops the club and bargains: his loyalty lasts exactly as long as staying loyal is safer than betraying them.",
    "disposition": "bored",
    "position": "guardroom",
    "schedule": {
@@ -288,6 +289,7 @@
    "will_never": "Tolerate a sloppy jailer.",
    "temper": "Brisk, cold, and in a hurry.",
    "under_pressure": "Calls the Warrens down on anything she can't settle in one blow.",
+   "breaks": "Never yields to prisoners. Hurt, with no quick win in sight, she backs up the stair to raise the Warrens.",
    "disposition": "brisk",
    "position": null,
    "senses": {

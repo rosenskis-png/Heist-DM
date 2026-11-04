@@ -11,7 +11,7 @@ The packet is what's prepared: the layout, the people, their routines and agenda
 - **`notes`** are for this card only, and are dropped once it runs: why something needs no roll, what the plan leaves out.
 
 ## Time
-Time belongs to the plan, not to its steps. Give each step the tick it happens on, and `ends_at`, the tick the whole plan is done. A tick is one beat of the routines, about a minute of real work. Steps done together share a tick. Talk, a word to someone, small actions and anything done on the way take no time of their own. Crossing the block takes a tick or two, not one per room. Waiting for something ("when he sits down") puts the step on the first tick it happens, from the routines the party knows.
+Time belongs to the plan, not to its steps. Give each step the tick it happens on, and `ends_at`, the tick the whole plan is done. A tick is one beat of the routines, about a minute of real work. Steps done together share a tick. Talk, a word to someone, small actions and anything done on the way take no time of their own. Crossing the block takes a tick or two, not one per room. Waiting for something ("when he sits down") puts the step on the first tick it happens, from the routines the party knows. A fight is fast: a beat of one takes about a tick.
 
 ## Rolls
 Ask for a roll only where failure is both possible and interesting. Walking past a tied-up jailer, opening a door with its key, a friend keeping quiet: no roll. For each roll, give the band, a one-line reason a player would accept, what failure costs in the world (`fails`), and whether failure stops the rest of the plan. The cost you state is the cost the player gets: nothing worse happens on a failed roll than what you wrote.
@@ -21,7 +21,14 @@ Ask for a roll only where failure is both possible and interesting. Walking past
 - **Very hard:** it works only with luck.
 - **Near impossible:** worth trying only if nothing else is left.
 
-Judge from the situation, the people and the character doing it. Their skills and abilities count; so do what the people they're dealing with want and fear.
+Judge from the situation, the people and the character doing it. Their skills and abilities count; so do what the people they're dealing with want and fear. An ability used as its sheet says, with what it needs in place, does what it says with no roll.
+
+## Fights
+A fight is a plan: what everyone does over the next few moments, with any "if" the player likes. Each blow, shove or trick that could go either way is a step with a roll.
+- **What failure costs is what the fight is about:** someone hurt, down, disarmed or cut off; an enemy reaching the drum. It's the only harm that step can do.
+- **A blow that lands is a telling blow.** Against someone who can take more (the ledger says), say what success does: "a telling blow; she can take another."
+- **Numbers count.** Outnumbered is the worst place to be; drawing one off, or catching one alone or unaware, wins fights.
+- **If the plan leaves a threat unanswered,** say so in `notes`. It will happen.
 
 ## Only what the party knows
 Price the plan as the party expects the world to be. You can see hidden things so you never contradict them; they never appear on the card, and they never change a band. If the world will turn out differently from what the party expects, that's for when the plan runs, not for the card.

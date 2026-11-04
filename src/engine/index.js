@@ -9,8 +9,9 @@ import { resolve, scene, rollCard } from "./ledger.js";
 
 export { load, checkPacket, deadlineTick, bindParty, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
-export { handoff } from "./handoff.js";
-export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms, checkFactBudget, revealable, LEDGER } from "./ledger.js";
+export { handoff, endingOf } from "./handoff.js";
+export { CAPTURED } from "./clock.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, toughnessOf, revealable, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions (the DM rules and the engine keeps the books, D75):
@@ -19,7 +20,7 @@ export { ODDS } from "./rng.js";
 // - {type: "scene", out, rolls?}: one Moment exchange the DM ruled; the engine rolls its checks.
 // - {type: "ops", source, ops}: apply engine-written operations, e.g. narration's texture as canon.
 // - {type: "ticks", n}: time passes.
-// - {type: "end", outcome}: the encounter ends without its objective (the player leaves, a fight is lost).
+// - {type: "end", outcome}: the encounter ends without its objective (the player leaves).
 export function apply(state, action) {
   const { packet, party, ...rest } = state;
   const s = { packet, party, ...clone(rest) };
@@ -50,7 +51,10 @@ export function apply(state, action) {
     default:
       throw new Error(`unknown action ${action.type}`);
   }
-  if (s.ended && !s.handoff) s.handoff = handoff(s);
+  if (s.ended && !s.handoff) {
+    s.threats = [];
+    s.handoff = handoff(s);
+  }
   delete s.forced;
   return s;
 }

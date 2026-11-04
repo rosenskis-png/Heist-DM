@@ -41,6 +41,8 @@ Plus the party's abilities and one worked example of a different genre. Never an
 Beyond `docs/spec/packet.md`'s consistency checks:
 - **Every attachment it was handed resolves** in it (D123), or the packet is rejected.
 - **Every exit carries a next-scene stub** (D119).
+- **Its fail-forward ending moves the story on,** and so does `captured`, which every encounter has (D131): each has a next-scene stub that takes the party somewhere new, never back to where they started.
+- **Anyone who might fight has a tier and `breaks`** (D130), and a fight encounter's objective is something other than everyone down (`docs/design/encounter-craft.md` §3.9).
 - **A room holds exactly one outfit,** for a companion in the party, and has no objective or deadline (D121).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).

@@ -118,7 +118,8 @@ export function cardView(s, card) {
   return { plan: card.plan, steps, done, rulings: card.rulings.map((r) => r.text), notes: card.notes ?? [], stances: card.stances ?? [] };
 }
 
-// The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, and events it knows are coming.
+// The clock (docs/spec/ui.md): the tick, the beat of each routine the party knows, events it knows are coming, and
+// what anyone fighting the party is about to do.
 export function clockView(s) {
   const beats = s.packet.people
     .filter((p) => knownRoutine(s, p) && s.at[p.id] != null)
@@ -131,8 +132,11 @@ export function clockView(s) {
   const coming = s.packet.clock.events
     .filter((e) => (e.known || s.known.revealed.includes(e.id)) && !s.fired.includes(e.id) && s.due[e.id] !== undefined)
     .map((e) => ({ what: cap(e.id.replace(/_/g, " ")), at: s.due[e.id], in: s.due[e.id] - s.tick }));
-  return { tick: s.tick, pending: s.pending, beats, coming };
+  // What anyone fighting the party is visibly about to do (D130).
+  const threats = s.threats.map((t) => ({ who: short(s, t.who), does: t.does }));
+  return { tick: s.tick, pending: s.pending, beats, coming, threats };
 }
 
-// Party HP and conditions for the header.
-export const partyView = (s) => s.party.map((p) => ({ id: p.id, name: p.name, hp: s.hp[p.id], max: p.abilities?.hp ?? 4, form: s.flags[p.id]?.form ?? null, down: s.flags[p.id]?.down === true }));
+// The party for the header: each member's conditions, form, and whether they're down (D130).
+export const partyView = (s) =>
+  s.party.map((p) => ({ id: p.id, name: p.name, conditions: s.conditions.filter((c) => c.who === p.id).map((c) => c.text), form: s.flags[p.id]?.form ?? null, down: s.flags[p.id]?.down === true }));

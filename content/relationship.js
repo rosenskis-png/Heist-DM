@@ -70,6 +70,16 @@ export const scoring = {
 // READY thresholds. The payoff's own thresholds are in each companion's `payoff`.
 export const ready = { vulnerability: 6, deepOrBond: 9 };
 
+// How the encounter went moves how the party feels when it reaches camp (D131): the ending's number, plus `optional`
+// for each optional objective met, kept within `range`. Each point moves every companion's regard for him, and her
+// affection and trust toward the other companion, by `moves`.
+export const morale = {
+  ending: { objective: 1, alternate: 0, fail_forward: -1, captured: -2, other: 0 },
+  optional: 1,
+  range: [-2, 2],
+  moves: { regard: 1, affection: 1, trust: 1 },
+};
+
 // What a beat does to her state when it lands. Payoff, vulnerability, deep and bond set their flag.
 export const beatEffects = {
   rupture: { regard: -2 },

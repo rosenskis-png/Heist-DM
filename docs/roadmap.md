@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Next thread: combat.** It's the biggest open design problem, and the reason the work so far has leaned on non-combat encounters. See "Combat" below. Decide it before the table is built, since fights run there.
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). The table is the next build.
 
 ---
 
@@ -33,16 +33,13 @@ Not gates. Each is answered when play shows it.
 - **Beats outside camp.** Only the campfire reports beats (D80). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
 - **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. If Ember needs her own lines over the rings, the candidate needs a speaker.
 
-## Combat (the next thread)
+## Combat
 
-Not designed yet. What's true now: a fight runs in the Moment, a round at a time, through the scene call. The DM rules each round, rolls are bands the engine rolls, and HP lives in the ledger (enemies' from their sheet or their tier in `content/rules.js`). The engine's own combat rounds are retired (D125). Questions to answer, before building anything:
-1. **What makes a fight fun here instead of a slog?** The same test as any encounter (`docs/design/encounter-craft.md` §1): decisions whose consequences you can partly see, dice that settle what's left, and every outcome leading somewhere. A fight that's trading blows until HP runs out fails it.
-2. **What a round is.** One message where the player says what everyone does, or something more like a plan card for a fight? How many rounds a fight should take, and how it ends: down, fled, yielded, surrounded, the alarm.
-3. **The companions in a fight.** Does the player command them, or do they act from their own data, the way stances do? How they speak during a fight without a call per round (D127).
-4. **Cost.** One scene call per round on full context. Whether a fight gets a lighter slice or a cheaper tier, as questions do (D127).
-5. **A fight as the point of an encounter,** with a setup (D118's genre): terrain, positions, traps and a plan before it starts, and how the generator builds one.
-
-*Recommendation:* talk it through first, with the encounter craft guide and Gravenhold's combat rule (`content/rules.js`) as the starting points, and decide in `docs/decisions.md` before any code.
+Decided and built (D130, D131). What's left:
+- **The combat abilities are redesigned and rebalanced before Act 1 is final.** They're Gravenhold's, written for rounds and HP. *Recommendation:* each says exactly what it does in a beat and what it needs in place, without HP or rounds, and every one creates a decision (an opening, a position, a choice of target) rather than only removing an enemy. Judge them on the bench with fight cards.
+- **Whether a fight card feels like homework** in play, against "I hit him" in the Moment. *Recommendation:* watch for it; the card already reads one line the way the player means it (D77).
+- **Threats that bind.** *Recommendation:* in playtests, check that an unanswered threat lands as shown and nothing worse, and that the card's notes flag it, before adding anything.
+- **The morale numbers** (`content/relationship.js`). Starting values; tune them once the hand-off and campfires play end to end.
 
 ## Next build: the table
 
@@ -51,8 +48,8 @@ The screen and call design in D127, with ability uses (D128). Built after combat
 **Build order**
 1. **The companion call for both.** One call voicing both companions from their briefs, each free to pass. On the bench, run the same huddle cases as one shared call and as two separate calls, and judge whether the two still sound like different people and still catch a flawed plan's holes some of the time (D38, D40). If the shared call loses that, keep two calls.
 2. **The read-only slice and the cheap tier** for questions to the DM, with `test/budget.test.js` holding its size.
-3. **Ability uses** (D128) in the ledger, the DM's calls and the sheet, with the campfire refill.
-4. **The two tabs,** the addressee picker and the call routing, then the specs (`docs/spec/ui.md`, `architecture.md`, `context.md`, the call specs) in the same commit.
+3. **Ability uses** (D128) in the ledger, the DM's calls and the sheet, with the campfire refill. Conditions clear there too (D130).
+4. **The two tabs,** the addressee picker and the call routing (a fight goes through Plans, D130), the dice shown one step at a time as the account plays out (already rolled, so it costs nothing), then the specs (`docs/spec/ui.md`, `architecture.md`, `context.md`, the call specs) in the same commit.
 
 **Exit:** a question to the DM costs one cheap call; a table moment costs at most two; the companions' voices hold in a playtest; Fern can't Wild Shape twice before a rest.
 
@@ -72,13 +69,13 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
 4. **Sketch and critique** on a bench tab: generate ten sketches per seed, read them side by side, and plant flaws to test the critique. No encoding yet; this tests judgment, not code.
 5. **Encode** in stages, validated by the engine, and the layout from the sketch's rough sizes.
-6. **The hand-off:** attachments, the world's memory, next-scene stubs, and the outfit a room gives.
+6. **The hand-off:** attachments, the world's memory, next-scene stubs (including the fail-forward and captured endings', which always move the party on, D131), the conditions the party carries, `endEncounter` with the hand-off, and the outfit a room gives.
 7. **Play Act 1** from a new game.
 
 **Open questions**
 1. **The sketch's format.** *Recommendation:* the shape of `fixtures/cells/walkthrough.md` §1 (intent, people table, routines, places as relationships, things and properties, fixed facts, hidden things, events, attachments, exits with stubs, what the opening shows), about 1–2 KB. Tables where the walkthrough has them.
 2. **A motif's format.** *Recommendation:* a name; the pattern in a paragraph; the decisions it creates (routing, timing, approach, what to keep, `docs/design/encounter-craft.md` §2); what it usually connects to; the genres it suits; and the encounter it came from. Never a route.
-3. **Act 1's genres.** *Recommendation:* from the act's mechanics (`content/setting.js`): escape, infiltration, a negotiation with a deadline, a mechanism or hazard, and a fight with a setup. A hazard is a fixed fact, notes and placed events, and a fight runs as the Moment's rounds, so none of these needs new engine rules.
+3. **Act 1's genres.** *Recommendation:* from the act's mechanics (`content/setting.js`): escape, infiltration, a negotiation with a deadline, a mechanism or hazard, and a fight with a setup. A hazard is a fixed fact, notes and placed events, and a fight runs as cards (D130), so none of these needs new engine rules.
 4. **Layout from a sketch.** *Recommendation:* the sketch writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28), and states any distance that matters as a constraint ("the peg within 5 ft of the stool"). Code snaps it to the grid and validates it. A failure goes back once, described as relationships; then the packet ships without a map (D9). No open spaces (D124).
 5. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, and go to the critique as facts, not to the sketch as rules. Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 6. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.

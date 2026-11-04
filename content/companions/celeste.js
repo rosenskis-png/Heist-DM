@@ -110,7 +110,6 @@ export default {
   darkTriggers: `treating her only as a servant; accepting worship without care for her; walking toward the temple; claiming the prophecy as his due`,
   outfit: `White silk vestments in the Ordo's simple cut, sheer where the light comes through, belted with a gold cord and open at the sides to the hip; a gold sunburst pendant on a long chain; a thin gold circlet; sandals, or bare feet on holy days.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "dawnlight",
       name: "Dawnlight",

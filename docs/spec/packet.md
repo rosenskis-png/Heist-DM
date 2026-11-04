@@ -22,7 +22,7 @@ Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, may place e
 The party's companions appear only by slot, `companion_a` and `companion_b`, which loading binds to the party's companions in order (D126). A packet never names one.
 
 ## 2. People
-One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they react under pressure, `disposition`, position, and a `schedule` if they have one. The DM plays people from these sheets and the packet's `notes`.
+One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they react under pressure, `disposition`, position, and a `schedule` if they have one. Anyone who might fight has a `tier`, which sets their toughness (`content/rules.js`), and `breaks`: when they stop fighting, by yielding, fleeing or bargaining (D130). The DM plays people from these sheets and the packet's `notes`.
 
 ## 3. Map
 
@@ -73,6 +73,8 @@ Written from the map after the map is final. Stored word for word and sent with 
 | Every schedule has a cue the party can perceive from a zone they start in or can reach | Learnable cycles (§4.3) |
 | Every party member's abilities interact with at least one element | Everyone has essential work (§3.4) |
 | Each usable thing has at least one property beyond its description | Properties, not difficulties (§3.2) |
+| Everyone with a tier other than civilian has `breaks` | Fights end on morale (§3.9) |
+| A fight encounter's objective is something other than everyone down | Fights are for something (§3.9) |
 
 ### Size
 The engine measures each serialized packet and warns above twice the size of the Cells (D26). An encounter that big is split at a doorway, and each piece hands its state to the next.

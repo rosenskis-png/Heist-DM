@@ -126,7 +126,7 @@ If the player had written the plan with no timing ("Fern gets the keys, brings t
 
 **If step 2 had failed,** the ring would be on Snag's belt and his suspicion up a step, a fact in the ledger. The plan stops there. The party can lie still for a cycle to calm him and try again on the next Sit, at a cost of three of the ticks before Uzga.
 
-**If step 3 had failed,** Snag looks round with the drum still whole. Whether he goes for the drumstick is the DM's call from his sheet and the notes, and a fight would run in the Moment, a round at a time.
+**If step 3 had failed,** Snag looks round with the drum still whole. Whether he goes for the drumstick is the DM's call from his sheet and the notes. The account ends on what he's visibly about to do ("Snag lunges for the drumstick"), and the next card is the fight's first beat (D130).
 
 ## 3. Where the encounter really is: the doorway
 

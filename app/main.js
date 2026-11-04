@@ -219,7 +219,7 @@ function Game({ env, slot, initial, onQuit }) {
         <${Clock} clock=${clockView(s)} compact=${true} />
         <button className="iconbtn" aria-expanded=${menu} onClick=${() => setMenu(!menu)}>Menu</button>
       </div>
-      <div className="gutter"><div className="hp" style=${{ maxWidth: "1240px", margin: "0 auto 6px" }}>${partyView(s).map((p) => html`<span key=${p.id} className=${p.down ? "down" : ""}>${p.name} ${p.hp}/${p.max} HP${p.form === "animal" ? " · a rat" : ""}${p.down ? " · down" : ""}</span>`)}</div></div>
+      <div className="gutter"><div className="roster" style=${{ maxWidth: "1240px", margin: "0 auto 6px" }}>${partyView(s).map((p) => html`<span key=${p.id} className=${p.down ? "down" : ""}>${p.name}${p.form === "animal" ? " · a rat" : ""}${p.down ? " · down" : ""}${p.conditions.map((c) => ` · ${c}`).join("")}</span>`)}</div></div>
       ${menu
         ? html`<div className="gutter"><div className="menu">
             <div><b>Speed and quality.</b> <span className="muted small">Every call is charged to your own Claude usage.</span></div>
@@ -399,7 +399,7 @@ function MomentTab({ session, env, io, run, busy, error, refresh }) {
   const who = (id) => (id === "dm" ? "DM" : id === "player" ? "You" : nameOf(s, id));
   return html`<section className="feed" aria-label="Moment">
     ${!session.feeds.moment.length
-      ? html`<p className="muted">Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A fight goes round by round here too. A plan of several steps goes on the card.</p>`
+      ? html`<p className="muted">Ask the DM anything, talk to someone, or try something quick: the DM rules on it, and time passes as it would. A plan of several steps goes on the card, and so does a fight: say what everyone does.</p>`
       : null}
     ${session.feeds.moment.map((e) => {
       if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">You${e.to && e.to !== "dm" ? ` to ${who(e.to)}` : ""}</span><span className="text">${e.text}</span></div>`;

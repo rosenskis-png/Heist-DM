@@ -10,7 +10,7 @@ Splitting the single chat into three is one of the project's two breakthroughs. 
 | Interface | Job | Moves time? |
 |---|---|---|
 | **Plan** | The draft card, committing, the DM's card, the narration of each plan played out | Yes, through committed cards |
-| **Moment** | Questions, talk, quick actions, fights a round at a time | Only physical work takes time (`docs/spec/architecture.md`) |
+| **Moment** | Questions, talk, quick actions; in a fight, only questions and talk (D130) | Only physical work takes time (`docs/spec/architecture.md`) |
 | **Companions** | The huddle, private channels, the campfire | No |
 
 On a phone the three are tabs, each with an unread marker, and the map is one tap away. On a wide screen the map and clock hold a column beside the tabs (D72).
@@ -34,6 +34,8 @@ On a phone the three are tabs, each with an unread marker, and the map is one ta
 - Shows party positions, plus NPC and item positions the party currently perceives.
 - Connections show their state (open, locked, broken) once known.
 - The clock (tick, and the current beat if the party has learned it, with its cue and the known events coming) is always visible next to the map, and its short form is always in the header. Players should never have to ask what time it is.
+- In a fight, the clock also shows what each enemy is about to do (`threats`, D130); the header's short form counts them.
+- The header lists the party: each member's conditions, form, and whether they're down. There's no HP (D130).
 - A packet without geometry shows no map. A wrong map is worse than none.
 
 ## Carried over from Gravenhold (legacy `Title`, `Setup`, `Drawer`, `AbilitySheet`, `Bar`, `Sigil`)

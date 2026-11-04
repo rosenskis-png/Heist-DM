@@ -112,7 +112,6 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
   darkTriggers: `defending her when she's knowingly cruel; treating the act as the whole of her; encouraging her to wreck what she's jealous of`,
   outfit: `A loose, off-the-shoulder cream peasant blouse tied at the neckline, nearly sheer in firelight, with nothing under it; a short wine-red skirt; striped stockings and laced ankle boots; a black ribbon at her throat; a charcoal pencil tucked behind her ear.`,
   abilities: {
-    hp: 3,
     combat: {
       id: "scandal",
       name: "Scandal",

@@ -1,10 +1,10 @@
 // The ledger (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
 // objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
-import { person, isParty, isNpc, zoneOf, sheet } from "./world.js";
+import { person, isParty, isNpc, zoneOf } from "./world.js";
 import { nextTick, objectives, log } from "./clock.js";
 import { d100, ODDS } from "./rng.js";
-import { enemyTiers } from "../../content/rules.js";
+import { toughness, CONDITIONS, THREATS } from "../../content/rules.js";
 
 // The ledger's size limits (D76). Facts are what's true now and matters later; history goes to the log. A
 // ruling that would leave more than `facts` active, or add more than `newFacts` at once, goes back for the retry.
@@ -47,7 +47,10 @@ export function checkChanges(s, ch = {}, at = "changes") {
   for (const f of ch.facts ?? []) for (const id of f.about ?? []) if (!known.has(id)) bad("subject", id);
   const facts = new Set([...s.facts.map((f) => f.id), ...(ch.facts ?? []).map((f) => f.id)]);
   for (const id of ch.retire ?? []) if (!facts.has(id)) errors.push(`${at}: there's no fact ${id} to retire`);
-  for (const h of ch.hp ?? []) if (!isParty(s, h.who) && !isNpc(s, h.who)) bad("person", h.who);
+  for (const w of ch.wounds ?? []) if (!isNpc(s, w.who)) errors.push(`${at}: wounds are for people in the encounter, not ${w.who}; harm to the party is a condition or \`down\``);
+  for (const c of ch.conditions ?? []) if (!isParty(s, c.who)) errors.push(`${at}: conditions are for the party, not ${c.who}`);
+  const conditions = new Set([...s.conditions.map((c) => c.id), ...(ch.conditions ?? []).map((c) => c.id)]);
+  for (const id of ch.recover ?? []) if (!conditions.has(id)) errors.push(`${at}: there's no condition ${id} to recover from`);
   for (const r of ch.routine ?? []) if (!person(s, r.npc)?.schedule) errors.push(`${at}: ${r.npc} has no routine`);
   for (const m of ch.moods ?? []) if (!isNpc(s, m.npc)) bad("person", m.npc);
   const can = revealable(s);
@@ -71,7 +74,36 @@ export function checkFactBudget(s, all) {
   return errors;
 }
 
-const maxHp = (s, id) => sheet(s, id)?.abilities?.hp ?? person(s, id)?.hp ?? enemyTiers[person(s, id)?.tier]?.hp ?? 1;
+// How many conditions the party would carry after these changes (CONDITIONS.max).
+export function checkConditionBudget(s, all) {
+  const ids = new Set(s.conditions.map((c) => c.id));
+  for (const ch of all) {
+    for (const c of ch?.conditions ?? []) ids.add(c.id);
+    for (const id of ch?.recover ?? []) ids.delete(id);
+  }
+  return ids.size > CONDITIONS.max ? [`the party would carry ${ids.size} conditions; at most ${CONDITIONS.max}. Replace one by reusing its id, or recover from one`] : [];
+}
+
+// Telling blows a person can take before they're down, from their tier (D130).
+export const toughnessOf = (p) => toughness[p.tier] ?? 1;
+
+// What each person fighting the party is about to do (D130): real people, one line each.
+export function checkThreats(s, threats = [], at = "threats") {
+  const errors = [];
+  if (threats.length > THREATS.max) errors.push(`${at}: at most ${THREATS.max}, one for each person still fighting`);
+  const seen = new Set();
+  for (const t of threats) {
+    if (!isNpc(s, t.who)) errors.push(`${at}: ${t.who} isn't a person in this encounter`);
+    if (seen.has(t.who)) errors.push(`${at}: one line for ${t.who}, not two`);
+    seen.add(t.who);
+  }
+  return errors;
+}
+
+// Threats stand until the next account or scene replaces them; nobody who's down threatens anyone.
+const setThreats = (s, threats) => {
+  s.threats = (threats ?? []).filter((t) => !s.flags[t.who]?.down);
+};
 
 // Records a ruling. Moving an NPC who has a routine takes them off it until a ruling puts them back.
 export function applyChanges(s, ch = {}) {
@@ -97,13 +129,24 @@ export function applyChanges(s, ch = {}) {
     else s.facts.push(fact);
   }
   s.facts = s.facts.filter((f) => !(ch.retire ?? []).includes(f.id));
-  for (const h of ch.hp ?? []) s.hp[h.who] = Math.max(0, Math.min(maxHp(s, h.who), (s.hp[h.who] ?? maxHp(s, h.who)) + h.by));
+  for (const w of ch.wounds ?? []) {
+    s.toughness[w.who] = Math.max(0, (s.toughness[w.who] ?? 1) - (w.n ?? 1));
+    if (!s.toughness[w.who]) (s.flags[w.who] ??= {}).down = true;
+  }
+  for (const c of ch.conditions ?? []) {
+    const cond = { id: c.id, who: c.who, text: c.text };
+    const i = s.conditions.findIndex((x) => x.id === c.id);
+    if (i >= 0) s.conditions[i] = cond;
+    else s.conditions.push(cond);
+  }
+  s.conditions = s.conditions.filter((c) => !(ch.recover ?? []).includes(c.id));
   for (const r of ch.routine ?? []) {
     s.offRoutine = s.offRoutine.filter((id) => id !== r.npc);
     if (!r.follows) s.offRoutine.push(r.npc);
   }
   for (const m of ch.moods ?? []) s.disposition[m.npc] = m.value;
   for (const id of ch.reveal ?? []) if (!s.known.revealed.includes(id)) s.known.revealed.push(id);
+  setThreats(s, s.threats);
   objectives(s);
 }
 
@@ -170,6 +213,8 @@ export function checkResolve(s, card, rolls, out) {
   }
   errors.push(...checkChanges(s, out.after, "after"));
   errors.push(...checkFactBudget(s, [{ facts: card.rulings }, ...out.steps.map((st) => st.changes), out.after]));
+  errors.push(...checkConditionBudget(s, [...out.steps.map((st) => st.changes), out.after]));
+  errors.push(...checkThreats(s, out.threats));
   const happened = card.steps.filter((c) => out.steps.some((st) => st.n === c.n && st.happened !== "no"));
   const floor = Math.max(s.tick, ...happened.map((c) => c.at));
   if (out.ends_at < floor) errors.push(`ends_at must be tick ${floor} or later`);
@@ -190,6 +235,8 @@ export function resolve(s, card, rolls, out) {
   }
   if (!s.ended) advanceTo(s, out.ends_at);
   if (!s.ended) applyChanges(s, out.after);
+  // The account leaves the fight where it stands: what each person still fighting is about to do, or nothing.
+  setThreats(s, out.threats);
   log(s, { plan: out.steps.map((st) => `${st.n}:${st.happened}`).join(" "), ...(out.stopped ? { stopped: out.stopped.at } : {}) });
   return { rolls, steps: out.steps, stopped: out.stopped ?? null };
 }
@@ -205,7 +252,12 @@ export function checkScene(s, out) {
   });
   errors.push(...checkChanges(s, out.changes));
   errors.push(...checkFactBudget(s, [out.changes, ...(out.checks ?? []).flatMap((c) => [c.success.changes, c.failure.changes])]));
+  errors.push(...checkConditionBudget(s, [out.changes, ...(out.checks ?? []).flatMap((c) => [c.success.changes, c.failure.changes])]));
+  errors.push(...checkThreats(s, out.threats));
   if (out.ticks > 12) errors.push("an exchange takes at most 12 ticks; longer is a plan");
+  // A fight is a plan (D130): once anyone is fighting the party, what the party does goes on the card.
+  if (s.threats.length && ((out.checks ?? []).length || out.ticks > 0))
+    errors.push(`someone is fighting the party (${s.threats.map((x) => x.who).join(", ")}), so what the party does goes on the card: answer and talk here, with no checks and no time, and put what they want to do in "plan"`);
   return errors;
 }
 
@@ -221,6 +273,7 @@ export function scene(s, out) {
   });
   applyChanges(s, out.changes);
   for (const l of out.learned ?? []) log(s, { learned: l });
+  if (out.threats) setThreats(s, out.threats);
   advanceTo(s, s.tick + out.ticks);
   return { checks };
 }

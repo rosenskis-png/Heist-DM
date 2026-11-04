@@ -136,7 +136,7 @@ export async function commit(session, io, prompts, { checkpoints = [], rolls } =
   return out;
 }
 
-// One exchange in the Moment tab: a question, talk, a quick action or a fight round, ruled by the DM.
+// One exchange in the Moment tab: a question, talk or a quick action, ruled by the DM.
 export async function talk(session, io, prompts, { to = "dm", text, rolls }) {
   const env = envFor(session, prompts);
   let s = session.state;

@@ -28,7 +28,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | How she gets what she wants | `boundaries` (what she does with a no), `honesty` (when and how she lies), `means` (what she'll do), `whenRefused` (what she shows, and what she resolves inside). Fern is the honest baseline (D107). |
 | Voice and limits | `voice`, `rules` (hard rules), `skills` (roll modifiers) |
 | Planning | `planning`: `sees` (what she reliably notices about a plan), `misses` (what she tends not to consider), `reaches_for` (the kind of plan she proposes first), `hunch` (a belief about the situation, phrased as a hint, that steers what her call attends to). Her call gets `hunch` and `reaches_for` only; `sees` and `misses` describe her bias for the designer and the bench (D50). How she thinks in the huddle (D38; `docs/design/companion-craft.md` §6). |
-| Abilities | `abilities`: `hp`, `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
+| Abilities | `abilities`: `combat`, `noncombat`, `limits`. Exact, conditional and limited; the main way a plan handles a risk. Each ability's `declared` block is what the engine tracks (D30). |
 | Special cases | optional, declared: `tie`, `secondVoice`, `extraBeats`, `stageLabels`, `notes` (§6, D81). |
 
 The exact shape is `schemas/companion.js`, and `node --test` checks every file in the registry against it (D82).
@@ -87,6 +87,8 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 **What her call reads** (D94): every number with a stance sentence from `stances` in `content/relationship.js`.
 
 **Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat keeps moving; for a companion with `leanFromHeat`, heat gained then also feeds lean, and intimacy gained after the payoff draws lean back down (D93). She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
+
+**How the encounter went** (D131): when an encounter ends, `endEncounter` reads the hand-off's ending and optional objectives (`morale` in `content/relationship.js`) and moves each companion's regard for him, and her affection and trust toward the other, by up to 2 either way. Her read of the other's view doesn't move; that's hers to revise at camp.
 
 **READY** (code decides what may happen):
 - `payoff` once heat ≥ `payoff.at`, the turn count ≥ `minTurns`, and the act ≥ `minAct`;

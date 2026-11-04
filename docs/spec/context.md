@@ -30,7 +30,7 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 - **Coordinates never go to any call** (D9). Zones come with their size in feet, and openings in rough real dimensions. Code: `src/context.js`.
 - **Hidden things** go only to the resolve and scene calls, marked hidden. The card names nothing the party doesn't know.
 - **Companions** see only what the party knows, plus their own data.
-- **Budgets** (D76): every call has an input budget (`BUDGET` in `src/ask.js`). One that crosses it still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` holds every DM and companion call under its budget with the ledger at its limits.
+- **Budgets** (D76): every call has an input budget (`BUDGET` in `src/ask.js`). One that crosses it still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` holds every DM and companion call under its budget with the ledger at its limits, mid-fight (D130).
 - Generation's calls (sketch, critique, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet.
 
 ## 3. Act gates

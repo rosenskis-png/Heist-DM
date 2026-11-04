@@ -88,7 +88,6 @@ export default {
   darkTriggers: `pure indulgence with nothing else; helping her complete the contract; cruelty she can savour`,
   outfit: `A black silk-and-lace halter top that barely covers and a low-slung skirt of sheer black panels split high on both legs; fine hell-forged gold body chains engraved with infernal script across her hips and waist; gold cuffs on her horns; the dwarven ward-chains on her ankles worn as anklets.`,
   abilities: {
-    hp: 4,
     combat: {
       id: "kiss",
       name: "Draining Kiss",

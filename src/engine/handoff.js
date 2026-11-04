@@ -1,5 +1,7 @@
 // The hand-off written when an encounter ends (docs/spec/state.md, D21), and the slack it moves (D41, D43).
-import { partyIds, zoneOf, nameOf, person } from "./world.js";
+import { partyIds, zoneOf, nameOf } from "./world.js";
+import { test } from "./cond.js";
+import { CAPTURED } from "./clock.js";
 
 // Slack moves by 1 per encounter with a deadline, between −10 and +10 (D43).
 export function slackAfter(s) {
@@ -7,9 +9,21 @@ export function slackAfter(s) {
   if (!deadline) return { spare: null, slack: s.slack };
   const due = s.due[deadline.id];
   const spare = Math.max(0, due - s.tick);
-  const failForward = s.ended?.outcome === s.packet.intent.fail_forward?.id;
+  const failForward = ["fail_forward", "captured"].includes(endingOf(s));
   const by = failForward || spare <= 0.15 * due ? 1 : spare >= 0.5 * due ? -1 : 0;
   return { spare, slack: Math.max(-10, Math.min(10, s.slack + by)) };
+}
+
+// What kind of ending this was, for slack and for how the party feels about it (D131).
+export function endingOf(s) {
+  const { objective, alternates = [], fail_forward } = s.packet.intent;
+  const id = s.ended?.outcome;
+  if (!id) return null;
+  if (id === objective?.id) return "objective";
+  if (alternates.some((o) => o.id === id)) return "alternate";
+  if (id === fail_forward?.id) return "fail_forward";
+  if (id === CAPTURED.id) return "captured";
+  return "other";
 }
 
 export function handoff(s) {
@@ -21,14 +35,19 @@ export function handoff(s) {
     s.packet.people.map((p) => [p.id, { disposition: s.disposition[p.id], zone: s.at[p.id] ?? null, ...(s.flags[p.id] ? { flags: s.flags[p.id] } : {}) }]),
   );
   const outcome = s.ended?.outcome ?? null;
-  const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward].find((o) => o?.id === outcome)?.label;
+  const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward, CAPTURED].find((o) => o?.id === outcome)?.label;
+  // Optional objectives count where they stand when the encounter ends.
+  const optional = s.packet.intent.optional ?? [];
+  const met = optional.filter((o) => test(s, o.condition)).map((o) => o.id);
   return {
     packet: s.packet.id,
     outcome,
+    ending: endingOf(s),
+    optional: { met, missed: optional.map((o) => o.id).filter((id) => !met.includes(id)) },
     exit,
     gear,
-    hp: { ...s.hp },
-    conditions: Object.fromEntries(party.filter((id) => s.flags[id]).map((id) => [id, s.flags[id]])),
+    // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
+    conditions: s.conditions.map((c) => ({ ...c })),
     fates,
     companions: party.filter((id) => id !== "player"),
     tick: s.tick,
