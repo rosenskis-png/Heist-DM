@@ -7,8 +7,8 @@ They are different people. Each talks in her own voice, notices what her own hun
 
 What's in one companion's entry beyond what the table can see (her rules, her hunch, her tie, what she knows) is hers. The other doesn't know it unless it's been said.
 
-## Right now: the huddle
-Time is stopped while the party talks. Nothing anyone says here moves the world; only the plan the player commits does. They talk like friends at the table: reacting, joking, flirting, arguing, throwing out ideas.
+## Right now: over the rings
+The party talks over the whisper rings, so nobody else hears, and time is stopped while they talk. Nothing said over the rings moves the world; only what the player does, says aloud, or commits as a plan does. They react to what just happened at the table (the DM's answer, someone's words, how a try went, the plan) like friends at the table: reacting, joking, flirting, arguing, throwing out ideas. Each of the player's lines says who it was to.
 
 ## Three ways the next moment could go
 Give three genuinely different exchanges. One is picked at random, so make them different takes, not three wordings of one take. In each, either can speak, in either order; one can answer the other; either or both can let it go. Usually one or two lines, sometimes a short back-and-forth. An exchange with no lines is both of them letting it go.

@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). The table is the next build.
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built** (D127, D128, D132–D134); what's left of it is a playtest, below.
 
 ---
 
@@ -41,17 +41,16 @@ Decided and built (D130, D131). What's left:
 - **Threats that bind.** *Recommendation:* in playtests, check that an unanswered threat lands as shown and nothing worse, and that the card's notes flag it, before adding anything.
 - **The morale numbers** (`content/relationship.js`). Starting values; tune them once the hand-off and campfires play end to end.
 
-## Next build: the table
+## The table: built, waiting on a playtest
 
-The screen and call design in D127, with ability uses (D128). Built after combat is decided, before Act 1 is played (Phase 7's step 7).
+The two tabs, the routing, the question call, the shared companion call, ability uses and the plan as a list (D127, D128, D132–D134). Tests hold the first two exit checks: a question to the DM is one call on the cheapest tier, and a table moment is the scene call and one party call.
 
-**Build order**
-1. **The companion call for both.** One call voicing both companions from their briefs, each free to pass. On the bench, run the same huddle cases as one shared call and as two separate calls, and judge whether the two still sound like different people and still catch a flawed plan's holes some of the time (D38, D40). If the shared call loses that, keep two calls. *Done:* one shared call (D132).
-2. **The read-only slice and the cheap tier** for questions to the DM, with `test/budget.test.js` holding its size.
-3. **Ability uses** (D128) in the ledger, the DM's calls and the sheet, with the campfire refill. Conditions clear there too (D130).
-4. **The two tabs,** the addressee picker and the call routing (a fight goes through Plans, D130), the dice shown one step at a time as the account plays out (already rolled, so it costs nothing), then the specs (`docs/spec/ui.md`, `architecture.md`, `context.md`, the call specs) in the same commit.
+**Exit:** the companions' voices hold in a playtest, and limited abilities hold to their uses.
 
-**Exit:** a question to the DM costs one cheap call; a table moment costs at most two; the companions' voices hold in a playtest; Fern can't Wild Shape twice before a rest.
+**Open questions**
+- **Wild Shape's uses.** The exit asked that Fern can't Wild Shape twice before a rest, but her file gives it once per encounter and three times per rest, and that's what the engine now holds. *Recommendation:* keep the file's numbers until the balance pass the designer has deferred; set `rest: 1` there if twice is too many.
+- **Whether the DM records `used`.** The engine can only count a use the DM records; nothing infers one from a form flag. *Recommendation:* watch the party's sheet in the playtest. If uses go unrecorded, have the scene and resolve prompts' worked examples show one before adding any structure.
+- **Whether answers fill the ledger.** Every ruling from a question is a fact, and the ledger holds 20 (D76). *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if questions crowd out what plans record.
 
 ## Phase 7: The generator
 

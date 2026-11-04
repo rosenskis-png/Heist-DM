@@ -2,7 +2,7 @@
 
 **Job:** rule on the player's plan and make its card (D75).
 **Runtime:** `sample.json`, replay on, `default`.
-**Sees:** the characters, the encounter with hidden things marked and only the routines the party knows, the ledger, the next ticks as the party expects them, decided stances, recent exchanges and the plan.
+**Sees:** the characters, with what's left of each limited ability (D128), the encounter with hidden things marked and only the routines the party knows, the ledger, the next ticks as the party expects them, decided stances, recent exchanges at the table (no private words) and the plan, as the draft's actions numbered in order (D134). The ledger's facts include what the DM's answers settled (D133).
 
 ## Returns (`schemas/calls/adjudicate.js`)
 - **Steps,** in the player's order and timing, read the way the player means them (D77). Each has who, the tick it happens on (steps can share one), and a roll only where failure is possible and interesting. A roll has its band, reason, what failure costs and whether failure stops the plan.

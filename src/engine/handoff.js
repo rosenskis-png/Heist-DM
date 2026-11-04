@@ -26,6 +26,16 @@ export function endingOf(s) {
   return "other";
 }
 
+function spentAfter(s) {
+  const out = structuredClone(s.spent ?? {});
+  for (const [who, used] of Object.entries(s.used ?? {})) for (const [id, n] of Object.entries(used)) (out[who] ??= {})[id] = (out[who][id] ?? 0) + n;
+  return out;
+}
+
+// A rest at a campfire (D122): per-rest uses refill and conditions clear (D128, D130). Takes and returns what the
+// hand-off carries into the next packet.
+export const rest = (carry) => ({ ...carry, conditions: [], spent: {} });
+
 export function handoff(s) {
   const party = partyIds(s);
   const { spare, slack } = slackAfter(s);
@@ -48,6 +58,8 @@ export function handoff(s) {
     gear,
     // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
     conditions: s.conditions.map((c) => ({ ...c })),
+    // Per-rest ability uses spent so far, this encounter's included; per-encounter uses refill now (D128).
+    spent: spentAfter(s),
     fates,
     companions: party.filter((id) => id !== "player"),
     tick: s.tick,

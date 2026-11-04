@@ -7,4 +7,5 @@ export { encodeSchema } from "./calls/encode.js";
 export { adjudicateSchema } from "./calls/adjudicate.js";
 export { resolveSchema } from "./calls/resolve.js";
 export { sceneSchema } from "./calls/scene.js";
+export { questionSchema } from "./calls/question.js";
 export { companionFileSchema } from "./companion.js";

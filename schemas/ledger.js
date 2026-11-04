@@ -3,6 +3,9 @@
 // docs/spec/engine.md §2.
 import { r, list, obj } from "./shape.js";
 
+// A fact, added or (same id) replaced: one short line about how things are now.
+export const fact = obj(["id", "text"], { id: r("id"), text: { type: "string", minLength: 1, maxLength: 160 }, about: list(r("id")), known: { type: "boolean" } });
+
 export const changes = obj([], {
   // A person or thing goes to a zone (nothing checks the way there: the DM has ruled it).
   moves: list(obj(["who", "to"], { who: r("id"), to: r("id") })),
@@ -12,7 +15,7 @@ export const changes = obj([], {
   flags: list(obj(["on", "key", "value"], { on: r("id"), key: r("id"), value: { type: ["string", "number", "boolean"] } })),
   // A fact, added or (same id) replaced: one short line about how things are now, not what happened (that's the
   // log). Known facts are ones the party knows. The ledger holds a fixed number of them (D76).
-  facts: list(obj(["id", "text"], { id: r("id"), text: { type: "string", minLength: 1, maxLength: 160 }, about: list(r("id")), known: { type: "boolean" } })),
+  facts: list(fact),
   // Facts that stop being true.
   retire: list(r("id")),
   // Telling blows on a person in the encounter, never the party (D130). At no toughness left they're down.
@@ -26,6 +29,8 @@ export const changes = obj([], {
   moods: list(obj(["npc", "value"], { npc: r("id"), value: r("id") })),
   // Hidden things, routines or coming events the party now knows.
   reveal: list(r("id")),
+  // A limited ability someone in the party used (D128): who, and the ability's id. The engine counts each one.
+  used: list(obj(["who", "ability"], { who: r("id"), ability: r("id") })),
 });
 
 export const band = { enum: ["easy", "medium", "hard", "very_hard", "near_impossible"] };

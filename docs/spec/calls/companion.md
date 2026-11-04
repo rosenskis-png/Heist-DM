@@ -1,7 +1,7 @@
 # Companion call
 
-**Job:** voice one companion in the huddle or on a private channel.
-**Runtime:** `sample.json`, replay off, `quick` (D58). One call per companion per message; on a private channel, only the addressed companion.
+**Job:** voice one companion on her private channel. At the table both companions are the party call (D132); the bench still runs this call in the huddle, as the two-call comparison.
+**Runtime:** `sample.json`, replay off, `quick` (D58). One call per private message, for the addressed companion only.
 **Sees:** what a player at the table would see (the "Companion" row of `docs/spec/context.md` §2): the party's view of the encounter and the ledger, the DM's last two narrations, the draft card with its pending stances and the card once it's made (D40). Plus her brief and the special cases she acts on (D79, D114), and the channel. The second companion's call also sees the first's reply.
 **Never sees:** hidden things, the intent, NPC sheets, her secrets and romance arc (those are for camp), or the other companion's private channel and secrets.
 

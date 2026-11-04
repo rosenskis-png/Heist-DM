@@ -12,4 +12,4 @@
 - **The narration,** last, written from that record, and any texture it added. It paints the scene (D49), gives the moment reality stopped the plan its beat, and keeps hidden things out.
 
 ## Validated by the engine
-Steps in order from 1; all of them unless the plan stopped, and none after the stop; no step whose roll failed happening in full; real names in every change and threat; an end tick no earlier than the last step that happened; the ledger's limits (D76), conditions included. Failures go back for one retry.
+Steps in order from 1; all of them unless the plan stopped, and none after the stop; no step whose roll failed happening in full; real names in every change and threat; an end tick no earlier than the last step that happened; the ledger's limits (D76), conditions included; abilities used within what's left of them (D128). Failures go back for one retry.

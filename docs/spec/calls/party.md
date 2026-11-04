@@ -1,9 +1,8 @@
 # Party call
 
-**Job:** voice both companions in the huddle, in one call (D127).
-**Status:** chosen for the huddle (D132). The game switches to it with the table's tabs (`docs/roadmap.md`); until then the game's huddle runs the companion call once per companion, and the bench runs both on the same cases.
-**Runtime:** `sample.json`, replay off, `quick` (D58). One call per huddle message. A private word to one companion is still her companion call.
-**Sees:** for each companion, exactly the brief and special cases her own companion call gets (`docs/spec/calls/companion.md`). Also the table as both of them see it: the party's view of the encounter and the ledger, the DM's last two narrations, the pair's dynamic, the huddle, the draft and the card. `test/companions.test.js` checks for every pairing that the briefs equal the companion call's.
+**Job:** voice both companions at the table, over the rings, in one call (D127, D132): after the DM rules on what the player did or said aloud, when the player talks to the party, and when the player talks a plan over. The bench runs it on the huddle cases beside the two-call huddle.
+**Runtime:** `sample.json`, replay off, `quick` (D58). A private word to one companion is still her companion call.
+**Sees:** for each companion, exactly the brief and special cases her own companion call gets (`docs/spec/calls/companion.md`). Also the table as both of them see it: the party's view of the encounter and the ledger, the DM's last two narrations, the pair's dynamic, the table so far (each of the player's lines says who it was to; private words are left out), the draft and the card. `test/companions.test.js` checks for every pairing that the briefs equal the companion call's.
 **Never sees:** anything the companion call never sees.
 
 ## Returns (`schemas/calls/party.js`)

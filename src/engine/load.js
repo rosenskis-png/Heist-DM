@@ -68,8 +68,9 @@ export function bindParty(packet, party) {
 }
 
 // The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's;
-// `conditions` are the ones the party carries in from the last hand-off (D130).
-export function load({ packet: unbound, party, slack = 0, seed = 1, conditions = [] }) {
+// `conditions` are the ones the party carries in from the last hand-off (D130), and `spent` the per-rest ability
+// uses spent since the last rest (D128).
+export function load({ packet: unbound, party, slack = 0, seed = 1, conditions = [], spent = {} }) {
   const packet = bindParty(unbound, party);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
@@ -89,6 +90,9 @@ export function load({ packet: unbound, party, slack = 0, seed = 1, conditions =
     toughness: Object.fromEntries(people.map((p) => [p.id, toughnessOf(p)])),
     conditions: conditions.filter((c) => party.some((p) => p.id === c.who)).map(({ id, who, text }) => ({ id, who, text })),
     threats: [],
+    // Ability uses this encounter, and per-rest uses spent before it, by who and ability id (D128).
+    used: {},
+    spent: structuredClone(spent),
     known: { revealed: [] },
     due: Object.fromEntries(
       clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick]),

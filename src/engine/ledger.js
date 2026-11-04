@@ -1,7 +1,7 @@
 // The ledger (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
 // objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
-import { person, isParty, isNpc, zoneOf } from "./world.js";
+import { person, isParty, isNpc, zoneOf, sheet } from "./world.js";
 import { nextTick, objectives, log } from "./clock.js";
 import { d100, ODDS } from "./rng.js";
 import { toughness, CONDITIONS, THREATS } from "../../content/rules.js";
@@ -24,6 +24,54 @@ const ids = (s, ...kinds) =>
       k === "people" ? s.packet.people.map((p) => p.id) : k === "party" ? s.party.map((p) => p.id) : s.packet.map[k].map((x) => x.id),
     ),
   );
+
+// ---- Ability uses (D128) ----
+
+export const abilitiesOf = (s, who) => {
+  const a = sheet(s, who)?.abilities ?? {};
+  return [a.combat, a.noncombat].filter(Boolean);
+};
+
+// What's left of a limited ability: this encounter and until the next rest, each as {left, of}. null is at will.
+export function usesLeft(s, who, id) {
+  const lim = abilitiesOf(s, who).find((a) => a.id === id)?.declared?.uses;
+  if (!lim) return null;
+  const here = s.used?.[who]?.[id] ?? 0;
+  const before = s.spent?.[who]?.[id] ?? 0;
+  return {
+    ...(lim.encounter ? { encounter: { left: Math.max(0, lim.encounter - here), of: lim.encounter } } : {}),
+    ...(lim.rest ? { rest: { left: Math.max(0, lim.rest - before - here), of: lim.rest } } : {}),
+  };
+}
+
+// "1 of 1 this encounter, 3 of 3 until a rest", as every DM call and the sheet show it. null is at will.
+export function usesText(s, who, id) {
+  const u = usesLeft(s, who, id);
+  if (!u) return null;
+  return [u.encounter && `${u.encounter.left} of ${u.encounter.of} this encounter`, u.rest && `${u.rest.left} of ${u.rest.of} until a rest`].filter(Boolean).join(", ");
+}
+
+const usesNow = (u) => (u ? Math.min(u.encounter?.left ?? Infinity, u.rest?.left ?? Infinity) : Infinity);
+
+// Every use in one output, counted against what's left: one past the limit goes back for the retry. `sets` are
+// changes that all happen; for a check, pass whichever outcome uses more.
+export function checkUses(s, sets) {
+  const count = new Map();
+  for (const ch of sets) for (const u of ch?.used ?? []) count.set(`${u.who}|${u.ability}`, (count.get(`${u.who}|${u.ability}`) ?? 0) + 1);
+  const errors = [];
+  for (const [key, n] of count) {
+    const [who, id] = key.split("|");
+    const a = abilitiesOf(s, who).find((x) => x.id === id);
+    if (!a) continue;
+    const left = usesNow(usesLeft(s, who, id));
+    if (n > left)
+      errors.push(`${sheet(s, who).name} has ${left === 0 ? "no" : `only ${left}`} ${a.name} left (${usesText(s, who, id)}), so this can't use it ${n} time${n > 1 ? "s" : ""}: rule it as not happening, or as done some other way`);
+  }
+  return errors;
+}
+
+// Of a check's two outcomes, the one that uses more abilities, for the count.
+export const moreUses = (a, b) => ((b?.used?.length ?? 0) > (a?.used?.length ?? 0) ? b : a);
 
 // What a ruling may name: real zones, people and things. Anything else goes back for the one retry.
 export function checkChanges(s, ch = {}, at = "changes") {
@@ -55,6 +103,10 @@ export function checkChanges(s, ch = {}, at = "changes") {
   for (const m of ch.moods ?? []) if (!isNpc(s, m.npc)) bad("person", m.npc);
   const can = revealable(s);
   for (const id of ch.reveal ?? []) if (!can.has(id)) errors.push(`${at}: ${id} isn't hidden, a routine or an event`);
+  for (const u of ch.used ?? []) {
+    if (!isParty(s, u.who)) errors.push(`${at}: abilities used are the party's, not ${u.who}'s`);
+    else if (!abilitiesOf(s, u.who).some((a) => a.id === u.ability)) errors.push(`${at}: ${u.ability} isn't one of ${sheet(s, u.who).name}'s abilities (${abilitiesOf(s, u.who).map((a) => a.id).join(", ")})`);
+  }
   return errors;
 }
 
@@ -146,6 +198,11 @@ export function applyChanges(s, ch = {}) {
   }
   for (const m of ch.moods ?? []) s.disposition[m.npc] = m.value;
   for (const id of ch.reveal ?? []) if (!s.known.revealed.includes(id)) s.known.revealed.push(id);
+  for (const u of ch.used ?? []) {
+    const mine = ((s.used ??= {})[u.who] ??= {});
+    mine[u.ability] = (mine[u.ability] ?? 0) + 1;
+    log(s, { used: `${u.who} ${u.ability}` });
+  }
   setThreats(s, s.threats);
   objectives(s);
 }
@@ -214,6 +271,7 @@ export function checkResolve(s, card, rolls, out) {
   errors.push(...checkChanges(s, out.after, "after"));
   errors.push(...checkFactBudget(s, [{ facts: card.rulings }, ...out.steps.map((st) => st.changes), out.after]));
   errors.push(...checkConditionBudget(s, [...out.steps.map((st) => st.changes), out.after]));
+  errors.push(...checkUses(s, [...out.steps.map((st) => st.changes), out.after]));
   errors.push(...checkThreats(s, out.threats));
   const happened = card.steps.filter((c) => out.steps.some((st) => st.n === c.n && st.happened !== "no"));
   const floor = Math.max(s.tick, ...happened.map((c) => c.at));
@@ -241,6 +299,25 @@ export function resolve(s, card, rolls, out) {
   return { rolls, steps: out.steps, stopped: out.stopped ?? null };
 }
 
+// ---- A question to the DM (D133) ----
+
+// The answer's rulings are facts the party knows, and name only what's in the encounter. Nothing the party
+// hasn't found may be named, in the answer or its rulings, since the party hears both.
+export function checkAnswer(s, out) {
+  const ch = { facts: (out.rulings ?? []).map((f) => ({ ...f, known: true })), retire: out.retire ?? [] };
+  const errors = [...checkChanges(s, ch, "rulings"), ...checkFactBudget(s, [ch])];
+  const said = [out.reply, ...(out.rulings ?? []).map((f) => f.text)].join(" \n ").toLowerCase();
+  for (const t of hiddenTerms(s)) if (said.includes(t)) errors.push(`the party hasn't found "${t}", so the answer can't name it`);
+  return errors;
+}
+
+// Records an answer: its rulings join the ledger as facts the party knows, so the card and every later call treat
+// them as true. Nothing moves and no time passes.
+export function answer(s, out) {
+  applyChanges(s, { facts: (out.rulings ?? []).map((f) => ({ ...f, known: true })), retire: out.retire ?? [] });
+  for (const l of out.learned ?? []) log(s, { learned: l });
+}
+
 // ---- A scene (the Moment tab) ----
 
 export function checkScene(s, out) {
@@ -253,6 +330,7 @@ export function checkScene(s, out) {
   errors.push(...checkChanges(s, out.changes));
   errors.push(...checkFactBudget(s, [out.changes, ...(out.checks ?? []).flatMap((c) => [c.success.changes, c.failure.changes])]));
   errors.push(...checkConditionBudget(s, [out.changes, ...(out.checks ?? []).flatMap((c) => [c.success.changes, c.failure.changes])]));
+  errors.push(...checkUses(s, [out.changes, ...(out.checks ?? []).map((c) => moreUses(c.success.changes, c.failure.changes))]));
   errors.push(...checkThreats(s, out.threats));
   if (out.ticks > 12) errors.push("an exchange takes at most 12 ticks; longer is a plan");
   // A fight is a plan (D130): once anyone is fighting the party, what the party does goes on the card.

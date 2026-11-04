@@ -21,7 +21,7 @@ Nobody in the party dies or is maimed. The party is harmed only by a failed roll
 - **`threats`:** if anyone is still fighting the party, what each is visibly about to do, one line as the party sees it ("Snag's club is coming down at you"). It happens unless the next plan stops it. Empty when nobody is fighting.
 
 ## Record everything that changed
-Every change goes in the ledger, at the step where it happens: where people and things are, who holds what, doors (`locked`), harm (`conditions`, `down`, `wounds`), moods, what the party now knows. An NPC you move leaves their routine; put them back on it when they return to it.
+Every change goes in the ledger, at the step where it happens: where people and things are, who holds what, doors (`locked`), harm (`conditions`, `down`, `wounds`), moods, what the party now knows, and each limited ability someone uses (`used`; none left means it doesn't happen). An NPC you move leaves their routine; put them back on it when they return to it.
 - **Facts are how things are now,** one short line each, and only what will matter later and has no other home: "Snag is sick from the fouled ale", "the far cell's bars are bent apart". Positions, doors, holdings and moods have their own places; don't repeat them as facts.
 - **What happened is history,** not a fact. It goes in `what`, one plain line per step, and the log keeps it.
 - **Keep the ledger true.** When a fact stops being true, retire it, or replace it by writing its id again. The ledger holds only a couple of dozen facts.
