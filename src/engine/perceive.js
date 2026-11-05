@@ -1,5 +1,5 @@
 // What the party perceives, for the map and who they can talk to (docs/spec/engine.md §5).
-import { zone, partyIds, zoneOf, sheet } from "./world.js";
+import { zone, partyIds, zoneOf, sheet, person, thing, conn, isNpc, isParty } from "./world.js";
 import { shareWall, other } from "./map.js";
 
 // A member's traits, from their abilities' declared blocks (e.g. sees_in_dark, hears_through_walls).
@@ -41,4 +41,39 @@ export function partyPerceives(s) {
     p.heard.forEach((z) => add(heard, z, id));
   }
   return { seen, heard };
+}
+
+// What the party can make out where they stand, which the opening must name (D136): every person in a zone they
+// see; every thing in their own zones or one they see, followed up to the fixture it hangs on; and every barrier
+// out of their own zones. Their own zone counts even in the dark, since they're in it. Hidden things stay out, and
+// so does what a person carries, which a look or a question finds. Plain openings, where one area runs into the
+// next, aren't features.
+export function inSight(s) {
+  const own = new Set(partyIds(s).map((id) => zoneOf(s, id)));
+  const zones = new Set([...own, ...partyPerceives(s).seen.keys()]);
+  const carried = (id, n = 0) => {
+    const h = s.holder[id];
+    if (!h) return false;
+    return isNpc(s, h) || isParty(s, h) || (n < 8 && carried(h, n + 1));
+  };
+  return {
+    people: s.packet.people.filter((p) => known(s, p) && zones.has(zoneOf(s, p.id))).map((p) => p.id),
+    things: s.packet.map.things.filter((t) => known(s, t) && !carried(t.id) && zones.has(zoneOf(s, t.id))).map((t) => t.id),
+    ways: s.packet.map.connections.filter((c) => c.kind !== "opening" && known(s, c) && c.between.some((z) => own.has(z))).map((c) => c.id),
+  };
+}
+
+// What's in sight that the opening never names (D136). A crude word match, so a miss is certain and a pass is
+// likely: a person by any word of their name ("the miner" names "Brannoc, human miner"), a thing by its name's
+// last word ("War drum" by "drum"), a way by its kind ("bars").
+const words = (t) => new Set((t.toLowerCase().match(/[a-z]+/g) ?? []).map((w) => (w.length > 3 ? w.replace(/s$/, "") : w)));
+export function openingMisses(s, opening = s.packet.opening) {
+  const said = words(opening);
+  const has = (w) => [...words(w)].some((x) => x.length > 2 && said.has(x));
+  const { people, things, ways } = inSight(s);
+  return [
+    ...people.filter((id) => !has(person(s, id).name)),
+    ...things.filter((id) => !has(thing(s, id).name.split(/\s+/).at(-1))),
+    ...ways.filter((id) => !has(conn(s, id).kind)),
+  ];
 }

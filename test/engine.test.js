@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { load, apply, replay, checkPacket, bindParty } from "../src/engine/index.js";
 import { beatOf } from "../src/engine/clock.js";
+import { inSight, openingMisses } from "../src/engine/perceive.js";
 import * as A from "../src/context.js";
 import { classes } from "../content/classes.js";
 import fern from "../content/companions/fern.js";
@@ -38,6 +39,20 @@ test("a packet names companions by slot, and loading binds each slot to the part
   const other = load({ packet, party: [party[0], nadia, fern] });
   assert.deepEqual([other.at.nadia, other.at.fern], ["cell_middle", "cell_near"]);
   assert.ok(!JSON.stringify(s.packet).includes("companion_a"));
+});
+
+test("the Cells opening names everything the party can make out from where they start (D136)", () => {
+  const s = start();
+  const seen = inSight(s);
+  for (const id of ["bench_far", "bucket_far", "drum", "peg", "keyring", "gear_sack"]) assert.ok(seen.things.includes(id), id);
+  assert.ok(seen.ways.includes("grate_far") && seen.ways.includes("bars_far"));
+  // Out of sight: the rats in the dark gutter, what Brannoc holds, and the hidden crawl behind the cask.
+  for (const id of ["gutter_rats", "crusts"]) assert.ok(!seen.things.includes(id), id);
+  assert.ok(!seen.ways.includes("crawl"));
+  assert.deepEqual(openingMisses(s), []);
+  const thin = openingMisses(s, "Snag hums at the cask. The miner watches you through the bars.");
+  for (const id of ["drum", "bench_far", "grate_far"]) assert.ok(thin.includes(id), id);
+  assert.ok(!thin.includes("cask") && !thin.includes("snag") && !thin.includes("bars_far"));
 });
 
 test("routines move people and things on the beat: the keys go on the belt on Pace, back on the peg on Sit", () => {

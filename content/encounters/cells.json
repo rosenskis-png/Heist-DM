@@ -891,7 +891,7 @@
    },
    {
     "id": "gear_sack",
-    "name": "The party's gear",
+    "name": "The party's gear sack",
     "properties": "A sack under the guardroom table holding everything taken from the party. Carrying it costs an extra step.",
     "size": "medium",
     "location": {
@@ -1015,5 +1015,5 @@
   },
   "ops": []
  },
- "opening": "Snag's club rattles along the bars, cell by cell, his keys jangling at his belt. He hangs them on the peg as he passes the stool, and stops at the cask. The tap squeaks; he starts to hum. From your cell at the dark end of the block you can see the guardroom past the torch: the war drum on its hook by his stool, and the key ring on its peg behind it. Uzga's voice comes down the stair as she leaves: \"The one in the middle cell goes up at watch change. Have her clean.\" The heavy door shuts above. Across the corridor, the miner presses his face to his bars. \"Take me with you,\" he whispers, \"or I tell the sergeant everything I saw.\""
+ "opening": "Snag's club rattles along the bars, cell by cell, his keys jangling at his belt. He hangs them on the peg as he passes the stool, and stops at the cask. The tap squeaks; he starts to hum. From your cell at the dark end of the block you can see the guardroom past the torch: the war drum on its hook by his stool, the key ring on its peg behind it, and a sack under the table. Your own cell is a plank bench shedding its nails, a slop bucket, and an iron grate in the floor. Water trickles through it into the gutter below, which runs under every cell toward the guardroom, and something small scrabbles down there in the dark. Moss has cracked the flagstones at this end of the corridor. Uzga's voice comes down the stair as she leaves: \"The one in the middle cell goes up at watch change. Have her clean.\" The heavy door shuts above. Across the corridor, the miner presses his face to his bars, his hands wrapped around something. \"Take me with you,\" he whispers, \"or I tell the sergeant everything I saw.\""
 }

@@ -48,7 +48,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 
 ## 5. Opening description
-Written from the map after the map is final. Stored word for word and sent with every call in the encounter. The packet's `name` is what the player sees it called ("The Cells").
+Written from the map after the map is final. Stored word for word and sent with every call in the encounter. It paints the scene (D49) and names everything the party can make out from where they start (`inSight`, `docs/spec/engine.md` §5), each in a phrase woven into the picture: that it's there, never its measurements and never what it's for, with every usable thing given the same weight (D136). Hidden things and what a person carries stay out. The packet's `name` is what the player sees it called ("The Cells").
 
 ---
 
@@ -73,6 +73,7 @@ Written from the map after the map is final. Stored word for word and sent with 
 | Every schedule has a cue the party can perceive from a zone they start in or can reach | Learnable cycles (§4.3) |
 | Every party member's abilities interact with at least one element | Everyone has essential work (§3.4) |
 | Each usable thing has at least one property beyond its description | Properties, not difficulties (§3.2) |
+| The opening names everything in sight at the start (`openingMisses`) | What a plan depends on is perceivable (§4.3), D136 |
 | Everyone with a tier other than civilian has `breaks` | Fights end on morale (§3.9) |
 | A fight encounter's objective is something other than everyone down | Fights are for something (§3.9) |
 
