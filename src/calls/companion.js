@@ -1,4 +1,4 @@
-// The companion call (docs/spec/calls/companion.md): three things she might say, for the huddle or a private channel.
+// The companion call (docs/spec/calls/companion.md): what she says next, for the huddle or a private channel (D137).
 import { ask } from "../ask.js";
 import { companionSchema } from "../../schemas/calls/companion.js";
 import { companionInput } from "../context.js";

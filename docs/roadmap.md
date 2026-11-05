@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built** (D127, D128, D132–D134); what's left of it is a playtest, below.
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139).
 
 ---
 
@@ -26,7 +26,6 @@ Not gates. Each is answered when play shows it.
 
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 - **Card leaks the engine can't see.** The engine rejects a card that names a hidden thing, but not one that describes it in plain words ("he's got them on his belt"). *Recommendation:* watch for it in playtests before adding anything.
-- **A failed call left its message behind** (Phase 4): the next call saw the old message and followed it. *Recommendation:* a message whose call fails is marked failed and not resent; the page offers to send it again.
 - **The campfire feels like Gravenhold's,** and the three newest companions (Annaleise, Sable, Celeste) play as written. Judged in Camp and in play. Still open from Phase 5: nobody in the roster has dark skin, and Ruby has no quick friend.
 - **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`). *Recommendation:* the page advances it once per player message in the huddle, the Moment or camp, and calls `endEncounter` with the hand-off.
 - **Beats outside camp.** Only the campfire reports beats (D80). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
@@ -40,16 +39,20 @@ Decided and built (D130, D131). What's left:
 - **Threats that bind.** *Recommendation:* in playtests, check that an unanswered threat lands as shown and nothing worse, and that the card's notes flag it, before adding anything.
 - **The morale numbers** (`content/relationship.js`). Starting values; tune them once the hand-off and campfires play end to end.
 
-## The table: built, waiting on a playtest
+## The table: played once, fixed, playing again
 
-The two tabs, the routing, the question call, the shared companion call, ability uses and the plan as a list (D127, D128, D132–D134). Tests hold the first two exit checks: a question to the DM is one call on the cheapest tier, and a table moment is the scene call and one party call.
+The first playtest (on the Cells, with D135's call records) found one companion's voice failing and over a quarter of the input wasted on retries; D137 and D138 fix what it found. The second playtest checks them.
 
 **Exit:** the companions' voices hold in a playtest, and limited abilities hold to their uses.
 
 **Open questions**
-- **Wild Shape's uses.** The exit asked that Fern can't Wild Shape twice before a rest, but her file gives it once per encounter and three times per rest, and that's what the engine now holds. *Recommendation:* keep the file's numbers until the balance pass the designer has deferred; set `rest: 1` there if twice is too many.
-- **Whether the DM records `used`.** The engine can only count a use the DM records; nothing infers one from a form flag. *Recommendation:* watch the party's sheet in the playtest. If uses go unrecorded, have the scene and resolve prompts' worked examples show one before adding any structure.
-- **Whether answers fill the ledger.** Every ruling from a question is a fact, and the ledger holds 20 (D76). *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if questions crowd out what plans record.
+- **Wild Shape's uses.** The exit asked that Fern can't Wild Shape twice before a rest, but her file gives it once per encounter and three times per rest, and that's what the engine holds. Not pushed in the first playtest. *Recommendation:* keep the file's numbers until the balance pass the designer has deferred; set `rest: 1` there if twice is too many.
+- **Whether the DM records `used`.** It did, the one time it came up. *Recommendation:* keep watching the party's sheet; nothing to add unless a use goes unrecorded.
+- **Whether the ledger fills.** It reached 16 of 20 facts in 11 ticks, but questions added only 2; most of the pressure was resolve recording the card's rulings again, which D138 stops. *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if a longer encounter fills it with facts that still matter.
+- **Whether companions catch too much,** now that each says one thing (D137). *Recommendation:* compare their catches on the bench's flaw cases with the old rates; bring chance back only in a form that never drops an answer to the player.
+- **Trivial actions as cards.** The first playtest ran six plans of easy rolls to open doors and tie up a beaten guard, about three minutes of waiting, and used "Do something" once. *Recommendation:* watch it on an encounter that isn't the Cells; if it holds, make low-stakes actions the scene call's job and say so under the picker, before adding anything.
+- **A companion's line becoming a rule on herself.** Fern's "once I'm a rat I'm a rat till we're out" was recorded as facts barring her magic for the rest of the encounter. *Recommendation:* watch it; if it recurs, the engine rejects a fact about a companion's own abilities that her sheet doesn't say.
+- **Things that act.** The rats were a thing, and the plan made them act, so the card went back twice. *Recommendation:* the DM can make a thing an actor mid-encounter, as an op the engine records, rather than the generator foreseeing who can be talked into acting.
 
 ## Phase 7: The generator
 
@@ -57,13 +60,14 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
-- On the bench, ten sketches from the same act read as different encounters, and the designer judges them comparable to the Cells.
+- On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
 - The critique call finds the flaws planted in hand-made sketches in 4 of 5 runs.
 - Act 1 plays end to end from a new game: generated encounters, rooms with outfits, campfires, and every attachment resolved within one encounter.
 
 **Build order** (each judged on the bench before the next, as Phase 2 judged the play calls)
-1. **The motif library** (`content/motifs.js`): the Cells' motifs, and the heist's and the cavern's from `docs/design/encounter-craft.md`'s appendix. Each genre's promise.
-2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge. They're the only hand-written material (D115).
+0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written.
+1. **The motif library** (`content/motifs.js`), from the rethought design. Each genre's promise.
+2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge, to the rethought standard. They're the only hand-written material (D115).
 3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
 4. **Sketch and critique** on a bench tab: generate ten sketches per seed, read them side by side, and plant flaws to test the critique. No encoding yet; this tests judgment, not code.
 5. **Encode** in stages, validated by the engine, and the layout from the sketch's rough sizes.
@@ -71,7 +75,7 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 7. **Play Act 1** from a new game.
 
 **Open questions**
-1. **The sketch's format.** *Recommendation:* the shape of `fixtures/cells/walkthrough.md` §1 (intent, people table, routines, places as relationships, things and properties, fixed facts, hidden things, events, attachments, exits with stubs, what the opening shows), about 1–2 KB. Tables where the walkthrough has them.
+1. **The sketch's format.** Answered after the rethink. *Recommendation:* the fields of `fixtures/cells/walkthrough.md` §1, not its kind of properties (intent, people table, routines, places as relationships, things and properties, fixed facts, hidden things, events, attachments, exits with stubs, what the opening shows), about 1–2 KB. Tables where the walkthrough has them.
 2. **A motif's format.** *Recommendation:* a name; the pattern in a paragraph; the decisions it creates (routing, timing, approach, what to keep, `docs/design/encounter-craft.md` §2); what it usually connects to; the genres it suits; and the encounter it came from. Never a route.
 3. **Act 1's genres.** *Recommendation:* from the act's mechanics (`content/setting.js`): escape, infiltration, a negotiation with a deadline, a mechanism or hazard, and a fight with a setup. A hazard is a fixed fact, notes and placed events, and a fight runs as cards (D130), so none of these needs new engine rules.
 4. **Layout from a sketch.** *Recommendation:* the sketch writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28), and states any distance that matters as a constraint ("the peg within 5 ft of the stool"). Code snaps it to the grid and validates it. A failure goes back once, described as relationships; then the packet ships without a map (D9). No open spaces (D124).

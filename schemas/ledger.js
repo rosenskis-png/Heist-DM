@@ -4,7 +4,7 @@
 import { r, list, obj } from "./shape.js";
 
 // A fact, added or (same id) replaced: one short line about how things are now.
-export const fact = obj(["id", "text"], { id: r("id"), text: { type: "string", minLength: 1, maxLength: 160 }, about: list(r("id")), known: { type: "boolean" } });
+export const fact = obj(["id", "text"], { id: r("id"), text: { type: "string", minLength: 1, maxLength: 200 }, about: list(r("id")), known: { type: "boolean" } });
 
 export const changes = obj([], {
   // A person or thing goes to a zone (nothing checks the way there: the DM has ruled it).
@@ -37,4 +37,4 @@ export const band = { enum: ["easy", "medium", "hard", "very_hard", "near_imposs
 
 // What each person fighting the party is visibly about to do, as the party sees it (D130). It happens as shown
 // unless the party's next move stops it.
-export const threats = list(obj(["who", "does"], { who: r("id"), does: { type: "string", minLength: 1, maxLength: 100 } }));
+export const threats = list(obj(["who", "does"], { who: r("id"), does: { type: "string", minLength: 1, maxLength: 200 } }));

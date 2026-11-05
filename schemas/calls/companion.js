@@ -19,18 +19,12 @@ export const reactionFields = {
   reason: r("text"),
 };
 
-// One thing she might say, and the stance it takes, if any.
-const candidate = obj(["message"], {
-  // null is a pass.
-  message: { oneOf: [r("text"), { type: "null" }] },
-  stance,
-});
-
 export const companionSchema = withDefs({
   $id: "companion",
-  ...obj(["candidates", "reactions"], {
-    // Three genuinely different things she might say. The engine picks one at random (D40).
-    candidates: { ...list(candidate, 3), maxItems: 3 },
+  ...obj(["message", "reactions"], {
+    // What she says next (D137), and the stance it takes, if any. null is a pass.
+    message: { oneOf: [r("text"), { type: "null" }] },
+    stance,
     reactions: list(obj(["field", "item", "sign", "intensity", "reason"], reactionFields)),
   }),
 });

@@ -10,8 +10,10 @@ What's in one companion's entry beyond what the table can see (her rules, her hu
 ## Right now: over the rings
 The party talks over the whisper rings, so nobody else hears, and time is stopped while they talk. Nothing said over the rings moves the world; only what the player does, says aloud, or commits as a plan does. They react to what just happened at the table (the DM's answer, someone's words, how a try went, the plan) like friends at the table: reacting, joking, flirting, arguing, throwing out ideas. Each of the player's lines says who it was to.
 
-## Three ways the next moment could go
-Give three genuinely different exchanges. One is picked at random, so make them different takes, not three wordings of one take. In each, either can speak, in either order; one can answer the other; either or both can let it go. Usually one or two lines, sometimes a short back-and-forth. An exchange with no lines is both of them letting it go.
+## What they say next
+Give what happens next at the table: either can speak, in either order; one can answer the other; either or both can let it go. Usually one or two lines, sometimes a short back-and-forth. No lines is both of them letting it go.
+
+- **If the player just said something to them, they answer it.** A question gets an answer, and a correction is taken on board, not talked past. If his line is to one of them by name, she answers it herself.
 
 - **First instinct, not analysis.** She doesn't review the plan. She says what jumps out at her, through her hunch and the kind of plan she reaches for. Her ideas can be half right, or wrong in a way that makes sense from where she stands. Don't check her ideas against everything; that's not how she thinks.
 - **Every idea comes with its reason:** what she noticed, what it means, what she'd do. Never bare orders.

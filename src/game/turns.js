@@ -13,9 +13,9 @@
 //
 // Each function takes the session, the runtime `io` and the prompts, makes its calls through `src/calls/`, and
 // changes state only through engine actions. No DOM, so `node --test` can play it with recorded outputs.
-import { d100 } from "../engine/rng.js";
 import { nameOf, zoneOf, isParty } from "../engine/world.js";
 import { ledgerText, aheadText } from "../context.js";
+import { withRulings } from "../engine/index.js";
 import { adjudicateCall } from "../calls/adjudicate.js";
 import { resolveCall } from "../calls/resolve.js";
 import { sceneCall } from "../calls/scene.js";
@@ -49,13 +49,17 @@ export const draftView = (session) =>
 // The card no longer matches the draft: the player changed the plan after it was made.
 export const cardStale = (session) => !!session.card && session.card.card.plan !== planText(session.draft);
 
-// One of n, picked at random (D40), from the session's own seeded generator.
-function pick(session, n) {
-  const box = { rng: session.rng };
-  const i = Math.min(n - 1, Math.floor(((d100(box) - 1) / 100) * n));
-  session.rng = box.rng;
-  return i;
+// A message whose call failed is marked failed, so no later call reads it, and the page offers to send it again
+// (D138). The error still goes to the page.
+async function tried(entry, fn) {
+  try {
+    return await fn();
+  } catch (e) {
+    entry.failed = true;
+    throw e;
+  }
 }
+const said = (e) => e.text && !e.failed;
 
 const live = (session) => {
   if (session.state.ended) throw new Error("The encounter is over.");
@@ -74,7 +78,7 @@ function toText(s, e) {
 // The table as the companions hear it: everything but private words and the narration, which comes on its own.
 export function tableLines(session, n = 14) {
   const s = session.state;
-  return last(session.feeds.table.filter((e) => e.text && ["dm", "scene", "rings"].includes(e.ch)), n).map((e) => ({
+  return last(session.feeds.table.filter((e) => said(e) && ["dm", "scene", "rings"].includes(e.ch)), n).map((e) => ({
     from: e.who,
     text: e.text,
     ...(e.who === "player" ? { to: toText(s, e) } : {}),
@@ -84,14 +88,14 @@ export function tableLines(session, n = 14) {
 
 // The current scene conversation: the exchanges since the player last turned to someone else.
 export function conversation(session, to) {
-  const feed = session.feeds.table.filter((e) => e.ch === "scene");
+  const feed = session.feeds.table.filter((e) => e.ch === "scene" && !e.failed);
   let i = feed.length;
   while (i > 0 && feed[i - 1].to === to) i--;
   return last(feed.slice(i), 12).map((e) => ({ from: e.who, text: e.text, ...(e.kind && e.kind !== "reply" ? { kind: e.kind } : {}) }));
 }
 
 // What happened at the table lately, for the card: no private words.
-const recentTable = (session, n = 6) => last(session.feeds.table.filter((e) => e.text && ["dm", "scene", "rings"].includes(e.ch)), n).map((e) => ({ from: e.who, text: e.text }));
+const recentTable = (session, n = 6) => last(session.feeds.table.filter((e) => said(e) && ["dm", "scene", "rings"].includes(e.ch)), n).map((e) => ({ from: e.who, text: e.text }));
 
 // ---- Asking the DM (D127, D133) ----
 
@@ -99,11 +103,11 @@ const recentTable = (session, n = 6) => last(session.feeds.table.filter((e) => e
 export async function question(session, io, prompts, { text }) {
   live(session);
   const env = envFor(session, prompts);
-  const recent = last(session.feeds.table.filter((e) => e.ch === "dm"), 6).map((e) => ({ from: e.who, text: e.text }));
-  post(session, "table", { ch: "dm", who: "player", to: "dm", text });
+  const recent = last(session.feeds.table.filter((e) => e.ch === "dm" && said(e)), 6).map((e) => ({ from: e.who, text: e.text }));
+  const asked = post(session, "table", { ch: "dm", who: "player", to: "dm", text });
   exchange(session);
   const s = session.state;
-  const out = await questionCall(io, env, s, { now: ledgerText(s, { log: false }), recent, question: text });
+  const out = await tried(asked, () => questionCall(io, env, s, { now: ledgerText(s, { log: false }), recent, question: text }));
   act(session, { type: "answer", out });
   post(session, "table", { ch: "dm", who: "dm", kind: "answer", text: out.reply, ...(out.rulings.length ? { rulings: out.rulings.map((f) => f.text) } : {}) });
   return out;
@@ -116,7 +120,7 @@ export async function talk(session, io, prompts, { to = "do", text, rolls }) {
   live(session);
   const env = envFor(session, prompts);
   let s = session.state;
-  post(session, "table", { ch: "scene", who: "player", to, text });
+  const asked = post(session, "table", { ch: "scene", who: "player", to, text });
   exchange(session);
   const c = {
     to: to === "do" ? "do" : nameOf(s, to),
@@ -126,7 +130,7 @@ export async function talk(session, io, prompts, { to = "do", text, rolls }) {
     recent: narrated(session, 2),
     conversation: conversation(session, to),
   };
-  const out = await sceneCall(io, env, s, c);
+  const out = await tried(asked, () => sceneCall(io, env, s, c));
   s = act(session, { type: "scene", out, rolls });
   post(session, "table", { ch: "scene", who: to === "do" ? "dm" : to, to, kind: "reply", text: out.reply });
   (out.checks ?? []).forEach((ch, i) => {
@@ -162,13 +166,16 @@ const companionContext = (session, channel) => {
   };
 };
 
-// Both companions in one call (D132): three exchanges, one picked at random (D40). Either may pass.
-async function voices(session, io, prompts) {
+// The companions the player's line names, so the one asked answers it herself (D137).
+export const named = (companions, text = "") => companions.filter((c) => new RegExp(`\\b${c.name.split(/[ ,]/)[0]}\\b`, "i").test(text)).map((c) => c.name);
+
+// Both companions in one call (D132), saying one thing between them (D137). Either may pass.
+async function voices(session, io, prompts, asked = null) {
   const env = envFor(session, prompts);
   const s = session.state;
-  const out = await partyCall(io, env, companionContext(session, "table"), env.companions, tableLines(session));
-  const chosen = out.exchanges[pick(session, out.exchanges.length)];
-  for (const l of chosen.lines) {
+  const c = { ...companionContext(session, "table"), asked: asked ? named(env.companions, asked.text) : [] };
+  const out = await (asked ? tried(asked, () => partyCall(io, env, c, env.companions, tableLines(session))) : partyCall(io, env, c, env.companions, tableLines(session)));
+  for (const l of out.lines) {
     post(session, "table", { ch: "rings", who: l.from, text: l.message, ...(l.stance ? { stance: l.stance } : {}) });
     if (l.stance) takeStance(session, l.from, l.stance);
   }
@@ -180,19 +187,29 @@ async function voices(session, io, prompts) {
 export async function rings(session, io, prompts, { to = "party", text }) {
   const env = envFor(session, prompts);
   exchange(session);
-  if (to === "party") {
-    post(session, "table", { ch: "rings", who: "player", to, text });
-    return voices(session, io, prompts);
-  }
+  if (to === "party") return voices(session, io, prompts, post(session, "table", { ch: "rings", who: "player", to, text }));
   const self = env.companions.find((c) => c.id === to);
   if (!self) throw new Error(`${to} isn't in the party.`);
-  post(session, "table", { ch: "private", with: to, who: "player", text });
-  const thread = last(session.feeds.table.filter((e) => e.ch === "private" && e.with === to && e.text), 14).map((e) => ({ from: e.who, text: e.text }));
-  const out = await companionCall(io, env, companionContext(session, "private"), self, env.companions.filter((o) => o !== self), thread);
-  const chosen = out.candidates[pick(session, out.candidates.length)];
-  post(session, "table", { ch: "private", with: to, who: to, text: chosen.message, ...(chosen.stance ? { stance: chosen.stance } : {}) });
-  if (chosen.stance) takeStance(session, to, chosen.stance);
+  const asked = post(session, "table", { ch: "private", with: to, who: "player", text });
+  const thread = last(session.feeds.table.filter((e) => e.ch === "private" && e.with === to && said(e)), 14).map((e) => ({ from: e.who, text: e.text }));
+  const out = await tried(asked, () => companionCall(io, env, companionContext(session, "private"), self, env.companions.filter((o) => o !== self), thread));
+  post(session, "table", { ch: "private", with: to, who: to, text: out.message, ...(out.stance ? { stance: out.stance } : {}) });
+  if (out.stance) takeStance(session, to, out.stance);
   for (const r of out.reactions) session.reactions.push({ companion: to, tick: session.state.tick, ...r });
+}
+
+// A message that didn't go through, sent again as it was (D138): it leaves the table and goes through its own
+// route once more. `drop` just takes it off the table.
+export function drop(session, entry) {
+  if (!entry.failed) throw new Error("That message went through.");
+  session.feeds.table = session.feeds.table.filter((e) => e !== entry);
+}
+export async function resend(session, io, prompts, entry) {
+  drop(session, entry);
+  const { ch, to, text } = entry;
+  if (ch === "dm") return question(session, io, prompts, { text });
+  if (ch === "scene") return talk(session, io, prompts, { to, text });
+  return rings(session, io, prompts, { to: ch === "private" ? entry.with : "party", text });
 }
 
 // The player puts the draft to the party: it's said over the rings, and both companions react.
@@ -262,8 +279,9 @@ export async function commit(session, io, prompts, { checkpoints = [], rolls } =
   }
   const dice = session.card.dice;
   let s = session.state;
-  const { plan, stances, ...dmCard } = card;
-  const out = await resolveCall(io, env, s, { plan, card: dmCard, dice: diceFor(card, dice), stances, now: ledgerText(s), timeline: aheadText(s, { ticks: card.ends_at - s.tick + 4 }) }, card, dice);
+  // The card's rulings are read as facts in the ledger, not as part of the card, so they aren't recorded twice (D138).
+  const { plan, stances, rulings, ...dmCard } = card;
+  const out = await resolveCall(io, env, s, { plan, card: dmCard, dice: diceFor(card, dice), stances, now: ledgerText(withRulings(s, card)), timeline: aheadText(s, { ticks: card.ends_at - s.tick + 4 }) }, card, dice);
   s = act(session, { type: "resolve", card, dice, out });
   const entry = session.feeds.plans.find((e) => e.at === session.card.entry);
   if (entry) entry.outcome = outcomeOf(card, dice, out);

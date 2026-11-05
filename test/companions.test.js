@@ -620,7 +620,7 @@ test("a campfire answer's nothing parts are filled before it's checked; real mis
 test("a party call's lines and reactions must come from the two companions", async () => {
   const { speakerProblems: problems } = await import("../src/calls/party.js");
   const line = (from) => ({ from, message: "m" });
-  const out = { exchanges: [{ lines: [line("a"), line("b")] }, { lines: [] }, { lines: [line("player")] }], reactions: [{ from: "dm", field: "admires", item: "i", sign: 1, intensity: 1, reason: "r" }] };
+  const out = { lines: [line("a"), line("b"), line("player")], reactions: [{ from: "dm", field: "admires", item: "i", sign: 1, intensity: 1, reason: "r" }] };
   assert.deepEqual(validate(partySchema, out), []);
   assert.deepEqual(problems(out, ["a", "b"]).length, 2);
 });

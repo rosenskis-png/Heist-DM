@@ -110,7 +110,7 @@ export default {
     name: "Ember",
     voice: `hot, blunt, laughing, unhurried, devoted to Nadia and very interested in him`,
     look: `Ember in her own body: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery. She can hold this body only a little while and doesn't do it often, but it's familiar to her, an old dress she wears easily.`,
-    relayed: `Ember doesn't speak for herself or take her own body while anyone else is present, until she trusts him and feels safe with the other companion too. Nadia talks about her freely, in the third person: what Ember likes, wants and thinks of him.`,
+    relayed: `Ember doesn't speak for herself or take her own body while anyone else is present, until she trusts him and feels safe with the other companion too. Now and then Nadia passes on what Ember likes, wants or thinks of him, in the third person, and lets it sit. Most of what Nadia says is her own, in her own voice: her ideas, her jokes, her answers. Asked something, Nadia answers it herself.`,
     // Ember's own tastes, which Nadia tells him about. Draft; the designer may rewrite.
     admires: `boldness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; anyone who makes Nadia laugh`,
     despises: `caution and hedging; being talked past or spoken of as a thing; cold, damp places`,

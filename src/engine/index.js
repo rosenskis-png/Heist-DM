@@ -11,7 +11,7 @@ export { load, checkPacket, deadlineTick, bindParty, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
 export { handoff, endingOf, rest } from "./handoff.js";
 export { CAPTURED } from "./clock.js";
-export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, checkUses, usesLeft, usesText, toughnessOf, revealable, LEDGER } from "./ledger.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, withRulings, checkUses, usesLeft, usesText, toughnessOf, revealable, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions (the DM rules and the engine keeps the books, D75):
