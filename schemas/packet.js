@@ -115,6 +115,17 @@ const event = obj(["id", "do"], {
   do: list(r("rule"), 1),
 });
 
+// A way out of the room, and the kind of room code drew for it (docs/spec/campaign.md §2, D144).
+export const EXIT_KINDS = ["encounter", "quiet", "oddity", "merchant", "campfire", "climax", "sanctuary"];
+const exit = obj(["id", "zone", "leads_to"], {
+  id: r("id"),
+  // Where the party stands to leave by it.
+  zone: r("id"),
+  leads_to: { enum: EXIT_KINDS },
+  // A line on the next scene it leads to (D119).
+  stub: r("text"),
+});
+
 const objective = obj(["id", "condition"], {
   id: r("id"),
   label: r("text"),
@@ -140,6 +151,7 @@ export const packetSchema = withDefs({
       fail_forward: objective,
       optional: list(objective),
       purpose: r("text"),
+      exits: list(exit),
       expected_plans: { type: "array", prefixItems: [{ type: "integer" }, { type: "integer" }], minItems: 2, maxItems: 2 },
     }),
     people: list(npc),

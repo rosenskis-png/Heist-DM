@@ -15,7 +15,7 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **No routes, ever.** The intent never lists solutions, obvious or alternative. The critique call plays approaches privately (D120), but they are never stored or sent. The engine rejects a packet with route-like fields.
 
 - **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
-- **Exits:** each way out carries a one-line stub for the next scene it leads to (D119).
+- **Exits:** each way out names the zone the party leaves from, the kind of room code drew for it (`docs/spec/campaign.md` §2, D144), and a one-line stub for the next scene it leads to (D119).
 
 Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, and may place events (D143). A campfire is a room where the party rests (D122, D142).
 

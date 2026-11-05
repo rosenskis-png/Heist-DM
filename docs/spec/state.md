@@ -49,7 +49,7 @@ When an encounter ends, the engine writes a hand-off object, and the next packet
 
 - gear, the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
 - companions present;
-- the exit used, and its next-scene stub (D119);
+- the exit used, and its next-scene stub (D119): `way_on` names it when the whole party ended in its zone (D144);
 - **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;
 - **the world's memory** (D123): NPC fates and who saw the party, which come back only through a callback the seed allows;
 - the outcome, its kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, which move how the companions feel when it ends (D131);

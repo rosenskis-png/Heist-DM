@@ -39,17 +39,27 @@ export const setting = {
       boss: "First Daughter Quavra, and Matron Ilphara",
     },
   },
+  // How the way ahead is drawn (docs/spec/campaign.md §2, D144). Starting values. A leg is `rooms` rooms long; each
+  // rough room adds one more, at most `roughMax` a leg, so a rough stretch takes longer to reach the campfire. Every act's
+  // `legs` is at least 2, so every path has a campfire before the climax as well as the sanctuary after it. Each exit's
+  // kind is drawn by `weights`; a non-encounter never follows another, and a leg has at most `once` of each kind listed.
+  way: {
+    rooms: 3,
+    roughMax: 2,
+    weights: { encounter: 6, quiet: 2, oddity: 1, merchant: 1 },
+    once: ["merchant"],
+  },
   acts: [
     {
       name: "The Cells",
-      min: 3,
+      legs: 2,
       sanctuary: `a collapsed shrine to a forgotten dwarven god, half-buried in rubble, one candle niche still whole`,
       mechanics: `guard rhythms, keys and cell locks, noise discipline, improvised tools; the party has almost no gear`,
       goal: `escape the cell block, recover some gear, learn who your companions are`,
     },
     {
       name: "The Warrens",
-      min: 4,
+      legs: 3,
       sanctuary:
         "a forgotten cistern behind a forge wall: warm stone, dripping water",
       mechanics: `an alarm network (bells, drums, runners), crowds, the enemy’s internal politics and grudges, disguises, other prisoners who can help or betray`,
@@ -57,21 +67,21 @@ export const setting = {
     },
     {
       name: "The Undercroft",
-      min: 4,
+      legs: 3,
       sanctuary: `a dwarven reading hall with a natural hot spring, shelves of stone books`,
       mechanics: `dwarven mechanisms with consistent rules (water locks, counterweights, rune-wards, pressure systems), ancient guardians, the fortress’s own history`,
       goal: `uncover why Gravenhold was built and why each of you was taken; find the way to the Sanctum and the forgotten shaft`,
     },
     {
       name: "The Sanctum",
-      min: 3,
+      legs: 2,
       sanctuary: "a sealed warden’s tomb: carved stone sleepers, utter silence",
       mechanics: `the faction’s strongest magic and elite guards, ritual sites, every earlier mechanic combined`,
       goal: `decide whether to slip past the ritual, sabotage it, or stop it at a cost; reach the shaft`,
     },
     {
       name: "The Ascent",
-      min: 2,
+      legs: 2,
       sanctuary: `a ledge in the shaft where, far above, a thread of real sky shows stars`,
       mechanics: `climbing, pursuit, collapse; allies freed earlier return and enemies spared come back`,
       goal: "get out of Gravenhold alive, together",

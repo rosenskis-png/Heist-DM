@@ -29,6 +29,8 @@ export function handoff(s) {
   const party = partyIds(s);
   const gear = Object.keys(s.holder).filter((item) => party.includes(s.holder[item]));
   const exit = [...new Set(party.map((id) => zoneOf(s, id)))];
+  // The way on: the exit whose zone the whole party ended in, if any (docs/spec/campaign.md §3).
+  const wayOn = exit.length === 1 ? (s.packet.intent.exits ?? []).find((e) => e.zone === exit[0])?.id ?? null : null;
   const fates = Object.fromEntries(
     s.packet.people.map((p) => [p.id, { disposition: s.disposition[p.id], zone: s.at[p.id] ?? null, ...(s.flags[p.id] ? { flags: s.flags[p.id] } : {}) }]),
   );
@@ -43,6 +45,7 @@ export function handoff(s) {
     ending: endingOf(s),
     optional: { met, missed: optional.map((o) => o.id).filter((id) => !met.includes(id)) },
     exit,
+    way_on: wayOn,
     gear,
     // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
     conditions: s.conditions.map((c) => ({ ...c })),
