@@ -7,8 +7,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 ## Campaign state (lives across encounters)
 - **Act,** and the act history.
 - **Invariants:** world facts that never change once they're in play. Each can carry an **act gate**, the first act it applies in (`docs/spec/context.md`). Data: `content/setting.js`.
-- **Two campaign clocks:** alert and days (D21).
-- **Slack:** a hidden −10..+10 that moves the next encounter's deadlines (D41). Never shown.
+- **Where the party is in the act:** the rooms left in this leg and the legs left in the act, and the kinds drawn for the current room's exits (`docs/spec/campaign.md`, D140). There are no campaign clocks (D141).
 - **Character sheets:** class or companion abilities with their exact effects, conditions and limits; the conditions each carries until the next campfire (D130); ability uses per encounter and per rest. Abilities are exact, conditional and limited, and they're the main way a plan handles a risk.
 - **Companions:** which two are in the party, their relationship state (including each one's view of the other, D92), memories and commitments, and what each owns to wear and has on (`docs/spec/companions.md`).
 - **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
@@ -48,14 +47,12 @@ The engine checks that every write names real things before committing it (`docs
 
 When an encounter ends, the engine writes a hand-off object, and the next packet's starting conditions are built from it:
 
-- alert and days;
 - gear, the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
 - companions present;
 - the exit used, and its next-scene stub (D119);
 - **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;
 - **the world's memory** (D123): NPC fates and who saw the party, which come back only through a callback the seed allows;
 - the outcome, its kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, which move how the companions feel when it ends (D131);
-- the ticks to spare before the deadline, which update slack (D41);
 - the one-line log entry.
 
 Only the hand-off, memories and commitments cross between encounters (principle 4). Nothing is summarized.

@@ -84,7 +84,6 @@ test("the whole party down is captured: the encounter ends, and the hand-off say
   const taken = scene(s, { changes: { flags: [down("nadia")], conditions: [{ id: "concussed", who: "nadia", text: "Concussed: slow and sick." }] } });
   assert.equal(taken.ended.outcome, "captured");
   assert.equal(taken.handoff.ending, "captured");
-  assert.equal(taken.handoff.slack, 1);
   assert.deepEqual(taken.handoff.conditions, [{ id: "concussed", who: "nadia", text: "Concussed: slow and sick." }]);
   assert.deepEqual(taken.threats, []);
   // The conditions travel: the next encounter starts with them (and only the party's).

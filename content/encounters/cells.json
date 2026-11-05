@@ -982,7 +982,6 @@
    {
     "id": "uzga_arrives",
     "known": true,
-    "deadline": true,
     "at_tick": 32,
     "do": [
      {

@@ -7,7 +7,6 @@ What the engine does. **Code computes, AI judges** (principle 2): the DM rules a
 ## 1. Loading a packet
 - **The consistency checks** in `docs/spec/packet.md` reject a packet; the quality checks only warn.
 - **Party slots** (D126): the packet places companions as `companion_a` and `companion_b`, and loading binds each to the party's companions in order (`bindParty`).
-- **Slack** (D41, D43): each event marked `deadline` moves by 2% of its tick per point of the campaign's slack (−10 to +10), rounded once to the nearest tick. Nothing moves once the encounter has started, and the player never sees slack.
 
 ## 2. The ledger
 What the DM writes, and what every later call reads back. Shape: `schemas/ledger.js`; code: `src/engine/ledger.js`.
@@ -50,10 +49,10 @@ Skill numbers are on the sheets the DM reads when it chooses a band. The engine 
 Used for the map and for who the player can talk to, never as a rule (`src/engine/perceive.js`). Pooled across the party, since the whisper rings make sharing free. Each member sees their own zone, any zone joined to it by a `see_through` or open connection, and any zone its `sees` list names, unless it's dark (or they have `sees_in_dark`). They hear their own zone and any zone joined to theirs by a connection (with `hears_through_walls`, any zone that shares a wall with theirs). `inSight` lists what the opening must name (D136): the people in zones they see, the things in those zones and their own (even dark), unless a person carries them, and the barriers out of their own zones; never hidden ones.
 
 ## 6. The hand-off
-When an encounter ends, the engine writes the hand-off (`docs/spec/state.md`, `src/engine/handoff.js`), and moves slack by 1: up after the fail-forward or captured ending or with 15% or less of the deadline to spare, down with 50% or more to spare. It records the ending's kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, each tested as it stands at the end, which the relationship model reads (D131).
+When an encounter ends, the engine writes the hand-off (`docs/spec/state.md`, `src/engine/handoff.js`). It records the ending's kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, each tested as it stands at the end, which the relationship model reads (D131).
 
 ## 7. Replay (D60)
-The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, slack, seed) plus every action in order: the DM's validated outputs, rolls, operations and time passing. Applying it again gives deep-equal state.
+The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, seed) plus every action in order: the DM's validated outputs, rolls, operations and time passing. Applying it again gives deep-equal state.
 
 ## 8. Condition language (D17)
 JSON predicate trees: `{"all": [...]}`, `{"any": [...]}`, `{"not": ...}`, and the atoms below. Used for objectives, events' `when` and rule guards. Shapes: `schemas/defs.js`.

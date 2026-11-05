@@ -15,16 +15,15 @@ export function playerSheet(player) {
 export const partyFor = (player, companionIds) => [playerSheet(player), ...companionIds.map((id) => roster[id])];
 
 // `companions` is the two companion ids the player chose.
-export function newSession({ packet, player, companions, seed = 1, slack = 0, act = packet.act ?? 1 }) {
+export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1 }) {
   const party = partyFor(player, companions);
-  const state = load({ packet, party, slack, seed });
+  const state = load({ packet, party, seed });
   const session = {
     v: 3,
     player,
     companions,
     act,
-    slack,
-    start: { packet: packet.id, seed, slack },
+    start: { packet: packet.id, seed },
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
     state,

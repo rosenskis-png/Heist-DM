@@ -17,7 +17,7 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
 - **Exits:** each way out carries a one-line stub for the next scene it leads to (D119).
 
-Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, may place events, and hold one outfit unless they're a campfire (D122).
+Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, and may place events (D143). A campfire is a room where the party rests (D122, D142).
 
 The party's companions appear only by slot, `companion_a` and `companion_b`, which loading binds to the party's companions in order (D126). A packet never names one.
 
@@ -41,7 +41,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 - **Hidden things:** marked hidden. Included for the AI, never shown to the player until revealed.
 
 ## 4. Clock and how people react
-- **Schedules,** written in ticks: repeating cycles of beats, one tick each. Each has an `id` and a `known` flag: whether the party knows the routine from the start. Otherwise it's learned in play, through a `reveal`. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat gives the NPC's position, any senses, a cue, and `on_start` rules that run when it begins (the keys go back on the peg). **One-time events** fire `at_tick` or `when` a condition first holds, and are marked `known` if the party knows they're coming. An event marked `deadline` moves with the campaign's slack before the encounter starts (D41); a condition that depends on it should test a flag the event sets, not the tick.
+- **Schedules,** written in ticks: repeating cycles of beats, one tick each. Each has an `id` and a `known` flag: whether the party knows the routine from the start. Otherwise it's learned in play, through a `reveal`. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat gives the NPC's position, any senses, a cue, and `on_start` rules that run when it begins (the keys go back on the peg). **One-time events** fire `at_tick` or `when` a condition first holds, and are marked `known` if the party knows they're coming.
 - **Deadlines** are written in the DM's time (a tick is about a minute of real work, D77, D125), and leave room for some exploring and two recovered failures (D37).
 - **Notes:** how people react, in plain words, for the DM to apply (`notes`; D76): "he hears a noise: he comes to look, and his suspicion rises a step". A rising alarm, a suspicion ladder or a spreading fire is written here too, with what each step changes and how it comes back down.
 

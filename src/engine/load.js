@@ -55,9 +55,6 @@ export function packetWarnings(packet, reference) {
   return reference && size > 2 * JSON.stringify(reference).length ? [`packet is ${size} bytes, over twice the reference`] : [];
 }
 
-// A deadline moves by 2% of its tick per point of slack, rounded once (D41, D43).
-export const deadlineTick = (tick, slack) => Math.round(tick * (1 + 0.02 * slack));
-
 // A packet places the party's companions by slot, in party order, so it never names one (D8): the slots are
 // replaced by the companions' ids wherever the packet names them.
 export const SLOTS = ["companion_a", "companion_b"];
@@ -67,10 +64,10 @@ export function bindParty(packet, party) {
   return bind(packet);
 }
 
-// The starting state for an encounter. `party` is the party's sheets (player first); `slack` is the campaign's;
+// The starting state for an encounter. `party` is the party's sheets (player first);
 // `conditions` are the ones the party carries in from the last hand-off (D130), and `spent` the per-rest ability
 // uses spent since the last rest (D128).
-export function load({ packet: unbound, party, slack = 0, seed = 1, conditions = [], spent = {} }) {
+export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {} }) {
   const packet = bindParty(unbound, party);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
@@ -95,9 +92,8 @@ export function load({ packet: unbound, party, slack = 0, seed = 1, conditions =
     spent: structuredClone(spent),
     known: { revealed: [] },
     due: Object.fromEntries(
-      clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.deadline ? deadlineTick(e.at_tick, slack) : e.at_tick]),
+      clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.at_tick]),
     ),
-    slack,
     fired: [],
     canon: [],
     log: [],

@@ -512,7 +512,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     if (!sheets) return `- ${p.id} (${p.name})${routine}`;
     return `- ${p.id} (${p.name}${p.tier ? `, ${p.tier}` : ""}): wants ${p.wants} Fears ${p.fears} Knows ${p.knows} Will never ${p.will_never} Temper: ${p.temper} Under pressure: ${p.under_pressure}${p.breaks ? ` Stops fighting: ${p.breaks}` : ""}${routine}`;
   };
-  const events = clock.events.filter((e) => !party || e.known || knows(e.id)).map((e) => `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}${e.deadline ? " (the deadline)" : ""}`);
+  const events = clock.events.filter((e) => !party || e.known || knows(e.id)).map((e) => `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}`);
   const goal = (o) => o && `${o.label}${o.id ? ` (${o.id})` : ""}`;
   const secret = [...map.zones.filter(hidden).map(zone), ...map.connections.filter(hidden).map(way), ...map.things.filter(hidden).map(thing), ...map.facts.filter(hidden).map((f) => `- ${f.id}: ${f.text}`)];
   const parts = [

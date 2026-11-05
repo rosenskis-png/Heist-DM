@@ -73,7 +73,7 @@ export const setting = {
       name: "The Ascent",
       min: 2,
       sanctuary: `a ledge in the shaft where, far above, a thread of real sky shows stars`,
-      mechanics: `climbing, pursuit, collapse; allies freed earlier return and enemies spared come back; the Alert level’s full weight`,
+      mechanics: `climbing, pursuit, collapse; allies freed earlier return and enemies spared come back`,
       goal: "get out of Gravenhold alive, together",
     },
   ],

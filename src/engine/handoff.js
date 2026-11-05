@@ -1,20 +1,9 @@
-// The hand-off written when an encounter ends (docs/spec/state.md, D21), and the slack it moves (D41, D43).
+// The hand-off written when an encounter ends (docs/spec/state.md, D21).
 import { partyIds, zoneOf, nameOf } from "./world.js";
 import { test } from "./cond.js";
 import { CAPTURED } from "./clock.js";
 
-// Slack moves by 1 per encounter with a deadline, between −10 and +10 (D43).
-export function slackAfter(s) {
-  const deadline = s.packet.clock.events.find((e) => e.deadline);
-  if (!deadline) return { spare: null, slack: s.slack };
-  const due = s.due[deadline.id];
-  const spare = Math.max(0, due - s.tick);
-  const failForward = ["fail_forward", "captured"].includes(endingOf(s));
-  const by = failForward || spare <= 0.15 * due ? 1 : spare >= 0.5 * due ? -1 : 0;
-  return { spare, slack: Math.max(-10, Math.min(10, s.slack + by)) };
-}
-
-// What kind of ending this was, for slack and for how the party feels about it (D131).
+// What kind of ending this was, for how the party feels about it (D131).
 export function endingOf(s) {
   const { objective, alternates = [], fail_forward } = s.packet.intent;
   const id = s.ended?.outcome;
@@ -38,7 +27,6 @@ export const rest = (carry) => ({ ...carry, conditions: [], spent: {} });
 
 export function handoff(s) {
   const party = partyIds(s);
-  const { spare, slack } = slackAfter(s);
   const gear = Object.keys(s.holder).filter((item) => party.includes(s.holder[item]));
   const exit = [...new Set(party.map((id) => zoneOf(s, id)))];
   const fates = Object.fromEntries(
@@ -63,8 +51,6 @@ export function handoff(s) {
     fates,
     companions: party.filter((id) => id !== "player"),
     tick: s.tick,
-    spare,
-    slack,
     log: `${s.packet.id}: ${label ?? outcome} at tick ${s.tick}; ${party.map((id) => nameOf(s, id)).join(", ")} in ${exit.map((z) => nameOf(s, z)).join(", ")}.`,
   };
 }

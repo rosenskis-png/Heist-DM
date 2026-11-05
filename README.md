@@ -47,7 +47,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/principles.md` | Lessons from Gravenhold, the 8 design principles, and the reflexes to resist |
 | `docs/roadmap.md` | Phases, exit tests, and **every open question** with a recommendation |
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
-| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
+| `docs/spec/` | The current design: `architecture`, `campaign`, `packet`, `state`, `engine`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
 | `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
 | `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |

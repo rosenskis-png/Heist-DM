@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139).
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139), which has settled the campaign's shape so far (D140–D143, `docs/spec/campaign.md`).
 
 ---
 
@@ -56,22 +56,23 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 
 ## Phase 7: The generator
 
-Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms with an outfit each (D121) and campfires (D122), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
 - On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
 - The critique call finds the flaws planted in hand-made sketches in 4 of 5 runs.
-- Act 1 plays end to end from a new game: generated encounters, rooms with outfits, campfires, and every attachment resolved within one encounter.
+- Act 1 plays end to end from a new game: generated encounters and rooms, a campfire ending every leg, the climax, and every separation resolved before its campfire.
 
 **Build order** (each judged on the bench before the next, as Phase 2 judged the play calls)
-0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written; the playtest's lessons and starting questions are in `docs/design/encounter-rethink.md`.
+0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written; the playtest's lessons and starting questions are in `docs/design/encounter-rethink.md`. Settled so far: the campaign's shape (D140), no campaign clocks or slack (D141), campfires (D142), and outfits as rewards (D143).
+   - **Then the campaign layer, in code, before any generator** (each tested without an AI call): code drawing each exit's kind and counting the leg and the act; exits that point at the next room's kind, and how much choice the party earned; how a room's ending is judged and what it moves; gold and relics; separations that resolve before the campfire; the climax as a kind of room; the setting rewritten as living places (`content/setting.js`); and a test run through two legs and a climax on stand-in packets.
 1. **The motif library** (`content/motifs.js`), from the rethought design. Each genre's promise.
 2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge, to the rethought standard. They're the only hand-written material (D115).
 3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
 4. **Sketch and critique** on a bench tab: generate ten sketches per seed, read them side by side, and plant flaws to test the critique. No encoding yet; this tests judgment, not code.
 5. **Encode** in stages, validated by the engine, and the layout from the sketch's rough sizes.
-6. **The hand-off:** attachments, the world's memory, next-scene stubs (including the fail-forward and captured endings', which always move the party on, D131), the conditions the party carries, `endEncounter` with the hand-off, and the outfit a room gives.
+6. **The hand-off:** attachments, the world's memory, next-scene stubs (including the captured ending's, which always moves the party on, D131), the conditions the party carries, `endEncounter` with the hand-off, and any rewards the room gives.
 7. **Play Act 1** from a new game.
 
 **Open questions**
@@ -81,9 +82,11 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 4. **Layout from a sketch.** *Recommendation:* the sketch writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28), and states any distance that matters as a constraint ("the peg within 5 ft of the stool"). Code snaps it to the grid and validates it. A failure goes back once, described as relationships; then the packet ships without a map (D9). No open spaces (D124).
 5. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, and go to the critique as facts, not to the sketch as rules. Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 6. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
-7. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
-8. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
-9. **How many campfires an act.** *Recommendation:* one after every two or three encounters, with the act's sanctuary as the last. A starting value.
+7. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
+8. **How long legs and acts are.** *Recommendation:* 3–5 rooms a leg and 2–3 legs an act, with each kind's weight per act, as starting values in `content/setting.js`.
+9. **How a room's ending is judged, and what it moves.** The question is never whether the party gets through, but how well. *Recommendation:* one call when the room ends reads the record (the account, the ledger, what the party took and left behind, the hurts) rather than the narration, and rates how it went from 1 to 10 against anchors written for 3, 6 and 9, so the rating doesn't settle on a polite 7. It also says, for each companion, what moved how she feels and why, as tagged reactions (D20) the engine caps. Nothing inside the room depends on it, so it's not the in-encounter judgment of progress that principle 6 rules out. The rating decides how much choice of the next room the party gets, and replaces D131's ending kinds.
+10. **What's at stake in the climax,** which the party always gets through. *Recommendation:* how epic the escape is, what the act built up deciding it; a choice at the peak, often between the companions' threads; and a reward pick as the act closes, all landing in the sanctuary scene.
+11. **Gold and relics.** *Recommendation:* gold is one number, spent at merchants. A relic is a name and one sentence the DM reads as a fact, maybe with a small declared block (D30), kept for the act. The climax decides how many the player keeps into the next act (0 to about 3), once their strength and how common they are are known. No inventory beyond these.
 
 ## Later
 

@@ -85,13 +85,6 @@ test("Uzga arrives at tick 32, and the fail-forward ending fires with the middle
   assert.equal(s.handoff.outcome, "companion_taken");
 });
 
-test("slack moves the deadline before the encounter starts; an early finish lowers slack, the fail-forward ending raises it", () => {
-  assert.deepEqual([-10, 10, 3, -3, 1].map((slack) => start({ slack }).due.uzga_arrives), [26, 38, 34, 30, 33]);
-  const fast = apply(ticks(start(), 8), { type: "end", outcome: "escaped" });
-  assert.equal(fast.handoff.slack, -1);
-  assert.equal(ticks(start({ slack: -10 }), 26).handoff.slack, -9);
-});
-
 test("the hand-off records gear, fates, companions and the exit", () => {
   let s = ops(start(), [{ give: { item: "gear_sack", to: "nadia" } }]);
   s = ops(s, ["player", "fern", "nadia"].map((id) => ({ move: { entity: id, to: "stair_top" } })));
@@ -101,7 +94,7 @@ test("the hand-off records gear, fates, companions and the exit", () => {
   assert.ok(h.gear.includes("gear_sack"));
   assert.deepEqual(h.companions, ["fern", "nadia"]);
   assert.equal(h.fates.brannoc.zone, "cell_brannoc");
-  assert.ok(h.spare > 0 && typeof h.log === "string");
+  assert.ok(typeof h.log === "string");
 });
 
 test("replaying a recorded log reproduces state exactly", () => {
