@@ -105,6 +105,8 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .say .text { white-space: pre-line; }
 .say.player { justify-self: end; text-align: right; }
 .say.player .text { background: var(--surface2); border-radius: 14px 14px 4px 14px; padding: 8px 12px; }
+.say.player.failed .text { opacity: .6; border: 1px dashed var(--danger); }
+.say .retry { color: var(--danger); }
 .say.comp .from { color: var(--cc, var(--rose)); }
 .say.comp .text { border-left: 3px solid var(--cc, var(--rose)); padding-left: 10px; }
 .say.pass .text { font-style: italic; color: var(--muted); }

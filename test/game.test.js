@@ -2,8 +2,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { newSession, serialize, restore, post } from "../src/game/session.js";
-import { makeCard, commit, talk, shown, question, rings, talkOver, cardStale } from "../src/game/turns.js";
+import { newSession, serialize, restore, post, recordCall, act, CALL_RECORDS, SAVE_ROOM } from "../src/game/session.js";
+import { makeCard, commit, talk, shown, question, rings, talkOver, cardStale, resend, drop } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft, planText } from "../src/game/draft.js";
 import { mapView, clockView } from "../src/game/view.js";
 import { ask, tierFor, CallFailed } from "../src/ask.js";
@@ -105,6 +105,9 @@ test("the rat plan is one card, and the party is out at exchange 1", async () =>
   const played = sample.seen.find((x) => x.call === "resolve").input;
   assert.ok(played.includes('"result":"succeeded"') && !played.includes('"roll":10'));
   assert.ok(card.includes("What the party expects next") && played.includes("What is really happening"));
+  // The card's rulings reach the DM once, as facts in the ledger (D138).
+  const ruling = ratCard.rulings[0].text;
+  assert.equal(played.split(ruling).length - 1, 1);
 });
 
 test("a failed resolve keeps its dice, so trying again can't reroll them", async () => {
@@ -141,9 +144,9 @@ test("a scene rolls its checks, records the ruling and lets time pass", async ()
 
 // ---- The table (D127) ----
 
-// The companions let it go: three exchanges with no lines.
-const quiet = { exchanges: [{ lines: [] }, { lines: [] }, { lines: [] }], reactions: [] };
-const said = (lines) => ({ exchanges: [0, 1, 2].map(() => ({ lines })), reactions: [] });
+// The companions let it go: no lines.
+const quiet = { lines: [], reactions: [] };
+const said = (lines) => ({ lines, reactions: [] });
 const calls = (sample) => sample.seen.map((x) => x.call);
 
 test("a question to the DM is one cheap call, and what it settles is fact when the card is made", async () => {
@@ -174,13 +177,36 @@ test("doing something is the scene call, then one party call; a line's stance go
 });
 
 test("party talk is the party call alone; a private word is her call alone, and the other never hears it", async () => {
-  const sample = ruledSample({ party: [quiet, quiet], companion: [{ candidates: [0, 1, 2].map(() => ({ message: "Just us." })), reactions: [] }] });
+  const sample = ruledSample({ party: [quiet, quiet], companion: [{ message: "Just us.", reactions: [] }] });
   const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY });
   await rings(session, { sample }, prompts, { to: PARTY[0], text: "Do you trust her?" });
   await rings(session, { sample }, prompts, { to: "party", text: "Ideas?" });
   assert.deepEqual(calls(sample), ["companion", "party"]);
   assert.ok(!sample.seen[1].input.includes("Do you trust her?") && !sample.seen[1].input.includes("Just us."));
   assert.deepEqual(session.feeds.table.filter((e) => e.ch === "private").map((e) => [e.who, e.with]), [["player", PARTY[0]], [PARTY[0], PARTY[0]]]);
+});
+
+test("a message whose call fails is marked failed, no later call reads it, and it can be sent again (D138)", async () => {
+  const bad = { lines: "not a list", reactions: [] };
+  const sample = ruledSample({ party: [bad, bad, quiet, quiet] });
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY });
+  await assert.rejects(rings(session, { sample }, prompts, { to: "party", text: "He has the ring while he paces." }));
+  const failed = session.feeds.table.at(-1);
+  assert.equal(failed.failed, true);
+  await rings(session, { sample }, prompts, { to: "party", text: "Anything else?" });
+  assert.ok(!sample.seen.at(-1).input.includes("He has the ring while he paces."));
+  await resend(session, { sample }, prompts, failed);
+  const mine = session.feeds.table.filter((e) => e.who === "player").map((e) => e.text);
+  assert.deepEqual(mine, ["Anything else?", "He has the ring while he paces."]);
+  assert.ok(sample.seen.at(-1).input.includes("He has the ring while he paces."));
+  assert.throws(() => drop(session, session.feeds.table.at(-1)));
+});
+
+test("a line to a companion by name tells the party call she was asked (D137)", async () => {
+  const sample = ruledSample({ party: [quiet] });
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY });
+  await rings(session, { sample }, prompts, { to: "party", text: "Nadia, what do you want to do?" });
+  assert.ok(sample.seen[0].input.includes("The player's last line is to Nadia by name."));
 });
 
 test("the draft is a list: add, edit, reorder, remove, and it stays as written after the plan runs", async () => {
@@ -225,4 +251,27 @@ test("a save from before the table merges its feeds in order, and its plan text 
   assert.deepEqual(back.feeds.table.map((e) => [e.at, e.ch]), [[1, "narration"], [2, "rings"], [3, "scene"], [4, "scene"], [6, "private"]]);
   assert.deepEqual(back.feeds.plans.map((e) => e.at), [5]);
   assert.deepEqual(back.draft.items.map((x) => x.text), ["First", "Second"]);
+});
+
+test("a save keeps the replay log and the last call outputs, never their inputs (D135)", () => {
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY, seed: 3 });
+  act(session, { type: "answer", out: { reply: "Yes.", rulings: [], learned: [] } });
+  for (let i = 0; i < CALL_RECORDS + 5; i++) recordCall(session, { call: "scene", tier: "default", at: i, input: "SECRET INPUT", size: 12, out: { n: i }, first: { n: i }, errors: [], ms: 5 });
+  const json = serialize(session);
+  assert.ok(!json.includes("SECRET INPUT"));
+  const back = restore(json, packet);
+  assert.equal(back.calls.length, CALL_RECORDS);
+  assert.deepEqual(back.calls.at(-1).out, { n: CALL_RECORDS + 4 });
+  assert.equal(back.calls.at(-1).first, undefined);
+  assert.deepEqual(back.actions, session.actions);
+});
+
+test("a save too big for its slot drops the oldest call outputs first (D135)", () => {
+  const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY, seed: 3 });
+  for (let i = 0; i < CALL_RECORDS; i++) recordCall(session, { call: "scene", at: i, out: { text: "x".repeat(8000), n: i } });
+  const json = serialize(session);
+  assert.ok(json.length <= SAVE_ROOM);
+  const kept = JSON.parse(json).calls;
+  assert.ok(kept.length > 0 && kept.length < CALL_RECORDS);
+  assert.equal(kept.at(-1).out.n, CALL_RECORDS - 1);
 });

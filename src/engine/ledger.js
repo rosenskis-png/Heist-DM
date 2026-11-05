@@ -261,7 +261,10 @@ export function checkResolve(s, card, rolls, out) {
   });
   const stop = out.stopped?.at;
   if (stop === undefined && listed.length < card.steps.length) errors.push(`the plan didn't stop, so all ${card.steps.length} steps need an entry`);
-  if (stop !== undefined && listed.some((n) => n > stop)) errors.push(`the plan stopped at step ${stop}, so nothing after it happened`);
+  // Steps after the stop may be listed as not having happened (D138); the engine drops them when it applies the account.
+  for (const st of out.steps)
+    if (stop !== undefined && st.n > stop && (st.happened !== "no" || hasChanges(st.changes)))
+      errors.push(`the plan stopped at step ${stop}, so step ${st.n} didn't happen: leave it out, or list it as "no" with no changes`);
   for (const st of out.steps) {
     if (!card.steps.some((c) => c.n === st.n)) errors.push(`step ${st.n} isn't on the card`);
     const r = rolls.find((x) => x.n === st.n);
@@ -279,11 +282,22 @@ export function checkResolve(s, card, rolls, out) {
   return errors;
 }
 
+// Whether a step's changes change anything.
+const hasChanges = (ch) => !!ch && Object.values(ch).some((v) => (Array.isArray(v) ? v.length : v != null));
+
+// The card's rulings as facts, as they will be once the card runs: what the resolve call reads as the ledger, so it
+// doesn't record them again (D138).
+export function withRulings(s, card) {
+  const ruled = card.rulings.map((f) => ({ id: f.id, text: f.text, about: f.about ?? [], known: f.known ?? true, since: s.tick }));
+  return { ...s, facts: [...s.facts.filter((f) => !ruled.some((r) => r.id === f.id)), ...ruled] };
+}
+
 // Runs a played-out card: the card's rulings become facts, each step's changes land on its tick, then the
-// people respond, and the clock stops where the plan ended.
+// people respond, and the clock stops where the plan ended. Steps listed after a stop are dropped.
 export function resolve(s, card, rolls, out) {
   applyChanges(s, { facts: card.rulings });
-  for (const st of out.steps) {
+  const stop = out.stopped?.at;
+  for (const st of out.steps.filter((x) => stop === undefined || x.n <= stop)) {
     const c = card.steps.find((x) => x.n === st.n);
     if (st.happened !== "no") advanceTo(s, c.at);
     if (s.ended) break;

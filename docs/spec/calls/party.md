@@ -6,9 +6,9 @@
 **Never sees:** anything the companion call never sees.
 
 ## Returns (`schemas/calls/party.js`)
-- **Three exchanges:** three genuinely different ways the next moment at the table could go. Each has up to four lines. Each line is by one of the two, in any order, and carries any stance it takes, as in the companion call. An exchange with no lines is both letting it go. **The engine picks one at random** (D40), and only that one is shown and applied.
+- **What they say next** (D137): up to four lines, each by one of the two, in any order, each carrying any stance it takes, as in the companion call. No lines is both letting it go. If the player just said something to them, they answer it. When his line names one of them, code says so in the input, and she answers it herself.
 - Optional **tagged reactions**, each naming whose it is.
 - Every line and reaction must name one of the two companions. `speakerProblems` in `src/calls/party.js` checks this, with one retry.
 
 ## Thinking about plans
-As in the companion call, each reasons from her own `hunch` and `reaches_for`, as a first instinct. The prompt asks for two people, not one voice: write each from her own entry, then have them react to each other. Playtests watch whether the voices blur or their catches move together (D132).
+As in the companion call, each reasons from her own `hunch` and `reaches_for`, as a first instinct. The prompt asks for two people, not one voice: write each from her own entry, then have them react to each other. Playtests watch whether the voices blur or their catches move together (D132), and whether, saying one thing each time, they catch too much (D137).

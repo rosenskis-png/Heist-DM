@@ -160,7 +160,7 @@ async function runOne(kind, c) {
   return run;
 }
 
-// The huddle: each companion in turn sees the one candidate picked for the companion before her (D40).
+// The huddle: each companion in turn sees what the companion before her said (D137).
 async function runHuddle(c, schema, tier) {
   const huddle = [...c.huddle];
   const turns = [];
@@ -172,21 +172,20 @@ async function runHuddle(c, schema, tier) {
     const r = await ask(input, schema, tier);
     ms += r.ms;
     inputChars += r.inputChars;
-    const pick = Math.floor(Math.random() * 3);
-    const picked = r.out.candidates?.[pick];
-    if (picked?.message) huddle.push({ from: self.id, text: picked.message });
+    const pick = 0;
+    if (r.out.message) huddle.push({ from: self.id, text: r.out.message });
     const checks = [...(r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.companionChecks(r.out)), { name: "JSON first time", ok: r.noJson ? "near" : true, detail: r.noJson ? "the first reply held no JSON" : "" }];
     turns.push({ id: self.id, name: self.name, input, out: r.out, errors: r.errors, retried: r.retried, pick, checks });
   }
   const run = { turns, ms, inputChars };
   if (c.flaws) {
-    const said = turns.flatMap((t) => (t.out.candidates ?? []).map((x) => x.message));
+    const said = turns.map((t) => t.out.message ?? null);
     try {
       const g = await slot(() =>
         sample.json(A.graderInput(c.flaws, said), { modelTier: settings.tiers.grader, cache: false, signal: controller.signal }),
       );
       let i = 0;
-      for (const t of turns) t.caught = (t.out.candidates ?? []).map(() => g.caught?.[i++] ?? []);
+      for (const t of turns) t.caught = [g.caught?.[i++] ?? []];
     } catch (e) {
       run.graderError = errorText(e);
     }
@@ -195,14 +194,14 @@ async function runHuddle(c, schema, tier) {
   return run;
 }
 
-// The huddle in one call: three exchanges between both companions, one picked at random (D40). Each companion's
+// The huddle in one call: one exchange between both companions (D137). Each companion's
 // row in the holes table counts her own lines, so it reads the same as the two-call tab's.
 async function runParty(c, schema, tier) {
   const ids = env.companions.map((x) => x.id);
   const input = A.partyInput(env, c, env.companions, [...c.huddle], schema);
   const r = await ask(input, schema, tier, (o) => speakerProblems(o, ids));
-  const pick = Math.floor(Math.random() * 3);
-  const exchanges = r.out.exchanges ?? [];
+  const pick = 0;
+  const exchanges = r.out.lines ? [{ lines: r.out.lines }] : [];
   const run = { input, out: r.out, pick, ms: r.ms, inputChars: r.inputChars, retried: r.retried };
   run.turns = env.companions.map((comp) => ({ id: comp.id, name: comp.name, pick }));
   run.checks = [...(r.errors.length ? [{ name: "Matches the schema", ok: false, detail: r.errors.slice(0, 5).join("; ") }] : C.partyChecks(r.out, env.companions)), { name: "JSON first time", ok: r.noJson ? "near" : true, detail: r.noJson ? "the first reply held no JSON" : "" }];
@@ -356,15 +355,12 @@ function flawTable(c, runs) {
       h("th", {}, comp.name),
       ...c.flaws.map((f) => {
         let picked = 0;
-        let any = 0;
         for (const r of hud) {
           const t = r.turns.find((x) => x.id === comp.id);
-          if (!t) continue;
-          if (t.caught[t.pick]?.includes(f.id)) picked++;
-          if (t.caught.some((ids) => ids.includes(f.id))) any++;
+          if (t?.caught[t.pick]?.includes(f.id)) picked++;
         }
         const tag = f.hunch_of.includes(comp.id) ? " hunch" : f.misses_of.includes(comp.id) ? " misses" : "";
-        return h("td", { class: tag.trim() }, `${picked}/${hud.length}`, h("small", {}, ` (any ${any})`));
+        return h("td", { class: tag.trim() }, `${picked}/${hud.length}`);
       }),
     ),
   );
@@ -374,7 +370,7 @@ function flawTable(c, runs) {
     h(
       "table",
       { class: "flaws" },
-      h("caption", {}, "Holes caught in the line actually said (in any of her three). Shaded: her hunch points at it; outlined: her blind spot."),
+      h("caption", {}, "Holes caught in what she said, across runs. Shaded: her hunch points at it; outlined: her blind spot."),
       h("tr", {}, h("th", {}), ...c.flaws.map((f) => h("th", { title: f.text }, f.id))),
       ...rows,
     ),
@@ -412,7 +408,7 @@ function huddleView(c, run) {
       "div",
       { class: "turn" },
       h("div", { class: "who" }, t.name),
-      (t.out.candidates ?? []).map((x, i) =>
+      (t.out ? [t.out] : []).map((x, i) =>
         h(
           "div",
           { class: `cand${i === t.pick ? " picked" : ""}` },
@@ -433,7 +429,7 @@ function partyView(c, run) {
   return h(
     "div",
     { class: "turn" },
-    (run.out.exchanges ?? []).map((x, i) =>
+    (run.out.lines ? [{ lines: run.out.lines }] : []).map((x, i) =>
       h(
         "div",
         { class: `cand${i === run.pick ? " picked" : ""}` },

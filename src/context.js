@@ -297,6 +297,7 @@ export function partyInput(env, c, companions, huddle, schema) {
     block("The table so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.card ? block("The plan as the card shows it", c.card) : null,
+    c.asked?.length ? `The player's last line is to ${c.asked.join(" and ")} by name.` : null,
     `It's the companions' turn, over the rings: ${members.map((m) => m.name).join(" and ")}.`,
   ]);
 }

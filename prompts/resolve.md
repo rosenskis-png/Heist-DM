@@ -5,7 +5,7 @@ You're the DM. The player committed the card below, and the dice have been rolle
 ## Honour the card
 - Each roll's result is settled. A step whose roll failed doesn't happen in full, and its cost is what the card said, no worse. A step whose roll succeeded happens unless the world stops it.
 - Steps without a roll happen as ruled, unless the world stops them.
-- The card's rulings hold.
+- The card's rulings hold: they're in the ledger now, so don't record them again.
 
 ## The world as it really is
 You see everything: hidden things, routines the party doesn't know, events on their way, and what each person is doing at each step's tick. Where reality differs from what the plan expected (the keys aren't on the peg, someone arrives, a hidden thing is in the way), the plan meets it at the first moment someone in the party could notice. It stops there, at a moment the player can plan from: give the step it stopped at and why, as the party sees it. Steps after that don't happen.

@@ -41,7 +41,10 @@ test("the DM's account must fit the dice and the card", () => {
   const failed = [{ n: 2, odds: 65, roll: 90, success: false }, { n: 3, odds: 80, roll: 10, success: true }];
   assert.ok(checkResolve(s, ratCard, failed, ratPlayed).some((e) => e.includes("step 2's roll failed")));
   const stopped = { ...ratPlayed, stopped: { at: 2, why: "Snag has the keys." } };
-  assert.ok(checkResolve(s, ratCard, failed, stopped).some((e) => e.includes("nothing after it")));
+  assert.ok(checkResolve(s, ratCard, failed, stopped).some((e) => e.includes("step 3 didn't happen")));
+  // Steps after the stop may be listed as not having happened, with nothing changed (D138).
+  const listedNo = { ...stopped, steps: stopped.steps.map((st) => (st.n > 2 ? { ...st, happened: "no", changes: {} } : st)) };
+  assert.ok(!checkResolve(s, ratCard, failed, listedNo).some((e) => e.includes("didn't happen")));
   const short = { steps: ratPlayed.steps.slice(0, 2), ends_at: 2 };
   assert.ok(checkResolve(s, ratCard, failed, short).some((e) => e.includes("all 4 steps")));
   const ghost = { steps: [{ n: 1, happened: "yes", what: "x", changes: { moves: [{ who: "goblin", to: "attic" }] } }], stopped: { at: 1, why: "x" }, ends_at: 0 };

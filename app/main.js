@@ -3,8 +3,8 @@
 import { html, useState, useEffect, useRef } from "./h.js";
 import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
-import { newSession, serialize, restore, partyFor } from "../src/game/session.js";
-import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker } from "../src/game/turns.js";
+import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
+import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as roster } from "../content/companions/index.js";
 import { partyProblems } from "../src/campaign/roster.js";
@@ -169,7 +169,7 @@ function Game({ env, slot, initial, onQuit }) {
 
   // A call whose input crossed its budget is recorded in the save, so growth never goes unnoticed (D76).
   const onOver = (w) => (session.warnings ??= []).push({ ...w, tick: session.state.tick, at: Date.now() });
-  const io = { sample: env.sample, speed, onStart: (call) => (setBusy(STATUS[call] ?? "Thinking…"), refresh()), onCall: (r) => calls.current.unshift(r), onOver };
+  const io = { sample: env.sample, speed, onStart: (call) => (setBusy(STATUS[call] ?? "Thinking…"), refresh()), onCall: (r) => (calls.current.unshift(r), recordCall(session, r)), onOver };
 
   const save = async () => {
     try {
@@ -317,7 +317,10 @@ function TableTab({ session, env, io, run, busy, error, refresh, colors, onQuit,
   return html`<section className="feed" aria-label="Table">
     ${session.feeds.table.map((e) => {
       if (e.ch === "narration") return html`<${Narration} key=${e.at} text=${e.text} />`;
-      if (e.who === "player") return html`<div key=${e.at} className="say player"><span className="from">${mine(e)}</span><span className="text">${e.text}</span></div>`;
+      if (e.who === "player")
+        return html`<div key=${e.at} className=${`say player${e.failed ? " failed" : ""}`}><span className="from">${mine(e)}</span><span className="text">${e.text}</span>
+          ${e.failed ? html`<span className="retry small">Didn't go through. <button className="link" disabled=${!!busy} onClick=${() => run("table", () => resend(session, io, env.prompts, e))}>Send again</button><button className="link" disabled=${!!busy} onClick=${() => (drop(session, e), refresh())}>Remove</button></span>` : null}
+        </div>`;
       if (e.kind === "check")
         return html`<div key=${e.at} className="check"><span><span className=${`pill ${e.success ? "ok" : "bad"}`}>${e.success ? "Success" : "Failure"}</span> <span className="small muted">${who(e.actor)}, ${BAND[e.difficulty]}</span></span><span>${e.text}</span></div>`;
       if (e.kind === "redirect")
@@ -562,6 +565,7 @@ function DevView({ session, calls, onExport }) {
     ${session.warnings?.length ? html`<p className="error">${session.warnings.length} call${session.warnings.length > 1 ? "s" : ""} went over budget: ${session.warnings.slice(-3).map((w) => `${w.call} ${(w.size / 1024).toFixed(1)} KB of ${(w.budget / 1024).toFixed(0)} KB at tick ${w.tick}`).join("; ")}. Worth a look: something is growing.</p>` : null}
     <div className="row" style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
       <button className="ghost" onClick=${() => onExport(`heist-dm-replay-tick${session.state.tick}.json`, replay())}>Export this session's replay log</button>
+      <button className="ghost" onClick=${() => onExport(`heist-dm-postmortem-tick${session.state.tick}.json`, serialize(session))}>Export for a post-mortem (save, replay log, last ${session.calls?.length ?? 0} call outputs)</button>
     </div>
     ${session.reactions.length ? html`<details><summary>Companion reactions (recorded, not scored yet): ${session.reactions.length}</summary><pre>${JSON.stringify(session.reactions, null, 1)}</pre></details>` : null}
     <details><summary>State, canon and event log</summary><pre>${JSON.stringify({ tick: session.state.tick, pending: session.state.pending, facts: session.state.facts, off_routine: session.state.offRoutine, flags: session.state.flags, meters: session.state.meters, dispositions: session.state.disposition, revealed: session.state.known.revealed, canon: session.state.canon, log: session.state.log }, null, 1)}</pre></details>
