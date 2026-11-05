@@ -65,7 +65,7 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 - Act 1 plays end to end from a new game: generated encounters, rooms with outfits, campfires, and every attachment resolved within one encounter.
 
 **Build order** (each judged on the bench before the next, as Phase 2 judged the play calls)
-0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written.
+0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written; the playtest's lessons and starting questions are in `docs/design/encounter-rethink.md`.
 1. **The motif library** (`content/motifs.js`), from the rethought design. Each genre's promise.
 2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge, to the rethought standard. They're the only hand-written material (D115).
 3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
