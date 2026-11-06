@@ -18,7 +18,7 @@ No map of the act is built in advance.
 - **When a room is written, code draws the kind of room each of its exits leads to,** from the act's weights, with the campaign's seeded generator. The act's map is just the tree of what has been drawn, and only the branch the party took is kept.
 - **Code counts.** It tracks how many rooms are left in this leg and how many legs are left in the act. When a leg's count runs out, every exit leads to its campfire. After the last leg, every exit leads to the climax, and the climax leads to the sanctuary. A campfire at the end of every leg is guaranteed by the count, not by checking a graph. Code: `src/campaign/way.js`.
 - **The counts and the kinds** (D144; starting values in `content/setting.js`, `way`):
-  - A leg is three rooms. Each room's verdict (§3) moves the leg's strain: a rough room raises it, a good one eases it, never below nothing. Every four points add one more room, at most two a leg, and only while the leg still has rooms left. So a rough stretch takes longer to reach the campfire, but a campfire the exits already lead to stays where it is (D146).
+  - A leg is three rooms. Each room's verdict (§3) moves the leg's strain: a rough room raises it, a good one eases it, never below nothing. Every four points add one more room, at most two a leg, and only while the leg still has rooms left. So a rough stretch takes longer to reach the campfire, but a campfire the exits already lead to stays where it is (D146). A room strain adds is always an encounter, never a quiet room or a merchant: more road to the fire, not a reward for doing worse (D149).
   - Every act has at least two legs, so every path has a campfire before the climax as well as the sanctuary after it. Each act opens on an encounter.
   - Each exit's kind is drawn by weight (encounter 6, quiet room 2, something odd 1, merchant 1). A calm room (quiet, odd or a merchant) never follows another, a leg has at most one merchant, and a room's exits differ in kind where they can.
 - **A room's content is written just in time:** when its exit is offered, or after the party takes it. It's built from the act's design, the hand-off and the kind code drew (`docs/spec/generation.md`).
@@ -43,7 +43,7 @@ No map of the act is built in advance.
 ## 5. The climax
 
 - **The climax is a room the party always gets through.** What's at stake is how: how epic the escape is, decided by what the act built up; a choice at its peak, often between the companions' threads; and what comes away with them (D148).
-- **Its verdict decides how many of the act's relics carry into the next act:** none for a rough climax, up to three for a great one (`content/setting.js`, `relics.keptByRating`). The player picks which at the sanctuary, and the next act starts fresh with them and the gold. How the companions feel, and everything else in §7's last row, carries as always.
+- **Its verdict decides how many of the act's relics carry into the next act:** none for a rough climax, up to three for a great one (`content/setting.js`, `relics.keptByRating`), and never more than the party has (D149). The player picks which at the sanctuary, and the next act starts fresh with them and the gold. How the companions feel, and everything else in §7's last row, carries as always.
 
 ## 6. Campfires
 

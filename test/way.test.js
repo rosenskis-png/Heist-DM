@@ -56,6 +56,11 @@ test("rough rooms lengthen the leg by a gradient, good ones ease it, and not onc
   assert.equal(once(strain.pivot - 2, once(strain.pivot - 2)).left, 9);
   assert.equal(once(strain.pivot - 2, once(10, once(strain.pivot - 2))).left, 7);
   assert.equal(once(1, once(1, once(1))).extra, addedMax, "never more than the most a leg can add");
+  // A room strain adds is an encounter, never a calm room or a merchant.
+  const strained = once(1);
+  assert.equal(strained.owed, 1);
+  assert.deepEqual(exitKinds(strained, 3).kinds, ["encounter", "encounter", "encounter"]);
+  assert.equal(enter(strained, "encounter").owed, 0);
   const atCamp = { ...startAct(1), left: 0 };
   assert.deepEqual(exitKinds(atCamp, 2).kinds, ["campfire", "campfire"]);
   const rested = enter(atCamp, "campfire", { rating: 1 });

@@ -90,6 +90,18 @@ test("a merchant's price is paid from the party's gold, and the party can't spen
   assert.equal(rich.gold, 6);
 });
 
+test("a party with fewer relics than the climax allows keeps them all, and nothing breaks", () => {
+  let camp = newCampaign({ members });
+  camp = { ...camp, way: { ...camp.way, here: "climax" }, relics: [{ id: "charm", name: "Charm", text: "x" }] };
+  const handoff = { conditions: [], spent: {}, gold: 0, relics: [] };
+  const { camp: after } = roomEnded(camp, { handoff, verdict: { rating: 10, why: "x", reactions: [] }, members });
+  assert.equal(after.keep, 1);
+  assert.equal(endAct(after, ["charm"]).relics.length, 1);
+  const none = roomEnded({ ...camp, relics: [] }, { handoff, verdict: { rating: 10, why: "x", reactions: [] }, members }).camp;
+  assert.equal(none.keep, 0);
+  assert.equal(endAct(none, []).relics.length, 0);
+});
+
 test("a separation can start only where it can resolve before the campfire, and everyone is back at the fire", () => {
   let camp = newCampaign({ members });
   assert.equal(canSeparate(camp), true);

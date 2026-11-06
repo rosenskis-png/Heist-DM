@@ -157,9 +157,10 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D143** Rooms no longer hold one outfit each: current
 - **D144** How the way ahead is drawn, and how a room's exits lead on: changed by D146
 - **D145** The decision log has an index, and entries that are only history are archived: current
-- **D146** A room's ending is judged by a verdict call, and the rating is a gradient: current
+- **D146** A room's ending is judged by a verdict call, and the rating is a gradient: changed by D149
 - **D147** Gold and relics: current
-- **D148** The climax is always won; its verdict decides what carries into the next act: current
+- **D148** The climax is always won; its verdict decides what carries into the next act: changed by D149
+- **D149** A room strain adds is an encounter, and a climax never keeps more relics than the party has: current
 
 ---
 
@@ -922,3 +923,8 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-05), settling the roadmap's question. The climax is a room the party always gets through. What's at stake is how epic the escape is, decided by what the act built up; a choice at its peak, often between the companions' threads; and what comes away with them, all landing in the sanctuary scene. Its verdict's rating decides how many of the act's relics the party keeps into the next act (`content/setting.js`, `relics.keptByRating`: none for a rough climax, up to three for a great one), and the player picks which at the sanctuary. The next act starts fresh with those relics and the gold; how the companions feel and the rest of the campaign's memory carry as always (D142). Code: `src/campaign/run.js` (`endAct`).
 **Why:** A climax that can't be lost needs stakes other than winning. Letting its quality decide what carries over rewards a great act without punishing a rough one beyond the act: the next act is still a fresh start (D140).
 **Rules out:** A climax the party can lose; penalties carried into the next act.
+
+### D149. A room strain adds is an encounter, and a climax never keeps more relics than the party has
+**Decided:** The designer's call (2026-11-06). Refines D146 and D148. A room added to a leg by strain is always an encounter: until it's played, every exit leads to an encounter. The number of relics the climax lets the party keep is capped at the number it holds, so a party with fewer relics than its rating allows keeps them all.
+**Why:** An added room is more road to the campfire for a rough stretch; if it could be a quiet room or a merchant, doing worse would buy a reward. And a climax that allows three relics shouldn't break for a party that found only one.
+**Rules out:** A calm room or a merchant drawn for a room strain added.

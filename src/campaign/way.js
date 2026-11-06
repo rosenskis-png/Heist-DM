@@ -16,7 +16,7 @@ const actOf = (act) => setting.acts[act - 1];
 // The way at the start of an act. Its first room is an encounter (the act opens in trouble), so the leg still holds
 // `rooms - 1` after it.
 export function startAct(act, seed = 1) {
-  return { act, legs: actOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, strain: 0, seen: [], here: "encounter", rng: seed >>> 0 };
+  return { act, legs: actOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, owed: 0, strain: 0, seen: [], here: "encounter", rng: seed >>> 0 };
 }
 
 function pick(way, kinds) {
@@ -36,6 +36,8 @@ export function exitKinds(way, n = 1) {
   if (way.here === "sanctuary") return { way: next, kinds: [] };
   if (way.here === "climax") return { way: next, kinds: ["sanctuary"] };
   if (way.left === 0) return { way: next, kinds: Array(n).fill(way.leg < way.legs ? "campfire" : "climax") };
+  // A room strain added to the leg is an encounter, never a quiet room or a merchant (D149).
+  if (way.owed > 0) return { way: next, kinds: Array(n).fill("encounter") };
   const allowed = DRAWN.filter((k) => !(calm(k) && calm(way.here)) && !(rules().once.includes(k) && way.seen.includes(k)));
   const kinds = [];
   for (let i = 0; i < n; i++) {
@@ -53,12 +55,15 @@ export function enter(way, kind, { rating = null } = {}) {
   if (!KINDS.includes(kind)) throw new Error(`unknown kind of room: ${kind}`);
   const next = structuredClone(way);
   const { strain, addedMax } = rules();
+  // The room being entered was drawn before this rating: an encounter pays off a room strain added earlier.
+  if (kind === "encounter" && next.owed > 0) next.owed -= 1;
   if (rating != null) next.strain = Math.max(0, next.strain + strain.pivot - rating);
   while (next.left > 0 && next.extra < addedMax && next.extra < Math.floor(next.strain / strain.per)) {
     next.left += 1;
     next.extra += 1;
+    next.owed += 1;
   }
-  if (kind === "campfire") Object.assign(next, { leg: next.leg + 1, left: rules().rooms, extra: 0, strain: 0, seen: [] });
+  if (kind === "campfire") Object.assign(next, { leg: next.leg + 1, left: rules().rooms, extra: 0, owed: 0, strain: 0, seen: [] });
   else if (DRAWN.includes(kind)) {
     next.left -= 1;
     next.seen.push(kind);

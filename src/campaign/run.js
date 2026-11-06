@@ -31,7 +31,8 @@ export function roomEnded(camp, { handoff, verdict, exits = [], members = [] }) 
   out.gold = handoff.gold ?? out.gold;
   out.relics = [...out.relics, ...(handoff.relics ?? [])].slice(0, setting.relics.max);
   out.carry = { conditions: handoff.conditions ?? [], spent: handoff.spent ?? {}, companions: handoff.companions ?? out.members };
-  if (out.way.here === "climax") out.keep = setting.relics.keptByRating[verdict.rating - 1];
+  // Never more than the party has: a party with fewer relics than the climax allows keeps them all (D149).
+  if (out.way.here === "climax") out.keep = Math.min(setting.relics.keptByRating[verdict.rating - 1], out.relics.length);
   const { way, exit, forced } = wayOn(out.way, exits, handoff);
   const kind = exit?.leads_to ?? exitKinds(way, 1).kinds[0];
   out.way = enter(way, kind, { rating: verdict?.rating ?? null });
