@@ -19,7 +19,7 @@ export function promptFor(text, act) {
 }
 
 // Invariants in play this act: a gated one is absent before its act, not forbidden (docs/spec/context.md §3).
-export const invariantsFor = (act, list = worldOf().invariants) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
+export const invariantsFor = (act, list = worldOf().invariants ?? []) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
 
 // Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59). With live state
 // `s` and whose they are, each limited one says what's left (D128).
@@ -237,7 +237,7 @@ function campaign(env, call, schema) {
     block("How this game is written", env.prompts.style),
     block("Your job", promptFor(env.prompts[call], env.act)),
     block("Output format", shapeText(schema)),
-    invariantsFor(env.act).length ? block("World facts that never change", invariantsFor(env.act)) : null,
+    invariantsFor(env.act, env.world?.invariants).length ? block("World facts that never change", invariantsFor(env.act, env.world?.invariants)) : null,
   ];
 }
 
@@ -255,7 +255,7 @@ const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p, env.stat
 // special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The encounter and
 // what the party can see come as plain lines (D76); the opening reaches her through the DM's narration.
 export function companionInput(env, c, self, others, huddle, schema) {
-  const [me, ...rest] = resolveParty([self, ...others]);
+  const [me, ...rest] = resolveParty([self, ...others], env.world);
   const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
   const privately = c.channel === "private";
   const rom = romanceOf(env, [me, ...rest]);
@@ -280,7 +280,7 @@ export function companionInput(env, c, self, others, huddle, schema) {
 // Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
 // companionInput gives them, and the table as both of them see it.
 export function partyInput(env, c, companions, huddle, schema) {
-  const members = resolveParty(companions);
+  const members = resolveParty(companions, env.world);
   const [a, b] = members;
   const pair = b ? pairEntry(env.pairs ?? pairs, a.id, b.id) : null;
   const rom = romanceOf(env, members);
@@ -327,7 +327,7 @@ function encounterCases(c, rom, members, scene) {
 // secrets or private history; answering second after a turn that moved nothing, `c.mustAdvance` says so. The beats
 // she may report are listed, with any declared beat's own text, and the outfits she could change into.
 export function campfireInput(env, c, self, others, schema) {
-  const [me, ...rest] = resolveParty([self, ...others]);
+  const [me, ...rest] = resolveParty([self, ...others], env.world);
   const members = [me, ...rest];
   const rom = romanceOf(env, members);
   const alone = !c.with.some((id) => id !== me.id);
@@ -611,7 +611,7 @@ export function sceneInput(env, c, schema) {
 // how it ended (the hand-off), and each companion's values: what she believes, admires and despises, wants and can't stand,
 // so her reactions are by her own values.
 export function verdictInput(env, c, schema) {
-  const members = resolveParty(env.party.slice(1));
+  const members = resolveParty(env.party.slice(1), env.world);
   const values = (m) => {
     const { mood } = briefProfile(m, standingOf(env, m.id), env.state);
     return { id: m.id, name: m.name, beliefs: m.beliefs, rules: m.rules, pursuit: m.pursuit, mood, admires: m.admires, despises: m.despises, heatActs: m.heatActs, turnoffs: m.turnoffs };
@@ -631,6 +631,24 @@ export function verdictInput(env, c, schema) {
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
     "Judge how the room went.",
+  ]);
+}
+
+// A new world from the player's vibe (docs/spec/calls/pitch.md, D151): what every world shares, the companions'
+// needs with what Gravenhold made of each, Gravenhold as the worked example, the vibe, and any pitches the player has
+// already turned down. No invariants and no encounter: there's no world yet.
+export function pitchInput(env, c, schema) {
+  const example = worldOf();
+  const needs = c.companions.flatMap((m) => (m.needs ?? []).map((k) => ({ companion: m.name, key: k, in_gravenhold: example.features[k] })));
+  return compose([
+    block("Your job", env.prompts.pitch),
+    block("Output format", shapeText(schema)),
+    block("The companions in this party", c.companions.map((m) => ({ name: m.name, role: m.role, blurb: m.blurb }))),
+    needs.length ? block("Features their stories need", needs) : null,
+    block("Worked example: Gravenhold", example),
+    c.rejected?.length ? block("Pitches the player turned down (write something different)", c.rejected) : null,
+    block("The player's vibe", c.vibe || "No vibe given: surprise them."),
+    "Write the world and its pitch.",
   ]);
 }
 

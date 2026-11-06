@@ -77,5 +77,5 @@ Every adventure is set in a world (`content/worlds/`, D150). The rules every wor
 - **Its acts:** each act's place, sanctuary, mechanics and goal, in the shared five-act shape.
 - **The player's secrets** it can draw from, **room kinds** with examples from the place, and **world facts that never change** (`invariants`, with act gates).
 
-Gravenhold is the default world and the worked example a generated world is written to match. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
+Gravenhold is the default world and the worked example a generated world is written to match. A player who types a vibe at setup gets a world from the pitch call instead (`docs/spec/calls/pitch.md`, D151), in the same shape (`schemas/world.js`), holding every feature the two chosen companions need; the session keeps it whole and saves it, and it's never generated again. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
 

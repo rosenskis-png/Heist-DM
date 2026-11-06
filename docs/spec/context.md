@@ -28,6 +28,7 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 | Party | Both companions' briefs, each exactly as her companion call has it (D132); the party's view of the encounter and the ledger, as for the companion call; the DM's last two narrations; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
 | Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); her private channel |
 | Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
+| Pitch | Its job and the format; the two companions' names, roles and blurbs; the features their stories need, with Gravenhold's version of each; Gravenhold as the worked example; pitches the player turned down; the vibe (D151) |
 
 - **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks; a limited one says what's left of it instead (D128).
 - **Coordinates never go to any call** (D9). Zones come with their size in feet, and openings in rough real dimensions. Code: `src/context.js`.
@@ -57,6 +58,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Party | `sample.json` | off | `quick` (D132) |
 | Companion | `sample.json` | off | `quick` (D58) |
 | Campfire | `sample.json` | off | `complex` |
+| Pitch | `sample.json` | off | `complex` (D151) |
 | Sketch | `sample.json` | off | `complex` |
 | Critique | `sample.json` | off | `complex` |
 | Encode | `sample.json` | off | `default` |

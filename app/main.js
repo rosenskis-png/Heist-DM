@@ -7,7 +7,8 @@ import { newSession, serialize, restore, partyFor, recordCall } from "../src/gam
 import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as authored } from "../content/companions/index.js";
-import { rosterIn } from "../src/campaign/world.js";
+import { rosterIn, worldOf } from "../src/campaign/world.js";
+import { pitchCall } from "../src/calls/pitch.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
@@ -16,7 +17,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -31,6 +32,7 @@ const STATUS = {
   adjudicate: "The DM rules on your plan…",
   resolve: "The dice are down. The DM plays it out…",
   scene: "The DM considers…",
+  pitch: "Imagining your adventure…",
 };
 
 const SPEED = [
@@ -126,9 +128,31 @@ function Setup({ env, slot, onBack, onBegin }) {
   const pick = (id) => setChosen((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length < 2 ? [...c, id] : [c[1], id]));
   const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen) : null;
   const problems = party ? partyProblems(party.slice(1)) : [];
+  // The adventure's world (D151): Gravenhold unless the player asks for a pitch from a vibe. A pitch is written for
+  // the two companions chosen, so choosing again clears it.
+  const [vibe, setVibe] = useState("");
+  const [pitched, setPitched] = useState(null);
+  const [rejected, setRejected] = useState([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  useEffect(() => (setPitched(null), setRejected([])), [chosen.join()]);
+  const pitch = async () => {
+    setBusy(true);
+    setError(null);
+    try {
+      const io = { sample: env.sample, speed: prefs.get().speed };
+      const out = await pitchCall(io, { prompts: env.prompts }, { companions: chosen.map((id) => authored[id]), vibe: vibe.trim(), rejected });
+      if (pitched) setRejected((r) => [...r, pitched.pitch].slice(-3));
+      setPitched(out);
+    } catch (e) {
+      setError(errorText(e));
+    } finally {
+      setBusy(false);
+    }
+  };
   const begin = () => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
-    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, companions: chosen, seed }));
+    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, companions: chosen, seed, world: pitched?.world ?? worldOf() }));
   };
   return html`<main className="setup gutter">
     <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onBack}>Back</button>
@@ -139,7 +163,16 @@ function Setup({ env, slot, onBack, onBegin }) {
       ${Object.values(roster).map((c) => html`<button key=${c.id} className="who mode" aria-pressed=${chosen.includes(c.id)} style=${{ "--cc": c.color ?? "var(--gold)" }} onClick=${() => pick(c.id)}><strong>${c.name}</strong><span>${c.role}</span><span>${c.blurb}</span></button>`)}
     </div>
     ${problems.length ? html`<p className="error">${problems.join(" ")}</p>` : null}
-    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0}>Wake up in the cells</button>
+    <h2>Where?</h2>
+    <p className="muted">Gravenhold, unless you'd like an adventure of your own: type a vibe ("trapped in a creepy noble's masquerade, gothic and eldritch", "an epic escape from hell") and ask for a pitch.</p>
+    <label className="field"><span>Your vibe</span><input id="vibe" value=${vibe} placeholder="Leave empty to be surprised" onChange=${(e) => setVibe(e.target.value)} /></label>
+    <div style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+      <button onClick=${pitch} disabled=${!env.sample || !party || problems.length > 0 || busy}>${busy ? STATUS.pitch : pitched ? "Pitch me another" : "Pitch me an adventure"}</button>
+      ${pitched ? html`<button className="link" onClick=${() => setPitched(null)}>Back to Gravenhold</button>` : null}
+    </div>
+    ${error ? html`<p className="error">${error}</p>` : null}
+    ${pitched ? html`<div className="pitch"><strong>${pitched.world.name}</strong>${paras(pitched.pitch).map((t, i) => html`<p key=${i}>${t}</p>`)}<p className="muted small">Until encounters are generated, the first encounter is still Gravenhold's cells; the companions' stories and the world's facts follow this world.</p></div>` : null}
+    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
   </main>`;
 }
 

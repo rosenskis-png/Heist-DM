@@ -55,3 +55,50 @@ test("no unfilled slot reaches a companion's call", () => {
     assert.ok(!SLOT.test(huddle) && !SLOT.test(camp), `${pair}`);
   }
 });
+
+// A stand-in for a generated world: Gravenhold's shape with a masquerade's nouns.
+const masquerade = () => ({
+  ...structuredClone(worldOf()),
+  id: "chateau_noir",
+  name: "Château Noir",
+  roles: { place: "Château Noir", kind: "manor", builders: "the old counts", builders_adj: "comital", rulers: "the household", commander: "the household's steward", master: "the marquise", working: "the servants' halls", depths: "the crypts", sanctum: "the marquise's salon" },
+  invariants: [{ id: "masks", text: "Nobody in the manor ever removes their mask." }],
+});
+
+test("the pitch's world has Gravenhold's shape, and the check sends back one that lacks a companion's needs", async () => {
+  const { validate } = await import("../src/validate.js");
+  const { pitchSchema } = await import("../schemas/calls/pitch.js");
+  const { pitchCall } = await import("../src/calls/pitch.js");
+  assert.deepEqual(validate(pitchSchema, { pitch: "You wake in a cell.", world: worldOf() }), []);
+  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), acts: worldOf().acts.slice(0, 4) } }).length > 0, "five acts");
+  const needy = Object.values(authored).filter((c) => c.needs?.length).slice(0, 2);
+  const bare = { ...masquerade(), features: {} };
+  const outs = [{ pitch: "x", world: bare }, { pitch: "You wake.", world: masquerade() }];
+  const sent = [];
+  const io = { sample: { json: async (input) => (sent.push(input), outs.shift()) } };
+  const prompts = Object.fromEntries(readdirSync(new URL("../prompts/", import.meta.url)).map((f) => [f.replace(".md", ""), readFileSync(new URL(`../prompts/${f}`, import.meta.url), "utf8")]));
+  const out = await pitchCall(io, { prompts }, { companions: needy, vibe: "a gothic masquerade", rejected: [] });
+  assert.equal(out.world.id, "chateau_noir");
+  assert.equal(sent.length, 2, "the world missing a feature went back once");
+  assert.ok(sent[0].includes("a gothic masquerade") && sent[0].includes("Worked example: Gravenhold"));
+  assert.ok(new TextEncoder().encode(sent[0]).length < (await import("../src/ask.js")).BUDGET.pitch);
+});
+
+test("a session in a generated world fills companions from it, reads its world facts, and keeps it through a save", async () => {
+  const { serialize, restore } = await import("../src/game/session.js");
+  const { companionInput } = await import("../src/context.js");
+  const { companionSchema } = await import("../schemas/index.js");
+  const packet = JSON.parse(readFileSync(new URL("../content/encounters/cells.json", import.meta.url)));
+  const prompts = Object.fromEntries(readdirSync(new URL("../prompts/", import.meta.url)).map((f) => [f.replace(".md", ""), readFileSync(new URL(`../prompts/${f}`, import.meta.url), "utf8")]));
+  const vesper = Object.values(authored).find((c) => JSON.stringify(c).includes("{builders_adj}"));
+  const other = Object.values(authored).find((c) => c !== vesper && !c.tie?.required);
+  const session = newSession({ packet, player: { name: "P", class: "rogue" }, companions: [vesper.id, other.id], world: masquerade() });
+  const sheet = session.state.party[1];
+  assert.ok(JSON.stringify(sheet).includes("comital") && !JSON.stringify(sheet).includes("dwarven"));
+  const env = envFor(session, prompts);
+  const input = companionInput(env, { channel: "huddle", now: "", recent: [] }, session.state.party[1], [session.state.party[2]], [], companionSchema);
+  assert.ok(input.includes("Nobody in the manor ever removes their mask."));
+  const back = restore(serialize(session), packet);
+  assert.equal(back.world.id, "chateau_noir");
+  assert.ok(JSON.stringify(back.state.party[1]).includes("comital"));
+});

@@ -3,9 +3,7 @@
 import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
 import { companions as authored } from "../../content/companions/index.js";
-import { rosterIn } from "../campaign/world.js";
-// The companions as they are in this world: their stories' role nouns filled in (D150).
-const roster = rosterIn(authored);
+import { inWorld, worldOf } from "../campaign/world.js";
 import { emptyDraft, draftFrom } from "./draft.js";
 
 // The player's sheet: their name, their class's skills and abilities.
@@ -15,17 +13,20 @@ export function playerSheet(player) {
 }
 
 // The party: the player, then the two companions the player chose, which the packet places by slot (D8).
-export const partyFor = (player, companionIds) => [playerSheet(player), ...companionIds.map((id) => roster[id])];
+// Each companion as she is in the adventure's world: her stories' role nouns filled in (D150).
+export const partyFor = (player, companionIds, world = worldOf()) => [playerSheet(player), ...companionIds.map((id) => inWorld(authored[id], world))];
 
 // `companions` is the two companion ids the player chose.
-export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1 }) {
-  const party = partyFor(player, companions);
+// `world` is the adventure's world: Gravenhold, or one the pitch call wrote (D151), kept whole in the save.
+export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1, world = worldOf() }) {
+  const party = partyFor(player, companions, world);
   const state = load({ packet, party, seed });
   const session = {
     v: 3,
     player,
     companions,
     act,
+    world,
     start: { packet: packet.id, seed },
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
@@ -84,6 +85,7 @@ export function envFor(session, prompts) {
       return session.state;
     },
     act: session.act,
+    world: session.world ?? worldOf(),
     prompts,
     companions: party.slice(1),
     connections: new Map(packet.map.connections.map((c) => [c.id, c])),
@@ -108,7 +110,9 @@ export function serialize(session) {
 export function restore(json, packet) {
   const saved = typeof json === "string" ? JSON.parse(json) : json;
   if (saved.start.packet !== packet.id) throw new Error(`this save is for ${saved.start.packet}, not ${packet.id}`);
-  const party = partyFor(saved.player, saved.companions);
+  // A save from before worlds (D150) is in Gravenhold.
+  const world = saved.world ?? worldOf();
+  const party = partyFor(saved.player, saved.companions, world);
   // A save from before fights were plans (D130) has HP instead of toughness, conditions and threats.
   const { hp, ...state } = saved.state;
   state.toughness ??= Object.fromEntries(packet.people.map((p) => [p.id, toughnessOf(p)]));
@@ -117,7 +121,7 @@ export function restore(json, packet) {
   // A save from before ability uses were counted (D128).
   state.used ??= {};
   state.spent ??= {};
-  return { ...tableFrom(saved), actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: bindParty(packet, party), party } };
+  return { ...tableFrom(saved), world, actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: bindParty(packet, party), party } };
 }
 
 // A save from before the table (D127): its Plan, Moment and Companions feeds merge into one table, in the order
