@@ -76,8 +76,8 @@ A room can sit anywhere from "very stressed about time" to "this is basically a 
 ## 9. The companions belong to the situation
 
 - **A room can press on a companion's values,** and that's a source of stakes no ordinary scenario has: a plan that's efficient but costs a companion something she believes in. A stance the situation earned ("if the rats get hurt, I'm out") gives the romance pillar something to do between camps.
-- **Their stories can be in the room:** a feature a companion needs (her spring, her archive, D150), or her personal quest, placed when its act allows (D83). Never forced, never improvised.
-- **Everyone has work through properties, not slots.** Abilities touch the world because the world has properties to grab, not because a task was assigned to each character. Watch for a party member whose fun depends on the plan failing.
+- **Their stories can be in the room,** when it's hers: a feature a companion needs (her spring, her archive, D150), or her personal quest, placed when its act allows (D83). The seed says whose room it is, and most rooms are no one's (D158): a room that gives both companions a goal every time turns their stories into a checklist. Never forced, never improvised, and never something to fail in a calm room.
+- **Everyone has work through properties, not slots.** Abilities touch the world because the world has properties to grab, not because a task was assigned to each character. Write the place and let abilities find what's in it: never a prop placed for one party member's ability, or a detail added to block one (D159). Watch for a party member whose fun depends on the plan failing.
 
 ## 10. Blockout: blocks are games, not rooms
 
@@ -116,9 +116,9 @@ Define observers by their senses where it matters. Different senses make disguis
 2. **Design statement** (§2), then **blockout** (§10).
 3. **People** with wants, fears and what they'll never do, and at least two sides wanting different things.
 4. **Things** with properties (§4), and the **pressure** (§6).
-5. **Prizes and exits** (§7), and **the opening**: the situation in motion first, everything usable named, what things are doing in the world but never what they could do for the party (D136, D155).
+5. **Prizes and exits** (§7), and **the opening**: two or three short paragraphs, each about one thing (what's happening; what the party wants and who has it; what's coming and the ways on), everything usable named where it belongs, what things are doing in the world but never what they could do for the party (D136, D155, D159).
 
-Keep it small: three or four zones, two or three people who matter, one or two sources of pressure. The good versions of a room have fewer branches and more connections. Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.
+Keep it small: three or four zones, two or three people who matter, one or two sources of pressure, five or six things (D159). The good versions of a room have fewer branches and more connections. Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.
 
 ## 15. Failure patterns
 

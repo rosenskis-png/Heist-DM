@@ -6,7 +6,7 @@ The player is starting a new adventure and has typed a vibe: a few words about w
 Whatever the vibe, every world is the same kind of adventure, and yours must be too:
 
 - **An escape from a hostile, living place much bigger than the party.** The place has its own life and isn't mainly concerned with the party: it's busy with its own work, feasts, rites and feuds. Its people are mostly hostile, but they're going about their business, not hunting the party. The party starts small, in a cell inside it, and escapes outward through it over five acts.
-- **A heart at the bottom:** something sealed, sleeping or hidden deep in the place that its factions each want, for their own ends. It's what the adventure builds toward.
+- **A heart at the bottom:** something deep in the place that its factions each want, for their own ends, of the kind the seed names. It's what the adventure builds toward.
 - **Factions that want things from each other, not only from the party,** so the party has leverage and the place has surprises in it. Give two to four, each with its own way of behaving, what works on it, and how it raises the alarm.
 - **Medieval fantasy,** in whatever key the vibe asks for. The three of them wake wearing silver rings that let them talk silently, mind to mind; that's true in every world, and who put them there is a mystery revealed in Act 3.
 
@@ -27,14 +27,14 @@ The companions in this party each have a story that needs the place to hold some
 - `place` and `escape`: the place in a sentence or two, and its one real way out, which should lead the party deeper before it leads them out.
 - `life`: what the place is busy with, whatever the party does.
 - `tensions`: two or three lines on what the factions want from each other.
-- `playerSecrets`: two or three secrets that could tie the player to the heart, revealed over the acts.
+- `playerSecrets`: two secrets, one of each kind the seed names, each tying the player to the place, revealed over the acts. They needn't touch the heart. The player's gender isn't known: always write them as "they".
 - `roomKinds`: what an exploration room, a social room and a respite room look like here, with examples from the place.
 - `invariants`: world facts that never change, each optionally gated to the act it first applies in. One or two is plenty.
 - `id`: a short lowercase id for the world. `openAct` is optional.
 
-Gravenhold is shown as a worked example of the shape and the level of detail. Don't copy it: no dwarves, vaults, warbands or mind flayers unless the vibe asks for them.
+Gravenhold is shown as a worked example of the shape and the level of detail. Don't copy it: no dwarves, vaults, warbands or mind flayers unless the vibe asks for them, and its heart and secrets are one answer to a different seed, not a pattern.
 
 ## The pitch
-A few sentences in the second person that sell this adventure to the player: where they wake, what the place is, what's stirring in its depths. Don't spoil the heart's secret or the player's secrets.
+A few sentences in the second person that sell this adventure to the player: where they wake, what the place is, what it's busy with, and what they'll have to get through. Don't spoil the heart's secret or the player's secrets.
 
 Return only JSON that matches the schema you're given.

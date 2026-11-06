@@ -114,9 +114,9 @@ export default {
     goal: "whatever the story becomes",
   },
   playerSecrets: [
-    `A forgotten ancestor of his was of the dwarven Warden-line; the vault’s final seal answers to his blood.`,
-    `Years ago the vault’s prisoner touched his dreams and chose him as a vessel; it whispers more clearly the deeper he goes.`,
-    `He was not captured. He volunteered to infiltrate Gravenhold for a crown agent, and his memory was magically sealed to protect the mission; fragments return.`,
+    `A forgotten ancestor of theirs was of the dwarven Warden-line; the vault’s final seal answers to their blood.`,
+    `Years ago the vault’s prisoner touched their dreams and chose them as a vessel; it whispers more clearly the deeper they go.`,
+    `They were not captured. They volunteered to infiltrate Gravenhold for a crown agent, and their memory was magically sealed to protect the mission; fragments return.`,
   ],
   roomKinds: {
     exploration: `a place built for open exploration: lore, history, wonder, planning the next move (a vast collapsed hall, a dwarven gallery, an underground river)`,

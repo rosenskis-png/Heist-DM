@@ -7,7 +7,7 @@ import { companions as authored } from "../content/companions/index.js";
 import { classes } from "../content/classes.js";
 import { setting } from "../content/setting.js";
 import { motifs } from "../content/motifs.js";
-import { worldOf } from "../src/campaign/world.js";
+import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
 import { TONES, XFACTORS, SHAPES, MEAT } from "../src/campaign/seed.js";
@@ -66,7 +66,7 @@ const S = {
   speed: store.get("forge.speed", "balanced"),
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
-  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", meat: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", meat: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
   rooms: store.get("forge.rooms", []),
   busy: null, // what's running, for the status line
   calls: {}, // run id -> the call records (inputs and outputs), this page load only
@@ -121,9 +121,10 @@ async function pitch(another) {
   S.busy = "Imagining the adventure…";
   S.error = null;
   render();
-  const rec = { id, at: Date.now(), vibe: vibe.trim(), companions: [a, b], cls, rejected: rejected.length, note: "" };
+  const seed = pitchSeed((Math.random() * 2 ** 31) >>> 0);
+  const rec = { id, at: Date.now(), vibe: vibe.trim(), companions: [a, b], cls, rejected: rejected.length, seed, note: "" };
   try {
-    const out = await pitchCall(io, env, { companions: [authored[a], authored[b]], vibe: vibe.trim(), rejected });
+    const out = await pitchCall(io, env, { companions: [authored[a], authored[b]], vibe: vibe.trim(), rejected, seed });
     Object.assign(rec, { pitch: out.pitch, world: out.world });
     S.adventures.unshift(rec);
     S.current = id;
@@ -213,6 +214,7 @@ function adventureView(adv) {
     h("h3", {}, "Factions"), h("div", { class: "grid2" }, factions),
     h("h3", {}, "The five acts"), h("ol", { class: "acts" }, acts),
     w.openAct ? [h("h3", {}, "The open act"), kv([["From act", w.openAct.min], ["Goal", w.openAct.goal], ["How it plays", w.openAct.mechanics], ["Sanctuary", w.openAct.sanctuary]])] : null,
+    adv.seed ? [h("h3", {}, "The seed it answered"), kv([["The heart is", adv.seed.heart], ["Secret kinds", h("ul", { class: "plain" }, adv.seed.secrets.map((t) => h("li", {}, t)))]])] : null,
     h("h3", {}, "The player's secrets"), h("ul", { class: "plain" }, w.playerSecrets.map((t) => h("li", {}, t))),
     h("h3", {}, "Features the companions' stories use"),
     kv(Object.entries(w.features).map(([k, v]) => [`${k.replaceAll("_", " ")}${needs[k] ? ` (${needs[k]})` : ""}`, v])),
@@ -252,6 +254,23 @@ function historyView() {
 
 // ---------- rooms ----------
 
+// The pins that apply to this kind of room in this world (D159): a motif that doesn't suit the kind, a faction the world
+// doesn't have, or an axis the kind doesn't take is never sent, and never shown as pinned.
+function pinsFor(adv, r) {
+  const challenged = CHALLENGED.includes(r.kind);
+  const p = {};
+  if (TONES.includes(r.tone)) p.tone = r.tone;
+  if ((challenged || r.kind === "oddity") && XFACTORS.includes(r.xFactor)) p.xFactor = r.xFactor;
+  if (challenged && SHAPES.includes(r.shape)) p.shape = r.shape;
+  if (challenged && MEAT.includes(r.meat)) p.meat = r.meat;
+  if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
+  const fs = challenged ? r.factions.filter((f) => adv.world.factions[f]) : [];
+  if (fs.length) p.factions = fs;
+  const ms = r.motifs.filter((id) => motifs.find((m) => m.id === id)?.kinds.includes(r.kind));
+  if (ms.length) p.motifs = ms;
+  return p;
+}
+
 // The seed exactly as the game draws it for a room of this kind in this act, then with whatever the designer pinned.
 function seedWith(adv, r) {
   let camp = newCampaign({ act: r.act, seed: (Math.random() * 2 ** 31) >>> 0 });
@@ -259,16 +278,10 @@ function seedWith(adv, r) {
   const used = S.rooms.filter((x) => x.adventure === adv.id && x.act === r.act).flatMap((x) => x.seed?.motifs?.map((m) => m.id) ?? []);
   camp = { ...camp, used, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
-  if (r.tone) seed.tone = r.tone;
-  if (CHALLENGED.includes(r.kind) || r.kind === "oddity") if (r.xFactor) seed.xFactor = r.xFactor;
-  if (CHALLENGED.includes(r.kind)) {
-    if (r.shape) seed.shape = r.shape;
-    if (r.meat) seed.meat = r.meat;
-    const fs = r.factions.filter((f) => adv.world.factions[f]);
-    if (fs.length) seed.factions = fs;
-  }
-  const ms = r.motifs.map((id) => motifs.find((m) => m.id === id)).filter(Boolean);
-  if (ms.length) seed.motifs = ms;
+  const p = pinsFor(adv, r);
+  for (const k of ["tone", "xFactor", "shape", "meat", "factions"]) if (p[k]) seed[k] = p[k];
+  if (p.spotlight) seed.spotlight = p.spotlight === "none" ? null : p.spotlight;
+  if (p.motifs) seed.motifs = p.motifs.map((id) => motifs.find((m) => m.id === id));
   return seed;
 }
 
@@ -277,7 +290,7 @@ async function designOne() {
   const r = structuredClone(S.room);
   const id = newId();
   const seed = seedWith(adv, r);
-  const run = { id, at: Date.now(), adventure: adv.id, worldName: adv.world.name, companions: adv.companions, kind: r.kind, act: r.act, brief: r.brief.trim(), arrives: r.arrives.trim(), pinned: pinnedOf(r), seed, stages: {}, note: "" };
+  const run = { id, at: Date.now(), adventure: adv.id, worldName: adv.world.name, companions: adv.companions, kind: r.kind, act: r.act, brief: r.brief.trim(), arrives: r.arrives.trim(), pinned: pinsFor(adv, r), seed, stages: {}, note: "" };
   S.rooms.unshift(run);
   S.calls[id] = [];
   await runRoom(run, adv);
@@ -308,11 +321,15 @@ async function runRoom(run, adv) {
   render();
 }
 
-const pinnedOf = (r) => Object.fromEntries(["tone", "xFactor", "shape", "meat"].filter((k) => r[k]).map((k) => [k, r[k]]).concat(r.factions.length ? [["factions", r.factions]] : [], r.motifs.length ? [["motifs", r.motifs]] : []));
 
 function roomsTab() {
   const adv = currentAdventure();
   const r = S.room;
+  // Clear pins this kind or world can't take, so nothing hidden rides along (D159).
+  const fitting = pinsFor(adv, r);
+  r.motifs = fitting.motifs ?? [];
+  if (CHALLENGED.includes(r.kind)) r.factions = fitting.factions ?? [];
+  for (const k of ["tone", "meat", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
   const set = (k, v) => ((S.room[k] = v), save(), render());
   const sel = (k, label, options, { random = "Random, as the game draws it" } = {}) =>
     h("label", { class: "field" }, label,
@@ -339,6 +356,9 @@ function roomsTab() {
       challenged || r.kind === "oddity" ? sel("xFactor", "X-factor", XFACTORS.map((t) => [t, t])) : null,
       challenged ? sel("shape", "Shape", SHAPES.map((t) => [t, t])) : null,
       challenged ? sel("meat", "What makes its choices meaningful", MEAT.map((t) => [t, t])) : null,
+      sel("spotlight", "Whose room it is", r.kind === "climax"
+        ? [["both", "Both companions'"]]
+        : [["companion_a", `${authored[adv.companions[0]]?.name ?? "First companion"}'s`], ["companion_b", `${authored[adv.companions[1]]?.name ?? "Second companion"}'s`], ["none", "No one's"]]),
     ),
     challenged
       ? h("div", { class: "field" }, h("span", { class: "muted small" }, "Factions in the room (none ticked: the game picks one or two)"),
@@ -397,6 +417,7 @@ function seedView(run) {
       ["Shape", seed.shape && mark("shape", seed.shape)],
       ["Meaningful by", seed.meat && mark("meat", seed.meat)],
       ["Factions", seed.factions && mark("factions", seed.factions.join(", "))],
+      ["Whose room", mark("spotlight", seed.spotlight === "both" ? "both companions'" : seed.spotlight ? `${authored[run.companions?.[seed.spotlight === "companion_a" ? 0 : 1]]?.name ?? seed.spotlight}'s` : seed.spotlight === null ? "no one's" : null)],
       ["Exits lead to", seed.exits.length ? seed.exits.join(", ") : "nothing: the act ends"],
     ]),
     h("div", { class: "sub" }, h("span", { class: "muted small" }, pinned.motifs ? "Motifs (pinned)" : "Motifs"), seed.motifs.map((m) => h("p", { class: "small" }, h("b", {}, m.name), ": ", m.pattern))),

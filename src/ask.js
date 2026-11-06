@@ -46,11 +46,16 @@ export async function ask(io, { call, input, schema, check = () => [] }) {
   }
   if (record.size > LIMIT) throw new CallFailed(call, [`its input is ${record.size} bytes, over the 256 KiB limit`], record);
   const opts = { modelTier: tier, cache: REPLAY.has(call), signal: io.signal };
-  // One backoff on rate_limited, and one more try when the connection drops (upstream_error, the runtime's only
-  // transient failure), never a loop (D156).
+  // One backoff on rate_limited, one more try when the connection drops (upstream_error, the runtime's only
+  // transient failure, D156), and one more when the reply held no JSON, keeping what it said instead (`noJson`, D159).
+  // Never a loop.
   const send = (x) =>
     io.sample.json(x, opts).catch(async (e) => {
       if (e?.code === "upstream_error") return io.sample.json(x, opts);
+      if (e?.code === "invalid_json") {
+        record.noJson = String(e.text ?? "").slice(0, 20000);
+        return io.sample.json(x, opts);
+      }
       if (e?.code !== "rate_limited") throw e;
       await pause(io.backoff ?? 15000, io.signal);
       return io.sample.json(x, opts);

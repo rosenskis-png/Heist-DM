@@ -24,6 +24,7 @@ Each phase's full record (findings, causes and fixes) is in git history; what it
 
 Not gates. Each is answered when play shows it.
 
+- **The player's gender in companion text.** The pitch and Gravenhold now say "they" (D157), but the companions' files still speak of the player as "he" in places (Celeste's first line, "When she sees him"). *Recommendation:* a role slot for the player's pronouns, filled in code like the world's roles (D150), chosen at setup.
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 - **Card leaks the engine can't see.** The engine rejects a card that names a hidden thing, but not one that describes it in plain words ("he's got them on his belt"). *Recommendation:* watch for it in playtests before adding anything.
 - **The campfire feels like Gravenhold's,** and the three newest companions (Annaleise, Sable, Celeste) play as written. Judged in Camp and in play. Still open from Phase 5: nobody in the roster has dark skin, and Ruby has no quick friend.
@@ -82,4 +83,4 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 
 Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
 
-- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen, but hasn't run against a model. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.
+- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D157); judge the next batch for that. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.

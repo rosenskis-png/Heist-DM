@@ -4,6 +4,8 @@
 import { worlds, defaultWorld } from "../../content/worlds/index.js";
 
 import { WORLD_ROLES } from "../../schemas/world.js";
+import { HEARTS, SECRETS } from "../../content/pitch.js";
+import { d100 } from "../engine/rng.js";
 
 export const ROLES = WORLD_ROLES;
 export const worldOf = (id = defaultWorld) => worlds[id];
@@ -34,4 +36,16 @@ export function worldProblems(world, members) {
   const problems = ROLES.filter((r) => !world.roles?.[r]).map((r) => `the world has no ${r}`);
   for (const c of members) for (const need of c.needs ?? []) if (!world.features?.[need]) problems.push(`${c.name} needs ${need.replaceAll("_", " ")}`);
   return problems;
+}
+
+// A pitch's seed (D157): the kind of heart, and two different kinds of player secret, from a random position `n`.
+// Pure and seeded, so a reroll with a new `n` asks a different question.
+export function pitchSeed(n) {
+  const rng = { rng: n >>> 0 || 1 };
+  const pick = (list) => list[(d100(rng) - 1) % list.length];
+  const heart = pick(HEARTS);
+  const first = pick(SECRETS);
+  let second = pick(SECRETS);
+  while (second === first) second = pick(SECRETS);
+  return { heart, secrets: [first, second] };
 }

@@ -159,3 +159,32 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
   const twice = { sample: { json: async () => { throw { code: "upstream_error", message: "x" }; } } };
   await assert.rejects(designRoom(twice, env, { seed, world, party, sketch }), (e) => e.code === "upstream_error");
 });
+
+test("whose room it is: one companion or no one, never the same one twice running, both at the climax (D158)", () => {
+  let camp = newCampaign({ seed: 11 });
+  const seen = [];
+  for (let i = 0; i < 60; i++) {
+    const { seed, camp: next } = seedFor({ ...camp, used: [] }, world, "encounter", ["encounter"]);
+    if (seed.spotlight && seed.spotlight === seen.at(-1)) assert.fail(`${seed.spotlight} twice in a row`);
+    if (!seed.spotlight) assert.ok(seed.motifs.every((m) => m.id !== "valued_thing"), "a companion's thing needs a companion");
+    seen.push(seed.spotlight);
+    camp = next;
+  }
+  const none = seen.filter((s) => !s).length;
+  assert.ok(none > 15 && seen.includes("companion_a") && seen.includes("companion_b"), `a mix: ${none} of 60 no one's`);
+  assert.equal(seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed.spotlight, "both");
+  // Only her story goes to the sketch: the features it needs, for the companion whose room it is.
+  const base = seedFor(newCampaign(), world, "quiet", ["encounter"]).seed;
+  const count = (spotlight) => (sketchInput(env, { seed: { ...base, spotlight }, world, party }, sketchSchema).match(/her_story_needs/g) ?? []).length;
+  assert.deepEqual([count(null), count("companion_a"), count("both")], [0, 1, 2]);
+});
+
+test("a reply with no JSON is tried once more, and what it said is kept (D159)", async () => {
+  const { ask } = await import("../src/ask.js");
+  let n = 0;
+  const records = [];
+  const io = { sample: { json: async () => (n++ ? { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "x" }, sketch: "x" } : Promise.reject({ code: "invalid_json", message: "no JSON", text: "I'd rather not." })) }, onCall: (r) => records.push(r) };
+  const out = await ask(io, { call: "sketch", schema: sketchSchema, input: "x" });
+  assert.equal(out.sketch, "x");
+  assert.equal(records[0].noJson, "I'd rather not.");
+});

@@ -102,3 +102,23 @@ test("a session in a generated world fills companions from it, reads its world f
   assert.equal(back.world.id, "chateau_noir");
   assert.ok(JSON.stringify(back.state.party[1]).includes("comital"));
 });
+
+test("a pitch's seed names the kind of heart and two different kinds of secret, and reaches the pitch (D157)", async () => {
+  const { pitchSeed } = await import("../src/campaign/world.js");
+  const { HEARTS, SECRETS } = await import("../content/pitch.js");
+  const { pitchInput } = await import("../src/context.js");
+  const { pitchSchema } = await import("../schemas/index.js");
+  const hearts = new Set();
+  for (let n = 1; n < 40; n++) {
+    const s = pitchSeed(n * 7919);
+    assert.ok(HEARTS.includes(s.heart) && s.secrets.every((x) => SECRETS.includes(x)) && s.secrets[0] !== s.secrets[1]);
+    hearts.add(s.heart);
+  }
+  assert.ok(hearts.size >= 5, "rerolls ask different questions");
+  assert.deepEqual(pitchSeed(42), pitchSeed(42));
+  const seed = pitchSeed(5);
+  const input = pitchInput({ prompts: { pitch: "x" } }, { companions: [], vibe: "", seed }, pitchSchema);
+  assert.ok(input.includes(seed.heart) && input.includes(seed.secrets[1]));
+  const { worldOf } = await import("../src/campaign/world.js");
+  assert.ok(worldOf().playerSecrets.every((t) => !/\b(he|his|him)\b/i.test(t)), "the player is they");
+});

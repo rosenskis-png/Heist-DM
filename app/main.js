@@ -7,7 +7,7 @@ import { newSession, serialize, restore, partyFor, recordCall } from "../src/gam
 import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as authored } from "../content/companions/index.js";
-import { rosterIn, worldOf } from "../src/campaign/world.js";
+import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
@@ -141,7 +141,7 @@ function Setup({ env, slot, onBack, onBegin }) {
     setError(null);
     try {
       const io = { sample: env.sample, speed: prefs.get().speed };
-      const out = await pitchCall(io, { prompts: env.prompts }, { companions: chosen.map((id) => authored[id]), vibe: vibe.trim(), rejected });
+      const out = await pitchCall(io, { prompts: env.prompts }, { companions: chosen.map((id) => authored[id]), vibe: vibe.trim(), rejected, seed: pitchSeed((Math.random() * 2 ** 31) >>> 0) });
       if (pitched) setRejected((r) => [...r, pitched.pitch].slice(-3));
       setPitched(out);
     } catch (e) {

@@ -24,10 +24,11 @@ The sketch is generator-only: no play call ever sees it (D59), and it holds no r
 ## The seed (D118, D153)
 - **The kind** comes from the way (D144); the exits' kinds are drawn with it.
 - **Two or three motifs** for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
+- **Whose room it is** (D158): one companion's slot or no one's, no one's about half the time, never the same companion twice running; the climax is both companions'. A companion's thing (the motif) is drawn only when the room is someone's.
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
 - **For an encounter or the climax:** the x-factor (explore, interact, acquire, overcome, get through), the shape (linear, branching, open, hub), what makes its choices meaningful (costs that differ in kind, incomplete information, a dilemma, prizes that compete), and one or two of the world's factions. An oddity gets an x-factor too.
 
-The campaign records the act's used motifs, and the seed's random position, so the next seed differs; both reset when an act ends.
+The campaign records the act's used motifs, whose the last room was, and the seed's random position, so the next seed differs; the motifs reset when an act ends.
 
 ## What the sketch sees (D119)
 | Tier | Holds |
@@ -36,7 +37,7 @@ The campaign records the act's used motifs, and the seed's random position, so t
 | **Background** | The world's place, life, heart and tensions, this act, the factions in the room, its room kinds |
 | **Seed** | Everything above |
 
-Plus the party, each companion's values and needs, and the worked example. Never an AI summary of the act.
+Plus the party (what each can do and each companion's values; her story's needs and her quest only when the room is hers, D158), and the worked example. Never an AI summary of the act.
 
 ## What every packet must have
 Beyond `docs/spec/packet.md`'s consistency checks:

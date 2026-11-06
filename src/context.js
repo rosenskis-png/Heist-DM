@@ -648,6 +648,7 @@ export function pitchInput(env, c, schema) {
     block("The companions in this party", c.companions.map((m) => ({ name: m.name, role: m.role, blurb: m.blurb }))),
     needs.length ? block("Features their stories need", needs) : null,
     block("Worked example: Gravenhold", example),
+    c.seed ? block("The question: this world's seed", { the_heart_is: c.seed.heart, the_player_secrets_are: c.seed.secrets }) : null,
     c.rejected?.length ? block("Pitches the player turned down (write something different)", c.rejected) : null,
     block("The player's vibe", c.vibe || "No vibe given: surprise them."),
     "Write the world and its pitch.",
@@ -664,22 +665,31 @@ const seedText = (seed) => ({
   ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
   ...(seed.shape ? { shape: seed.shape } : {}),
   ...(seed.meat ? { what_makes_its_choices_meaningful: seed.meat } : {}),
+  whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
+    : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
+    : "no one's: the room touches no companion's story; they react to it as themselves",
   motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern, decisions: m.decisions })),
   exits: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
 });
 
-// The party as the designer needs it: what each can do, and what each companion values and needs from the world.
+// The party as the designer needs it: what each can do, and what each companion values. Her story (the features it
+// needs, and her quest once its act is near) only when the room is hers (D158).
 function designParty(c) {
   const [player, ...companions] = c.party;
   const act = c.seed.act;
+  const spot = c.seed.spotlight;
   return [
     { id: "player", role: player.role, abilities: abilitiesFor(player.abilities) },
-    ...companions.map((m, i) => ({
-      slot: `companion_${"ab"[i]}`, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
-      abilities: abilitiesFor(m.abilities),
-      ...(m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
-      ...(m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
-    })),
+    ...companions.map((m, i) => {
+      const slot = `companion_${"ab"[i]}`;
+      const hers = spot === "both" || spot === slot;
+      return {
+        slot, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
+        abilities: abilitiesFor(m.abilities),
+        ...(hers && m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
+        ...(hers && m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
+      };
+    }),
   ];
 }
 
