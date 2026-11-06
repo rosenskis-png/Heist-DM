@@ -44,6 +44,10 @@ const segEdges = ([[x1, y1], [x2, y2]]) => {
 // Consistency checks the geometry must pass (docs/spec/packet.md, Validation).
 export function geometryProblems(packet) {
   const { zones, connections, things } = packet.map;
+  // A packet without a map (D9, D153): no zone has a footprint, and there's nothing to check. Half a map is wrong.
+  const mapped = zones.filter((z) => z.rects?.length).length;
+  if (!mapped) return [];
+  if (mapped < zones.length) return [`only some zones have footprints: ${zones.filter((z) => !z.rects?.length).map((z) => z.id).join(", ")} don't`];
   const byId = new Map(zones.map((z) => [z.id, z]));
   const problems = [];
   const owner = new Map();

@@ -1,10 +1,11 @@
 # Sketch call
 
-**Job:** design the next encounter, room or campfire in plain English, whole, before any of it becomes data (D117).
-**Runtime:** `sample.json`, replay off, `complex`.
-**Sees:** the three tiers of `docs/spec/generation.md` (the hand-off, the background and the seed), the party's abilities, the chosen genre's promise and its motifs, one worked example of a different genre, and a small slice of `docs/design/encounter-craft.md` as judgment. On a revision, also its own sketch and the critique.
+**Job:** design the next room whole, in plain English, design statement first, before any of it becomes data (D117, D153).
+**Runtime:** `sample.json`, replay off, `complex`. Budget 32 KB.
+**Sees** (`sketchInput` in `src/context.js`): its prompt, which carries the craft as judgment (`docs/design/encounter-craft.md`); the seed (kind, tone, x-factor, shape, what makes its choices meaningful, two or three motifs, the kinds its exits lead to); the world's place, life, heart, tensions, this act, the factions in the room and its room kinds; the party (what each can do; each companion's values, the features her story needs, and her quest once its act is near); must honour, the way the party arrives and the last rooms' log lines; and the worked example (`fixtures/generator/encoded.json`). Revising, also its own sketch and the critique.
 
-## Output
-A sketch, in the shape of `fixtures/cells/walkthrough.md` §1: intent (objective, alternates, fail-forward, optional objectives, purpose, the states the party could leave in), people with sheets and any routine, places with purposes and how they connect, things and their properties, fixed facts, hidden things, what happens when, how attachments resolve, exits with next-scene stubs, and what the opening puts on the table. Sizes and placements are rough ("a 30-ft corridor, cells along the north wall"), never coordinates (D28). The exact format is Phase 7's (`docs/roadmap.md`).
+## Returns (`schemas/calls/sketch.js`)
+- **The design statement:** start, goal, the challenge as "X by Y, hard because Z", outcomes, x-factor and pressure (encounter-craft §2).
+- **The sketch:** blockout (with the golden path, a working note encode drops), people, places and things, pressure, prizes and the ways on, and what the opening shows. Rough sizes in squares, never coordinates (D28). Never routes the DM would see.
 
-It never lists routes or solutions. On a revision it may cut, connect or swap elements, never add one (D120).
+On a revision it may cut, connect or swap elements, never add one (D120). No play call ever sees a sketch (D59).

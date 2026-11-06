@@ -129,7 +129,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D115** Phases 4 and 5 close, and the generator is next, without hand-authoring Act 1: current
 - **D116** Generated packets are written for ruled mode: current
 - **D117** The generator designs the whole encounter first, then encodes it in stages: current
-- **D118** Code picks each encounter's ingredients: changed by D139
+- **D118** Code picks each encounter's ingredients: changed by D139, D153
 - **D119** The sketch call's context comes in three tiers: current
 - **D120** The critique plays a clever player, and a revision only cuts or connects: changed by D141
 - **D121** Rooms have time when it matters, and one outfit each: changed by D143
@@ -150,7 +150,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D136** The opening names everything in sight, without measuring it: current
 - **D137** A companion says one thing, and answers what she's asked: current
 - **D138** Fixes from the table playtest: current
-- **D139** The Cells, the heist and the cavern stop being the model, and encounter design is rethought first: current
+- **D139** The Cells, the heist and the cavern stop being the model, and encounter design is rethought first: changed by D152
 - **D140** The campaign is acts of one-way legs, drawn as the party goes: changed by D144
 - **D141** Slack, deadlines and the campaign clocks are retired: current
 - **D142** Campfires end every leg, at night, with everyone there: current
@@ -163,6 +163,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D149** A room strain adds is an encounter, and a climax never keeps more relics than the party has: current
 - **D150** Adventures are set in worlds, and companion text names the world through role slots: current
 - **D151** The pitch call writes a world from the player's vibe: current
+- **D152** Encounter design is rethought for the DM era: current
+- **D153** The generator, built in one pass: current
 
 ---
 
@@ -940,3 +942,13 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-06), the second half of the roadmap's "vibe at new game start". At setup, after choosing two companions, the player may type a vibe and ask for a pitch. The pitch call (`docs/spec/calls/pitch.md`, `complex`, budget 16 KB) writes a world in Gravenhold's shape (`schemas/world.js`, which Gravenhold also passes) and a few sentences selling it, from the vibe, the companions' blurbs, the features their stories need with Gravenhold's version of each, Gravenhold as the worked example, and the last three pitches the player turned down. The engine checks the shape (exactly five acts, every role, at least two factions, tensions and player secrets) and that the world holds every feature the companions need (`worldProblems`); a failure goes back once. The player can ask for another pitch, go back to Gravenhold, or begin. The session keeps the chosen world whole in its save and never generates it again; party sheets, companion calls and world facts read it (`envFor`'s `world`). Until encounters are generated, the first encounter is still the Cells, and the setup screen says so.
 **Why:** Worlds exist (D150), so a generated one needs only a call that fills the same shape, checked by the same code that checks Gravenhold. Showing what Gravenhold made of each need tells the call what kind of thing a feature is without dictating it, and sending turned-down pitches is how a reroll avoids writing the same world twice. A separate critique of the frame was recommended; it's left out until the bench shows the pitch missing the frame, since the prompt states it and the checks hold the shape (principles: add nothing until a failure shows).
 **Rules out:** Regenerating a world mid-campaign; a world that lacks a chosen companion's needs; a world in a shape other than Gravenhold's.
+
+### D152. Encounter design is rethought for the DM era
+**Decided:** The designer's call (2026-11-06), settling D139. `docs/design/encounter-craft.md` is rewritten from the Angry GM's scenario design (reading notes kept in `docs/design/references/angry-scenario-design.md`) and the designer's discussions: a room is a situation the DM runs, not a mechanism the player solves; structure that creates pressure, never structure that pre-solves; a design statement first (start, goal, the challenge as "X by Y, hard because Z", outcomes, x-factor); challenge as choice, with at least two approaches a plain player can see, made of properties in view, and never a creativity test the room depends on; things said as what they are, never what they're for, so constraints are written down and affordances ruled; resistance from people and several kinds of pressure, with no single point of failure; pressure as a gradient of visible steps, never a binary deadline; prizes as one lever among several, with the way on part of the prize; a tone range from stressed to playground; the companions belonging to the situation; blockout before architecture, with the golden path only in the sketch; and the kinds of room. The Cells, the heist and the cavern stop being references (D139); the encounter-rethink notes are folded in and removed.
+**Why:** The engine era's craft taught locks and timetables, and the Cells showed what that produces when the DM rules: properties that are answers, one key that empties the threat, arithmetic instead of play. The designer asked for the discussion itself to carry into the next thread rather than a summary, so it's written into the craft and its references.
+**Rules out:** Building rooms or motifs from the Cells, the heist or the cavern; properties that say what a thing is for; binary deadlines as a room's pressure.
+
+### D153. The generator, built in one pass
+**Decided:** The designer's call (2026-11-06): build the encounter builder in a single pass for the next thread to critique. Code draws a room's exits and its seed (`src/campaign/seed.js`: kind, tone leaning on the leg's strain, two or three motifs from `content/motifs.js`, and for an encounter or the climax an x-factor, shape, what makes its choices meaningful, and one or two factions; the act's used motifs are avoided and reset per act). The sketch call (`complex`) writes the design statement and the sketch; for an encounter or the climax the critique call (`complex`) plays it four ways (force, guile, odd, plain) and, if it finds problems, the sketch call revises once (cut, connect or swap). The encode call (`default`) writes packet data with rough zone sizes and no geometry (`schemas/calls/encode.js`), checked once laid out (`encodeProblems`: the engine's packet checks, mode by kind, exits matching the drawn kinds, a merchant's prices, the act). Code lays it out (`src/engine/layout.js`): zones outward from the party's start, connections on shared walls or squares between levels; a packet it can't lay out ships with no geometry at all, which the packet schema and the engine now allow (D9), and the page shows no map. Pipeline: `generateRoom` in `src/game/generate.js`. Budgets: sketch 32 KB, critique 20 KB, encode 28 KB. One worked example of a finished room's data: `fixtures/generator/encoded.json`. Supersedes the sketch, critique and encode specs' engine-era formats, and the rooms-per-genre seed of D118.
+**Why:** The thread holding the Angry GM discussion was nearly out of context; building the whole pipeline while that discussion was fresh, and writing the craft into the repo, keeps it for the next thread to critique, rather than handing over a summary. Every piece that can be code is code (the seed, the checks, the layout); judgment stays in the three calls.
+**Rules out:** Coordinates from any AI; a revision that adds elements; a packet with half a map.

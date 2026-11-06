@@ -29,7 +29,7 @@ One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they 
 The map is structure: an exact layout plus the relationships the AIs reason with (D9, D28, principle 5). No call adds a zone or a connection during play. A feature the player assumes can be ruled into existence against the zone's purpose and fixed facts, as a fact in the ledger (D75).
 
 - **Zones:** an id, a short description, and a **purpose line** saying why the zone exists and how it's used (e.g. "where the jailers eat, dice and sleep in shifts; the drain runs to the midden"). The purpose is what keeps improvised detail consistent.
-- **Geometry** (D28), in 5-ft squares, read only by the engine and the UI. The AIs get derived facts ("the corridor is 30 ft long", "the peg is 10 ft behind the stool"), never coordinates.
+- **Geometry** (D28), in 5-ft squares, read only by the engine and the UI. A generated packet gets it from code (`src/engine/layout.js`), and one that can't be laid out has none at all: no zone has `rects` and no connection a wall or square, and the page shows no map (D9, D153). The AIs get derived facts ("the corridor is 30 ft long", "the peg is 10 ft behind the stool"), never coordinates.
   - Each zone is a list of rectangles `[x, y, w, h]` on a `level` (0 by default). Walls are implicit at zone edges. Zones on one level don't overlap.
   - A connection on one level is a `wall` segment `[[x1, y1], [x2, y2]]` on the edge its two zones share. A connection between levels (stairs, a grate into a gutter) is one `square` inside both zones' footprints.
   - A thing gets an `at` square only when where it sits matters or the map should show it. Otherwise it just sits in its zone.

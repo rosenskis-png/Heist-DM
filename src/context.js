@@ -499,6 +499,8 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
   const hidden = (x) => x.hidden && !knows(x.id);
   const name = (id) => [...map.zones, ...map.things, ...people, ...s.party].find((x) => x.id === id)?.name ?? id;
   const feet = (z) => {
+    // A packet without a map (D9, D153) has no footprints to measure.
+    if (!z.rects?.length) return "size not mapped";
     const [x0, y0] = [Math.min(...z.rects.map(([x]) => x)), Math.min(...z.rects.map(([, y]) => y))];
     const [x1, y1] = [Math.max(...z.rects.map(([x, , w]) => x + w)), Math.max(...z.rects.map(([, y, , h]) => y + h))];
     return `${(x1 - x0) * 5}×${(y1 - y0) * 5} ft`;
@@ -652,3 +654,87 @@ export function pitchInput(env, c, schema) {
   ]);
 }
 
+
+// ---------- generation (docs/spec/generation.md, D153) ----------
+
+// What the room's sketch is built from, for the sketch and critique calls: the seed's question, with its motifs.
+const seedText = (seed) => ({
+  kind: seed.kind,
+  tone: seed.tone,
+  ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
+  ...(seed.shape ? { shape: seed.shape } : {}),
+  ...(seed.meat ? { what_makes_its_choices_meaningful: seed.meat } : {}),
+  motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern, decisions: m.decisions })),
+  exits: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
+});
+
+// The party as the designer needs it: what each can do, and what each companion values and needs from the world.
+function designParty(c) {
+  const [player, ...companions] = c.party;
+  const act = c.seed.act;
+  return [
+    { id: "player", role: player.role, abilities: abilitiesFor(player.abilities) },
+    ...companions.map((m, i) => ({
+      slot: `companion_${"ab"[i]}`, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
+      abilities: abilitiesFor(m.abilities),
+      ...(m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
+      ...(m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
+    })),
+  ];
+}
+
+// The world as the sketch needs it: the place, its life, heart and tensions, this act, the factions in the room.
+function designWorld(world, seed) {
+  return {
+    place: world.place, life: world.life, heart: world.heart, tensions: world.tensions,
+    this_act: world.acts[seed.act - 1],
+    factions: (seed.factions ?? []).map((f) => world.factions[f]),
+    room_kinds: world.roomKinds,
+  };
+}
+
+// The sketch call (D117, D119): must honour the hand-off; the world and the act as background; the seed; the party;
+// the worked example. Revising, it also gets its sketch and the critique.
+export function sketchInput(env, c, schema) {
+  const h = c.handoff;
+  return compose([
+    block("Your job", env.prompts.sketch),
+    block("Output format", shapeText(schema)),
+    block("The question: this room's seed", seedText(c.seed)),
+    block("The world", designWorld(c.world, c.seed)),
+    block("The party", designParty(c)),
+    h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
+    block("Worked example: a finished room's data (another room; match its detail, not its content)", env.examples?.encoded),
+    c.previous ? block("Your sketch", c.previous) : null,
+    c.critique ? block("The critique of it", c.critique.problems) : null,
+    c.previous ? "Revise the sketch from the critique: cut, connect or swap, never add." : "Design the room.",
+  ]);
+}
+
+// The critique call (D120): the sketch, its seed and the party's abilities.
+export function critiqueInput(env, c, schema) {
+  return compose([
+    block("Your job", env.prompts.critique),
+    block("Output format", shapeText(schema)),
+    block("The room's seed", seedText(c.seed)),
+    block("The party", designParty(c)),
+    block("The sketch", c.sketch),
+    "Play it four ways and report what's wrong.",
+  ]);
+}
+
+// The encode call (D117): the sketch, what the seed fixes (kind, act, exits), the party's slots, and the worked example.
+export function encodeInput(env, c, schema) {
+  return compose([
+    block("Your job", env.prompts.encode),
+    block("Output format", shapeText(schema)),
+    block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits }),
+    block("The party's slots", ["player", "companion_a", "companion_b"]),
+    block("Worked example: a finished packet", env.examples?.encoded),
+    block("The sketch", c.sketch),
+    "Encode the sketch as the packet.",
+  ]);
+}
+
+// The kinds of room that are rooms rather than encounters (D121, D153).
+export const ROOM_KINDS = ["quiet", "oddity", "merchant", "campfire", "sanctuary"];

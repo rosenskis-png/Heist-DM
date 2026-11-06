@@ -1,19 +1,11 @@
 # Encode call
 
-**Job:** turn a finished sketch into an encounter packet (`docs/spec/packet.md`), with only what the DM reads (D116).
-**Runtime:** `sample.json`, replay off, `default`. Output: `schemas/calls/encode.js`.
-**Sees:** the sketch, the packet schema's slice for its stage, and the stages already encoded.
+**Job:** turn a room's sketch into packet data, without geometry (D117, D153).
+**Runtime:** `sample.json`, replay off, `default`. Budget 28 KB.
+**Sees** (`encodeInput`): its prompt, what the seed fixes (kind, mode, act, the exits' kinds), the party's slots, the worked example (`fixtures/generator/encoded.json`), and the sketch.
 
-## Stages
-Each stage is one call, validated by the engine before the next:
-objective and people → zones and connections → things → clock (routines and placed events) → notes on how people react → opening description.
+## Returns (`schemas/calls/encode.js`)
+The packet's shape (`schemas/packet.js`) with each zone's footprint replaced by a rough `size` in squares (and a `level` if it isn't on the ground), and no walls, squares or coordinates. Code lays it out (`src/engine/layout.js`): zones outward from where the party starts, each connection on a wall the two zones share, or on a square inside both between levels. If a connection can't be placed, the packet ships without a map (D9).
 
-It must also:
-- mark which routines and events the party knows from the start (`known`);
-- make everything a plan could depend on perceivable or learnable before the player commits (`docs/design/encounter-craft.md` §4.3), since the card never warns (D36);
-- write the opening from what code says is in sight at the start (`inSight`), naming each thing without measuring it or saying what it's for (`docs/spec/packet.md` §5, D136);
-- write the sketch's design faithfully, adding nothing the sketch doesn't have.
-
-A stage that fails the consistency checks goes back once, with the errors listed. Quality checks only warn.
-
-It writes topology and approximate sizes, never coordinates; code lays them out on the grid (D28).
+## Validated by the engine (`encodeProblems` in `src/calls/encode.js`)
+Laid out, it must pass the engine's packet checks; its mode must fit its kind (a room for quiet, oddity, merchant, campfire and sanctuary), an encounter must have an objective and a room none; its exits must lead to exactly the kinds code drew, one each; a merchant must sell something; and its act must be the seed's. Failures go back for one retry.

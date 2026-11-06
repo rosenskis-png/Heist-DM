@@ -1,0 +1,89 @@
+{
+  "id": "steam_laundry",
+  "name": "The steam laundry",
+  "mode": "encounter",
+  "act": 2,
+  "notes": [
+    "The washers keep their heads down and work; they won't raise a cry for the overseer, but they won't lie for strangers either unless someone gives them a reason.",
+    "Gorrik reads trouble as a chance to look good for the quartermaster: he shouts for the runner before he draws, unless he thinks he can handle it alone and keep the credit.",
+    "Steam is the room's cover: while the vats boil, the floor is a fog where shapes are only shapes. It thins every time someone opens the boiler valve."
+  ],
+  "intent": {
+    "objective": { "id": "through", "label": "The whole party out by either way on", "condition": { "any": [{ "party_all_in": "back_stair" }, { "party_all_in": "servants_passage" }] } },
+    "alternates": [],
+    "fail_forward": { "id": "pressed", "label": "Gorrik's runner brings the quartermaster's men, and the party is marched into the servants' passage under guard", "condition": { "flag": ["gorrik", "runner_sent", true] } },
+    "optional": [
+      { "id": "purse", "label": "Lift the quartermaster's purse", "condition": { "holds": ["party", "purse"] } },
+      { "id": "livery", "label": "Leave in the household's livery", "condition": { "holds": ["party", "livery"] } }
+    ],
+    "purpose": "The working levels at their busiest: get through a room that's busy with its own work without becoming its business. Two sides are at odds (the washers and their overseer), the steam hides and betrays, and the two ways on lead to different kinds of place.",
+    "expected_plans": [2, 4],
+    "exits": [
+      { "id": "up_the_back_stair", "zone": "back_stair", "leads_to": "encounter", "stub": "The back stair climbs toward the clatter of the garrison's kitchens." },
+      { "id": "into_the_passage", "zone": "servants_passage", "leads_to": "quiet", "stub": "The servants' passage runs warm and dim toward the sound of running water." }
+    ]
+  },
+  "people": [
+    {
+      "id": "gorrik",
+      "name": "Gorrik, hobgoblin overseer",
+      "tier": "guard",
+      "wants": "To be noticed by the quartermaster and moved off laundry duty.",
+      "fears": "Being blamed for anything that goes missing on his floor.",
+      "knows": "Which washer is skimming coins, and that the quartermaster's purse is in the drying loft.",
+      "will_never": "Admit to the quartermaster that something happened on his floor that he couldn't handle.",
+      "temper": "Loud, bored, quick to bully.",
+      "under_pressure": "Sends the washer-boy running for the quartermaster, or tries to settle it himself if he thinks nobody will know.",
+      "breaks": "Hurt and alone, he bargains: his silence for his life, and he'll swear nothing happened.",
+      "disposition": "bored",
+      "position": "laundry_floor"
+    },
+    {
+      "id": "maud",
+      "name": "Maud, pressed washerwoman",
+      "tier": "civilian",
+      "wants": "Out of the laundry, and Gorrik made to pay for her burned hands.",
+      "fears": "Being sent down to the vats for good.",
+      "knows": "Where the clean livery is folded, and that the servants' passage is never watched at the boil.",
+      "will_never": "Help anyone who'd leave the other washers to take the blame.",
+      "temper": "Tired, sharp-tongued, watchful.",
+      "under_pressure": "Goes quiet and keeps working, and remembers who did what.",
+      "breaks": "She doesn't fight.",
+      "disposition": "wary",
+      "position": "laundry_floor"
+    }
+  ],
+  "map": {
+    "zones": [
+      { "id": "laundry_floor", "name": "The laundry floor", "purpose": "Where the washers work the vats in the steam; Gorrik walks it and shouts.", "light": "dim", "size": [6, 4] },
+      { "id": "boiler_room", "name": "The boiler room", "purpose": "The furnace and the valve that feeds the vats; hot, loud, and only the stoker comes here.", "light": "bright", "size": [3, 3] },
+      { "id": "drying_loft", "name": "The drying loft", "purpose": "Where laundry hangs to dry and the quartermaster keeps a purse for the washers' pay.", "light": "dim", "size": [4, 3] },
+      { "id": "back_stair", "name": "The back stair", "purpose": "A narrow stair up to the garrison's kitchens.", "light": "dark", "size": [2, 2] },
+      { "id": "servants_passage", "name": "The servants' passage", "purpose": "A warm, low passage the household's servants use to come and go unseen.", "light": "dark", "size": [2, 3] }
+    ],
+    "connections": [
+      { "id": "boiler_door", "kind": "door", "name": "Boiler room door", "between": ["laundry_floor", "boiler_room"], "fits": "medium", "operated_from": "both" },
+      { "id": "loft_ladder", "kind": "opening", "name": "Ladder to the loft", "between": ["laundry_floor", "drying_loft"], "fits": "medium", "operated_from": "both" },
+      { "id": "stair_arch", "kind": "opening", "name": "Arch to the back stair", "between": ["laundry_floor", "back_stair"], "fits": "medium", "operated_from": "both" },
+      { "id": "servants_door", "kind": "door", "name": "Servants' door", "between": ["laundry_floor", "servants_passage"], "fits": "medium", "flags": { "locked": true }, "operated_from": "laundry_floor", "key": "token_ring" }
+    ],
+    "things": [
+      { "id": "vats", "name": "the boiling vats", "properties": "Iron, waist high, full of scalding grey water; the steam off them fills the floor.", "size": "large", "location": { "zone": "laundry_floor" } },
+      { "id": "valve", "name": "the boiler valve", "properties": "Brass wheel, stiff, hot to the touch; it feeds steam to the vats.", "size": "small", "location": { "zone": "boiler_room" } },
+      { "id": "token_ring", "name": "a ring of brass tokens", "properties": "Six brass tokens on an iron ring, stamped with the household's mark; Gorrik's.", "size": "small", "location": { "holder": "gorrik" } },
+      { "id": "livery", "name": "folded livery", "properties": "Clean grey household livery, folded in a basket; three sets.", "size": "small", "location": { "zone": "drying_loft" } },
+      { "id": "purse", "name": "the quartermaster's purse", "properties": "Leather, heavy with coin, tucked behind a hanging sheet.", "size": "small", "location": { "zone": "drying_loft" }, "reward": { "gold": 12 } }
+    ],
+    "facts": [
+      { "id": "steam", "text": "While the vats boil, the laundry floor is thick with steam: people are shapes past arm's length." },
+      { "id": "runner", "text": "A washer-boy sits by the back stair, ready to run for the quartermaster when Gorrik shouts." }
+    ]
+  },
+  "clock": {
+    "events": [
+      { "id": "inspection", "known": false, "at_tick": 8, "do": [{ "then": [{ "set_flag": { "entity": "gorrik", "key": "inspection_due", "value": true } }] }] }
+    ]
+  },
+  "start": { "tick": 0, "positions": { "player": "boiler_room", "companion_a": "boiler_room", "companion_b": "boiler_room" }, "ops": [] },
+  "opening": "Heat hits you first. The boiler room's furnace roars behind you, a brass valve wheel sweating beside it, and beyond the door the laundry floor is a fog of steam over iron vats where washers bend and wring. A hobgoblin with a ring of brass tokens on his belt paces the floor, shouting. A ladder climbs to a loft hung with drying sheets, an arch opens on a narrow back stair where a boy sits waiting, and a low door, shut, leads off to a dim passage."
+}

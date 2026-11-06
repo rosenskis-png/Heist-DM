@@ -1,372 +1,137 @@
 # Encounter craft
 
-How to design encounters that play the way a great DM would run them. This document consolidates the design discussions behind the project into principles that apply at any scale. Those discussions covered a heist told three ways, the same heist's layout and timing told three ways, a small cell-block escape, and a mid-prison cavern.
+How to design a room that plays the way a great DM would run it, in a game where the DM rules (D125) and every adventure is a one-way escape through a living place (D140). This is the rethought design D139 asked for. Its sources are the Angry GM's scenario design series (reading notes in `docs/design/references/angry-scenario-design.md`), the designer's discussions of 2026-11-05 and 06, and what the table playtest showed about the Cells.
 
-**Who this is for.** Anyone writing an encounter by hand, and anyone designing the encounter generator and its validation (`docs/spec/packet.md`, roadmap Phase 7).
+**Who this is for.** Anyone designing a room by hand, and the generator's sketch and critique calls (`docs/spec/generation.md`), which get slices of it.
 
-**This is not a prompt.** Rules in a prompt compete with each other (`docs/principles.md`). Give the generator only a small slice of this document, as judgment. Wherever a principle can be checked, turn it into structure or an engine check instead (the validation section of `docs/spec/packet.md`).
-
----
-
-## 1. What makes an encounter good
-
-An encounter is good when three things hold:
-
-1. **Players make decisions whose consequences they can partly see coming.**
-2. **Dice settle what's still uncertain after a decision.** They never stand in for the decision.
-3. **Every outcome leads somewhere interesting, including success.**
-
-The third fails most often. In a merely competent encounter, a group that plans well and rolls well gets pass, pass, pass, done. The best play produces the dullest session. All the interest comes from failure, which quietly pushes the DM to make players fail.
-
-**Genres make promises.**
-- A heist promises a competent crew, a clever plan, the plan going sideways, improvisation, and a payoff.
-- A prison break promises being stuck, noticing things, and getting out by your own wits.
-- A fight with a setup promises choosing the ground, preparation that pays off, a beat where it goes wrong, and a win the setup made possible.
-
-Design so the encounter can deliver every beat of its genre's promise.
-
-**Planning is a deal between players and DM.** Players spend real time planning, and in return the DM promises that planning will matter.
-- **What planning buys:** leverage (position, information, options), never certainty.
-- **Scouting:** should turn up true but partial facts, each at a price: a face seen, a favor owed, time spent.
-- **When the plan goes wrong,** that should test the plan, not prove it was pointless.
+**This is not a prompt.** Rules in a prompt compete (`docs/principles.md`). The generator gets small slices as judgment; anything checkable becomes a check in code.
 
 ---
 
-## 2. Scope first: find where the decisions are
+## 1. What a room is now
 
-Before placing anything, ask what the players are actually choosing in this encounter. Build for that choice and cut everything else.
+- **A room is one place in a living place,** busy with its own purpose: a kitchen feeding a garrison, a chapel mid-rite, a forge on deadline. Its people are most likely hostile, but they're going about their business, not hunting the party. The party is a nuisance to it, not its subject.
+- **Design a situation the DM runs, not a mechanism the player solves.** The engine era built locks and listed how they behave. Now a room is people who want things, in a place with real constraints, under pressure that moves on its own. The packet's job is to give the DM's judgment good material, never to have judged already. The judgment is the product.
+- **The line isn't structure against openness. It's structure that creates pressure against structure that pre-solves.** A routine that finds the empty peg creates pressure. A property that says "several rats can carry it quietly" pre-solves.
+- **A room is a scenario at room scale,** with a goal, a challenge, outcomes and context, like an adventure but smaller. Not every room is: a quiet room, a merchant or a campfire is there for pacing, a companion moment, a trade or a breath, and has no challenge (§11). That's fine. Empty rooms make a dungeon, too.
+- **Everything is made of the same few levers:** what must happen to leave, what's worth having, what pushes, what it costs, and where it leads.
 
-| The decisions are about | Build | Example |
+## 2. The design statement
+
+Before anything is placed, state the room in prose (not bullets, which lose the "why it's hard"):
+
+- **Where it starts:** an in-game circumstance that reveals the goal, shows why it's worth pursuing, and points somewhere to begin. None of that needs saying out loud.
+- **The goal:** what the players are trying to accomplish, from inside the game. It isn't a motivation (fun, story) or a reward (loot). Implicit goals are best: the players infer them from the situation, and genre conventions make the inference reliable ("Because That's How the Game Works": an enemy patrol between you and the stair means getting past it).
+- **The major challenge:** *the players must accomplish X by doing Y, and Y is hard because of Z.* If the goal and the challenge say the same thing, or the challenge fits in one imperative phrase ("stop the ritual"), the goal has been mistaken for the challenge. The challenge must follow directly from the goal, not by way of a gauntlet.
+- **The outcomes, plural:** every reasonable way out the other end, good, bad and indifferent. One outcome is a railroad. Outcomes are where the players can actually get, and the goal is where they're trying to get; the goal must visibly close when an outcome is reached, or they won't know it's over.
+- **The x-factor:** the players' main way of engaging with this room (explore, interact, acquire, overcome, get through). The goal, the challenge and the pressure should all be about it. Picking the x-factor first is a good way to find the challenge.
+
+Winning and losing aren't outcomes. They're the players' own judgment of the outcome, read from every clue the room gives: how it ends, who reacts how, what's left behind. That judgment is designable, and the verdict call (D146) and the companions are its voices.
+
+## 3. Challenge is choice
+
+- **The game tests one thing: choices.** Which approach now, and how to prepare. A roll answers "did my choice work?", never "what should I do?". A difficulty band is probability, not challenge: remove every roll, and the decisions should still differ.
+- **A choice is meaningful when the options differ in what they lead to, and different players would choose differently.** If everyone would pick the same option, it's a calculation. Some easy, meaningless steps are fine; a room made only of them is a slog of easy rolls.
+- **What makes a choice meaningful:** costs that differ in *kind*, not amount (picking the lock takes time, forcing it makes noise); incomplete but not *zero* information (with none, the choice is random); obscured truths to deduce; options too different to compare; dilemmas (which wanted thing to give up); and prizes that compete (§7). Real choices mix these.
+- **Never build a creativity test.** "Here's a problem, solve it" stalls when nobody has the flash of inspiration, which is most of the time. Players aren't genius problem-solvers, but they think they are, and their sense of agency comes from figuring things out, not from unlimited freedom. Design the room to be playable by a plain player using only what the opening makes salient and what their sheets say. The DM honours creative ideas when they come; the room must never depend on them.
+- **At least two visible approaches, made of properties in view.** Visible means the system's defaults the players already know (fight, sneak, talk, pick, force) and leading description (the chandelier hangs on a frayed rope directly over the brute). It never means a list of options in the narration, and never routes in the packet.
+- **Presentation is a difficulty dial.** The size of the leap from what's described to the option is the difficulty. The ideal miss ends with "we should have seen it from this, that and that". Tune so an inexperienced player very likely finds what they need and only a sharp one finds the edge.
+
+## 4. Say what things are, never what they're for
+
+- **Properties, not answers.** Material, size, state, who cares about it: "iron, six keys, heavy, the jailer's". What it lets you do is a ruling the DM makes when a plan arrives. The test: could the sentence be read as a hint? Then it's an answer.
+- **Constraints are fixed before play; affordances are ruled in it.** What says *no* (it's iron, it's warded, the door is barred from the far side, she'd never cross the sergeant) has to be written down, because the DM leans toward yes and won't supply resistance unprompted. What says *yes* (whether one rat can drag the ring) is the DM's to rule. Pre-rulings may close doors, never open them.
+- **A person's wants are both.** "Terrified of the sergeant" is a constraint the DM must honour and a lever the player can pull. That's why people are the richest material a room has.
+- **Nothing is true until the players know it.** The garrison's exact size doesn't exist; there are as many as the challenge needs. That's not the quantum ogre (forcing a pet encounter whatever the players choose): using the limits of what players perceive to build fair challenges is design; cancelling out their choices isn't.
+
+## 5. Where resistance comes from
+
+- **No single point of failure for the danger.** If removing one element empties the threat (gnaw the drum and there's no alarm, no antagonist move, no deadline), the room is a puzzle with one key. Pressure should come in more than one kind (people, time, place, cost), so a clever bypass changes the situation rather than ending it.
+- **People resist better than locks.** A lock resists once. A person adapts, bargains, panics, lies, wants something, and can be won over: people work on both sides at once, pushing back and offering a way forward.
+- **At least two sides that want different things from each other,** not just from the party. That's where leverage comes from, and where surprise comes from without the DM inventing anything: their wants colliding.
+- **A good solution creates the next problem.** The guard is tied up, so someone will miss him; the keys are gone, so the block is a crime scene.
+- **The opposite failure is yes-and mush:** nothing resists, every plan works, the DM narrates success after success. Whatever resists has to be designed in.
+
+## 6. Pressure is a gradient, not a cliff
+
+- **No binary deadlines.** A hard cut-off at a tick the DM's own time rulings decide reads as the DM deciding whether you lose. Instead, pressure rises in steps, each step visibly changing the room (the water reaches the archive, the rite's light fades, the one who could guide them is led away). The order is shown before it bites, and no step ends the room.
+- **The question is never whether, but how well.** A room may require something before the party can leave. Do it fast enough to grab extras, just fast enough to leave clean, or so slowly it costs.
+- **Visible pressure should be a resource, not a punishment meter.** Something the players can choose to spend for speed or boldness, the way hit points are spent in a roguelike, not a counter that triggers when full. Hidden pressure is a slow gradient the fiction shows. No room needs a visible resource; one may have its own.
+- **Waiting must cost something,** or the best play is always to wait for the perfect moment. Something one-way (an arrival, a closing, someone losing patience) makes waiting a choice.
+- **Fairness lives in the world.** Everything a plan depends on must be perceivable or learnable before the player commits (D36). Show every behaviour rule before it matters: the goblin gives the den a wide berth before the den matters.
+- **Few sources of time.** One or two things drive the room's clock, so windows come from how they interact. If the player needs arithmetic to use a timing, that's the engine's job, shown as a fact.
+
+## 7. Prizes, the way on, and momentum
+
+- **Prizes are one lever among several,** never a room full of loot. Gold, a relic, an outfit, a companion moment, progress on a companion's goal, knowledge of what's ahead, or the choice of where to go next (D147). Optional content has diminishing returns, and too much drowns the room.
+- **The way on is part of the prize.** The party leaves by an exit it managed to reach (D144). One setup among many: to the left a prize guarded by one thing, leading to one kind of room; to the right another, leading elsewhere. A bold, successful party takes both and chooses; an adequate one takes one path; a poor one gets neither and is carried on. A forced way on should lead to a different kind of story, not simply a worse room.
+- **Exits feel different.** Warm wet air one way, a kitchen's clatter the other. Choosing between identical doors is the worst choice a room can offer. Nothing two rooms ahead is shown (D140).
+- **Momentum is progress that strengthens the party against what's coming,** not just progress. Things the party carries out (an ally, a weakness learned, a relic) should matter later. Inertia (what pushes back) and momentum are separate pulls, and the players should feel both.
+
+## 8. Tone is a range
+
+A room can sit anywhere from "very stressed about time" to "this is basically a fantasy playground". The living place has strange, funny and beautiful corners, and a well-equipped, successful party should get to do epic things. The same forge can be a desperate scramble for a hurt party and a stage for a party carrying the right tools.
+
+## 9. The companions belong to the situation
+
+- **A room can press on a companion's values,** and that's a source of stakes no ordinary scenario has: a plan that's efficient but costs a companion something she believes in. A stance the situation earned ("if the rats get hurt, I'm out") gives the romance pillar something to do between camps.
+- **Their stories can be in the room:** a feature a companion needs (her spring, her archive, D150), or her personal quest, placed when its act allows (D83). Never forced, never improvised.
+- **Everyone has work through properties, not slots.** Abilities touch the world because the world has properties to grab, not because a task was assigned to each character. Watch for a party member whose fun depends on the plan failing.
+
+## 10. Blockout: blocks are games, not rooms
+
+- **Lay out the gameplay before the architecture.** First the decision spaces (what is decided where, how they connect, which are optional), then dress them as a place. A block can be several rooms (a three-room library is one block), and a gap between blocks needn't be a wall (an impassable river with bridges, one retracted).
+- **Realistic buildings are too open:** built so anyone can reach anything, which is the opposite of a room. Make the layout fit the blocks with rubble, flooding, barred doors, breaches, growth.
+- **A golden path may live in the sketch, never in the packet.** The best route through the room is designer's working material, thrown away at encode like the critique's runs. The DM never sees a route.
+- **Hide the path.** A side space or a cut between branches so the structure doesn't show.
+- **Loops where routing matters, a chokepoint only where you mean one.** On a loop, being spotted starts a chase you can recover from; in a tube it means retreat or fight.
+- **Put key objects where different spaces meet** (the servants' door into the hall), and set distances by how fast help arrives.
+
+## 11. Kinds of room
+
+Code draws each room's kind (D144); the room is written for it.
+
+| Kind | What it's for |
+|---|---|
+| **Encounter** | A situation with a goal, a challenge, pressure and outcomes. Most rooms. |
+| **Quiet** | A breath: a companion moment, a discovery, mood, scouting in disguise, maybe an outfit. No objective; something may happen if they linger. |
+| **Oddity** | Something strange the place holds: a wonder, a bargain, a test, a fairy's puzzle. Light pressure at most; usually a prize and a story. |
+| **Merchant** | Someone to trade with, for gold (D147). Things with prices, and a person with wants. |
+| **Campfire** | Rest at night, everyone present (D142). A room whose only job is a safe, memorable place to sleep. |
+| **Climax** | The act's peak: always won (D148). Stakes are how epic the escape is, a choice at the peak, and what comes away with them. What the act built up should show here. |
+| **Sanctuary** | The act's main campfire, where it ends. |
+
+## 12. Fights
+
+A fight is a plan (D130). Fights are for something (hold the door, stop the horn), never "everyone down". The setup is the fun. Most people stop before they're beaten: each sheet says when (`breaks`). Outnumbered is the worst place to be. Threats are shown before they land. Violence costs: noise, bodies, how the companions feel about it.
+
+## 13. Senses, disguise and pursuit
+
+Define observers by their senses where it matters. Different senses make disguises double-edged (a cloak fools eyes, not noses). Pursuers should differ, and something that stops each kind should be within reach (water breaks a scent trail; a climb stops anything without hands).
+
+## 14. The generator's order, and its tests
+
+1. **Seed** (code): the kind, the x-factor, the shape, what makes its choices meaningful, the tone, motifs, the act and the factions present, and the exits' kinds.
+2. **Design statement** (§2), then **blockout** (§10).
+3. **People** with wants, fears and what they'll never do, and at least two sides wanting different things.
+4. **Things** with properties (§4), and the **pressure** (§6).
+5. **Prizes and exits** (§7), and **what the opening shows**: everything usable named, nothing said about what it's for (D136).
+6. **Critique:** walk four approaches, clean and messy: force, guile, something odd, and a plain player with no clever ideas. Report: a clean run that produces nothing interesting; one roll deciding the room; an approach that hits a wall with nothing to grab; one approach plainly best; a party member with nothing to do; an element nothing touched; a bypass that empties the threat; a property that reads as a hint; only one side wanting anything; a companion the room never touches.
+7. **Revise:** cut, connect or swap. Never add (D120). The good versions of a room have fewer branches and more connections.
+
+## 15. Failure patterns
+
+| At the table | Cause | Fix |
 |---|---|---|
-| **Routing:** which way, through what | loops, chokepoints, exits, response distances | the cavern floor |
-| **Timing:** when to act | a learnable cycle, a deadline, windows | the cell block |
-| **Approach:** force, talk, trick or magic | objects with properties, people with wants, something to do at each position | both |
-| **What to keep:** the state the party leaves in | stakes beyond plain success: gear, the alarm, witnesses, allies, time | every scene where failure isn't really possible |
-
-A principle that doesn't touch the encounter's decisions is decoration at best and bookkeeping at worst.
-- **In the cell block,** loops, disguises and varied exits did nothing, because every decision happened inside the cells.
-- **In the cavern,** those same three principles were the core of the design.
-
-**Some scenes are guaranteed successes.** A jailbreak at the start of a campaign isn't really asking *whether* the party gets out, because the story needs them out. Put the stakes in *how* they leave:
-- with or without their gear;
-- with or without the alarm raised;
-- with or without a witness, a new enemy, or a new ally.
-
-This is also how a success produces something interesting.
-
-**Size an encounter by its decisions, not its length in minutes.** The packet already sizes encounters by the number of plans committed (`docs/spec/packet.md` §1). Keep an encounter small enough that all of its facts fit in every call (principle 4). Split a large set piece like the heist at its natural seams, such as the ballroom and the basement. Each piece then hands its state to the next (§3.8).
-
----
-
-## 3. Principles at any scale
-
-### 3.1 Decisions before dice
-- **A roll answers "did my choice work?", never "what should I do?"**
-  - "Roll Stealth" is not a choice.
-  - "Go now while the music covers you, or wait for the quiet window and risk the bell" is a choice.
-- **Leverage first, then the roll.** Without leverage, no roll talks the guard round. With leverage, the roll decides how far he goes.
-- **State the stakes before rolling:** what success gets and what failure costs (the plan card). Careful wording is not a mechanism.
-
-### 3.2 Problems, not puzzles
-- **A puzzle has one solution, the designer's. A problem has constraints, resources and people.** "One lock, one key" is a puzzle pretending to be a problem.
-- **Never write down solutions.** That includes "the intended route" and "alternatives." Any list of routes drags the DM back toward steering players onto them. See the reflexes in `docs/principles.md`, and the PATHS field in Gravenhold's generator (`legacy/README.md`).
-- **Give things properties, not just difficulties.**
-  - A vault door that is iron, warded, on a schedule, and has a clerk's deposit slot gives an improvised plan something to grab.
-  - A door that is just "DC 20" gives it nothing.
-  - Properties are what let the DM rule on a plan nobody anticipated.
-
-### 3.3 Interlock
-- **Solving one obstacle should change another.** For example:
-  - The key ring is on the guard's belt during one beat of his routine and on the peg during another.
-  - The ring that opens the vault also commands the guard hound.
-  - One prisoner's chatter covers another prisoner's noise.
-- **The connection test: every element should connect to at least two others.**
-  - In the cell block, the war drum connects to the jailer's response to a loose prisoner, to the starving rats in the gutter who can gnaw its hide head, and to whether a loud plan is safe.
-  - The guard's drinking connects to the near cell's line of sight, to the leverage over him, and to the quiet window.
-  - An element that connects to nothing is decoration. Cut it, or keep it as deliberate decoration.
-  - This replaces Gravenhold's rule that "an element exists only if it takes part in a path," which only worked because paths were written down.
-- **Links only work if the space and the clock make them physical.** A hound that rests at each quarter bell only opens a window if its resting spot is far from the vault.
-
-### 3.4 Everyone has essential work
-- **Give each position or character something only they can do.** In the cell block, the far cell has physical work, the middle cell faces the guard, and the near cell has the line of sight. The environment gives every position something to do; class abilities speed it up.
-- **Watch for a player whose fun depends on the plan failing,** such as the fighter waiting for combat. That's a sign the design is working against itself.
-- **Small encounters usually fail by having one solution. Large ones fail by having solutions that never meet.**
-  - The fix for small encounters: spread the parts of a solution across the players.
-  - The fix for large ones: make split groups hand things to each other, through a dumbwaiter or a signal.
-
-### 3.5 People with wants
-- **NPCs act from their sheets, not from difficulty numbers.** A sheet has wants, fears, and things they'll never do (`docs/spec/packet.md` §2).
-  - "Greedy, DC 15" is just a modifier.
-  - "Terrified of the sergeant" is a lever the players can pull.
-- **Let what players observe become leverage.** Seeing the guard drinking on duty is what makes a threat against him believable. Information gathered in play should be something players can spend.
-- **An NPC whose agenda is stated can betray the party as a consequence of their choices.** An NPC who betrays without one is just a twist (§3.6).
-
-### 3.6 Foreshadow
-- **Surprise is cheap; dread has to be earned.** A trap the players can see is a decision. A hidden one is a tax.
-- **Show every behavior rule before it matters.** Say goblins won't enter the wolf den and wolves avoid fire. Before players need either rule, they must see a goblin give the den a wide berth and a torch drive off a wolf. A rule the players haven't seen doesn't exist for them.
-- **Surprises should only open options; deadlines the players know about may close them.**
-  - In the cavern, the Hunt empties the wolf den. It's a surprise, but it only helps.
-  - The discovery of the escape, which raises the alarm, is something the players know is coming.
-- **No improvised twists** (principle 8). Everything the players don't see coming is placed while designing.
-
-### 3.7 Failure changes the situation
-- **Failure is partial and clear to the players:** suspicion rises, a window closes, a resource is spent, someone is taken.
-- **It never ends the encounter, and it never adds busywork** (new sub-steps nobody needs). Busywork complications were one of Gravenhold's root problems.
-- **It never sends the party back.** Reaching the next campfire is never in question; how they arrive is (D131). Captured means taken on to somewhere new, not returned to the cell.
-- **Design failure as a new problem made of the same parts.**
-  - The deadline arrives and the cell door opens, but now there are two guards.
-  - A party member taken upstairs turns an escape into a rescue.
-- **Taking things away is not difficulty.**
-  - Stripping spells, gear and information "to make it a challenge" removes decisions, not power.
-  - Constrain instead. For example: no material components, but spoken spells can be heard.
-
-### 3.8 Consequences pile up and carry forward
-- **The end of an encounter is the bill for everything before it.** Players should recognize every line item: who saw their faces, who got branded, whether the alarm sounded, whether the ring was put back.
-- **Carry state into the next encounter's starting conditions.**
-  - If the drum sounded, the party arrives to full alert.
-  - If the guard is cooperating, discovery of the escape is delayed.
-  - If the party kept their deal with the guard, they have a guide.
-- **The climax can be a choice instead of a roll.** Deciding what to do with the stolen ledger is a better ending than one more check.
-- **The bill is paid in story, never in permanent loss:** hurts that last until camp, optional objectives missed, who saw them, a companion separated, and how the party feels about each other when it gets there (D131).
-
-### 3.9 Fights
-A fight is a plan (D130), so everything above applies to it. What's particular to fights:
-- **Fights are for something.** Hold the door until the portcullis is up, stop the horn, get the keys off the sergeant. "Everyone down" is the dullest objective a fight can have, and it rewards a slog.
-- **The setup is the fun.** Choosing the ground, the trap, the bait, who takes whom: the fight itself should take a few beats, and the setup decides how they go.
-- **Fights end on morale.** Most people stop before they're beaten: they yield, run, or bargain when the fight turns. Each sheet says when (`breaks`), and talking or scaring someone out of a fight is a real way to win it.
-- **Numbers count.** Outnumbered is the worst place to be. The decisions are about splitting them up, drawing one off, and catching one alone or unaware.
-- **Threats are shown before they land.** The party sees what each enemy is about to do, and gets to answer it. An ambush is placed or comes from a failed roll's stated cost, never improvised (principle 8).
-- **Violence costs.** Noise, bodies, the alarm, and how the companions feel about what you did. That makes avoiding a fight the clever play, as a heist should, without forbidding it.
-
----
-
-## 4. Time
-
-### 4.1 Few sources, one grid
-- **Drive every clock from one or two sources,** so windows emerge from how they interact.
-  - In the heist, the bells drove the guards and the hound, and the orchestra drove the noise level and the Baron's movements.
-  - Several clocks that don't affect each other produce nothing but fudging.
-- **Put everything on one time grid, and pick a tick size that every scheduled event lands on.** With 10-minute ticks and bells every 15 minutes, the bells fall between ticks and the window gets fudged.
-
-### 4.2 A cycle for mastery, events for pressure
-- **A repeating cycle rewards watching and planning.**
-- **One-time events make waiting expensive.** They are irreversible, and each one closes an option.
-- **Waiting must cost something.** With twelve identical windows and nothing irreversible until the end, the best play is always to wait for the perfect gap, and tension goes flat.
-- **Design windows that open in one place by closing another.** The bell that clears the basement also crowds the stairs, so that window only helps someone who is already below.
-
-### 4.3 Make the cycle learnable
-- **Players must be able to learn a cycle within the time they actually have.** Either:
-  - they can watch it repeat at least twice at low cost, or
-  - someone hands it to them: an informant, a document, a fellow prisoner.
-- **Better still, make the cycle visible instead of something to memorize.** A patrol carrying a torch through a dark cavern shows its own position. The players watch it the same way their characters do.
-- **Being locked in a cell, a good vantage point, or a quiet opening can make watching free on purpose.** The deadline then sets the price.
-- **Anything the players must know to have a fair chance should be learnable in more than one way.**
-- **Fairness lives in the world, not on the card.** The card never warns that a plan will go wrong (D36). So everything a plan depends on must be perceivable or learnable before the player commits: the keys hang on Snag's belt while he paces, in plain view, and the routine can be heard through the wall. A plan that misses it is the player's miscalculation, and the scene picks up at the moment it shows.
-
-### 4.4 Alarm: a resource that changes the tempo
-- **The strongest single engine is a trade between two pressures:**
-  - quiet and slow, which spends time, or
-  - fast and loud, which spends alarm.
-  
-  Players then face the same clear trade-off again and again, in different forms.
-- **A rising alarm should change how the world moves, not just add a penalty.** Examples: guards check in every 5 minutes instead of every 15, or a guard stops leaving his post.
-- **A meter that only rises on bad rolls measures luck.** An alarm the players can choose to spend is a resource.
-- **Let players lower it by spending time.**
-  - Lying low for a while should bring suspicion back down: a prisoner pretending to sleep, a crew waiting out a patrol.
-  - The alarm then trades against the clock instead of only ever rising, and a bad roll costs time instead of the whole encounter.
-
-### 4.5 Write the schedule down
-- **A schedule written before play is how a fair DM proves fairness.**
-  - If the DM decides on the spot where a guard is, it reads as the DM choosing whether the players lose, however honest it is.
-  - "This was always going to happen at 10:47" is believable only if it was written down at 10:00.
-- **Never move a deadline because the scene is dragging.**
-  - "The sergeant arrives when the scene drags" reads as punishment.
-  - Gravenhold's pacing note ("stalled? add a complication") is the same failure in prompt form.
-- **Reactions, not scripts. The schedule is a baseline.**
-  - Patrols follow it until they meet something wrong: a door open that should be shut, a missed check-in, a body on the route.
-  - Each of those has a defined response.
-  - Patrols that ignore everything and move in lockstep get figured out during scouting, and play turns into reading a timetable.
-
-### 4.6 Zoom
-- **Match the tick size to the size of the decisions:**
-  - coarse ticks while sneaking;
-  - in a fight, a card is a beat of about a tick: what everyone does in the next few moments;
-  - coarse again once the party is clear.
-
----
-
-## 5. Space
-
-### 5.1 Loops, not tubes
-- **When routing matters, give every important area at least two ways in.**
-  - In a single corridor, getting spotted means retreat or fight.
-  - On a loop, getting spotted starts a chase, which the party can recover from: circle round, double back, break line of sight.
-- **Three entrances that funnel into one corridor are a false choice.**
-- **One mandatory chokepoint, like the vault door, is fine and often good.** Everything else should have a way around, at a cost.
-
-### 5.2 Membranes: where different spaces meet
-- **The interesting moments happen where spaces with different rules meet.** Examples:
-  - the servants' door into the ballroom;
-  - an office with both a guest door and a servants' door;
-  - the mouth of the wolf den, between the goblins' firelight and the wolves' dark.
-- **Put key objects on these boundaries.** That's where disguises switch, where handoffs happen, and where the social characters become essential. Move the signet ring away from a boundary and the party's talker is back to waiting.
-
-### 5.3 Information and channels
-- **Vantage points make information cost time.** Watching uses minutes the clock is counting.
-- **Give split groups a channel** (a dumbwaiter, a gutter running between cells, a signal) so they can hand things to each other instead of playing separate solo games.
-
-### 5.4 Distance is response time
-- **Set distances by how fast help arrives.** For example: one minute from the guardroom to the vault, three minutes to the records room. The map should tell players how loud they can afford to be in each place.
-- **"Reinforcements in 1d4 rounds" turns distance into nothing the players can use.**
-
-### 5.5 Exits
-- **When the decisions happen on the way out, the exits should differ from the entrance and from each other.** Each exit has its own cost, its own closing condition, and its own pursuers.
-- **Each exit can lead to a different next scene:** the road, the forest, a hilltop overlook, an unknown underground river. Choosing an exit then means choosing what happens next.
-- **The rising alarm should close exits in a known order.** Choosing a way in then means choosing which ways out you keep.
-
----
-
-## 6. Senses, disguise and pursuit
-
-- **Define observers by their senses, not just their positions:** who sees, who hears, who smells, and in what light. Write it on the sheet or the routine's beat, where the DM reads it (`docs/spec/packet.md` §3).
-- **Different senses make disguises double-edged.**
-  - A goblin cloak fools eyes but not noses.
-  - Den muck fools noses but draws looks.
-  - A disguise that fools one group should give you away to the other.
-- **Territories can be refuges.** The den is safe from goblins if you smell right, and firelight is safe from wolves.
-- **Chases need pursuers that differ from each other.**
-  - Give each pursuer a profile: speed, senses, and what stops it.
-  - Put things on the map that end the chase, matched to each pursuer:
-    - water breaks a scent trail;
-    - wolves won't cross a rope bridge;
-    - cutting the bridge stops goblins;
-    - a climb stops anything without hands.
-- **Calibrate the chase.** From any point on the route, something that stops at least one pursuer should be within two rounds of running. Otherwise the faster pursuer always wins and the chase is a formality.
-- **Trails last.** Trackers follow the route the party actually took. Where that route enters water, the trail ends.
-- **Check what the rules actually say.**
-  - The cavern relies on 5e wolves having no darkvision.
-  - Play wolves that see in the dark and both the river and the den refuge get much weaker.
-  - Note dependencies like this at design time.
-
----
-
-## 7. Running it
-
-These are execution jobs. In this project the engine keeps the clock and the routines, and the DM does the rest (code computes, AI judges).
-
-- **Work out positions in advance.** A cycle table should be small, six rows or fewer. Nobody should be calculating where a guard is during play.
-- **Keep the clock visible.** Players should never have to ask what time it is.
-- **Narrate cues before events, without being asked.** Examples: the music winding down, the hound's ticking audible at 30 feet, lantern light coming around a corner.
-- **Resolve a split party in clock order.** Whichever group's clock is earliest acts next, and no group gets more than one tick ahead.
-- **Run chases by moving pieces on the map and applying the chase-stoppers** (§6), not with tables of random complications.
-
----
-
-## 8. Process
-
-1. **Objective and purpose.**
-   - An objective the engine can check.
-   - A fail-forward alternative.
-   - One or two sentences on what the encounter is for.
-   - The states the party could leave in.
-2. **Where the decisions are** (§2). Pick the principles that act on them. Name the ones you're dropping and why.
-3. **People.** A sheet for each NPC: wants, fears, what they'll never do. Give an NPC a schedule only if the schedule creates a choice.
-4. **Places.**
-   - Zones, each with a line saying what it's for.
-   - Connections, each saying which side it can be operated from.
-   - What can be seen and heard from where.
-5. **Things.** A few objects with properties, placed so every position has something to do.
-6. **Clock.** Its sources, the repeating cycle, the one-time events, and the cue for each. Check that waiting costs something.
-7. **Alarm ladder.** Each level changes the map or the tempo, in a set order. Say how a level comes back down, if it can.
-8. **Exits,** if leaving is where the decisions are: each one's cost, closing condition, pursuer, and next scene.
-9. **Connection test.** Every element connects to at least two others.
-10. **Walk two runs privately: a clean one and a messy one.**
-    - Check that the clean run still produces something interesting.
-    - Check that the messy run still leaves options open.
-    - Check that no single roll decides the encounter.
-    - **Then throw both runs away.** They are tests: never stored and never sent to any call (`docs/spec/packet.md` §1).
-11. **Learnability check.** For every pattern or fact the players need: how can they learn it, and how cheaply, within the time they have?
-12. **Show-before-it-matters check.** For every behavior rule: when will the players first see it?
-
-### Don't over-build
-
-This guide pushes toward more prepared structure, and the reflexes in `docs/principles.md` warn about exactly that: pre-simulating everything (tick schedules for every NPC, senses for every creature, exhaustive contents) makes the game feel like a stealth video game.
-
-- **Where to draw the line:** prepare what the decisions depend on. Leave the rest as purpose and wants for the DM to judge.
-- **If a schedule doesn't create a choice, cut it.**
-- **Use one or two clock sources per encounter,** and define senses only for the observers that matter.
-
-The good versions in the worked examples had fewer pre-written branches than the average versions. What they had more of was connections.
-
----
-
-## 9. Failure patterns
-
-| What happens at the table | Cause | Fix |
-|---|---|---|
-| One player plays while the rest watch | the solution sits in one position | spread its parts across positions (§3.4) |
-| Valid ideas get shut down | the DM is protecting an intended solution | no written solutions; objects with properties (§3.2) |
-| One roll decides the whole encounter | a check stands in for a decision, or every route funnels to one spot | real choices with costs; loops (§3.1, §5.1) |
-| The choice of entrance doesn't matter | all routes funnel into one spot | loops; a chokepoint only where you mean one (§5.1) |
-| Linked obstacles never connect in play | the layout or timing doesn't make the link physical | place things so the link happens on the map (§3.3) |
-| Guard positions are decided on the spot and feel hostile | no written schedule | write it down beforehand (§4.5) |
-| Players wait for the perfect window | waiting costs nothing | one-time events (§4.2) |
-| Patrols get figured out in scouting; play is reading a timetable | identical patrols in lockstep that react to nothing | reactions to anomalies; clocks that interact (§4.1, §4.5) |
-| Windows fall between ticks and get fudged | scheduled events don't land on the tick grid | one grid (§4.1) |
-| The cycle is too fast to learn | no time budgeted for learning it | a visible cycle, an informant, or a free opening (§4.3) |
-| The alarm response is "soon" or "1d4 rounds" | the response has no geography | distance equals response time (§5.4) |
-| The alarm only measures luck | the meter only rises on bad rolls | let players spend it; let it change the tempo (§4.4) |
-| The escape is the entry run in reverse | exits weren't designed | distinct exits (§5.5) |
-| Three separate solo puzzles | each object is a full solution by itself | objects as parts of a solution; channels between groups (§3.4, §5.3) |
-| A clean success produces nothing | the stakes only exist on failure | stakes in the state they leave in; success creates new situations (§2, §3.8) |
-| The deadline arrives when the scene drags | pacing by the DM's mood | a fixed schedule (§4.5) |
-| A hidden trap or a sudden betrayal | nothing was foreshadowed | visible threats; stated agendas (§3.5, §3.6) |
-| Players never use a world rule | they were never shown it | show it before it matters (§3.6) |
-| A "challenging" scene with nothing to do | options were stripped away | constrain instead of removing (§3.7) |
-| Failure spirals into sub-tasks | complications add busywork | failure changes the situation (§3.7) |
-
----
-
-## 10. Rooms
-
-A room has no objective and no danger, and the party leaves when it likes (D121). That doesn't make it empty.
-
-- **A room exists for something:** a companion moment, a trade, a discovery, a hint about what's ahead. Mood plus a companion moment is enough; the hot spring needs nothing else.
-- **Give it one thing that happens if they stay:** the spring starts to glow, the sun sets, the cook starts gossiping. Then lingering is a choice, and it costs only time.
-- **A room can be scouting in disguise.** The kitchen staff talk about the guard rotation; the merchant knows which door sticks. That's planning bought with time and favours (§1), before the encounter it serves.
-- **An outfit belongs to its room.** When a room holds one (D143), it should be something only that room could give, so a companion wearing it later carries the room with her.
-
----
-
-## 11. In this project
-
-- **Which principles become engine checks:** the validation section of `docs/spec/packet.md`. They are warnings, not rejections, until playtests show which ones predict a bad encounter.
-- **The worked example:** the Cells, rebuilt as a packet, in `fixtures/cells/walkthrough.md`.
-- **The generator** (`docs/spec/generation.md`) builds from motifs: short patterns taken from encounters like the ones below, such as the moving key, the alarm with a weakness, the witness with an ultimatum, the arrival deadline and the hidden exit an NPC knows. They live in `content/motifs.js` (D118). Its critique call is §8's step 10, done by a separate call (D120).
-
-Everything the engine can't check stays as judgment. Improve that judgment with better information (the purpose line, the notes, worked examples), not with more rules in the prompt.
-
----
-
-## Appendix: the reference encounters, in brief
-
-- **The heist (the Vantorre counting house).**
-  - Two clocks, driven by the bells and the orchestra.
-  - The keys and the signet ring sit where guest and servant spaces meet.
-  - A dumbwaiter connects the split groups.
-  - Exits close in order as the alarm rises.
-  - The stolen ledger ends the job in a choice, not a roll.
-  - A lesson learned: the Baron's office was open only twice, too few times to learn unaided. Either give the players the schedule through legwork, or open with a long, free stretch of time.
-- **The cell block** (built out in full in `fixtures/cells/walkthrough.md`).
-  - One guard with a three-beat cycle: Pace, Sit, Drink.
-  - The key ring's location moves with the beat.
-  - Each cell has one thing to do: physical work, talking, or seeing.
-  - The war drum is the only alarm, and the sergeant's arrival at the watch change is the deadline.
-  - It deliberately drops loops, disguises and varied exits, because the decisions happen inside the cells.
-- **The cavern.**
-  - A goblin camp that sees, and a wolf den that smells.
-  - Disguises that help with one side and give you away to the other.
-  - A ring of loops, with chase-stoppers matched to each kind of pursuer.
-  - A patrol the players can watch.
-  - A surprise (the Hunt) that only opens options, and a deadline they know about (the discovery of the escape) that closes them.
-  - Four exits, each leading to a different next scene.
+| The winning plan was written in the packet | properties that are answers | say what things are (§4) |
+| One bypass empties the threat | one antagonist, one alarm, one deadline | pressure of several kinds (§5) |
+| The last plans are mop-up on easy rolls | the room ran out of resistance | people who adapt; a solution that makes a new problem |
+| Companion talk is arithmetic about a schedule | precision the player has to compute | pressure, not timetables; computed facts (§6) |
+| A plan "fails" because the deadline was a tick away | a binary cliff at a DM-ruled time | a gradient of steps (§6) |
+| Nobody sees the way forward | a creativity test | two visible approaches, a plain-player check (§3) |
+| One player plays while the rest watch | the solution sits in one position | work through properties; parts spread across the party |
+| Valid ideas get shut down | the DM protecting an intended solution | no routes anywhere in the packet |
+| A clean success produces nothing | stakes only exist on failure | prizes, costs and the way on (§7) |
+| Every room feels the same | the average room, every time | the seed's axes; the x-factor (§2, §14) |
+| Nothing resists | yes-and mush | constraints written down (§4, §5) |
+| Players argue at identical doors | undifferentiated exits | exits that feel different (§7) |
