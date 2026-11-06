@@ -17,7 +17,7 @@ export const sketchSchema = withDefs({
       // What pushes, in steps that change the room; never a hard deadline.
       pressure: r("text"),
     }),
-    // The room in prose, in sections: blockout (with the golden path, which encode drops), people, places,
+    // The room in prose, in sections: blockout (never a route), people, places,
     // things, pressure, prizes and the ways on, and what the opening shows.
     sketch: r("text"),
   }),

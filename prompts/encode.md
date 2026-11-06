@@ -11,8 +11,8 @@ You turn a room's sketch into the packet the game runs: exact data, in the schem
 - **Clock:** the pressure's steps as events at ticks (a tick is about a minute of real work), each one changing the room; no event marked as a deadline the party has to beat.
 - **Intent:** the purpose; for an encounter, an objective (usually reaching an exit), any alternates, one fail-forward ending that moves the story on, and optional objectives for the prizes. A room (quiet, oddity, merchant, campfire, sanctuary) has `mode: "room"` and no objective. **Exits:** one per kind the seed lists, each with the zone it leaves from, that kind as `leads_to`, and a one-line stub.
 - **Start:** where the party stands, by slot: `player`, `companion_a`, `companion_b`. Never a companion's name.
-- **Opening:** what the party sees first, naming everything usable in sight with equal weight, never what anything is for.
-- **No routes, ever:** leave the sketch's golden path and anything about how the room is meant to be solved out of the packet.
+- **Opening:** the sketch's opening, as it says it. If it has none, write one the same way: what the party takes in after a few safe seconds of watching, leading with what's happening and who's doing it, then what touches the party, the people and what they're busy with, and the ways out; what things are doing and what they're for to the people here, never what they could do for the party; everything usable in sight named, in plain sentences, never as a tour of the floor plan.
+- **No routes, ever:** leave anything about how the room is meant to be solved out of the packet.
 
 The worked example is a finished packet in this schema. Match its shape, not its room.
 

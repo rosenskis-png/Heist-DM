@@ -1,12 +1,10 @@
-// Generation (docs/spec/generation.md, D117, D153): the next room, from the campaign and the hand-off. Code draws the
-// kinds its exits lead to and its seed; the sketch call designs it; for an encounter or the climax, the critique call
-// plays it and the sketch call revises it (cut, connect or swap); the encode call turns it into packet data; code lays
-// it out. The sketch and the critique are generator-only and thrown away.
+// Generation (docs/spec/generation.md, D117, D153, D156): the next room, from the campaign and the hand-off. Code draws
+// the kinds its exits lead to and its seed; the sketch call designs it; the encode call turns it into packet data; code
+// lays it out. The sketch is generator-only and thrown away.
 import { drawExits } from "../campaign/run.js";
 import { seedFor } from "../campaign/seed.js";
 import { layout } from "../engine/layout.js";
 import { sketchCall } from "../calls/sketch.js";
-import { critiqueCall } from "../calls/critique.js";
 import { encodeCall } from "../calls/encode.js";
 
 // How many exits a room has, by kind, before the way's count says where they lead (D144).
@@ -20,16 +18,12 @@ export function seedRoom(camp, world) {
   return seedFor(drawn.camp, world, kind, drawn.kinds);
 }
 
-// The AI half, from a seed: sketch, critique and revision for an encounter or the climax, encode, layout. `c` holds the
-// seed, world, party, handoff and log (and, on the bench only, the designer's `brief`, D154). `io.onStage(name, value)`
-// hears each stage as it finishes, for the bench.
+// The AI half, from a seed: sketch, encode, layout. `c` holds the seed, world, party, handoff and log (and, on the bench
+// only, the designer's `brief`, D154, and a `sketch` already written, to resume a room whose encode failed).
+// `io.onStage(name, value)` hears each stage as it finishes, for the bench.
 export async function designRoom(io, env, c) {
   const stage = (name, value) => (io.onStage?.(name, value), value);
-  let sketch = stage("sketch", await sketchCall(io, env, c));
-  if (["encounter", "climax"].includes(c.seed.kind)) {
-    const critique = stage("critique", await critiqueCall(io, env, { ...c, sketch }));
-    if (critique.problems.length) sketch = stage("revision", await sketchCall(io, env, { ...c, previous: sketch, critique }));
-  }
+  const sketch = c.sketch ?? stage("sketch", await sketchCall(io, env, c));
   const encoded = stage("encoded", await encodeCall(io, env, { ...c, sketch }));
   return stage("laid out", layout(encoded));
 }

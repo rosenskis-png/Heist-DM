@@ -9,9 +9,9 @@ import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
 import { load, checkPacket } from "../src/engine/index.js";
 import { encodeProblems } from "../src/calls/encode.js";
-import { generateRoom } from "../src/game/generate.js";
-import { sketchInput, encodeInput, critiqueInput } from "../src/context.js";
-import { sketchSchema, encodeSchema, critiqueSchema } from "../schemas/index.js";
+import { generateRoom, designRoom } from "../src/game/generate.js";
+import { sketchInput, encodeInput } from "../src/context.js";
+import { sketchSchema, encodeSchema } from "../schemas/index.js";
 import { worldOf } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { motifs } from "../content/motifs.js";
@@ -75,17 +75,16 @@ test("an encoded room is checked against what the seed fixed", () => {
   assert.ok(encodeProblems(bad, seed).some((p) => p.includes("nowhere")));
 });
 
-test("the pipeline: exits drawn, seed, sketch, critique, revision, encode, layout, and a packet the engine loads", async () => {
+test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the engine loads", async () => {
   let camp = newCampaign({ seed: 11 });
   // Enter an encounter so the room being written is one, as after a room's end.
   camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
   const calls = [];
   const sketch = { design: { start: "Steam.", goal: "Get through.", challenge: "The players must cross the floor by passing as washers, and that's hard because the overseer knows every face.", outcomes: ["clean", "pressed"], x_factor: "get through", pressure: "The inspection." }, sketch: "Blockout: ..." };
-  const critique = { runs: ["force", "guile", "odd", "plain"].map((approach) => ({ approach, clean: "x", messy: "y" })), problems: [{ problem: "The loft touches nothing.", element: "drying loft", fix: "connect" }] };
   const io = {
     sample: {
       json: async (input) => {
-        const call = input.includes("# Sketch call") ? "sketch" : input.includes("# Critique call") ? "critique" : "encode";
+        const call = input.includes("# Sketch call") ? "sketch" : "encode";
         calls.push(call);
         if (call === "encode") {
           // Encode what the seed fixed: its exits.
@@ -96,15 +95,15 @@ test("the pipeline: exits drawn, seed, sketch, critique, revision, encode, layou
           out.act = 1;
           return out;
         }
-        return call === "sketch" ? sketch : critique;
+        return sketch;
       },
     },
   };
   const stages = [];
   io.onStage = (name) => stages.push(name);
   const room = await generateRoom(io, env, { camp, world, party, handoff: { stub: "Out of the cells.", conditions: [] }, log: ["cells: escaped at tick 9"] });
-  assert.deepEqual(calls, ["sketch", "critique", "sketch", "encode"]);
-  assert.deepEqual(stages, ["sketch", "critique", "revision", "encoded", "laid out"]);
+  assert.deepEqual(calls, ["sketch", "encode"]);
+  assert.deepEqual(stages, ["sketch", "encoded", "laid out"]);
   assert.equal(room.mapped, true);
   assert.equal(room.packet.intent.exits.length, room.seed.exits.length);
   const s = load({ packet: room.packet, party });
@@ -112,13 +111,12 @@ test("the pipeline: exits drawn, seed, sketch, critique, revision, encode, layou
   assert.ok(room.camp.used.length > 0);
 });
 
-test("the designer's brief reaches the sketch only when given, and never the critique or encode (D154)", () => {
+test("the designer's brief reaches the sketch only when given, and never encode (D154)", () => {
   const { seed } = seedFor(newCampaign(), world, "quiet", ["encounter"]);
   const c = { seed, world, party, brief: "A drowned chapel with a choir still singing." };
   assert.match(sketchInput(env, c, sketchSchema), /designer's brief[\s\S]*drowned chapel/);
   assert.doesNotMatch(sketchInput(env, { ...c, brief: "" }, sketchSchema), /designer's brief/);
   const sketch = { design: {}, sketch: "x" };
-  assert.doesNotMatch(critiqueInput(env, { ...c, sketch }, critiqueSchema), /drowned chapel/);
   assert.doesNotMatch(encodeInput(env, { ...c, sketch }, encodeSchema), /drowned chapel/);
 });
 
@@ -127,8 +125,7 @@ test("the generator's inputs stay small enough", () => {
   const c = { seed, world, party, handoff: { stub: "x", conditions: [] }, log: [] };
   const sketch = { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "x" }, sketch: "x".repeat(6000) };
   const sizes = {
-    sketch: sketchInput(env, { ...c, previous: sketch, critique: { problems: [] } }, sketchSchema),
-    critique: critiqueInput(env, { ...c, sketch }, critiqueSchema),
+    sketch: sketchInput(env, c, sketchSchema),
     encode: encodeInput(env, { ...c, sketch }, encodeSchema),
   };
   for (const [call, input] of Object.entries(sizes)) {
@@ -137,4 +134,28 @@ test("the generator's inputs stay small enough", () => {
     assert.ok(n < 40000, `${call} is ${n} bytes`);
     assert.ok(!/\{(place|master|builders)\}/.test(input));
   }
+});
+
+test("a room resumes from its sketch with only the encode call, and a dropped connection is tried once more (D156)", async () => {
+  const { seed } = seedFor(newCampaign(), world, "quiet", ["encounter"]);
+  const calls = [];
+  let dropped = 0;
+  const io = {
+    sample: {
+      json: async (input) => {
+        calls.push(input.includes("# Sketch call") ? "sketch" : "encode");
+        if (!dropped++) throw { code: "upstream_error", message: "the connection was lost" };
+        const out = structuredClone(encoded);
+        Object.assign(out, { mode: "room", act: 1 });
+        out.intent = { purpose: out.intent.purpose, exits: [{ ...encoded.intent.exits[0], leads_to: "encounter" }] };
+        return out;
+      },
+    },
+  };
+  const sketch = { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "none" }, sketch: "x" };
+  const { packet } = await designRoom(io, env, { seed, world, party, sketch });
+  assert.deepEqual(calls, ["encode", "encode"]);
+  assert.equal(packet.mode, "room");
+  const twice = { sample: { json: async () => { throw { code: "upstream_error", message: "x" }; } } };
+  await assert.rejects(designRoom(twice, env, { seed, world, party, sketch }), (e) => e.code === "upstream_error");
 });

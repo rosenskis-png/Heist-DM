@@ -131,7 +131,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D117** The generator designs the whole encounter first, then encodes it in stages: current
 - **D118** Code picks each encounter's ingredients: changed by D139, D153
 - **D119** The sketch call's context comes in three tiers: current
-- **D120** The critique plays a clever player, and a revision only cuts or connects: changed by D141
+- **D120** The critique plays a clever player, and a revision only cuts or connects: changed by D141, D156
 - **D121** Rooms have time when it matters, and one outfit each: changed by D143
 - **D122** A campfire is a room where the party rests: changed by D142
 - **D123** What travels with the party lasts one encounter; what the world remembers comes back only through the seed: changed by D142
@@ -147,7 +147,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D133** A question to the DM is its own cheap call, and what the answer settles is fact: current
 - **D134** The plan is a list of actions, and it stays as written: current
 - **D135** A save keeps the replay log and the last call outputs, for a post-mortem: current
-- **D136** The opening names everything in sight, without measuring it: current
+- **D136** The opening names everything in sight, without measuring it: changed by D155
 - **D137** A companion says one thing, and answers what she's asked: current
 - **D138** Fixes from the table playtest: current
 - **D139** The Cells, the heist and the cavern stop being the model, and encounter design is rethought first: changed by D152
@@ -163,9 +163,11 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D149** A room strain adds is an encounter, and a climax never keeps more relics than the party has: current
 - **D150** Adventures are set in worlds, and companion text names the world through role slots: current
 - **D151** The pitch call writes a world from the player's vibe: current
-- **D152** Encounter design is rethought for the DM era: current
-- **D153** The generator, built in one pass: current
-- **D154** The Forge: the designer's bench for adventures and rooms: current
+- **D152** Encounter design is rethought for the DM era: changed by D155, D156
+- **D153** The generator, built in one pass: changed by D156
+- **D154** The Forge: the designer's bench for adventures and rooms: changed by D156
+- **D155** The opening shows the situation in motion, and what things are for in the world: current
+- **D156** The sketch goes straight to encode, small, with no route in it: current
 
 ---
 
@@ -958,4 +960,14 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-06), before the generator's stress tests. A bench page, the Forge (`bench/forge.html`, `bench/forge.js`), runs the real pitch call and the real room pipeline so the designer can judge their shape by eye. Its Adventure tab takes two companions and a vibe and shows the world as the DM sees it (place, heart, life, tensions, factions, the five acts with their legs, the player's secrets, features, room kinds, roles, world facts) beside the pitch the player reads. Its Rooms tab, on that world, takes a kind of room, an act, any seed axes the designer pins (tone, x-factor, shape, what makes its choices meaningful, factions, motifs), a brief, and an optional arrival stub, and shows the seed, the sketch, the critique, the revision, and the encoded, laid-out room with its map, stage by stage, with every call's input and output. The pipeline is split for it: `seedRoom` (code) and `designRoom` (the calls and the layout, reporting each stage through `io.onStage`); `generateRoom` is the two in a row. The designer's brief reaches the sketch call only, as its own block after the seed, and only when given; the game never sends one. Every adventure and room, with the designer's notes, is saved to the page's db for the design thread to read.
 **Why:** The stress tests ask whether ten sketches read as different and as good as worked ones; before that, the designer needs to see whether the shape is right at all, and to steer a room toward content they have in mind to see how the generator handles it. Splitting the pipeline lets the bench pin seed axes and watch stages without a second copy of it.
 **Rules out:** A brief in play; a bench that runs its own copy of the pipeline or prompts.
+
+### D155. The opening shows the situation in motion, and what things are for in the world
+**Decided:** The designer's call (2026-11-06), from the first room generated on the Forge. Refines D136. The opening describes what the party takes in after standing safely for a few seconds and watching, not a snapshot: what's happening and who's doing it first, then what touches the party (their own things, anyone looking their way), then the people and what each is busy with, then the ways out, in plain sentences rather than a tour of the floor plan. It may say what a thing is doing and what it's for to the people there ("a siege engine melting a breach in the ice", "a cage of confiscated goods"); it still never says what a thing could do for the party, never gives measurements, and never names anything hidden. Everything usable in sight is still named (`openingMisses` is unchanged), but woven into the situation, not given equal weight in map order. Spec: `docs/spec/packet.md` §5; prompts: sketch and encode; craft §4 and §14.
+**Why:** The first generated opening named everything and meant nothing: "beyond", "on the far side", "against the ice wall", "to the north", "overhead", one clause per item, so the player had to map the room on paper and reverse-engineer what was going on. D136's "never what it's for" was written against hints ("rats that work for bread"), but it also banned function in the world, which is exactly what a person standing there would understand in seconds. The line that matters is between what the place is doing and what the party could do with it.
+**Rules out:** An opening that lists the room in spatial order; an opening that hides what is plainly going on; an opening that says what a thing could do for the party.
+
+### D156. The sketch goes straight to encode, small, with no route in it
+**Decided:** The designer's call (2026-11-06), from the first room generated on the Forge. Supersedes the critique and revision of D120 and D153: generation is the sketch call, then encode, then layout. The critique call, its schema, prompt and spec are removed. The sketch is told to keep rooms small (three or four zones, two or three people who matter, a crowd counting as one, one or two sources of pressure, Act 1 at the low end) in its prompt, not by a check that costs a retry. It never writes a route, not even a golden path as a working note (refines D152's §10). Outcomes are three to five end states (where the party ends up, with what, at what cost), never the plans that got them there. A person's "under pressure" says what they do when the room changes, never their answer to one plan or one companion's ability. The seed no longer offers "a truth to deduce". A call whose connection drops (`upstream_error`) is tried once more (`src/ask.js`), and the Forge can resume a room whose encode failed from its sketch.
+**Why:** The critique's most confident finding was that snuffing the braziers empties the priest's threat; the designer's answer is that a player who works that out should be rewarded, so a call spent finding and closing it works against the game. Its other findings mostly pushed the revision to add rules, which the revision did, growing the room. Two complex calls took about two minutes of a five-minute room. The route was the deeper problem the room showed: the sketch planned one way through, then wrote its people around it (a clerk whose one weakness was the way out, a sergeant on the route's schedule, a priest built to catch one companion's ability), so the room read as having expected plans, and its outcomes read as plans. A deduction with one answer is the same answer key by another name. A dropped connection lost a whole room, and the runtime names that code as the one that's transient.
+**Rules out:** A review call between sketch and encode; a golden path anywhere; outcomes written as routes; people designed as the key to the room; a size check that costs a call.
 

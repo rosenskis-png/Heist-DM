@@ -56,18 +56,17 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 
 ## Phase 7: The generator
 
-Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the encode call turns it into a ruled-mode packet, and code lays it out (D116–D119, D156). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
 - On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
-- The critique call finds the flaws planted in hand-made sketches in 4 of 5 runs.
 - Act 1 plays end to end from a new game: generated encounters and rooms, a campfire ending every leg, the climax, and every separation resolved before its campfire.
 
-**Built, in one pass, for the next thread to critique and perfect** (D152, D153): the rethought craft (`docs/design/encounter-craft.md`, with the Angry GM reading notes in `docs/design/references/`), the motif library (`content/motifs.js`), the seed (`src/campaign/seed.js`), the sketch, critique and encode calls with their prompts, the layout (`src/engine/layout.js`), the pipeline (`src/game/generate.js`), and one worked example of a finished room's data (`fixtures/generator/encoded.json`). Tested on scripted call outputs only: no prompt has run against a model.
+**Built, in one pass, for the next thread to critique and perfect** (D152, D153), then cut to two calls after the first Forge room (D155, D156): the rethought craft (`docs/design/encounter-craft.md`, with the Angry GM reading notes in `docs/design/references/`), the motif library (`content/motifs.js`), the seed (`src/campaign/seed.js`), the sketch and encode calls with their prompts, the layout (`src/engine/layout.js`), the pipeline (`src/game/generate.js`), and one worked example of a finished room's data (`fixtures/generator/encoded.json`). One room has been sketched against a model on the Forge; its encode never finished.
 
 **Still to do**
-1. **Run the generator on the bench.** The Forge (D154) shows single adventures and rooms for the designer to judge by eye; the stress tests are still to build: ten sketches per seed side by side, judged by the designer; plant flaws in hand-made sketches to test the critique (4 of 5).
+1. **Run the generator on the bench.** The Forge (D154) shows single adventures and rooms for the designer to judge by eye; the stress tests are still to build: ten sketches per seed side by side, judged by the designer.
 2. **Worked examples:** more than the one encoded room, of different kinds, judged by the designer; and a worked *sketch*, which the sketch call has none of yet.
 3. **The page runs a campaign:** generate the next room while the closing narration plays, the verdict at a room's end, choosing an exit, the campfire and relic pick at the sanctuary.
 4. **The hand-off's remaining parts:** attachments, the world's memory and callbacks, and a companion's personal quest placed by act.
@@ -75,9 +74,9 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 6. **Play Act 1** from a new game.
 
 **Open questions**
-1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, and go to the critique as facts, not to the sketch as rules. Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
+1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no critique to read them, D156). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 2. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
-3. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
+3. **Waiting for the next packet.** Generation is two calls, a `complex` sketch and a `default` encode, charged to the player (D2, D156). The first Forge room's sketch took about two minutes. *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait on the Forge before optimizing.
 
 ## Later
 

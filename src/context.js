@@ -657,7 +657,7 @@ export function pitchInput(env, c, schema) {
 
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
-// What the room's sketch is built from, for the sketch and critique calls: the seed's question, with its motifs.
+// What the room's sketch is built from: the seed's question, with its motifs.
 const seedText = (seed) => ({
   kind: seed.kind,
   tone: seed.tone,
@@ -694,7 +694,7 @@ function designWorld(world, seed) {
 }
 
 // The sketch call (D117, D119): must honour the hand-off; the world and the act as background; the seed; the party;
-// the worked example. Revising, it also gets its sketch and the critique. On the bench, the designer's brief (D154).
+// the worked example. On the bench, the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
@@ -706,21 +706,7 @@ export function sketchInput(env, c, schema) {
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
     block("Worked example: a finished room's data (another room; match its detail, not its content)", env.examples?.encoded),
-    c.previous ? block("Your sketch", c.previous) : null,
-    c.critique ? block("The critique of it", c.critique.problems) : null,
-    c.previous ? "Revise the sketch from the critique: cut, connect or swap, never add." : "Design the room.",
-  ]);
-}
-
-// The critique call (D120): the sketch, its seed and the party's abilities.
-export function critiqueInput(env, c, schema) {
-  return compose([
-    block("Your job", env.prompts.critique),
-    block("Output format", shapeText(schema)),
-    block("The room's seed", seedText(c.seed)),
-    block("The party", designParty(c)),
-    block("The sketch", c.sketch),
-    "Play it four ways and report what's wrong.",
+    "Design the room.",
   ]);
 }
 

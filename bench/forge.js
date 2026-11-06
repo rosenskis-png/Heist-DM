@@ -1,8 +1,8 @@
 // The Forge: the designer's bench for the generator (docs/spec/generation.md). Two tabs on the real code and prompts.
 // Adventure: a vibe and two companions through the pitch call, shown as the DM sees the world and as the player reads
 // the pitch. Rooms: on that adventure's world, a kind of room, any seed axes pinned, and a brief (D154), through the
-// real pipeline (`seedRoom`, then `designRoom`: sketch, critique, revision, encode, layout), every stage shown as it
-// lands. Every adventure and room, with the designer's notes, is saved to the artifact's db for the design thread.
+// real pipeline (`seedRoom`, then `designRoom`: sketch, encode, layout, D156), every stage shown as it lands; a room
+// whose encode failed can be resumed from its sketch. Every adventure and room, with the designer's notes, is saved to the artifact's db for the design thread.
 import { companions as authored } from "../content/companions/index.js";
 import { classes } from "../content/classes.js";
 import { setting } from "../content/setting.js";
@@ -56,7 +56,7 @@ const fields = (o, skip = []) => kv(Object.entries(o).filter(([k]) => k !== "id"
 
 const KINDS = ["encounter", "quiet", "oddity", "merchant", "campfire", "climax", "sanctuary"];
 const CHALLENGED = ["encounter", "climax"];
-const PROMPTS = ["pitch", "sketch", "critique", "encode"];
+const PROMPTS = ["pitch", "sketch", "encode"];
 
 // ---------- state ----------
 
@@ -279,20 +279,31 @@ async function designOne() {
   const seed = seedWith(adv, r);
   const run = { id, at: Date.now(), adventure: adv.id, worldName: adv.world.name, companions: adv.companions, kind: r.kind, act: r.act, brief: r.brief.trim(), arrives: r.arrives.trim(), pinned: pinnedOf(r), seed, stages: {}, note: "" };
   S.rooms.unshift(run);
-  const io = { ...ioFor(id), onStage: (name, value) => ((run.stages[name] = value), render()) };
-  S.busy = "Designing the room…";
+  S.calls[id] = [];
+  await runRoom(run, adv);
+}
+
+// Runs the room's pipeline; with a sketch already written, from the encode on.
+async function runRoom(run, adv) {
+  const earlier = S.calls[run.id] ?? [];
+  const io = { ...ioFor(run.id), onStage: (name, value) => ((run.stages[name] = value), render()) };
+  S.calls[run.id] = earlier;
+  const t0 = Date.now();
+  delete run.error;
+  delete run.failedCall;
+  S.busy = run.stages.sketch ? "Encoding the sketch…" : "Designing the room…";
   render();
   const party = partyFor({ name: "The player", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world);
   try {
-    await designRoom(io, env, { seed, world: adv.world, party, handoff: run.arrives ? { stub: run.arrives, conditions: [] } : null, log: [], brief: run.brief || null });
+    await designRoom(io, env, { seed: run.seed, world: adv.world, party, handoff: run.arrives ? { stub: run.arrives, conditions: [] } : null, log: [], brief: run.brief || null, sketch: run.stages.sketch });
   } catch (e) {
     run.error = errorText(e);
     if (e instanceof CallFailed) run.failedCall = e.call;
   }
   S.busy = null;
-  run.ms = Date.now() - run.at;
-  run.calls = slim(S.calls[id]);
-  persist("rooms", { ...run, calls: S.calls[id] });
+  run.ms = (run.ms ?? 0) + Date.now() - t0;
+  run.calls = [...(run.calls ?? []).filter((c) => !S.calls[run.id].some((x) => x.at === c.at)), ...slim(S.calls[run.id])];
+  persist("rooms", { ...run, calls: S.calls[run.id] });
   save();
   render();
 }
@@ -342,7 +353,7 @@ function roomsTab() {
       S.busy ? h("button", { class: "plain danger", onclick: () => (controller.abort(), (controller = new AbortController())) }, "Stop") : null,
       S.busy ? h("span", { class: "status" }, S.busy) : null,
       sample ? null : h("span", { class: "status" }, "Open on claude.ai to run calls."),
-      h("span", { class: "status" }, `${challenged ? "sketch, critique, revision if needed, encode" : "sketch, encode"} · ${challenged ? 3 : 2}–${challenged ? 4 : 2} calls`)),
+      h("span", { class: "status" }, "sketch, then encode · 2 calls")),
   );
   const mine = S.rooms.filter((x) => x.adventure === adv.id);
   const others = S.rooms.length - mine.length;
@@ -363,10 +374,11 @@ function roomView(run) {
     head,
     seedView(run),
     s.sketch ? stage("Sketch", sketchView(s.sketch)) : null,
-    s.critique ? stage("Critique", critiqueView(s.critique), s.critique.problems.length ? h("span", { class: "chip near" }, `${s.critique.problems.length} problems`) : h("span", { class: "chip ok" }, "no problems, no revision")) : null,
-    s.revision ? stage("Revised sketch", sketchView(s.revision, s.sketch)) : null,
-    s["laid out"] ? stage("The room as the DM gets it", packetView(s["laid out"].packet, s["laid out"].mapped)) : null,
+    s["laid out"] ? stage("The room as the DM gets it", packetView(s["laid out"].packet, s["laid out"].mapped), sizeChips(s["laid out"].packet)) : null,
     run.error ? h("p", { class: "err" }, run.error) : null,
+    run.error && s.sketch && !s["laid out"]
+      ? h("div", { class: "row" }, h("button", { class: "go", disabled: !sample || !!S.busy, onclick: () => runRoom(run, S.adventures.find((a) => a.id === run.adventure) ?? currentAdventure()) }, "Resume: encode this sketch"), h("span", { class: "status" }, "Keeps the sketch; runs only the encode call."))
+      : null,
     stage("Calls", calls.length ? calls.map(recordView) : h("p", { class: "muted small" }, "None yet.")),
     noteBox("rooms", run),
   );
@@ -392,19 +404,18 @@ function seedView(run) {
     run.arrives ? h("div", { class: "sub" }, h("span", { class: "muted small" }, "Arriving through"), h("p", {}, run.arrives)) : null));
 }
 
-function sketchView(sk, before) {
+function sketchView(sk) {
   const d = sk.design;
   return h("div", { class: "stage" },
     kv([["Start", d.start], ["Goal", d.goal], ["Challenge", d.challenge], ["Outcomes", h("ul", { class: "plain" }, d.outcomes.map((o) => h("li", {}, o)))], ["X-factor", d.x_factor], ["Pressure", d.pressure]]),
-    prose(sk.sketch),
-    before ? fold("The sketch before the revision", before.sketch) : null);
+    prose(sk.sketch));
 }
 
-function critiqueView(c) {
-  return h("div", { class: "stage" },
-    c.problems.length ? c.problems.map((p) => h("div", { class: "problem" }, h("span", { class: `chip ${p.fix === "cut" ? "bad" : p.fix === "swap" ? "near" : ""}` }, p.fix), h("span", {}, h("b", {}, p.element), ": ", p.problem))) : null,
-    h("div", { class: "scroll" }, h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, "Played by"), h("th", {}, "Going well"), h("th", {}, "Going badly"))),
-      h("tbody", {}, c.runs.map((x) => h("tr", {}, h("td", {}, x.approach), h("td", {}, x.clean), h("td", {}, x.messy)))))));
+// How big the room came out, against what the sketch prompt asks (D156). Shown, never enforced.
+function sizeChips(p) {
+  const n = { zones: p.map.zones.length, people: p.people.length, things: p.map.things.length, events: p.clock?.events?.length ?? 0 };
+  const over = { zones: 4, people: 3 };
+  return h("span", { class: "row" }, Object.entries(n).map(([k, v]) => h("span", { class: `chip ${over[k] && v > over[k] ? "near" : ""}` }, `${v} ${k}`)));
 }
 
 function packetView(p, mapped) {

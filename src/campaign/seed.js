@@ -6,7 +6,7 @@ import { d100 } from "../engine/rng.js";
 // The axes a room can differ on (docs/design/encounter-craft.md §2, §3, §8, §10).
 export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
 export const SHAPES = ["linear", "branching", "open", "hub"];
-export const MEAT = ["costs that differ in kind", "incomplete information", "a dilemma", "a truth to deduce", "prizes that compete"];
+export const MEAT = ["costs that differ in kind", "incomplete information", "a dilemma", "prizes that compete"];
 export const TONES = ["very stressed about time", "tense", "even", "light", "a fantasy playground"];
 // Rooms with a challenge get every axis; the calm kinds get a tone and motifs, and the oddity a hook too.
 const CHALLENGED = ["encounter", "climax"];

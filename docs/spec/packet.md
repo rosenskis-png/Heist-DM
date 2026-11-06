@@ -12,7 +12,7 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **Optional objectives,** such as `item_held: gear_sack`.
 - **Purpose:** what this encounter is for, in one or two concrete sentences.
 - **Expected length,** in plans committed (e.g. 1–2, 3–5).
-- **No routes, ever.** The intent never lists solutions, obvious or alternative. The critique call plays approaches privately (D120), but they are never stored or sent. The engine rejects a packet with route-like fields.
+- **No routes, ever.** The intent never lists solutions, obvious or alternative. The engine rejects a packet with route-like fields.
 
 - **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
 - **Exits:** each way out names the zone the party leaves from, the kind of room code drew for it (`docs/spec/campaign.md` §2, D144), and a one-line stub for the next scene it leads to (D119).
@@ -48,7 +48,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 
 ## 5. Opening description
-Written from the map after the map is final. Stored word for word and sent with every call in the encounter. It paints the scene (D49) and names everything the party can make out from where they start (`inSight`, `docs/spec/engine.md` §5), each in a phrase woven into the picture: that it's there, never its measurements and never what it's for, with every usable thing given the same weight (D136). Hidden things and what a person carries stay out. The packet's `name` is what the player sees it called ("The Cells").
+Written from the map after the map is final. Stored word for word and sent with every call in the encounter. It paints the scene as the party takes it in after a few safe seconds of watching (D155): what's happening and who's doing it first, then what touches the party, the people and what each is busy with, and the ways out, in plain sentences rather than a tour of the floor plan. It names everything the party can make out from where they start (`inSight`, `docs/spec/engine.md` §5), each woven into that picture: what it is, what it's doing and what it's for to the people there, never its measurements and never what it could do for the party (D136, D155). Hidden things and what a person carries stay out. The packet's `name` is what the player sees it called ("The Cells").
 
 ---
 

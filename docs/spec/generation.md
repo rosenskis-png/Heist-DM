@@ -16,18 +16,16 @@ Code: `src/game/generate.js` (`generateRoom`: `seedRoom`, the code steps, then `
 | **Exits** | Code | Draws the kinds of room this room's exits lead to (D144) |
 | **Seed** | Code | Picks the question (`src/campaign/seed.js`, below) |
 | **Sketch** | `sketch` call | Writes the whole room in plain English, design statement first (`docs/spec/calls/sketch.md`) |
-| **Critique** | `critique` call | Plays it four ways and reports what's wrong (`docs/spec/calls/critique.md`). Encounters and the climax only |
-| **Revise** | `sketch` call | Rewrites the sketch from the critique: cut, connect or swap, never add. Once, and only if there were problems |
 | **Encode** | `encode` call | Turns the sketch into packet data without geometry, checked by the engine once laid out (`docs/spec/calls/encode.md`) |
 | **Layout** | Code | Puts it on the grid from rough sizes (`src/engine/layout.js`); if it can't, the packet ships without a map (D9) |
 
-The sketch and the critique are generator-only: no play call ever sees them (D59). The critique's runs and the sketch's golden path are thrown away. How to design a good room is `docs/design/encounter-craft.md`; the motifs are `content/motifs.js`.
+The sketch is generator-only: no play call ever sees it (D59), and it holds no route (D156). Nothing reviews the sketch before encode: a clever move the room didn't plan for is the player's reward, and what the craft asks of a room is in the sketch's prompt (D156). How to design a good room is `docs/design/encounter-craft.md`; the motifs are `content/motifs.js`.
 
 ## The seed (D118, D153)
 - **The kind** comes from the way (D144); the exits' kinds are drawn with it.
 - **Two or three motifs** for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
-- **For an encounter or the climax:** the x-factor (explore, interact, acquire, overcome, get through), the shape (linear, branching, open, hub), what makes its choices meaningful (costs that differ in kind, incomplete information, a dilemma, a truth to deduce, prizes that compete), and one or two of the world's factions. An oddity gets an x-factor too.
+- **For an encounter or the climax:** the x-factor (explore, interact, acquire, overcome, get through), the shape (linear, branching, open, hub), what makes its choices meaningful (costs that differ in kind, incomplete information, a dilemma, prizes that compete), and one or two of the world's factions. An oddity gets an x-factor too.
 
 The campaign records the act's used motifs, and the seed's random position, so the next seed differs; both reset when an act ends.
 

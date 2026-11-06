@@ -11,5 +11,4 @@ export { questionSchema } from "./calls/question.js";
 export { verdictSchema } from "./calls/verdict.js";
 export { pitchSchema } from "./calls/pitch.js";
 export { sketchSchema } from "./calls/sketch.js";
-export { critiqueSchema } from "./calls/critique.js";
 export { companionFileSchema } from "./companion.js";

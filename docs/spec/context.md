@@ -35,7 +35,7 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 - **Hidden things** go only to the resolve and scene calls, marked hidden. The card names nothing the party doesn't know.
 - **Companions** see only what the party knows, plus their own data.
 - **Budgets** (D76): every call has an input budget (`BUDGET` in `src/ask.js`). One that crosses it still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` holds every DM and companion call under its budget with the ledger at its limits, mid-fight (D130).
-- Generation's calls (sketch, critique, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet.
+- Generation's calls (sketch, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet.
 
 ## 3. Act gates
 
@@ -60,7 +60,6 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Campfire | `sample.json` | off | `complex` |
 | Pitch | `sample.json` | off | `complex` (D151) |
 | Sketch | `sample.json` | off | `complex` |
-| Critique | `sample.json` | off | `complex` |
 | Encode | `sample.json` | off | `default` |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same ledger and plan get the same card, for free. Conversation and prose must never repeat, so their replay is off.

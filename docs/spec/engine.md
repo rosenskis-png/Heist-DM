@@ -87,6 +87,6 @@ An ability's declared effects use the same operations, with `@self` for the comp
 - **Judge** plausibility, progress, "solved", NPC motives, odds, or whether an action can happen.
 - **Write prose.**
 - **Hold pacing formulas,** risk budgets or escalation curves (D4).
-- **Store or send routes.** The critique call's plans are thrown away (D120).
+- **Store or send routes.** No call writes one (D156).
 - **Invent people or events.** It runs only what the packet and the DM's validated outputs say.
 - **Name a companion.** Companion behaviour comes from her file (D8); packets use slots (D126).
