@@ -100,13 +100,26 @@ test("the pipeline: exits drawn, seed, sketch, critique, revision, encode, layou
       },
     },
   };
+  const stages = [];
+  io.onStage = (name) => stages.push(name);
   const room = await generateRoom(io, env, { camp, world, party, handoff: { stub: "Out of the cells.", conditions: [] }, log: ["cells: escaped at tick 9"] });
   assert.deepEqual(calls, ["sketch", "critique", "sketch", "encode"]);
+  assert.deepEqual(stages, ["sketch", "critique", "revision", "encoded", "laid out"]);
   assert.equal(room.mapped, true);
   assert.equal(room.packet.intent.exits.length, room.seed.exits.length);
   const s = load({ packet: room.packet, party });
   assert.equal(s.tick, 0);
   assert.ok(room.camp.used.length > 0);
+});
+
+test("the designer's brief reaches the sketch only when given, and never the critique or encode (D154)", () => {
+  const { seed } = seedFor(newCampaign(), world, "quiet", ["encounter"]);
+  const c = { seed, world, party, brief: "A drowned chapel with a choir still singing." };
+  assert.match(sketchInput(env, c, sketchSchema), /designer's brief[\s\S]*drowned chapel/);
+  assert.doesNotMatch(sketchInput(env, { ...c, brief: "" }, sketchSchema), /designer's brief/);
+  const sketch = { design: {}, sketch: "x" };
+  assert.doesNotMatch(critiqueInput(env, { ...c, sketch }, critiqueSchema), /drowned chapel/);
+  assert.doesNotMatch(encodeInput(env, { ...c, sketch }, encodeSchema), /drowned chapel/);
 });
 
 test("the generator's inputs stay small enough", () => {

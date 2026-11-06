@@ -67,7 +67,7 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 **Built, in one pass, for the next thread to critique and perfect** (D152, D153): the rethought craft (`docs/design/encounter-craft.md`, with the Angry GM reading notes in `docs/design/references/`), the motif library (`content/motifs.js`), the seed (`src/campaign/seed.js`), the sketch, critique and encode calls with their prompts, the layout (`src/engine/layout.js`), the pipeline (`src/game/generate.js`), and one worked example of a finished room's data (`fixtures/generator/encoded.json`). Tested on scripted call outputs only: no prompt has run against a model.
 
 **Still to do**
-1. **Run the generator on the bench** (a tab like the companions'): ten sketches per seed side by side, judged by the designer; plant flaws in hand-made sketches to test the critique (4 of 5).
+1. **Run the generator on the bench.** The Forge (D154) shows single adventures and rooms for the designer to judge by eye; the stress tests are still to build: ten sketches per seed side by side, judged by the designer; plant flaws in hand-made sketches to test the critique (4 of 5).
 2. **Worked examples:** more than the one encoded room, of different kinds, judged by the designer; and a worked *sketch*, which the sketch call has none of yet.
 3. **The page runs a campaign:** generate the next room while the closing narration plays, the verdict at a room's end, choosing an exit, the campfire and relic pick at the sanctuary.
 4. **The hand-off's remaining parts:** attachments, the world's memory and callbacks, and a companion's personal quest placed by act.

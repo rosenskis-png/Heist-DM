@@ -694,7 +694,7 @@ function designWorld(world, seed) {
 }
 
 // The sketch call (D117, D119): must honour the hand-off; the world and the act as background; the seed; the party;
-// the worked example. Revising, it also gets its sketch and the critique.
+// the worked example. Revising, it also gets its sketch and the critique. On the bench, the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
@@ -702,6 +702,7 @@ export function sketchInput(env, c, schema) {
     block("Output format", shapeText(schema)),
     block("The question: this room's seed", seedText(c.seed)),
     block("The world", designWorld(c.world, c.seed)),
+    c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
     block("Worked example: a finished room's data (another room; match its detail, not its content)", env.examples?.encoded),

@@ -9,7 +9,7 @@ When an encounter or room ends and its hand-off is final (`docs/spec/state.md`),
 
 ## The pipeline
 
-Code: `src/game/generate.js` (`generateRoom`). It runs once the party has taken an exit and the campaign has entered the next room's kind (`docs/spec/campaign.md`).
+Code: `src/game/generate.js` (`generateRoom`: `seedRoom`, the code steps, then `designRoom`, the calls and the layout, D154). It runs once the party has taken an exit and the campaign has entered the next room's kind (`docs/spec/campaign.md`).
 
 | Step | Who | Does |
 |---|---|---|
