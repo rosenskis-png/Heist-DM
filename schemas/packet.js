@@ -22,7 +22,8 @@ const location = {
   properties: { zone: r("id"), holder: r("id"), at: point },
 };
 
-const zone = obj(["id", "name", "purpose", "light", "rects"], {
+// `rects` is left out only when a generated packet ships without a map (D9, D153): then no zone has them.
+const zone = obj(["id", "name", "purpose", "light"], {
   id: r("id"),
   name: r("text"),
   purpose: r("text"),

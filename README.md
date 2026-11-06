@@ -52,7 +52,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
 | `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |
 | `test/` | `node --test` suites |
-| `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
+| `docs/design/encounter-craft.md` | How to design a good room, rethought for the DM era (D152); its sources in `docs/design/references/` |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The Cells worked example, and a recorded card and account for the rat plan |
 | `content/` | Game data: companions, pairs, classes, rules, the rules every world shares (`setting.js`), the worlds (`worlds/`, Gravenhold first), the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
