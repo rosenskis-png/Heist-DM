@@ -42,7 +42,7 @@ export default {
   voice: `Low, even and economical; she mirrors other people's phrasing without meaning to. Dry humour, rare and sudden. She asks questions instead of answering them. "Do you prefer it longer? The hair. I'm curious."`,
   // How she thinks about plans in the huddle (D38). Her shifting stays secret here, so her hunch never mentions it.
   planning: {
-    sees: `Who would pass unquestioned (a guard, a servant, {master} himself) and what people actually look at: uniforms and manners, not faces.`,
+    sees: `Who would pass unquestioned (a guard, a servant, {master} in person) and what people actually look at: uniforms and manners, not faces.`,
     misses: `How exposed she is if she's caught mid-shift, and anyone else's part in the plan.`,
     reaches_for: `Something she does alone and out of sight: she'll get a door open and won't say how.`,
     hunch: `Every lock here opens for the right person. Most guards never look at faces; they look at uniforms and manners.`,
