@@ -4,7 +4,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { companions } from "../content/companions/index.js";
+import { companions as authored } from "../content/companions/index.js";
+import { rosterIn } from "../src/campaign/world.js";
+// The companions as they are in the default world (D150), which is what every call sees.
+const companions = rosterIn(authored);
 import { pairs } from "../content/pairs.js";
 import { classes } from "../content/classes.js";
 import { companionFileSchema, companionSchema, campfireSchema, partySchema } from "../schemas/index.js";
@@ -114,7 +117,7 @@ test("a tie resolves for the companion it names, and blocks a party without one"
   const entry = tied.tie.by[partnerId];
   for (const [k, v] of Object.entries({ ...tied.tie.set, ...entry.set })) assert.equal(me[k], v.replaceAll("{partner}", partner.name));
   for (const [k, v] of Object.entries(entry.append ?? {})) assert.ok(me[k].endsWith(v.replaceAll("{partner}", partner.name)));
-  assert.equal(them, partner);
+  assert.deepEqual(them, partner);
   // She hears about the tie from her side; the other companion hears it from hers.
   const mine = huddle(tied, partner);
   const theirs = huddle(partner, tied);

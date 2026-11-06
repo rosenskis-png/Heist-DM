@@ -15,9 +15,9 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **No routes, ever.** The intent never lists solutions, obvious or alternative. The critique call plays approaches privately (D120), but they are never stored or sent. The engine rejects a packet with route-like fields.
 
 - **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
-- **Exits:** each way out carries a one-line stub for the next scene it leads to (D119).
+- **Exits:** each way out names the zone the party leaves from, the kind of room code drew for it (`docs/spec/campaign.md` §2, D144), and a one-line stub for the next scene it leads to (D119).
 
-Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, may place events, and hold one outfit unless they're a campfire (D122).
+Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, and may place events (D143). A campfire is a room where the party rests (D122, D142).
 
 The party's companions appear only by slot, `companion_a` and `companion_b`, which loading binds to the party's companions in order (D126). A packet never names one.
 
@@ -36,12 +36,12 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 - **Connections:** what links two zones (door, bars, grate, drain, opening, stairs, crawl), with the biggest size that `fits` through (and, for a lockable one, `fits_unlocked`, D53), `see_through`, flags (`locked`), **which side each one is operated from** and whether it can be reached from the other side, the `key` if any, plus extra travel cost in ticks.
 - **Senses** (optional): per NPC, or per beat for an NPC on a routine, the zones they see and hear, for the DM to read. The party's own sight and hearing come from the map (`docs/spec/engine.md` §5).
 - **Light level** per zone.
-- **Things:** objects with properties (free text for the AI to judge, plus a size and any flags the engine checks), and where they are: a zone or a holder. Schedules move them through beats' `on_start` rules.
+- **Things:** objects with properties (free text for the AI to judge, plus a size and any flags the engine checks), and where they are: a zone or a holder. Schedules move them through beats' `on_start` rules. A thing may carry a `reward`, gold or a relic, that the party gets if one of them holds it when the room ends, and a merchant's things carry a `price` (`docs/spec/campaign.md` §4, D147).
 - **Fixed facts:** physical facts that rule things out, including load-bearing material facts ("the hinges of cell 1 are rotten and give way under a heavy impact") and rulings made in advance ("plants only take hold on the mossy floor at the far end").
 - **Hidden things:** marked hidden. Included for the AI, never shown to the player until revealed.
 
 ## 4. Clock and how people react
-- **Schedules,** written in ticks: repeating cycles of beats, one tick each. Each has an `id` and a `known` flag: whether the party knows the routine from the start. Otherwise it's learned in play, through a `reveal`. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat gives the NPC's position, any senses, a cue, and `on_start` rules that run when it begins (the keys go back on the peg). **One-time events** fire `at_tick` or `when` a condition first holds, and are marked `known` if the party knows they're coming. An event marked `deadline` moves with the campaign's slack before the encounter starts (D41); a condition that depends on it should test a flag the event sets, not the tick.
+- **Schedules,** written in ticks: repeating cycles of beats, one tick each. Each has an `id` and a `known` flag: whether the party knows the routine from the start. Otherwise it's learned in play, through a `reveal`. At tick *t* the beat is `beats[(t + phase) % period]`. Each beat gives the NPC's position, any senses, a cue, and `on_start` rules that run when it begins (the keys go back on the peg). **One-time events** fire `at_tick` or `when` a condition first holds, and are marked `known` if the party knows they're coming.
 - **Deadlines** are written in the DM's time (a tick is about a minute of real work, D77, D125), and leave room for some exploring and two recovered failures (D37).
 - **Notes:** how people react, in plain words, for the DM to apply (`notes`; D76): "he hears a noise: he comes to look, and his suspicion rises a step". A rising alarm, a suspicion ladder or a spreading fire is written here too, with what each step changes and how it comes back down.
 

@@ -334,7 +334,7 @@ A room has no objective and no danger, and the party leaves when it likes (D121)
 - **A room exists for something:** a companion moment, a trade, a discovery, a hint about what's ahead. Mood plus a companion moment is enough; the hot spring needs nothing else.
 - **Give it one thing that happens if they stay:** the spring starts to glow, the sun sets, the cook starts gossiping. Then lingering is a choice, and it costs only time.
 - **A room can be scouting in disguise.** The kitchen staff talk about the guard rotation; the merchant knows which door sticks. That's planning bought with time and favours (§1), before the encounter it serves.
-- **Its outfit belongs to it.** The one outfit a room holds should be something only that room could give, so a companion wearing it later carries the room with her.
+- **An outfit belongs to its room.** When a room holds one (D143), it should be something only that room could give, so a companion wearing it later carries the room with her.
 
 ---
 

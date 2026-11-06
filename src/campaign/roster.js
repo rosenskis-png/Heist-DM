@@ -1,3 +1,5 @@
+import { inWorld, worldOf } from "./world.js";
+
 // Which companions can share a party, and each one as she is in this party (docs/spec/companions.md §6, D8).
 // Nothing here names a companion: everything companion-specific is declared in her own file.
 
@@ -24,7 +26,9 @@ const fill = (text, partner) => (typeof text === "string" ? text.replaceAll("{pa
 // extends them, first the tie's own, then its entry for the other companion; `{partner}` in any text becomes the
 // other companion's name. The result keeps `tie` resolved (`withId` plus the remaining fields) for context
 // assembly. A tie whose other companion isn't in the party is dropped.
-export function resolveParty(members) {
+export function resolveParty(authored, world = worldOf()) {
+  // Each companion as she is in this world (D150): her stories' role nouns filled in.
+  const members = authored.map((c) => inWorld(c, world));
   return members.map((c) => {
     const partner = members.find((o) => o !== c && c.tie?.by?.[o.id]);
     if (!partner) return c.tie ? (({ tie, ...rest }) => rest)(c) : c;

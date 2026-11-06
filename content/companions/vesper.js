@@ -8,11 +8,11 @@ export default {
   color: "#d24b5a",
   rate: 1,
   heatMode: "Hunger",
-  blurb: `A succubus trapped in a dwarven ward-circle, starving for centuries. She can taste what you want. She likes the taste.`,
+  blurb: `A succubus trapped in a {builders_adj} ward-circle, starving for centuries. She can taste what you want. She likes the taste.`,
   fantasy: `Being insatiably wanted by the most seductive being in existence, specifically you.`,
   look: `Sleepy, heavy-lidded gold slit eyes, high cheekbones, full dark lips in a permanent knowing half-smile. A statuesque, soft hourglass figure with poured-silk deep-red skin. Long glossy black waves falling between curled horns. Wings that fold around her like a cloak when she's being coy, and a lazy tail that betrays what she's thinking. Languid and unhurried, never posed.`,
-  why: `Summoned to seduce and kill the occupying commander (see LEADERS), she was caught by the fortress's old dwarven wards and has been starving in a warded circle ever since.`,
-  first: `As he approaches her circle she inhales, and her eyes roll back: his desire tastes unlike anything she's had in centuries. From that moment he is the most interesting thing in the fortress to her, and she makes no secret of it.`,
+  why: `Summoned to seduce and kill {commander} (see LEADERS), she was caught by the {kind}'s old {builders_adj} wards and has been starving in a warded circle ever since.`,
+  first: `As he approaches her circle she inhales, and her eyes roll back: his desire tastes unlike anything she's had in centuries. From that moment he is the most interesting thing in the {kind} to her, and she makes no secret of it.`,
   pursuit: `Shameless, sexual, constant, and a little desperate. She's seduction all the time: she narrates what his desire tastes like (her signature device), offers herself openly and often, touches without asking, purrs filth in company, begs prettily when it suits her, and turns every conversation toward sex. She cheers his sins and sulks at piety. It's a performance, and a very good one: hungry, seductive, never quite real. When a moment threatens to turn emotional, she makes it filthy instead, or laughs it off.`,
   payoff: {
     at: 5,
@@ -44,7 +44,9 @@ export default {
     Insight: 3,
     Presence: 5,
   },
-  quest: `The commander she was contracted to kill is within reach in the Sanctum; completing the contract would send her home.`,
+  // What her story needs the world to hold (D150): keys of a world's `features`.
+  needs: ["builders_wards"],
+  quest: `The commander she was contracted to kill is within reach in {sanctum}; completing the contract would send her home.`,
   questAct: 4,
   react: {
     chosen: `triumphant, greedy, showing him off; starts guarding him like a dragon guards gold`,
@@ -86,7 +88,7 @@ export default {
   other: `likes him shameless and generous with the other companion, and likes being included; dislikes him hiding things`,
   suppressed: `to be touched with tenderness, not as food, and wanted for herself. Met by tender touch, wanting her rather than the glamour, and telling her he wants real connection alongside the physical (this lands well with her)`,
   darkTriggers: `pure indulgence with nothing else; helping her complete the contract; cruelty she can savour`,
-  outfit: `A black silk-and-lace halter top that barely covers and a low-slung skirt of sheer black panels split high on both legs; fine hell-forged gold body chains engraved with infernal script across her hips and waist; gold cuffs on her horns; the dwarven ward-chains on her ankles worn as anklets.`,
+  outfit: `A black silk-and-lace halter top that barely covers and a low-slung skirt of sheer black panels split high on both legs; fine hell-forged gold body chains engraved with infernal script across her hips and waist; gold cuffs on her horns; the {builders_adj} ward-chains on her ankles worn as anklets.`,
   abilities: {
     combat: {
       id: "kiss",
@@ -104,7 +106,7 @@ export default {
       declared: { uses: null, effects: [] },
     },
     limits: [
-      `Cannot cross a dwarven-warded threshold unless carried across or the ward is broken`,
+      `Cannot cross a {builders_adj}-warded threshold unless carried across or the ward is broken`,
       "Holy ground burns her",
       "Weaker the longer she goes unfed",
     ],

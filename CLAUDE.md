@@ -4,7 +4,7 @@
 1. `README.md`: the vision and the map.
 2. `docs/principles.md`, especially the reflexes to resist, before proposing any system or mechanic.
 3. `docs/roadmap.md`: the current phase and its open questions.
-4. `docs/decisions.md`, all of it. The specs say what's current; the log says why.
+4. `docs/decisions.md`: the index, then every entry that isn't archived. The specs say what's current; the log says why. The archive (`docs/decisions-archive.md`) is only for tracing why something old was dropped.
 5. Only the `docs/spec/` files your task touches. They're split small so you can load just your slice.
 
 Don't design from `legacy/`. Use `legacy/README.md` to find what to port and what is banned.
@@ -15,7 +15,7 @@ Don't design from `legacy/`. Use `legacy/README.md` to find what to port and wha
 | It's… | It goes in… |
 |---|---|
 | An open question | `docs/roadmap.md`, under the phase that must answer it, with a recommendation |
-| A settled decision | A new entry in `docs/decisions.md`, plus the spec change, in the same commit |
+| A settled decision | A new entry in `docs/decisions.md` and its line in the index, plus the spec change, in the same commit |
 | How the game works now | `docs/spec/`, one home per fact |
 | The exact shape of a packet, card or call output | `schemas/`; the spec links to it |
 | Encounter design theory | `docs/design/encounter-craft.md` |

@@ -47,7 +47,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/principles.md` | Lessons from Gravenhold, the 8 design principles, and the reflexes to resist |
 | `docs/roadmap.md` | Phases, exit tests, and **every open question** with a recommendation |
 | `docs/decisions.md` | Settled decisions, cited as D1, D2, …: what, why, and what each rules out |
-| `docs/spec/` | The current design: `architecture`, `packet`, `state`, `engine`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
+| `docs/spec/` | The current design: `architecture`, `campaign`, `packet`, `state`, `engine`, `generation`, `context`, `companions`, `ui`, and one file per AI call in `calls/` |
 | `schemas/` | The contracts as JSON Schema: the packet, the card, results, the condition language and operations, and one file per AI call in `calls/` (D32) |
 | `src/` | Code: the engine (`src/engine/`, D60), the campaign layer (`src/campaign/`: the roster and the relationship model), context assembly (`src/context.js`), one module per AI call (`src/calls/`), the game loop and what the page shows (`src/game/`), and the contract validator |
 | `app/` | The game page: an artifact drawing `src/game/` (https://claude.ai/artifact/Nq4W2TAcHNEjFGJcpdHyDp) |
@@ -55,7 +55,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/design/encounter-craft.md` | How to design a good encounter, at any scale |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The Cells worked example, and a recorded card and account for the rat plan |
-| `content/` | Game data: companions, pairs, classes, rules, setting, the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
+| `content/` | Game data: companions, pairs, classes, rules, the rules every world shares (`setting.js`), the worlds (`worlds/`, Gravenhold first), the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
 | `bench/` | The judgment test bench: an artifact page that runs the companion and campfire prompts on hand-written cases, plus Camp, free play with any two companions |
 | `fixtures/bench/` | The bench's huddle and campfire cases |

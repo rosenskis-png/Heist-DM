@@ -21,7 +21,7 @@ When an encounter or room ends and its hand-off is final (`docs/spec/state.md`),
 The sketch and the critique are generator-only: no play call ever sees them (D59). The critique's plans are thrown away.
 
 ## The seed (D118)
-- **Kind:** an encounter, a room (D121) or a campfire (D122). Code places campfires: the act's sanctuary, plus one or two rests in between.
+- **Kind:** an encounter, a room (D121) or a campfire (D122). Code places campfires: one ends every leg, and the act's sanctuary ends the act (`docs/spec/campaign.md`, D140, D142).
 - **Genre:** from the act's mechanics, avoiding the genres this act has already used. Each genre has a promise (`docs/design/encounter-craft.md` §1).
 - **Motifs:** 2–3 from `content/motifs.js`, avoiding the motifs this act has already used. The sketch may add at most one element from no motif.
 - **Callback:** whether an NPC from the world's memory may reappear (D123). Off unless drawn.
@@ -43,6 +43,6 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **Every exit carries a next-scene stub** (D119).
 - **Its fail-forward ending moves the story on,** and so does `captured`, which every encounter has (D131): each has a next-scene stub that takes the party somewhere new, never back to where they started.
 - **Anyone who might fight has a tier and `breaks`** (D130), and a fight encounter's objective is something other than everyone down (`docs/design/encounter-craft.md` §3.9).
-- **A room holds exactly one outfit,** for a companion in the party, and has no objective or deadline (D121).
+- **A room has no objective or deadline** (D121). An outfit is a reward placed where it fits, for a companion in the party (D143).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).

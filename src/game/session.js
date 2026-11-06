@@ -2,7 +2,10 @@
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
 import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
-import { companions as roster } from "../../content/companions/index.js";
+import { companions as authored } from "../../content/companions/index.js";
+import { rosterIn } from "../campaign/world.js";
+// The companions as they are in this world: their stories' role nouns filled in (D150).
+const roster = rosterIn(authored);
 import { emptyDraft, draftFrom } from "./draft.js";
 
 // The player's sheet: their name, their class's skills and abilities.
@@ -15,16 +18,15 @@ export function playerSheet(player) {
 export const partyFor = (player, companionIds) => [playerSheet(player), ...companionIds.map((id) => roster[id])];
 
 // `companions` is the two companion ids the player chose.
-export function newSession({ packet, player, companions, seed = 1, slack = 0, act = packet.act ?? 1 }) {
+export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1 }) {
   const party = partyFor(player, companions);
-  const state = load({ packet, party, slack, seed });
+  const state = load({ packet, party, seed });
   const session = {
     v: 3,
     player,
     companions,
     act,
-    slack,
-    start: { packet: packet.id, seed, slack },
+    start: { packet: packet.id, seed },
     rng: (seed ^ 0x5bd1e995) >>> 0,
     seq: 0,
     state,

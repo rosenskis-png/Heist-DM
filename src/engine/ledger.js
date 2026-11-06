@@ -1,7 +1,7 @@
 // The ledger (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
 // objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
-import { person, isParty, isNpc, zoneOf, sheet } from "./world.js";
+import { person, thing, isParty, isNpc, zoneOf, sheet } from "./world.js";
 import { nextTick, objectives, log } from "./clock.js";
 import { d100, ODDS } from "./rng.js";
 import { toughness, CONDITIONS, THREATS } from "../../content/rules.js";
@@ -103,6 +103,9 @@ export function checkChanges(s, ch = {}, at = "changes") {
   for (const m of ch.moods ?? []) if (!isNpc(s, m.npc)) bad("person", m.npc);
   const can = revealable(s);
   for (const id of ch.reveal ?? []) if (!can.has(id)) errors.push(`${at}: ${id} isn't hidden, a routine or an event`);
+  // A priced thing the party takes is bought, and the party can't spend gold it doesn't have (D147).
+  const cost = (ch.holds ?? []).filter((h) => isParty(s, h.by) && !isParty(s, s.holder[h.item])).reduce((t, h) => t + (thing(s, h.item)?.price ?? 0), 0);
+  if (cost > s.gold) errors.push(`${at}: that costs ${cost} gold, and the party has ${s.gold}`);
   for (const u of ch.used ?? []) {
     if (!isParty(s, u.who)) errors.push(`${at}: abilities used are the party's, not ${u.who}'s`);
     else if (!abilitiesOf(s, u.who).some((a) => a.id === u.ability)) errors.push(`${at}: ${u.ability} isn't one of ${sheet(s, u.who).name}'s abilities (${abilitiesOf(s, u.who).map((a) => a.id).join(", ")})`);
@@ -165,6 +168,7 @@ export function applyChanges(s, ch = {}) {
     if (person(s, m.who)?.schedule && !s.offRoutine.includes(m.who)) s.offRoutine.push(m.who);
   }
   for (const h of ch.holds ?? []) {
+    if (isParty(s, h.by) && !isParty(s, s.holder[h.item])) s.gold -= thing(s, h.item)?.price ?? 0;
     if (h.by === null) {
       s.at[h.item] = zoneOf(s, h.item);
       delete s.holder[h.item];

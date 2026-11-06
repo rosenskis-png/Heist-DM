@@ -91,6 +91,8 @@ export const companionFileSchema = withDefs({
       rules: { type: "string" },
       skills: all(SKILLS, { type: "integer" }),
       quest: t,
+      // What her story needs the world to hold: keys of a world's `features` (D150).
+      needs: { type: "array", items: { type: "string" } },
       questAct: { type: "integer", minimum: 1 },
       // Her reaction to each configuration; "open" (nothing settled) needs none.
       react: { ...some(Object.keys(configText), t), required: Object.keys(configText).filter((k) => k !== "open" && k !== "former") },

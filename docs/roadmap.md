@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139).
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139), which has settled the campaign's shape so far (D140–D143, `docs/spec/campaign.md`).
 
 ---
 
@@ -56,22 +56,23 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 
 ## Phase 7: The generator
 
-Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms with an outfit each (D121) and campfires (D122), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the critique call plays it, one revision cuts or connects, the encode calls turn it into a ruled-mode packet in stages, and code lays it out (D116–D120). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
 - On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
 - The critique call finds the flaws planted in hand-made sketches in 4 of 5 runs.
-- Act 1 plays end to end from a new game: generated encounters, rooms with outfits, campfires, and every attachment resolved within one encounter.
+- Act 1 plays end to end from a new game: generated encounters and rooms, a campfire ending every leg, the climax, and every separation resolved before its campfire.
 
 **Build order** (each judged on the bench before the next, as Phase 2 judged the play calls)
-0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written; the playtest's lessons and starting questions are in `docs/design/encounter-rethink.md`.
+0. **Rethink encounter design** (D139): what makes a good encounter in a game where the DM rules, from first principles, with the Cells, the heist and the cavern rethought rather than copied. The output rewrites `docs/design/encounter-craft.md` and its references. Discussed with the designer before anything is written; the playtest's lessons and starting questions are in `docs/design/encounter-rethink.md`. Settled so far: the campaign's shape (D140), no campaign clocks or slack (D141), campfires (D142), outfits as rewards (D143), how the way ahead is drawn (D144), judging a room's ending (D146), gold and relics (D147) and the climax (D148), all built. **Once the rethought material exists, clean out the engine-era encounter material it replaces:** `docs/design/encounter-craft.md`'s old sections and appendix, the genres and motifs, the sketch, critique and encode specs, and the Cells once a generated encounter replaces it (D139).
+   - **Then the campaign layer, in code, before any generator** (each tested without an AI call). Built: code drawing each exit's kind and counting the leg and the act, and exits that point at the next room's kind (D144); the verdict call that judges a room's ending and what it moves (D146); gold, relics and merchants (D147); the climax and what carries into the next act (D148); separations that resolve before the campfire; and a test run through a whole act on stand-in rooms (`test/run.test.js`). Then worlds (D150): Gravenhold as the first world in its own file, companion text through role slots, and companions' needs. Still to build: the page running a campaign rather than one encounter (choosing an exit, picking relics at the sanctuary, the verdict at a room's end), which waits on the generator, since until then there's only the Cells to play.
 1. **The motif library** (`content/motifs.js`), from the rethought design. Each genre's promise.
 2. **Worked examples:** two or three sketches of different genres, drafted by Claude for the designer to judge, to the rethought standard. They're the only hand-written material (D115).
 3. **The seed** in code: kind, genre, motifs, mechanics, callback, campfire placement, and what the act has used.
 4. **Sketch and critique** on a bench tab: generate ten sketches per seed, read them side by side, and plant flaws to test the critique. No encoding yet; this tests judgment, not code.
 5. **Encode** in stages, validated by the engine, and the layout from the sketch's rough sizes.
-6. **The hand-off:** attachments, the world's memory, next-scene stubs (including the fail-forward and captured endings', which always move the party on, D131), the conditions the party carries, `endEncounter` with the hand-off, and the outfit a room gives.
+6. **The hand-off:** attachments, the world's memory, next-scene stubs (including the captured ending's, which always moves the party on, D131), the conditions the party carries, `endEncounter` with the hand-off, and any rewards the room gives.
 7. **Play Act 1** from a new game.
 
 **Open questions**
@@ -81,12 +82,10 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 4. **Layout from a sketch.** *Recommendation:* the sketch writes topology plus approximate sizes and rough placement ("cells ~10×10 along the north wall of a ~30-ft corridor"), never coordinates (D28), and states any distance that matters as a constraint ("the peg within 5 ft of the stool"). Code snaps it to the grid and validates it. A failure goes back once, described as relationships; then the packet ships without a map (D9). No open spaces (D124).
 5. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, and go to the critique as facts, not to the sketch as rules. Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 6. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
-7. **Where the act ends.** *Recommendation:* Gravenhold's rule (a minimum number of encounters solved, the act's goals met, the player chooses to move on) becomes an engine condition plus a player choice. The AI never moves the party to the next act.
-8. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
-9. **How many campfires an act.** *Recommendation:* one after every two or three encounters, with the act's sanctuary as the last. A starting value.
+7. **Waiting for the next packet.** Generation is four to eight `complex` and `default` calls, charged to the player (D2). *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait before optimizing.
 
 ## Later
 
 Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
 
-- **A vibe at new game start.** The player types an adventure's vibe ("trapped in a creepy noble's masquerade, gothic eldritch horror", "an epic escape from hell"), and the campaign is built from it. Not a different world: the same companions and the same shape of five acts (trapped, crossing the working levels, uncovering the secret, the climax, getting out), with the factions, alarms, acts and enemy generated, and a short pitch the player can reroll. *What it needs first:* each companion's file split into a core that never changes and setting hooks the vibe rewrites in the same shape (Fern's is always "something alive and sacred is being exploited here, and she was caught defending it"). That is the romance pillar's content, so it's real work across every companion.
+- **A vibe at new game start: the pitch.** Worlds exist (D150); what's left is generating one. The player types a vibe ("trapped in a creepy noble's masquerade, gothic eldritch horror", "an epic escape from hell"), and a pitch call writes a world in Gravenhold's shape: the place and its way out, its roles, heart, life, factions and their tensions, features, its five acts, the player's secrets, room kinds and world facts, plus a short pitch the player can reroll. *Recommendation:* the world must hold every feature the two chosen companions need, and fill every role (`worldProblems`), or it goes back once with the problems listed; a critique checks the frame (a living place much bigger than the party, a heart the factions want, tensions between them); the world is generated once at new game and saved with the campaign, never regenerated. Judge it on the bench against Gravenhold before the page offers it.

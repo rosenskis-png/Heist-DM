@@ -84,7 +84,6 @@ test("the whole party down is captured: the encounter ends, and the hand-off say
   const taken = scene(s, { changes: { flags: [down("nadia")], conditions: [{ id: "concussed", who: "nadia", text: "Concussed: slow and sick." }] } });
   assert.equal(taken.ended.outcome, "captured");
   assert.equal(taken.handoff.ending, "captured");
-  assert.equal(taken.handoff.slack, 1);
   assert.deepEqual(taken.handoff.conditions, [{ id: "concussed", who: "nadia", text: "Concussed: slow and sick." }]);
   assert.deepEqual(taken.threats, []);
   // The conditions travel: the next encounter starts with them (and only the party's).
@@ -100,14 +99,14 @@ test("the hand-off counts the optional objectives where they stand at the end", 
   assert.deepEqual(apply(start(), { type: "end", outcome: "escaped" }).handoff.optional, { met: [], missed: ["gear"] });
 });
 
-test("how the encounter went moves how they feel at camp: a clean win warms them, a capture sours them", () => {
+test("a room's verdict moves how they feel at camp: a great room warms them, a brutal one sours them", () => {
   const members = [fern, nadia];
   const base = Rel.newRomance(members, pairs);
-  const win = { ending: "objective", optional: { met: ["gear"], missed: [] } };
-  const lost = { ending: "captured", optional: { met: [], missed: ["gear"] } };
+  const win = { rating: 10, why: "x", reactions: [] };
+  const lost = { rating: 1, why: "x", reactions: [] };
   assert.equal(Rel.moraleOf(win), 2);
   assert.equal(Rel.moraleOf(lost), -2);
-  assert.equal(Rel.moraleOf({ ending: "fail_forward", optional: { met: ["gear"] } }), 0);
+  assert.equal(Rel.moraleOf({ rating: 5 }), 0);
   const up = Rel.endEncounter(base, members, win);
   const down = Rel.endEncounter(base, members, lost);
   for (const c of members) {
@@ -119,7 +118,12 @@ test("how the encounter went moves how they feel at camp: a clean win warms them
     assert.deepEqual(down.rel[c.id].read, base.rel[c.id].read);
     assert.equal(up.rel[c.id].toward.respect, base.rel[c.id].toward.respect);
   }
-  // Without a hand-off, only the caps reset.
+  // Each companion's own reactions apply to her alone, through the usual scoring and caps (D20).
+  const admired = { rating: 5, why: "x", reactions: [{ from: fern.id, field: "admires", item: "x", sign: 1, intensity: 2, reason: "x" }] };
+  const after = Rel.endEncounter(base, members, admired);
+  assert.equal(after.rel[fern.id].regard, base.rel[fern.id].regard + 2);
+  assert.equal(after.rel[nadia.id].regard, base.rel[nadia.id].regard);
+  // Without a verdict, only the caps reset.
   assert.deepEqual(Rel.endEncounter(base).rel[fern.id].toward, base.rel[fern.id].toward);
 });
 

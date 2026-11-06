@@ -46,7 +46,9 @@ export default {
     Insight: 2,
     Presence: 4,
   },
-  quest: `The dwarven archive holds the Hearth's last record: how to make Ember whole without a congregation, or how to bind her into Nadia forever.`,
+  // What her story needs the world to hold (D150): keys of a world's `features`.
+  needs: ["builders_archive"],
+  quest: `The {builders_adj} archive holds the Hearth's last record: how to make Ember whole without a congregation, or how to bind her into Nadia forever.`,
   questAct: 3,
   react: {
     chosen: "radiant and a little smug; Ember relays approval loudly",

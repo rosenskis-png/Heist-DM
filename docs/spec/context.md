@@ -20,10 +20,11 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 
 | Call | Gets |
 |---|---|
-| Adjudicate | Characters; the encounter with only the routines and events the party knows; the ledger; what the party expects next; the plan and its stances |
-| Resolve | Characters; the whole encounter; the ledger; what really happens tick by tick; the plan, the card and which rolls succeeded |
-| Scene | Characters; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
-| Question | The read-only slice (D127, D133): the party and its abilities, with what's left of them; the encounter without the objective, sheets or reaction notes, with only the routines and events the party knows; the opening; the ledger without its event log; the DM's recent answers; the question |
+| Adjudicate | Characters; the party's gold and relics (D147); the encounter with only the routines and events the party knows; the ledger; what the party expects next; the plan and its stances |
+| Resolve | Characters; the party's gold and relics; the whole encounter; the ledger; what really happens tick by tick; the plan, the card and which rolls succeeded |
+| Scene | Characters; the party's gold and relics; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
+| Question | The read-only slice (D127, D133): the party and its abilities, with what's left of them; its gold and relics; the encounter without the objective, sheets or reaction notes, with only the routines and events the party knows; the opening; the ledger without its event log; the DM's recent answers; the question |
+| Verdict | The record of a room that has ended (D146): the player; each companion's values (beliefs, rules, pursuit, mood, what she admires, despises, wants and can't stand); the whole encounter with its ways on; the ledger and the log at the end; how it ended, from the hand-off |
 | Party | Both companions' briefs, each exactly as her companion call has it (D132); the party's view of the encounter and the ledger, as for the companion call; the DM's last two narrations; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
 | Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); her private channel |
 | Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
@@ -39,10 +40,10 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 
 An invariant or worked example can carry an act gate: the first act it applies in. The engine leaves it out of context entirely before that act. A prompt rule forbidding it would compete with everything else; absence can't.
 
-- **Example:** the Hollow King's heartbeat (`content/setting.js`) is gated to Act 4. Before then it's in no context at all.
+- **Example:** the Hollow King's heartbeat (`content/worlds/gravenhold.js`, `invariants`) is gated to Act 4. Before then it's in no context at all.
 - **Worked examples need act tags too.** The Cells walkthrough's §5 names the heartbeat, so only §1–4 may be sent in Acts 1–3.
 - The campaign tier is rebuilt when the act changes.
-- The same mechanism gates companion data by relationship state (`docs/spec/companions.md`) and the player's secret by act (`content/setting.js`).
+- The same mechanism gates companion data by relationship state (`docs/spec/companions.md`) and the player's secret by act (the world's secrets, revealed by `content/setting.js`).
 
 ## 4. Runtime policy (D2, D13–D15)
 
@@ -52,6 +53,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Resolve | `sample.json` | off | `default` |
 | Scene | `sample.json` | off | `default` |
 | Question | `sample.json` | off | `quick` (D133) |
+| Verdict | `sample.json` | off | `default` (D146) |
 | Party | `sample.json` | off | `quick` (D132) |
 | Companion | `sample.json` | off | `quick` (D58) |
 | Campfire | `sample.json` | off | `complex` |

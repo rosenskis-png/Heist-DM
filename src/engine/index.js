@@ -7,7 +7,7 @@ import { nextTick, objectives } from "./clock.js";
 import { handoff } from "./handoff.js";
 import { resolve, scene, answer, rollCard } from "./ledger.js";
 
-export { load, checkPacket, deadlineTick, bindParty, SLOTS } from "./load.js";
+export { load, checkPacket, bindParty, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
 export { handoff, endingOf, rest } from "./handoff.js";
 export { CAPTURED } from "./clock.js";

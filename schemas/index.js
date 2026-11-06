@@ -8,4 +8,5 @@ export { adjudicateSchema } from "./calls/adjudicate.js";
 export { resolveSchema } from "./calls/resolve.js";
 export { sceneSchema } from "./calls/scene.js";
 export { questionSchema } from "./calls/question.js";
+export { verdictSchema } from "./calls/verdict.js";
 export { companionFileSchema } from "./companion.js";

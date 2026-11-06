@@ -63,6 +63,11 @@ const thing = obj(["id", "name", "properties", "location"], {
   flags: { type: "object", additionalProperties: { type: ["string", "number", "boolean"] } },
   location,
   hidden: { type: "boolean" },
+  // What it's worth to the party if they hold it when the room ends (D147): gold, or a relic, a passive edge the DM
+  // reads as a fact.
+  reward: { oneOf: [obj(["gold"], { gold: { type: "integer", minimum: 1 } }), obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) })] },
+  // What it costs, at a merchant: the party pays when one of them takes it (D147).
+  price: { type: "integer", minimum: 1 },
 });
 
 const senses = obj(["sees", "hears"], { sees: list(r("id")), hears: r("hearing") });
@@ -110,11 +115,20 @@ const event = obj(["id", "do"], {
   id: r("id"),
   // Whether the party knows it's coming (Uzga's arrival is announced in the opening).
   known: { type: "boolean" },
-  // A deadline: its tick moves with the campaign's slack before the encounter starts (D41).
-  deadline: { type: "boolean" },
   at_tick: { type: "integer", minimum: 0 },
   when: r("condition"),
   do: list(r("rule"), 1),
+});
+
+// A way out of the room, and the kind of room code drew for it (docs/spec/campaign.md §2, D144).
+export const EXIT_KINDS = ["encounter", "quiet", "oddity", "merchant", "campfire", "climax", "sanctuary"];
+const exit = obj(["id", "zone", "leads_to"], {
+  id: r("id"),
+  // Where the party stands to leave by it.
+  zone: r("id"),
+  leads_to: { enum: EXIT_KINDS },
+  // A line on the next scene it leads to (D119).
+  stub: r("text"),
 });
 
 const objective = obj(["id", "condition"], {
@@ -142,6 +156,7 @@ export const packetSchema = withDefs({
       fail_forward: objective,
       optional: list(objective),
       purpose: r("text"),
+      exits: list(exit),
       expected_plans: { type: "array", prefixItems: [{ type: "integer" }, { type: "integer" }], minItems: 2, maxItems: 2 },
     }),
     people: list(npc),

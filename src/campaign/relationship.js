@@ -404,25 +404,26 @@ export function progress(rel, c) {
 // An exchange with the player: the campaign turn advances.
 export const nextTurn = (rom) => ({ ...copy(rom), turn: rom.turn + 1 });
 
-// How the encounter went, from its hand-off (D131): its ending and the optional objectives met, as one number.
-export function moraleOf(handoff) {
-  if (!handoff) return 0;
-  const v = (R.morale.ending[handoff.ending] ?? 0) + R.morale.optional * (handoff.optional?.met?.length ?? 0);
-  return clamp(v, R.morale.range);
-}
+// How a room went, from its verdict's rating (D146), as one number.
+export const moraleOf = (verdict) => (verdict ? R.morale.byRating[verdict.rating - 1] ?? 0 : 0);
 
-// When an encounter ends, how it went moves how everyone feels (D131): each companion's regard for him, and her
-// affection and trust toward the other. Her read of the other's stays hers to revise at camp (D91). Then the
-// per-encounter gain caps reset.
-export function endEncounter(rom, members = [], handoff = null) {
+// When a room ends, its verdict moves how everyone feels (D131, D146): the rating moves each companion's regard for
+// him, and her affection and trust toward the other; then each companion's own reactions to how it went apply, within
+// the usual caps (D20). Her read of the other's stays hers to revise at camp (D91). Then the per-encounter gain caps
+// reset.
+export function endEncounter(rom, members = [], verdict = null) {
   let out = copy(rom);
-  const m = moraleOf(handoff);
+  const m = moraleOf(verdict);
   for (const c of m ? members : []) {
     out = applyDelta(out, c, { regard: m * R.morale.moves.regard });
     if (members.length < 2) continue;
     const r = out.rel[c.id];
     const lim = limitsFor(out, c, members);
     for (const k of ["affection", "trust"]) r.toward[k] = clamp(r.toward[k] + m * R.morale.moves[k], lim[k]);
+  }
+  for (const c of members) {
+    const mine = (verdict?.reactions ?? []).filter((x) => x.from === c.id);
+    if (mine.length) out = applyReactions(out, c, mine);
   }
   for (const r of Object.values(out.rel)) r.gain = { heat: 0, intimacy: 0 };
   return out;
