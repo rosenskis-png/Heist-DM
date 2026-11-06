@@ -3,7 +3,9 @@
 // hand-written companion works in any world, and no AI rewrites her. A capitalised slot (`{Master}`) starts a sentence.
 import { worlds, defaultWorld } from "../../content/worlds/index.js";
 
-export const ROLES = ["place", "kind", "builders", "builders_adj", "rulers", "commander", "master", "working", "depths", "sanctum"];
+import { WORLD_ROLES } from "../../schemas/world.js";
+
+export const ROLES = WORLD_ROLES;
 export const worldOf = (id = defaultWorld) => worlds[id];
 
 // A slot may be followed by a possessive. `{master}'s` is always 's ("the fortress's"); a bare `{rulers}'` suits the noun:

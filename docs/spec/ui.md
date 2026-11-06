@@ -41,7 +41,7 @@ On a phone the two are tabs, each with an unread marker, and the map and the par
 - A packet without geometry shows no map. A wrong map is worse than none.
 
 ## Carried over from Gravenhold (legacy `Title`, `Setup`, `Drawer`, `AbilitySheet`, `Bar`, `Sigil`)
-- The title screen with save slots, and the setup screen: a name and the two companions (D126). Class and faction come later.
+- The title screen with save slots, and the setup screen: a name, the two companions (D126), and where: Gravenhold, or a world pitched from a vibe the player types, with another pitch on request (D151). Class and faction come later.
 - The theme tokens and light and dark styles.
 - The relationship drawer.
 - Safe-area handling for phones.
