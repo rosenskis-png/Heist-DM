@@ -4,7 +4,7 @@ import { beatOf } from "./engine/clock.js";
 import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
-import { invariants } from "../content/setting.js";
+import { worldOf } from "./campaign/world.js";
 import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
@@ -19,7 +19,7 @@ export function promptFor(text, act) {
 }
 
 // Invariants in play this act: a gated one is absent before its act, not forbidden (docs/spec/context.md §3).
-export const invariantsFor = (act, list = invariants) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
+export const invariantsFor = (act, list = worldOf().invariants) => list.filter((i) => act >= (i.fromAct ?? 1)).map((i) => i.text);
 
 // Abilities as the AIs read them: the effect text, never the engine's `declared` block (D30, D59). With live state
 // `s` and whose they are, each limited one says what's left (D128).

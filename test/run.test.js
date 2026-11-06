@@ -61,7 +61,7 @@ test("a whole act on stand-in rooms: campfires between legs, the climax, the san
     if (ended.kind === "campfire") assert.deepEqual(camp.carry.conditions, []);
     assert.ok(n < 30, "the act ends");
   }
-  assert.equal(seen.filter((k) => k === "campfire").length, setting.acts[0].legs - 1);
+  assert.equal(seen.filter((k) => k === "campfire").length, setting.arc[0].legs - 1);
   assert.deepEqual(seen.slice(-2), ["climax", "sanctuary"]);
   assert.equal(camp.relics.length, setting.relics.max, "relics stop at the act's limit");
   // The climax's verdict decides how many relics carry on.

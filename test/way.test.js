@@ -30,10 +30,10 @@ function walk(act, seed) {
 
 test("every path through every act has a campfire per leg, then the climax and the sanctuary", () => {
   const { rooms, addedMax } = setting.way;
-  for (let act = 1; act <= setting.acts.length; act++)
+  for (let act = 1; act <= setting.arc.length; act++)
     for (let seed = 1; seed <= 200; seed++) {
       const legs = walk(act, seed);
-      assert.equal(legs.length, setting.acts[act - 1].legs, `act ${act} seed ${seed}`);
+      assert.equal(legs.length, setting.arc[act - 1].legs, `act ${act} seed ${seed}`);
       assert.ok(legs.length >= 2, "at least one campfire before the climax");
       assert.deepEqual(legs.at(-1).slice(-2), ["climax", "sanctuary"]);
       for (const leg of legs) {

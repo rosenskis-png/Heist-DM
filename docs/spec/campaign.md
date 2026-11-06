@@ -1,12 +1,12 @@
 # Campaign
 
-How a campaign is put together above the encounter: acts, legs, rooms and campfires, what the player sees of the way ahead, and what carries from one to the next (D140–D148). Code: `src/campaign/way.js` (the way ahead) and `src/campaign/run.js` (what a room's end, a campfire and the act's end do). A single room's contents are `docs/spec/packet.md`; what the engine holds is `docs/spec/state.md`; how a room is generated is `docs/spec/generation.md`.
+How a campaign is put together above the encounter: acts, legs, rooms and campfires, what the player sees of the way ahead, and what carries from one to the next, and the worlds it's set in (D140–D150). Code: `src/campaign/way.js` (the way ahead) and `src/campaign/run.js` (what a room's end, a campfire and the act's end do). A single room's contents are `docs/spec/packet.md`; what the engine holds is `docs/spec/state.md`; how a room is generated is `docs/spec/generation.md`.
 
 ---
 
 ## 1. The shape
 
-- **A campaign is five acts** (`content/setting.js`). Every act is an escape from part of a much larger place that has its own life and isn't mainly concerned with the party: kitchens feeding a garrison, a chapel mid-rite, a forge on a deadline. Its people are most likely hostile, but they're going about their business, not hunting the party. The campaign starts small: a cell inside an enemy fortress, not a prison complex.
+- **A campaign is five acts** (`content/setting.js`, `arc`), set in a world (§9). Every act is an escape from part of a much larger place that has its own life and isn't mainly concerned with the party: kitchens feeding a garrison, a chapel mid-rite, a forge on a deadline. Its people are most likely hostile, but they're going about their business, not hunting the party. The campaign starts small: a cell inside an enemy fortress, not a prison complex.
 - **An act** is a run of legs, then its climax, then its sanctuary.
 - **A leg** is a run of rooms that ends at a campfire (§4).
 - **A room** is one packet. Its kind is an encounter, a quiet room, a merchant, something odd, a campfire or the climax.
@@ -63,3 +63,19 @@ No map of the act is built in advance.
 ## 8. No campaign clocks
 
 Nothing counts against the party across rooms: no alert, no days and no hidden slack (D141). Pressure lives inside rooms, in the shape each room gives it. Anything hidden and gradual is a slow gradient that the fiction shows, never a counter with a threshold.
+
+## 9. Worlds
+
+Every adventure is set in a world (`content/worlds/`, D150). The rules every world shares are in `content/setting.js`: the five-act shape, the way ahead, relics, the whisper rings, and how much of the player's secret each act may show. A world holds what changes:
+
+- **The place** and **its way out.**
+- **Its roles:** the nouns companion text uses as slots (`docs/spec/companions.md` §2): its name, what kind of place it is, who built it, who rules it now, its commander and master, its working levels, its old depths and its seat of power. Code fills them (`src/campaign/world.js`).
+- **Its heart:** what's sealed at the bottom, that the factions want.
+- **Its life:** what it's busy with, whatever the party does.
+- **Its factions,** and the **tensions** between them: what they want from each other, not only from the party.
+- **Its features:** what it holds that companions' stories need. Each companion lists hers as `needs`, and a world that lacks one for a companion in the party has a problem to fix.
+- **Its acts:** each act's place, sanctuary, mechanics and goal, in the shared five-act shape.
+- **The player's secrets** it can draw from, **room kinds** with examples from the place, and **world facts that never change** (`invariants`, with act gates).
+
+Gravenhold is the default world and the worked example a generated world is written to match. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
+

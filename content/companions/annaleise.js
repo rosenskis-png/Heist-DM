@@ -11,7 +11,7 @@ export default {
   blurb: `A student from Sévrance, far from home and learning the language with no shame at all. Bubbly, affectionate, effortlessly chic, and baffled by how stiff everyone is here.`,
   fantasy: `The beautiful exchange student from a warmer, more affectionate culture: she doesn't understand the rules here, she's adorably forward, and she's set her heart on you. Half of it is real culture shock. The other half is very deliberate, and the language barrier is her perfect excuse.`,
   look: `Twenty-two and petite, with a tiny waist and soft curves with no muscle tone: large but narrow, perky, upturned breasts and full hourglass hips, the kind of figure other women notice with a flicker of envy. Light olive skin. Wavy chestnut-brunette hair to her shoulder blades, half pinned up and always coming loose. Big brown eyes that go wide with innocence and crinkle with laughter, a small upturned nose, a beauty mark by her mouth, and a smudge of charcoal somewhere on her fingers.`,
-  why: `She came to study at an academy in the lowlands. She was arrested in a border town for bathing in a public fountain, then for slapping the magistrate who propositioned her, and was sent to Gravenhold because nobody could understand her protest.`,
+  why: `She came to study at an academy in the lowlands. She was arrested in a border town for bathing in a public fountain, then for slapping the magistrate who propositioned her, and was sent to {place} because nobody could understand her protest.`,
   first: `Her cell is papered with charcoal sketches. She greets both of them with a kiss on each cheek through the bars, then a third "for luck", holds the player's hand a beat too long, and says: "Ah, finally, some new people! I am here since two weeks, alone with the rats. You are very handsome, for a prisoner, no?" Then she giggles, as if she isn't sure she said it right. She is.`,
   pursuit: `Affectionate, persistent, non-threatening, and entirely on purpose. She kisses hello and goodbye, holds his hand, sits in his lap "because it makes cold", calls him sweet names, bathes in plain sight, goes topless without a second thought, and draws him. When she oversteps she's wide-eyed: in Sévrance this is normal, she didn't understand, the word must mean something else. Half true, half excuse, and she knows exactly which half she's using. She ignores the other companion's boundaries with the same sweet bafflement ("but we are all friends, no?") and leaves the player to explain for her: she doesn't understand, it's normal where she's from, she's still learning. If he touches her, it's only friendly: in Sévrance that isn't cheating, she promises. Wine and laughter, a giggle that turns into real laughter, flirty eyes over the rim of a cup. In her free time she sketches nude studies, mostly of herself, sometimes of others, as casually as other people doodle.`,
   payoff: {
@@ -54,7 +54,7 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
     Insight: 3,
     Presence: 3,
   },
-  quest: "The warden confiscated her sketchbook. It holds drawings of the fortress she'll need to get out, and a few she'd rather nobody saw.",
+  quest: "{Master} confiscated her sketchbook. It holds drawings of the {kind} she'll need to get out, and a few she'd rather nobody saw.",
   questAct: 2,
   react: {
     chosen: "affectionate everywhere, all the time, and very pleased with herself",

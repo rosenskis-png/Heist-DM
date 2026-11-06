@@ -40,10 +40,10 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 
 An invariant or worked example can carry an act gate: the first act it applies in. The engine leaves it out of context entirely before that act. A prompt rule forbidding it would compete with everything else; absence can't.
 
-- **Example:** the Hollow King's heartbeat (`content/setting.js`) is gated to Act 4. Before then it's in no context at all.
+- **Example:** the Hollow King's heartbeat (`content/worlds/gravenhold.js`, `invariants`) is gated to Act 4. Before then it's in no context at all.
 - **Worked examples need act tags too.** The Cells walkthrough's §5 names the heartbeat, so only §1–4 may be sent in Acts 1–3.
 - The campaign tier is rebuilt when the act changes.
-- The same mechanism gates companion data by relationship state (`docs/spec/companions.md`) and the player's secret by act (`content/setting.js`).
+- The same mechanism gates companion data by relationship state (`docs/spec/companions.md`) and the player's secret by act (the world's secrets, revealed by `content/setting.js`).
 
 ## 4. Runtime policy (D2, D13–D15)
 

@@ -8,10 +8,10 @@ export default {
   color: "#7bb661",
   rate: 1.02,
   heatMode: "Abundance",
-  blurb: `A druid caught sabotaging the fortress's mining of a sacred spring. Warm, barefoot, utterly unashamed, and generous with everything.`,
+  blurb: `A druid caught sabotaging the {kind}'s mining of a sacred spring. Warm, barefoot, utterly unashamed, and generous with everything.`,
   fantasy: `Joyful, guilt-free sensuality with a woman who has no jealousy, no shame, and no rules but pleasure and honesty.`,
   look: `Naturally beautiful face with a dusting of freckles across fair skin, softly pointed half-elf ears, bright green eyes and an easy, open smile. A soft, curvy, natural figure, completely comfortable in her skin. Long, thick auburn-copper hair worn loose with a few thin braids and small wildflowers woven in.`,
-  why: `The dwarves built Gravenhold over a sacred underground spring; she was caught sabotaging the occupiers' mining of it, and means to free it on the way out.`,
+  why: `{Builders} built {place} over a sacred underground spring; she was caught sabotaging {rulers}' mining of it, and means to free it on the way out.`,
   first: `Her cell is full of moss and flowers grown out of stone. She greets both of her new cellmates with the same easy warmth, reaching through the bars to squeeze the other companion's hand like an old friend, and chats about her circle's customs (shared beds, shared baths, lovers kept freely) without a flicker of shame, as if everyone lives that way. The player gets to realise what she's like on his own. She does not kiss or touch him romantically; she waits, delighted, for him to show interest.`,
   pursuit: `Openly, unhurriedly, generously, once he shows interest. She talks about bodies and pleasure the way others talk about weather, touches freely, skinny-dips, and is delighted by him. She'll suggest including the other companion, and she's glad when he's happy elsewhere.`,
   payoff: {
@@ -44,7 +44,9 @@ export default {
     Insight: 3,
     Presence: 2,
   },
-  quest: "Freeing the sacred spring beneath the Undercroft.",
+  // What her story needs the world to hold (D150): keys of a world's `features`.
+  needs: ["sacred_spring"],
+  quest: "Freeing the sacred spring beneath {depths}.",
   questAct: 3,
   react: {
     chosen: "joyful, and still free; she just keeps coming back to him",

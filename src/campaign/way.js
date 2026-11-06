@@ -11,12 +11,12 @@ const DRAWN = ["encounter", "quiet", "oddity", "merchant"];
 const calm = (kind) => ["quiet", "oddity", "merchant"].includes(kind);
 
 const rules = () => setting.way;
-const actOf = (act) => setting.acts[act - 1];
+const arcOf = (act) => setting.arc[act - 1];
 
 // The way at the start of an act. Its first room is an encounter (the act opens in trouble), so the leg still holds
 // `rooms - 1` after it.
 export function startAct(act, seed = 1) {
-  return { act, legs: actOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, owed: 0, strain: 0, seen: [], here: "encounter", rng: seed >>> 0 };
+  return { act, legs: arcOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, owed: 0, strain: 0, seen: [], here: "encounter", rng: seed >>> 0 };
 }
 
 function pick(way, kinds) {

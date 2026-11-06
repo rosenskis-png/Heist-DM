@@ -5,13 +5,13 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 ---
 
 ## Campaign state (lives across encounters)
-- **Act,** and the act history.
-- **Invariants:** world facts that never change once they're in play. Each can carry an **act gate**, the first act it applies in (`docs/spec/context.md`). Data: `content/setting.js`.
+- **Act,** and the act history, and the **world** the adventure is set in (`docs/spec/campaign.md` §9, D150; Gravenhold until a world can be generated).
+- **Invariants:** world facts that never change once they're in play. Each can carry an **act gate**, the first act it applies in (`docs/spec/context.md`). Data: the world's `invariants`.
 - **Gold and relics** (D147), and how many relics the climax lets the party keep (D148).
 - **Where the party is in the act:** the rooms left in this leg and the legs left in the act, the leg's strain (D146), and the kinds drawn for the current room's exits (`docs/spec/campaign.md`, D140). There are no campaign clocks (D141).
 - **Character sheets:** class or companion abilities with their exact effects, conditions and limits; the conditions each carries until the next campfire (D130); ability uses per encounter and per rest. Abilities are exact, conditional and limited, and they're the main way a plan handles a risk.
 - **Companions:** which two are in the party, their relationship state (including each one's view of the other, D92), memories and commitments, and what each owns to wear and has on (`docs/spec/companions.md`).
-- **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
+- **The player:** name, class, and the hidden secret, drawn from the world's, which reveals by act (`content/setting.js`, `playerSecretReveal`).
 - **Gear and items** the party holds.
 - **The encounter log:** one line per finished encounter. The sketch call reads it as background (D119).
 - **What the act has used:** the kinds, genres and motifs of its packets, so the next seed avoids repeats (D118).

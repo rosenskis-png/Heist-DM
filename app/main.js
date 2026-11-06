@@ -6,7 +6,10 @@ import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
 import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
-import { companions as roster } from "../content/companions/index.js";
+import { companions as authored } from "../content/companions/index.js";
+import { rosterIn } from "../src/campaign/world.js";
+// The companions as they are in this world: their stories' role nouns filled in (D150).
+const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
 import { mapView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";

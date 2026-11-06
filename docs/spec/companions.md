@@ -22,7 +22,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 | Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D104), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
 | Look | `look` (her body and face), `outfit` (what she usually wears), and optionally `wardrobe`: other outfits she owns from the start (§7) |
-| Story | `why`, `first`, `quest`, `questAct` |
+| Story | `why`, `first`, `quest`, `questAct`, and `needs`: what her story needs the world to hold, as keys of a world's `features` (D150) |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
 | How she gets what she wants | `boundaries` (what she does with a no), `honesty` (when and how she lies), `means` (what she'll do), `whenRefused` (what she shows, and what she resolves inside). Fern is the honest baseline (D107). |
@@ -34,6 +34,8 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 The exact shape is `schemas/companion.js`, and `node --test` checks every file in the registry against it (D82).
 
 Text inside profiles may mention other companions by name (Fern's rule about Lisa and her sister). That's fine: it's characterization, not code.
+
+**Her text never names the world.** Where her story names the place she's escaping, it uses a role slot the world fills: `{place}`, `{kind}`, `{builders}`, `{builders_adj}`, `{rulers}`, `{commander}`, `{master}`, `{working}`, `{depths}` and `{sanctum}`, capitalised (`{Master}`) to start a sentence, with a possessive after it if needed (`{master}'s`). So the same hand-written companion works in any world, and no AI rewrites her (`docs/spec/campaign.md` §9, D150).
 
 ## 3. What the companion call sees, and when
 

@@ -6,7 +6,10 @@ import { companionSchema, campfireSchema, partySchema } from "../schemas/index.j
 import { speakerProblems } from "../src/calls/party.js";
 import { classes } from "../content/classes.js";
 import { pairs } from "../content/pairs.js";
-import { companions as roster } from "../content/companions/index.js";
+import { companions as authored } from "../content/companions/index.js";
+import { rosterIn } from "../src/campaign/world.js";
+// The companions as they are in this world: their stories' role nouns filled in (D150).
+const roster = rosterIn(authored);
 import * as Rel from "../src/campaign/relationship.js";
 import * as Relationship from "../content/relationship.js";
 import { addOutfit, equip, wearing } from "../src/campaign/wardrobe.js";

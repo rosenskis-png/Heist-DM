@@ -44,7 +44,7 @@ export default {
     Insight: 1,
     Presence: 0,
   },
-  quest: `The officer she knifed survived, runs the Warrens' pits, and wants her back.`,
+  quest: `The officer she knifed survived, runs {working}' pits, and wants her back.`,
   questAct: 2,
   react: {
     chosen:

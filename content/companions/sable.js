@@ -12,7 +12,7 @@ export default {
   blurb: `A quiet, watchful thief who keeps to herself and remembers everything. Easy to be around, hard to know.`,
   fantasy: `Mystique: a woman who can look like whatever you want her to look like, and who is quietly learning exactly what that is.`,
   look: `Her own shape, which she rarely wears: about thirty, a little shorter than most, with a volleyball player's build: strong shoulders, slight muscle tone, toned legs, a firm, athletic figure. Straight dark-brunette hair to the jaw, tucked behind one ear. Hazel eyes that watch more than they show, a straight nose, a small, private half-smile. Nothing about her is quite memorable, which is the point.`,
-  why: `Caught in the warden's own chambers, wearing the warden's face. Nobody can prove how. They locked up the woman they found when her grip on it slipped.`,
+  why: `Caught in {master}'s own chambers, wearing {master}'s face. Nobody can prove how. They locked up the woman they found when her grip on it slipped.`,
   first: `She says very little, watches both of them carefully, and asks the player one oddly specific question about home. The next time he sees her, she's subtly, impossibly, a little more his type.`,
   pursuit: `Quiet, attentive and adaptive. Early on she shifts a little every time he sees her (younger or older, taller, slimmer, curvier, a shade of hair) and watches what he looks at, never enough for the other companion to be sure of anything beyond a passing "weren't you shorter?". Once they're lovers she's tender and steady, and sometimes greets him in a new face, body and outfit she thinks he'll find exciting. That holds while he's hers alone. If he shows interest in the other companion she turns: a subtle, deceitful manipulator, the quiet counterpart to anyone who rages. She wears the other companion's face to have him in her place, or to behave badly as her and let him draw his own conclusions. Her shapeshifting is a secret she shares only with lovers.`,
   // Her shape and her disguises (D101). The first alternative whose gate holds sets the chance she comes in the
@@ -42,7 +42,7 @@ export default {
   voice: `Low, even and economical; she mirrors other people's phrasing without meaning to. Dry humour, rare and sudden. She asks questions instead of answering them. "Do you prefer it longer? The hair. I'm curious."`,
   // How she thinks about plans in the huddle (D38). Her shifting stays secret here, so her hunch never mentions it.
   planning: {
-    sees: `Who would pass unquestioned (a guard, a servant, the warden himself) and what people actually look at: uniforms and manners, not faces.`,
+    sees: `Who would pass unquestioned (a guard, a servant, {master} himself) and what people actually look at: uniforms and manners, not faces.`,
     misses: `How exposed she is if she's caught mid-shift, and anyone else's part in the plan.`,
     reaches_for: `Something she does alone and out of sight: she'll get a door open and won't say how.`,
     hunch: `Every lock here opens for the right person. Most guards never look at faces; they look at uniforms and manners.`,
@@ -56,7 +56,9 @@ export default {
     Insight: 3,
     Presence: 2,
   },
-  quest: "Somewhere in the warden's records is the changeling child the fortress once bought and sold, and the name she was never given.",
+  // What her story needs the world to hold (D150): keys of a world's `features`.
+  needs: ["masters_records"],
+  quest: "Somewhere in {master}'s records is the changeling child the {kind} once bought and sold, and the name she was never given.",
   questAct: 2,
   react: {
     chosen: "tender and steady, with a new face for him now and then",

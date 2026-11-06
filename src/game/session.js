@@ -2,7 +2,10 @@
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
 import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
-import { companions as roster } from "../../content/companions/index.js";
+import { companions as authored } from "../../content/companions/index.js";
+import { rosterIn } from "../campaign/world.js";
+// The companions as they are in this world: their stories' role nouns filled in (D150).
+const roster = rosterIn(authored);
 import { emptyDraft, draftFrom } from "./draft.js";
 
 // The player's sheet: their name, their class's skills and abilities.
