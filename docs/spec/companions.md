@@ -88,7 +88,7 @@ Ported from Gravenhold (legacy `newRel`, `computeReady`, `configOf`, `stageLabel
 
 **Caps:** each turn's change is clamped per track (heat −2..2, intimacy −3..2, regard −3..2, lean 0..2). Heat and intimacy gains are capped at +4 per encounter, reset when an encounter ends. After her payoff, heat keeps moving; for a companion with `leanFromHeat`, heat gained then also feeds lean, and intimacy gained after the payoff draws lean back down (D93). She's hurt when regard reaches −5 or intimacy drops 3 in one turn.
 
-**How the encounter went** (D131): when an encounter ends, `endEncounter` reads the hand-off's ending and optional objectives (`morale` in `content/relationship.js`) and moves each companion's regard for him, and her affection and trust toward the other, by up to 2 either way. Her read of the other's view doesn't move; that's hers to revise at camp.
+**How the room went** (D131, D146): when a room ends, `endEncounter` reads the verdict's rating (`morale` in `content/relationship.js`) and moves each companion's regard for him, and her affection and trust toward the other, by up to 2 either way; then each companion's own reactions in the verdict apply to her. Her read of the other's view doesn't move; that's hers to revise at camp.
 
 **READY** (code decides what may happen):
 - `payoff` once heat ≥ `payoff.at`, the turn count ≥ `minTurns`, and the act ≥ `minAct`;

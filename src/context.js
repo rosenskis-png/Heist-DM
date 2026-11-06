@@ -241,6 +241,13 @@ function campaign(env, call, schema) {
   ];
 }
 
+// What the party has to spend and the relics it holds (D147), for the DM's calls: each relic is a fact.
+function kit(env) {
+  const { gold = 0, relics = [] } = env.state ?? {};
+  if (!gold && !relics.length) return null;
+  return block("The party's gold and relics", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`) });
+}
+
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
 const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p, env.state) : { ...playSheet(p, env.state), voice: p.voice, mood: standingOf(env, p.id).mood }));
 
@@ -543,6 +550,7 @@ export function questionInput(env, c, schema) {
   return compose([
     ...campaign(env, "question", schema),
     block("The party", party),
+    kit(env),
     block("The encounter", encounterText(env.packet, env.state, { intent: false, party: true, sheets: false })),
     block("Opening description", env.packet.opening),
     block("The ledger now", c.now),
@@ -556,6 +564,7 @@ export function adjudicateInput(env, c, schema) {
   return compose([
     ...campaign(env, "adjudicate", schema),
     block("Characters", sheets(env)),
+    kit(env),
     block("The encounter", encounterText(env.packet, env.state, { party: true })),
     block("The ledger now", c.now),
     block("What the party expects next (the routines and events it knows)", c.timeline),
@@ -570,6 +579,7 @@ export function resolveInput(env, c, schema) {
   return compose([
     ...campaign(env, "resolve", schema),
     block("Characters", sheets(env)),
+    kit(env),
     ...dmEncounter(env),
     block("The ledger now", c.now),
     block("What is really happening, tick by tick", c.timeline),
@@ -585,6 +595,7 @@ export function sceneInput(env, c, schema) {
   return compose([
     ...campaign(env, "scene", schema),
     block("Characters", sheets(env)),
+    kit(env),
     ...dmEncounter(env, { intent: false, opening: true }),
     block("The ledger now", c.now),
     block("What is really happening, tick by tick", c.timeline),
@@ -594,3 +605,32 @@ export function sceneInput(env, c, schema) {
     "Answer the player.",
   ]);
 }
+
+// The verdict when a room ends (docs/spec/calls/verdict.md, D146): the record of what happened, not the narration.
+// The room as designed (its purpose, what could be had, its exits), the party, the ledger and the log as they stand,
+// how it ended (the hand-off), and each companion's values: what she believes, admires and despises, wants and can't stand,
+// so her reactions are by her own values.
+export function verdictInput(env, c, schema) {
+  const members = resolveParty(env.party.slice(1));
+  const values = (m) => {
+    const { mood } = briefProfile(m, standingOf(env, m.id), env.state);
+    return { id: m.id, name: m.name, beliefs: m.beliefs, rules: m.rules, pursuit: m.pursuit, mood, admires: m.admires, despises: m.despises, heatActs: m.heatActs, turnoffs: m.turnoffs };
+  };
+  const h = c.handoff;
+  const ending = {
+    ended: h.outcome, kind: h.ending, optional_met: h.optional?.met ?? [], optional_missed: h.optional?.missed ?? [],
+    left_by: h.way_on ?? "no exit reached", carried: h.gear, hurt: h.conditions.map((x) => `${x.who}: ${x.text}`),
+  };
+  const exits = (env.packet.intent.exits ?? []).map((e) => `${e.id} (from ${e.zone}, to a ${e.leads_to}${e.stub ? `: ${e.stub}` : ""})`);
+  return compose([
+    ...campaign(env, "verdict", schema),
+    block("The player", { id: env.party[0].id, name: env.party[0].name, role: env.party[0].role }),
+    block("The companions", members.map(values)),
+    ...dmEncounter(env),
+    exits.length ? block("The room's ways on", exits) : null,
+    block("The ledger and the log at the end", c.now),
+    block("How it ended", ending),
+    "Judge how the room went.",
+  ]);
+}
+

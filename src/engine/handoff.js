@@ -28,6 +28,14 @@ export const rest = (carry) => ({ ...carry, conditions: [], spent: {} });
 export function handoff(s) {
   const party = partyIds(s);
   const gear = Object.keys(s.holder).filter((item) => party.includes(s.holder[item]));
+  // What the party carries out is worth: gold, and relics (D147). Gold is what they had, less what they paid, plus what
+  // they carried out; a price is already paid when the thing was taken.
+  const rewards = gear.map((id) => s.packet.map.things.find((t) => t.id === id)?.reward).filter(Boolean);
+  const gold = (s.gold ?? 0) + rewards.reduce((t, r) => t + (r.gold ?? 0), 0);
+  const relics = gear.flatMap((id) => {
+    const r = s.packet.map.things.find((t) => t.id === id)?.reward?.relic;
+    return r ? [{ id, name: r.name, text: r.text }] : [];
+  });
   const exit = [...new Set(party.map((id) => zoneOf(s, id)))];
   // The way on: the exit whose zone the whole party ended in, if any (docs/spec/campaign.md §3).
   const wayOn = exit.length === 1 ? (s.packet.intent.exits ?? []).find((e) => e.zone === exit[0])?.id ?? null : null;
@@ -47,6 +55,8 @@ export function handoff(s) {
     exit,
     way_on: wayOn,
     gear,
+    gold,
+    relics,
     // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
     conditions: s.conditions.map((c) => ({ ...c })),
     // Per-rest ability uses spent so far, this encounter's included; per-encounter uses refill now (D128).

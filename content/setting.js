@@ -39,16 +39,21 @@ export const setting = {
       boss: "First Daughter Quavra, and Matron Ilphara",
     },
   },
-  // How the way ahead is drawn (docs/spec/campaign.md §2, D144). Starting values. A leg is `rooms` rooms long; each
-  // rough room adds one more, at most `roughMax` a leg, so a rough stretch takes longer to reach the campfire. Every act's
+  // How the way ahead is drawn (docs/spec/campaign.md §2, D144, D146). Starting values. A leg is `rooms` rooms long.
+  // Each room's verdict moves the leg's strain by `strain.pivot - rating` (never below 0), and every `strain.per` points
+  // add one more room, at most `addedMax` a leg, so a rough stretch takes longer to reach the campfire. Every act's
   // `legs` is at least 2, so every path has a campfire before the climax as well as the sanctuary after it. Each exit's
   // kind is drawn by `weights`; a non-encounter never follows another, and a leg has at most `once` of each kind listed.
   way: {
     rooms: 3,
-    roughMax: 2,
+    addedMax: 2,
+    strain: { pivot: 6, per: 4 },
     weights: { encounter: 6, quiet: 2, oddity: 1, merchant: 1 },
     once: ["merchant"],
   },
+  // Relics (D147, D148). Starting values: the party holds at most `max` in an act, and the climax's verdict rating
+  // decides how many it keeps into the next, `keptByRating[rating - 1]`.
+  relics: { max: 6, keptByRating: [0, 0, 0, 1, 1, 1, 2, 2, 3, 3] },
   acts: [
     {
       name: "The Cells",

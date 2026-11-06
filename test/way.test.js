@@ -9,7 +9,7 @@ import { classes } from "../content/classes.js";
 import fern from "../content/companions/fern.js";
 import nadia from "../content/companions/nadia.js";
 
-// Walk a whole act: at each room, draw 1–3 exits and take one at random; a room is rough at random. Returns the kinds
+// Walk a whole act: at each room, draw 1–3 exits and take one at random; each room's verdict rating is random. Returns the kinds
 // of room in order, split into legs at each campfire.
 function walk(act, seed) {
   let way = startAct(act, seed);
@@ -21,7 +21,7 @@ function walk(act, seed) {
     way = drawn.way;
     if (!drawn.kinds.length) return legs;
     const kind = drawn.kinds[coin(drawn.kinds.length)];
-    way = enter(way, kind, { rough: coin(2) === 0 });
+    way = enter(way, kind, { rating: 1 + coin(10) });
     if (kind === "campfire") legs.push([]);
     else legs.at(-1).push(kind);
   }
@@ -29,7 +29,7 @@ function walk(act, seed) {
 }
 
 test("every path through every act has a campfire per leg, then the climax and the sanctuary", () => {
-  const { rooms, roughMax } = setting.way;
+  const { rooms, addedMax } = setting.way;
   for (let act = 1; act <= setting.acts.length; act++)
     for (let seed = 1; seed <= 200; seed++) {
       const legs = walk(act, seed);
@@ -38,7 +38,7 @@ test("every path through every act has a campfire per leg, then the climax and t
       assert.deepEqual(legs.at(-1).slice(-2), ["climax", "sanctuary"]);
       for (const leg of legs) {
         const played = leg.filter((k) => !["climax", "sanctuary"].includes(k));
-        assert.ok(played.length >= rooms && played.length <= rooms + roughMax, `a leg of ${played.length} rooms`);
+        assert.ok(played.length >= rooms && played.length <= rooms + addedMax, `a leg of ${played.length} rooms`);
         assert.ok(played.filter((k) => k === "merchant").length <= 1, "one merchant a leg at most");
         const calm = (k) => ["quiet", "oddity", "merchant"].includes(k);
         played.forEach((k, i) => assert.ok(!(calm(k) && calm(played[i - 1])), `two calm rooms in a row: ${played}`));
@@ -46,14 +46,21 @@ test("every path through every act has a campfire per leg, then the climax and t
     }
 });
 
-test("a rough room lengthens the leg, but not once its exits lead to the campfire", () => {
-  let way = startAct(1);
-  way = enter(way, "encounter", { rough: true });
-  assert.equal(way.left, setting.way.rooms - 1);
-  way = { ...way, left: 0 };
-  assert.deepEqual(exitKinds(way, 2).kinds, ["campfire", "campfire"]);
-  assert.equal(enter(way, "campfire", { rough: true }).left, setting.way.rooms);
-  assert.equal(enter({ ...startAct(1), extra: setting.way.roughMax }, "encounter", { rough: true }).left, setting.way.rooms - 2);
+test("rough rooms lengthen the leg by a gradient, good ones ease it, and not once its exits lead to the campfire", () => {
+  const { rooms, strain, addedMax } = setting.way;
+  const long = { ...startAct(1), left: 10 };
+  const once = (rating, from = long) => enter(from, "encounter", { rating });
+  assert.equal(once(strain.pivot).left, 9, "an ordinary room adds nothing");
+  assert.equal(once(strain.pivot - strain.per).left, 10, "one bad room adds one");
+  // Two middling rooms add up to one more room; a good room in between eases the strain.
+  assert.equal(once(strain.pivot - 2, once(strain.pivot - 2)).left, 9);
+  assert.equal(once(strain.pivot - 2, once(10, once(strain.pivot - 2))).left, 7);
+  assert.equal(once(1, once(1, once(1))).extra, addedMax, "never more than the most a leg can add");
+  const atCamp = { ...startAct(1), left: 0 };
+  assert.deepEqual(exitKinds(atCamp, 2).kinds, ["campfire", "campfire"]);
+  const rested = enter(atCamp, "campfire", { rating: 1 });
+  assert.equal(rested.left, rooms);
+  assert.equal(rested.strain, 0);
 });
 
 test("the same seed draws the same way, and a room's exits differ where they can", () => {

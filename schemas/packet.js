@@ -63,6 +63,11 @@ const thing = obj(["id", "name", "properties", "location"], {
   flags: { type: "object", additionalProperties: { type: ["string", "number", "boolean"] } },
   location,
   hidden: { type: "boolean" },
+  // What it's worth to the party if they hold it when the room ends (D147): gold, or a relic, a passive edge the DM
+  // reads as a fact.
+  reward: { oneOf: [obj(["gold"], { gold: { type: "integer", minimum: 1 } }), obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) })] },
+  // What it costs, at a merchant: the party pays when one of them takes it (D147).
+  price: { type: "integer", minimum: 1 },
 });
 
 const senses = obj(["sees", "hears"], { sees: list(r("id")), hears: r("hearing") });

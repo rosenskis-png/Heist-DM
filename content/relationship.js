@@ -70,13 +70,11 @@ export const scoring = {
 // READY thresholds. The payoff's own thresholds are in each companion's `payoff`.
 export const ready = { vulnerability: 6, deepOrBond: 9 };
 
-// How the encounter went moves how the party feels when it reaches camp (D131): the ending's number, plus `optional`
-// for each optional objective met, kept within `range`. Each point moves every companion's regard for him, and her
-// affection and trust toward the other companion, by `moves`.
+// How a room went moves how the party feels when it reaches camp (D131, D146): the verdict's rating, 1 to 10, gives
+// `byRating[rating - 1]` points. Each point moves every companion's regard for him, and her affection and trust toward
+// the other companion, by `moves`. Starting values.
 export const morale = {
-  ending: { objective: 1, alternate: 0, fail_forward: -1, captured: -2, other: 0 },
-  optional: 1,
-  range: [-2, 2],
+  byRating: [-2, -2, -1, -1, 0, 0, 1, 1, 2, 2],
   moves: { regard: 1, affection: 1, trust: 1 },
 };
 

@@ -16,7 +16,7 @@ const actOf = (act) => setting.acts[act - 1];
 // The way at the start of an act. Its first room is an encounter (the act opens in trouble), so the leg still holds
 // `rooms - 1` after it.
 export function startAct(act, seed = 1) {
-  return { act, legs: actOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, seen: [], here: "encounter", rng: seed >>> 0 };
+  return { act, legs: actOf(act).legs, leg: 1, left: rules().rooms - 1, extra: 0, strain: 0, seen: [], here: "encounter", rng: seed >>> 0 };
 }
 
 function pick(way, kinds) {
@@ -45,17 +45,20 @@ export function exitKinds(way, n = 1) {
   return { way: next, kinds };
 }
 
-// The way once the party leaves the current room for a room of `kind`. A rough room adds one room to the leg, at most
-// `roughMax` a leg, and only while the leg has rooms left: once its exits lead to the campfire, the campfire is in sight.
-// A campfire starts the next leg.
-export function enter(way, kind, { rough = false } = {}) {
+// The way once the party leaves the current room for a room of `kind`, given the room's verdict `rating` (D146). The
+// rating moves the leg's strain (a rough room raises it, a good one eases it), and each `strain.per` points add one
+// room to the leg, at most `addedMax` a leg, only while the leg has rooms left: once a room's exits lead to the campfire,
+// the campfire is in sight. A room once added stays. A campfire starts the next leg, with no strain.
+export function enter(way, kind, { rating = null } = {}) {
   if (!KINDS.includes(kind)) throw new Error(`unknown kind of room: ${kind}`);
   const next = structuredClone(way);
-  if (rough && next.left > 0 && next.extra < rules().roughMax) {
+  const { strain, addedMax } = rules();
+  if (rating != null) next.strain = Math.max(0, next.strain + strain.pivot - rating);
+  while (next.left > 0 && next.extra < addedMax && next.extra < Math.floor(next.strain / strain.per)) {
     next.left += 1;
     next.extra += 1;
   }
-  if (kind === "campfire") Object.assign(next, { leg: next.leg + 1, left: rules().rooms, extra: 0, seen: [] });
+  if (kind === "campfire") Object.assign(next, { leg: next.leg + 1, left: rules().rooms, extra: 0, strain: 0, seen: [] });
   else if (DRAWN.includes(kind)) {
     next.left -= 1;
     next.seen.push(kind);

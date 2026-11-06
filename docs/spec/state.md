@@ -7,7 +7,8 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 ## Campaign state (lives across encounters)
 - **Act,** and the act history.
 - **Invariants:** world facts that never change once they're in play. Each can carry an **act gate**, the first act it applies in (`docs/spec/context.md`). Data: `content/setting.js`.
-- **Where the party is in the act:** the rooms left in this leg and the legs left in the act, and the kinds drawn for the current room's exits (`docs/spec/campaign.md`, D140). There are no campaign clocks (D141).
+- **Gold and relics** (D147), and how many relics the climax lets the party keep (D148).
+- **Where the party is in the act:** the rooms left in this leg and the legs left in the act, the leg's strain (D146), and the kinds drawn for the current room's exits (`docs/spec/campaign.md`, D140). There are no campaign clocks (D141).
 - **Character sheets:** class or companion abilities with their exact effects, conditions and limits; the conditions each carries until the next campfire (D130); ability uses per encounter and per rest. Abilities are exact, conditional and limited, and they're the main way a plan handles a risk.
 - **Companions:** which two are in the party, their relationship state (including each one's view of the other, D92), memories and commitments, and what each owns to wear and has on (`docs/spec/companions.md`).
 - **The player:** name, class, and the hidden secret, which reveals by act (`content/setting.js`).
@@ -40,19 +41,20 @@ The engine checks that every write names real things before committing it (`docs
 | Party call | Lines over the rings, stances, tagged reactions |
 | Companion call | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
-| Engine | Ticks, routines, events, rolls, objective status, `down` at no toughness left, the event log, the hand-off |
+| Verdict call | The room's rating and why, and each companion's reactions to how it went (D146) |
+| Engine | Ticks, routines, events, rolls, objective status, gold spent at a merchant, `down` at no toughness left, the event log, the hand-off |
 | Campfire | Relationship changes (including each one's view of the other), beliefs, storm level, caught asides, beats, memories, revealed secrets, commitments, her outfit |
 
 ## The hand-off (D21)
 
 When an encounter ends, the engine writes a hand-off object, and the next packet's starting conditions are built from it:
 
-- gear, the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
+- gear, the gold the party has (what it had, less what it paid, plus rewards carried out) and the relics it carried out (D147); the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
 - companions present;
 - the exit used, and its next-scene stub (D119): `way_on` names it when the whole party ended in its zone (D144);
 - **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;
 - **the world's memory** (D123): NPC fates and who saw the party, which come back only through a callback the seed allows;
-- the outcome, its kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, which move how the companions feel when it ends (D131);
+- the outcome, its kind (objective, alternate, fail-forward, captured or other) and the optional objectives met and missed, which the verdict reads when the room ends (D146);
 - the one-line log entry.
 
 Only the hand-off, memories and commitments cross between encounters (principle 4). Nothing is summarized.

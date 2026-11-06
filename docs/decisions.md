@@ -142,7 +142,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D128** The engine counts ability uses, and rest refills them: current
 - **D129** A packet runs seven operations, and its moves don't route: current
 - **D130** A fight is a plan: current
-- **D131** The party always moves on, and how it went is how they feel: current
+- **D131** The party always moves on, and how it went is how they feel: changed by D146
 - **D132** The huddle keeps one shared companion call: current
 - **D133** A question to the DM is its own cheap call, and what the answer settles is fact: current
 - **D134** The plan is a list of actions, and it stays as written: current
@@ -155,8 +155,11 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D141** Slack, deadlines and the campaign clocks are retired: current
 - **D142** Campfires end every leg, at night, with everyone there: current
 - **D143** Rooms no longer hold one outfit each: current
-- **D144** How the way ahead is drawn, and how a room's exits lead on: current
+- **D144** How the way ahead is drawn, and how a room's exits lead on: changed by D146
 - **D145** The decision log has an index, and entries that are only history are archived: current
+- **D146** A room's ending is judged by a verdict call, and the rating is a gradient: current
+- **D147** Gold and relics: current
+- **D148** The climax is always won; its verdict decides what carries into the next act: current
 
 ---
 
@@ -904,3 +907,18 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-05). `docs/decisions.md` opens with an index: every entry by number and title, marked current, refined (with the entries that change it) or archived. Entries that now apply only as history, because they were wholly superseded or describe the retired engine pipeline (D125, D129), move word for word to `docs/decisions-archive.md`, and each leaves its heading and a one-line pointer in the log. An archived entry still isn't edited; it's only moved. A test checks that the index lists every entry and that every pointer's entry is in the archive.
 **Why:** Every thread reads the whole log, which had grown to about 740 lines, about 30 of its entries now only history. Moving them keeps their "why" (the lessons that stop old ideas coming back) without making every thread read them, and the index shows at a glance what still holds.
 **Rules out:** Deleting a decision; editing an archived entry; an index that lists entries the log doesn't have.
+
+### D146. A room's ending is judged by a verdict call, and the rating is a gradient
+**Decided:** The designer's call (2026-11-05), settling the roadmap's question on how a room's ending is judged. Supersedes D131's ending kinds as what moves how the party feels, and refines D144's rough rooms. When a room ends, the verdict call (`docs/spec/calls/verdict.md`) reads the record (the encounter with what could be had and its ways on, the ledger and the log, how it ended), never the narration, and returns a rating from 1 to 10, why, and each companion's reactions to how it went, by her own values, as tagged reactions (D20). The prompt anchors 3, 6 and 9 so the rating uses the whole range. The rating's morale (`content/relationship.js`, `morale.byRating`) moves each companion's regard for the player and her affection and trust toward the other, as D131's ending did; her reactions then apply within the usual caps. The rating also moves the leg's strain by six minus the rating, never below nothing, and every four points of strain add a room to the leg, at most two a leg, only while it has rooms left (`content/setting.js`, `way`). A campfire clears the strain. The hand-off still records the ending's kind, as a fact the verdict reads. It runs on `default`, with a budget of 25 KB.
+**Why:** The question is never whether the party gets through, but how well, and "how well" is a judgment, which is the AI's job (principle 2). Reading the record rather than the narration keeps it from rating the prose, and the anchors keep it from rating politely. It runs after the room is over and nothing inside the room depends on it, so it isn't the in-encounter judgment of progress principle 6 rules out. "Rough" was meant as a description, not a switch: strain lets two middling rooms add up to a longer leg, and a good room in between ease it.
+**Rules out:** Authored tiers of success per room; a yes-or-no "rough"; the verdict reading the narration.
+
+### D147. Gold and relics
+**Decided:** The designer's call (2026-11-05), settling the roadmap's question. Gold is one number, carried through the whole game and spent at merchants. A relic is a name and one sentence, a passive edge the DM reads as a fact. Every DM call (adjudicate, resolve, scene, question) sees the party's gold and relics. The party holds at most six relics in an act (`content/setting.js`, `relics.max`). A room offers them as things: a thing's `reward` is gold or a relic, which the party gets if one of them holds it when the room ends, and the hand-off carries the gold and the relics out. A merchant's things carry a `price`: the party pays when one of them takes it through the DM's changes, and the engine refuses a change that spends more gold than the party has. Code: `src/engine/ledger.js`, `src/engine/handoff.js`, `src/campaign/run.js`.
+**Why:** The designer wanted rewards like gold for a merchant and relics with passive effects, without an inventory system. A relic as one sentence the DM reads needs no engine rule, which keeps it judgment (principle 2). Rewards as things put them in the world, where the party has to reach them, so they're one of a room's levers rather than a prize table.
+**Rules out:** An inventory beyond gold and relics; relics with engine-run effects, for now; buying what the party can't afford.
+
+### D148. The climax is always won; its verdict decides what carries into the next act
+**Decided:** The designer's call (2026-11-05), settling the roadmap's question. The climax is a room the party always gets through. What's at stake is how epic the escape is, decided by what the act built up; a choice at its peak, often between the companions' threads; and what comes away with them, all landing in the sanctuary scene. Its verdict's rating decides how many of the act's relics the party keeps into the next act (`content/setting.js`, `relics.keptByRating`: none for a rough climax, up to three for a great one), and the player picks which at the sanctuary. The next act starts fresh with those relics and the gold; how the companions feel and the rest of the campaign's memory carry as always (D142). Code: `src/campaign/run.js` (`endAct`).
+**Why:** A climax that can't be lost needs stakes other than winning. Letting its quality decide what carries over rewards a great act without punishing a rough one beyond the act: the next act is still a fresh start (D140).
+**Rules out:** A climax the party can lose; penalties carried into the next act.
