@@ -6,8 +6,10 @@ import { d100 } from "../engine/rng.js";
 // The axes a room can differ on (docs/design/encounter-craft.md §2, §8, §16). Fixed: kind, tone, whose room, exits.
 // Leanings, which the sketch may use or leave (D160): x-factor, shape, core, prize, motifs, factions.
 export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
-// One shape anyone can picture from a sentence (encounter-craft §16).
-export const SHAPES = ["rings or tiers around a hollow", "a tower or shaft", "a bridge or ledge over a drop", "a pit or bowl", "terraces down a slope", "an island in something", "a deck or platform", "a cage or frame hung in the air"];
+// The space's rough form, and the one thing the eye goes to (D163): fixed, drawn by code from wide lists and not repeated
+// within an act, because any image the prompt itself holds becomes an anchor (D161, D163).
+export const SHAPES = ["a street or alley", "a long gallery or nave", "a warren of small chambers", "a garden or orchard", "a market of stalls", "a river crossing or ford", "a field of pillars or columns", "a wide stair hall", "a courtyard open to the sky", "a ship's deck or barge", "a pit or bowl", "terraces down a slope", "a tower or shaft", "a bridge or ledge over a drop", "an island in something", "a cave of natural rock", "a ruin half fallen in", "a crossroads of tunnels"];
+export const CENTREPIECES = ["a statue or idol", "a great machine", "a fire or forge", "a tree or great growth", "a throne or seat of honour", "a wreck", "a pool or spring", "a beast", "a tower or scaffold", "an altar", "a table set for many", "a gate or portcullis", "a pile of something valuable", "a cart, wagon or vessel", "a grave or tomb", "a bell, drum or horn", "a map, model or mural", "a hole in the floor"];
 // What the room is built around (encounter-craft §16).
 export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
 // What the place is busy with when the party arrives (D162): drawn so an act's rooms don't repeat it, and fitted to the
@@ -54,12 +56,16 @@ export function seedFor(camp, world, kind, exits = []) {
   const usedBusy = camp.usedBusy ?? [];
   const busyPool = BUSY.filter((b) => !usedBusy.includes(b));
   seed.busy = pickFrom(rng, busyPool.length ? busyPool : BUSY);
+  const fresh2 = (list, used) => (list.filter((x) => !used.includes(x)).length ? list.filter((x) => !used.includes(x)) : list);
+  const usedShapes = camp.usedShapes ?? [];
+  const usedCentres = camp.usedCentres ?? [];
+  seed.shape = pickFrom(rng, fresh2(SHAPES, usedShapes));
+  seed.centrepiece = pickFrom(rng, fresh2(CENTREPIECES, usedCentres));
   if (CHALLENGED.includes(kind)) {
-    seed.shape = pickFrom(rng, SHAPES);
     seed.core = pickFrom(rng, CORES);
     seed.prize = pickFrom(rng, PRIZES);
     // Whose place it is (D162): one faction, fixed, so rooms differ by who holds them.
     seed.factions = [pickFrom(rng, Object.keys(world.factions))];
   }
-  return { seed, camp: { ...camp, seedRng: rng.rng, used: [...used, ...seed.motifs.map((m) => m.id)], usedBusy: [...usedBusy, seed.busy], spotlight: seed.spotlight } };
+  return { seed, camp: { ...camp, seedRng: rng.rng, used: [...used, ...seed.motifs.map((m) => m.id)], usedBusy: [...usedBusy, seed.busy], usedShapes: [...usedShapes, seed.shape], usedCentres: [...usedCentres, seed.centrepiece], spotlight: seed.spotlight } };
 }

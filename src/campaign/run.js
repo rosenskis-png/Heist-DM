@@ -8,7 +8,7 @@ import { rest } from "../engine/handoff.js";
 
 // A new campaign at the start of `act`. `members` are the two companions' profiles; `romance` their relationship state.
 export function newCampaign({ act = 1, seed = 1, members = [], romance = null } = {}) {
-  return { act, way: startAct(act, seed), gold: 0, relics: [], carry: { conditions: [], spent: {} }, members: members.map((m) => m.id), romance, keep: null, used: [], usedBusy: [], premises: [], seedRng: (seed ^ 0x9e3779b9) >>> 0 };
+  return { act, way: startAct(act, seed), gold: 0, relics: [], carry: { conditions: [], spent: {} }, members: members.map((m) => m.id), romance, keep: null, used: [], usedBusy: [], usedShapes: [], usedCentres: [], premises: [], seedRng: (seed ^ 0x9e3779b9) >>> 0 };
 }
 
 // The kinds of room the current room's exits lead to, for the room being written (D144).
@@ -48,5 +48,5 @@ export function endAct(camp, chosen = [], seed = 1) {
   if (kept.length !== chosen.length) throw new Error("only the act's own relics can be kept");
   if (kept.length > (camp.keep ?? 0)) throw new Error(`the climax lets the party keep ${camp.keep ?? 0} relics, not ${kept.length}`);
   const act = camp.act + 1;
-  return { ...structuredClone(camp), act, way: startAct(act, seed), relics: kept, keep: null, used: [], usedBusy: [], premises: [] };
+  return { ...structuredClone(camp), act, way: startAct(act, seed), relics: kept, keep: null, used: [], usedBusy: [], usedShapes: [], usedCentres: [], premises: [] };
 }

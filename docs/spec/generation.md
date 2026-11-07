@@ -28,12 +28,13 @@ What the seed fixes:
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
 - **What the place is busy with** (D162): labour, a feast, a rite, a punishment, trade, getting ready for a raid, the night watch, sickness, ruin, beasts, a burial, a contest, building, drill; never repeated within an act, and fitted to the world by the sketch.
 - **Whose place it is,** for an encounter or the climax (D162): one of the world's factions.
+- **The shape and its centrepiece** (D163): the space's rough form (a street, a gallery, a warren, a garden, a market, a ford, a field of pillars, a stair hall, a courtyard, a deck, a pit, terraces, a shaft, a ledge, an island, a cave, a ruin, a crossroads of tunnels) and the one thing the eye goes to (a statue, a machine, a fire, a tree, a throne, a wreck, a pool, a beast, a scaffold, an altar, a table, a gate, a hoard, a vessel, a tomb, a bell, a mural, a hole), neither repeated within an act.
 
 Its leanings, which the sketch uses or leaves, so they pull it away from the average room without turning into extra things:
 - **Motifs:** one or two for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
-- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, terraces, an island, a deck, a cage hung in the air), whether there's a prize (none, about half the time, or something worth the risk), and the x-factor (explore, interact, acquire, overcome, get through). An oddity gets an x-factor too.
+- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), whether there's a prize (none, about half the time, or something worth the risk), and the x-factor (explore, interact, acquire, overcome, get through). An oddity gets an x-factor too.
 
-The campaign records the act's used motifs and busy-withs, the premise of each room it has generated, whose the last room was, and the seed's random position, so the next seed differs and the next sketch goes somewhere new; motifs, busy-withs and premises reset when an act ends.
+The campaign records the act's used motifs, busy-withs, shapes and centrepieces, the premise of each room it has generated, whose the last room was, and the seed's random position, so the next seed differs and the next sketch goes somewhere new; all of them reset when an act ends.
 
 ## What the sketch sees (D119)
 | Tier | Holds |

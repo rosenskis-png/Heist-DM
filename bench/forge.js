@@ -10,7 +10,7 @@ import { motifs } from "../content/motifs.js";
 import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
-import { TONES, XFACTORS, SHAPES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
+import { TONES, XFACTORS, SHAPES, CENTREPIECES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { seedRoom, designRoom } from "../src/game/generate.js";
 import { pitchCall } from "../src/calls/pitch.js";
 import { tierFor, SPEEDS, CallFailed } from "../src/ask.js";
@@ -66,7 +66,7 @@ const S = {
   speed: store.get("forge.speed", "balanced"),
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
-  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", core: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", centrepiece: "", core: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
   rooms: store.get("forge.rooms", []),
   busy: null, // what's running, for the status line
   calls: {}, // run id -> the call records (inputs and outputs), this page load only
@@ -261,7 +261,8 @@ function pinsFor(adv, r) {
   const p = {};
   if (TONES.includes(r.tone)) p.tone = r.tone;
   if ((challenged || r.kind === "oddity") && XFACTORS.includes(r.xFactor)) p.xFactor = r.xFactor;
-  if (challenged && SHAPES.includes(r.shape)) p.shape = r.shape;
+  if (SHAPES.includes(r.shape)) p.shape = r.shape;
+  if (CENTREPIECES.includes(r.centrepiece)) p.centrepiece = r.centrepiece;
   if (challenged && CORES.includes(r.core)) p.core = r.core;
   if (challenged && PRIZES.includes(r.prize)) p.prize = r.prize;
   if (BUSY.includes(r.busy)) p.busy = r.busy;
@@ -280,10 +281,12 @@ function seedWith(adv, r) {
   const earlier = S.rooms.filter((x) => x.adventure === adv.id && x.act === r.act);
   const used = earlier.flatMap((x) => x.seed?.motifs?.map((m) => m.id) ?? []);
   const usedBusy = earlier.map((x) => x.seed?.busy).filter(Boolean);
-  camp = { ...camp, used, usedBusy, way: { ...camp.way, here: r.kind } };
+  const usedShapes = earlier.map((x) => x.seed?.shape).filter(Boolean);
+  const usedCentres = earlier.map((x) => x.seed?.centrepiece).filter(Boolean);
+  camp = { ...camp, used, usedBusy, usedShapes, usedCentres, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
-  for (const k of ["tone", "xFactor", "shape", "core", "prize", "busy", "factions"]) if (p[k]) seed[k] = p[k];
+  for (const k of ["tone", "xFactor", "shape", "centrepiece", "core", "prize", "busy", "factions"]) if (p[k]) seed[k] = p[k];
   if (p.spotlight) seed.spotlight = p.spotlight === "none" ? null : p.spotlight;
   if (p.motifs) seed.motifs = p.motifs.map((id) => motifs.find((m) => m.id === id));
   return seed;
@@ -335,7 +338,7 @@ function roomsTab() {
   const fitting = pinsFor(adv, r);
   r.motifs = fitting.motifs ?? [];
   if (CHALLENGED.includes(r.kind)) r.factions = fitting.factions ?? [];
-  for (const k of ["tone", "shape", "core", "prize", "busy", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
+  for (const k of ["tone", "shape", "centrepiece", "core", "prize", "busy", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
   const set = (k, v) => ((S.room[k] = v), save(), render());
   const sel = (k, label, options, { random = "Random, as the game draws it" } = {}) =>
     h("label", { class: "field" }, label,
@@ -361,7 +364,8 @@ function roomsTab() {
       sel("tone", "Tone", TONES.map((t) => [t, t])),
       sel("busy", "Busy with", BUSY.map((t) => [t, t])),
       challenged || r.kind === "oddity" ? sel("xFactor", "X-factor", XFACTORS.map((t) => [t, t])) : null,
-      challenged ? sel("shape", "Shape", SHAPES.map((t) => [t, t])) : null,
+      sel("shape", "Shape", SHAPES.map((t) => [t, t])),
+      sel("centrepiece", "Centrepiece", CENTREPIECES.map((t) => [t, t])),
       challenged ? sel("core", "Built around", CORES.map((t) => [t, t])) : null,
       challenged ? sel("prize", "Prize", PRIZES.map((t) => [t, t])) : null,
       sel("spotlight", "Whose room it is", r.kind === "climax"
@@ -423,6 +427,7 @@ function seedView(run) {
       ["Tone", mark("tone", seed.tone)],
       ["X-factor", seed.xFactor && mark("xFactor", seed.xFactor)],
       ["Shape", seed.shape && mark("shape", seed.shape)],
+      ["Centrepiece", seed.centrepiece && mark("centrepiece", seed.centrepiece)],
       ["Busy with", seed.busy && mark("busy", seed.busy)],
       ["Built around", seed.core && mark("core", seed.core)],
       ["Prize", seed.prize && mark("prize", seed.prize)],

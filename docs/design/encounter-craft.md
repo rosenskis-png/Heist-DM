@@ -165,12 +165,14 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 - **Characters move; the ground doesn't change.** No terrain that changes state, no lines of sight to compute, no timing windows, no machines with a rule to learn (a see-saw bridge to balance). A layout that needs a grid, a timer or a tracker is a video game.
 - **Leave the DM plenty to rule.**
 
+**The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163).
+
 **The opening**
 - **A scene in motion,** told the way a person tells a friend what they saw.
 - **Teach how the room works with a small event** in the first seconds: a foot on the web, a head snapping round.
 - **Make the dilemma felt:** the child's whimper.
 
-**Variety comes from the seed, not the model.** Any salient context becomes an anchor: with the examples gone, a world whose life is one industry made every room that industry. So code draws what the place is busy with and whose place it is, and the sketch sees the act's earlier premises (D162).
+**Variety comes from the seed, not the model.** Any salient context becomes an anchor: with the examples gone, a world whose life is one industry made every room that industry. So code draws what the place is busy with, whose place it is, the shape and its centrepiece, and the sketch sees the act's earlier premises (D162, D163). The same holds for the prompt itself: every concrete image in it, even one only illustrating an instruction, came back in room after room (a captive lowered toward doom a notch at a time, in six rooms across three worlds), so concrete content comes only from lists code draws and rotates, never from fixed prompt text (D163).
 
 **Why generators get this wrong:** people add rather than subtract; each thing looks fine alone and nothing checks the total; literary taste prefers subtle to bold; a seed's requirements turn into extra things (a required second side became a second faction in every early Forge room); and old defaults creep back (the key on the guard's belt in all three).
 

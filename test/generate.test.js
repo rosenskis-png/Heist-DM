@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, XFACTORS, SHAPES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
+import { seedFor, XFACTORS, SHAPES, CENTREPIECES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
@@ -208,4 +208,24 @@ test("the act's earlier premises reach the next sketch, and the campaign keeps e
   assert.match(input, /"busy_with":/);
   assert.match(input, /"whose_place_it_is":/);
   assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## Rooms the party has already/);
+});
+
+test("shape and centrepiece are fixed, drawn from code's lists without repeats in an act; the climax alone gets its block; the prompt holds no images (D163)", () => {
+  let camp = newCampaign({ seed: 11 });
+  const shapes = [], centres = [];
+  for (let i = 0; i < 6; i++) {
+    const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
+    assert.ok(SHAPES.includes(seed.shape) && CENTREPIECES.includes(seed.centrepiece));
+    shapes.push(seed.shape); centres.push(seed.centrepiece);
+    camp = next;
+  }
+  assert.equal(new Set(shapes).size, 6);
+  assert.equal(new Set(centres).size, 6);
+  const enc = seedFor(newCampaign(), world, "encounter", ["encounter"]).seed;
+  const input = sketchInput(env, { seed: enc, world, party }, sketchSchema);
+  assert.match(input, /"fixed":\{[^}]*"shape":[^}]*"centrepiece":/);
+  assert.doesNotMatch(input, /## The climax\n\n```json/);
+  const climax = seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed;
+  assert.match(sketchInput(env, { seed: climax, world, party, earlier: ["x"] }, sketchSchema), /## The climax\n\n```json[\s\S]*who_stands_at_its_centre/);
+  assert.doesNotMatch(prompts.sketch, /by a thread|pincer|lowering|sinking|mind flayer|winery|hung in the air/i, "the sketch prompt holds no concrete images");
 });

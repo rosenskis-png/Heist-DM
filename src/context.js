@@ -658,12 +658,27 @@ export function pitchInput(env, c, schema) {
 
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
+// What a climax is built from (D163): the act's goal, who stands at its centre (the boss of the faction whose place it
+// is), and the act's rooms so far, which the climax pays off. Sent only to a climax.
+function climaxText(c) {
+  const act = c.world.acts[c.seed.act - 1];
+  const f = c.seed.factions?.[0] && c.world.factions[c.seed.factions[0]];
+  return {
+    the_act: { name: act?.name, goal: act?.goal },
+    who_stands_at_its_centre: f ? { who: f.boss, of: f.name, what_they_want: f.goal, how_they_behave: f.rules } : "the act's antagonist, from the world",
+    the_heart: c.world.heart,
+    what_the_act_built_up: c.earlier?.length ? c.earlier : "the act so far",
+  };
+}
+
 // What the room's sketch is built from (D160): what the seed fixes, and its leanings, which the sketch uses or leaves.
 const seedText = (seed, world) => ({
   fixed: {
     kind: seed.kind,
     tone: seed.tone,
     busy_with: seed.busy,
+    ...(seed.shape ? { shape: seed.shape } : {}),
+    ...(seed.centrepiece ? { centrepiece: seed.centrepiece } : {}),
     ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),
     whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
       : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
@@ -672,7 +687,6 @@ const seedText = (seed, world) => ({
   },
   leanings: {
     ...(seed.core ? { built_around: seed.core } : {}),
-    ...(seed.shape ? { a_shape_you_might_use: seed.shape } : {}),
     ...(seed.prize ? { prize: seed.prize } : {}),
     ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
     motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern })),
@@ -720,6 +734,7 @@ export function sketchInput(env, c, schema) {
     block("Output format", shapeText(schema)),
     block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed, c.world)),
     c.earlier?.length ? block("Rooms the party has already passed through this act: this one is somewhere different", c.earlier) : null,
+    c.seed.kind === "climax" ? block("The climax", climaxText(c)) : null,
     block("The world", designWorld(c.world, c.seed)),
     c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
     block("The party", designParty(c)),
