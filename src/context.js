@@ -659,10 +659,12 @@ export function pitchInput(env, c, schema) {
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
 // What the room's sketch is built from (D160): what the seed fixes, and its leanings, which the sketch uses or leaves.
-const seedText = (seed) => ({
+const seedText = (seed, world) => ({
   fixed: {
     kind: seed.kind,
     tone: seed.tone,
+    busy_with: seed.busy,
+    ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),
     whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
       : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
       : "no one's: the room touches no companion's story; they react to it as themselves",
@@ -709,13 +711,15 @@ function designWorld(world, seed) {
 }
 
 // The sketch call (D117, D119, D161): must honour the hand-off; the world and the act as background; the seed; the
-// party. No example rooms: they become anchors (D161). On the bench, the designer's brief (D154).
+// party; the premises of the act's earlier rooms (D162). No example rooms: they become anchors (D161). On the bench,
+// the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
     block("Your job", env.prompts.sketch),
     block("Output format", shapeText(schema)),
-    block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed)),
+    block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed, c.world)),
+    c.earlier?.length ? block("Rooms the party has already passed through this act: this one is somewhere different", c.earlier) : null,
     block("The world", designWorld(c.world, c.seed)),
     c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
     block("The party", designParty(c)),

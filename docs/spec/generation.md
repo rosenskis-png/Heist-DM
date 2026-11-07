@@ -26,12 +26,14 @@ What the seed fixes:
 - **The kind** comes from the way (D144); the exits' kinds are drawn with it.
 - **Whose room it is** (D158): one companion's slot or no one's, no one's about half the time, never the same companion twice running; the climax is both companions'. A companion's thing (the motif) is drawn only when the room is someone's.
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
+- **What the place is busy with** (D162): labour, a feast, a rite, a punishment, trade, getting ready for a raid, the night watch, sickness, ruin, beasts, a burial, a contest, building, drill; never repeated within an act, and fitted to the world by the sketch.
+- **Whose place it is,** for an encounter or the climax (D162): one of the world's factions.
 
 Its leanings, which the sketch uses or leaves, so they pull it away from the average room without turning into extra things:
 - **Motifs:** one or two for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
-- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, terraces, an island, a deck, a cage hung in the air), whether there's a prize (none, about half the time, or something worth the risk), the x-factor (explore, interact, acquire, overcome, get through), and one or two of the world's factions. An oddity gets an x-factor too.
+- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, terraces, an island, a deck, a cage hung in the air), whether there's a prize (none, about half the time, or something worth the risk), and the x-factor (explore, interact, acquire, overcome, get through). An oddity gets an x-factor too.
 
-The campaign records the act's used motifs, whose the last room was, and the seed's random position, so the next seed differs; the motifs reset when an act ends.
+The campaign records the act's used motifs and busy-withs, the premise of each room it has generated, whose the last room was, and the seed's random position, so the next seed differs and the next sketch goes somewhere new; motifs, busy-withs and premises reset when an act ends.
 
 ## What the sketch sees (D119)
 | Tier | Holds |

@@ -1,6 +1,7 @@
 // Generation (docs/spec/generation.md, D117, D153, D156): the next room, from the campaign and the hand-off. Code draws
 // the kinds its exits lead to and its seed; the sketch call designs it; the encode call turns it into packet data; code
-// lays it out. The sketch is generator-only and thrown away.
+// lays it out. The sketch is generator-only and thrown away, except its premise, which the campaign keeps for the act's
+// next sketches (D162).
 import { drawExits } from "../campaign/run.js";
 import { seedFor } from "../campaign/seed.js";
 import { layout } from "../engine/layout.js";
@@ -25,7 +26,7 @@ export async function designRoom(io, env, c) {
   const stage = (name, value) => (io.onStage?.(name, value), value);
   const sketch = c.sketch ?? stage("sketch", await sketchCall(io, env, c));
   const encoded = stage("encoded", await encodeCall(io, env, { ...c, sketch }));
-  return stage("laid out", layout(encoded));
+  return { ...stage("laid out", layout(encoded)), sketch };
 }
 
 // `camp` is the campaign, with the room's kind already entered (`camp.way.here`); `world` its world; `party` the party's
@@ -34,6 +35,7 @@ export async function designRoom(io, env, c) {
 // and the campaign with its random positions and used motifs moved on.
 export async function generateRoom(io, env, { camp, world, party, handoff = null, log = [] }) {
   const { seed, camp: next } = seedRoom(camp, world);
-  const { packet, mapped } = await designRoom(io, env, { seed, world, party, handoff, log });
-  return { packet, mapped, seed, camp: next };
+  const { packet, mapped, sketch } = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [] });
+  // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162).
+  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), sketch.premise] } };
 }

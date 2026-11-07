@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, XFACTORS, SHAPES, CORES, PRIZES } from "../src/campaign/seed.js";
+import { seedFor, XFACTORS, SHAPES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
@@ -31,7 +31,8 @@ test("the seed asks a different question each time, suits the kind, and avoids t
   const seen = new Set();
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
-    assert.ok(XFACTORS.includes(seed.xFactor) && SHAPES.includes(seed.shape) && CORES.includes(seed.core) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length);
+    assert.ok(XFACTORS.includes(seed.xFactor) && SHAPES.includes(seed.shape) && CORES.includes(seed.core) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length === 1);
+    assert.ok(BUSY.includes(seed.busy) && !(camp.usedBusy ?? []).includes(seed.busy), "what the place is busy with doesn't repeat within an act");
     assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
     camp = next;
@@ -111,6 +112,7 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
   const s = load({ packet: room.packet, party });
   assert.equal(s.tick, 0);
   assert.ok(room.camp.used.length > 0);
+  assert.deepEqual(room.camp.premises, [sketch.premise], "the campaign keeps the premise for the act's next sketches");
 });
 
 test("the designer's brief reaches the sketch only when given, and never encode (D154)", () => {
@@ -197,4 +199,13 @@ test("the worked notes are prep notes the sketch schema accepts, and the sketch 
   const input = sketchInput(env, { seed, world, party }, sketchSchema);
   assert.match(input, /"fixed":[\s\S]*"leanings":/);
   assert.doesNotMatch(input, /Example rooms|Worked example|mind flayer asleep/);
+});
+
+test("the act's earlier premises reach the next sketch, and the campaign keeps each new one (D162)", async () => {
+  const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
+  const input = sketchInput(env, { seed, world, party, earlier: ["A goblin oil works round a boiling cauldron."] }, sketchSchema);
+  assert.match(input, /Rooms the party has already passed through[\s\S]*goblin oil works/);
+  assert.match(input, /"busy_with":/);
+  assert.match(input, /"whose_place_it_is":/);
+  assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## Rooms the party has already/);
 });

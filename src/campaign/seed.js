@@ -10,6 +10,9 @@ export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get thro
 export const SHAPES = ["rings or tiers around a hollow", "a tower or shaft", "a bridge or ledge over a drop", "a pit or bowl", "terraces down a slope", "an island in something", "a deck or platform", "a cage or frame hung in the air"];
 // What the room is built around (encounter-craft §16).
 export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
+// What the place is busy with when the party arrives (D162): drawn so an act's rooms don't repeat it, and fitted to the
+// world by the sketch, so a world whose life is one industry doesn't make every room that industry.
+export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship", "a punishment or execution", "trade or a market", "getting ready for a raid", "sleep or the night watch", "sickness or a plague", "ruin and decay", "beasts or monsters kept or loose", "a burial or mourning", "a contest or a game", "building or repair", "training or drill"];
 // Whether there's anything worth having beyond the way out; none is about half (encounter-craft §16).
 export const PRIZES = ["none: getting out is the whole of it", "something worth the risk"];
 export const TONES = ["very stressed about time", "tense", "even", "light", "a fantasy playground"];
@@ -48,13 +51,15 @@ export function seedFor(camp, world, kind, exits = []) {
   const lean = Math.max(-2, Math.min(2, Math.round(((camp.way.strain ?? 0) - 2) / 2)));
   seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean))];
   if (CHALLENGED.includes(kind) || kind === "oddity") seed.xFactor = pickFrom(rng, XFACTORS);
+  const usedBusy = camp.usedBusy ?? [];
+  const busyPool = BUSY.filter((b) => !usedBusy.includes(b));
+  seed.busy = pickFrom(rng, busyPool.length ? busyPool : BUSY);
   if (CHALLENGED.includes(kind)) {
     seed.shape = pickFrom(rng, SHAPES);
     seed.core = pickFrom(rng, CORES);
     seed.prize = pickFrom(rng, PRIZES);
-    const factions = Object.keys(world.factions);
-    seed.factions = [pickFrom(rng, factions)];
-    if (factions.length > 1 && roll(rng, 2)) seed.factions.push(pickFrom(rng, factions.filter((f) => f !== seed.factions[0])));
+    // Whose place it is (D162): one faction, fixed, so rooms differ by who holds them.
+    seed.factions = [pickFrom(rng, Object.keys(world.factions))];
   }
-  return { seed, camp: { ...camp, seedRng: rng.rng, used: [...used, ...seed.motifs.map((m) => m.id)], spotlight: seed.spotlight } };
+  return { seed, camp: { ...camp, seedRng: rng.rng, used: [...used, ...seed.motifs.map((m) => m.id)], usedBusy: [...usedBusy, seed.busy], spotlight: seed.spotlight } };
 }

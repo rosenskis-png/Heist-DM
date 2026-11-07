@@ -145,7 +145,7 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 - **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
 - **Two ways to hold together:** a place hard at its own work (the winery), or one big thing in a space (the watchtower).
 - **Bold, visible and a little pulpy** beats subtle and hidden. Detail counts by what players can do with it.
-- **People from outside:** what they're doing and what state they're in. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
+- **People from outside:** what they're doing, what state they're in, and where their attention is. Someone who watches everything at once leaves nothing to play with; say plainly who's busy, who's arguing, who only looks up at a shout. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
 - **Everything cuts both ways,** and is in a state that can tip: asleep, caged, rotten, sinking.
 - **Many uses, not one.** Plain physical words suggest many; a hidden special property (a knife that cuts silk silently) is an answer key.
 - **The genre's old images supply the verbs:** the sleeping monster, the caged beast, the rotten walkway.
@@ -169,6 +169,8 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 - **A scene in motion,** told the way a person tells a friend what they saw.
 - **Teach how the room works with a small event** in the first seconds: a foot on the web, a head snapping round.
 - **Make the dilemma felt:** the child's whimper.
+
+**Variety comes from the seed, not the model.** Any salient context becomes an anchor: with the examples gone, a world whose life is one industry made every room that industry. So code draws what the place is busy with and whose place it is, and the sketch sees the act's earlier premises (D162).
 
 **Why generators get this wrong:** people add rather than subtract; each thing looks fine alone and nothing checks the total; literary taste prefers subtle to bold; a seed's requirements turn into extra things (a required second side became a second faction in every early Forge room); and old defaults creep back (the key on the guard's belt in all three).
 

@@ -10,7 +10,7 @@ import { motifs } from "../content/motifs.js";
 import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
-import { TONES, XFACTORS, SHAPES, CORES, PRIZES } from "../src/campaign/seed.js";
+import { TONES, XFACTORS, SHAPES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { seedRoom, designRoom } from "../src/game/generate.js";
 import { pitchCall } from "../src/calls/pitch.js";
 import { tierFor, SPEEDS, CallFailed } from "../src/ask.js";
@@ -66,7 +66,7 @@ const S = {
   speed: store.get("forge.speed", "balanced"),
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
-  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", core: "", prize: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", core: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
   rooms: store.get("forge.rooms", []),
   busy: null, // what's running, for the status line
   calls: {}, // run id -> the call records (inputs and outputs), this page load only
@@ -264,6 +264,7 @@ function pinsFor(adv, r) {
   if (challenged && SHAPES.includes(r.shape)) p.shape = r.shape;
   if (challenged && CORES.includes(r.core)) p.core = r.core;
   if (challenged && PRIZES.includes(r.prize)) p.prize = r.prize;
+  if (BUSY.includes(r.busy)) p.busy = r.busy;
   if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
   const fs = challenged ? r.factions.filter((f) => adv.world.factions[f]) : [];
   if (fs.length) p.factions = fs;
@@ -276,11 +277,13 @@ function pinsFor(adv, r) {
 function seedWith(adv, r) {
   let camp = newCampaign({ act: r.act, seed: (Math.random() * 2 ** 31) >>> 0 });
   // The act's motifs used so far on this bench, so successive rooms vary as they would across an act.
-  const used = S.rooms.filter((x) => x.adventure === adv.id && x.act === r.act).flatMap((x) => x.seed?.motifs?.map((m) => m.id) ?? []);
-  camp = { ...camp, used, way: { ...camp.way, here: r.kind } };
+  const earlier = S.rooms.filter((x) => x.adventure === adv.id && x.act === r.act);
+  const used = earlier.flatMap((x) => x.seed?.motifs?.map((m) => m.id) ?? []);
+  const usedBusy = earlier.map((x) => x.seed?.busy).filter(Boolean);
+  camp = { ...camp, used, usedBusy, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
-  for (const k of ["tone", "xFactor", "shape", "core", "prize", "factions"]) if (p[k]) seed[k] = p[k];
+  for (const k of ["tone", "xFactor", "shape", "core", "prize", "busy", "factions"]) if (p[k]) seed[k] = p[k];
   if (p.spotlight) seed.spotlight = p.spotlight === "none" ? null : p.spotlight;
   if (p.motifs) seed.motifs = p.motifs.map((id) => motifs.find((m) => m.id === id));
   return seed;
@@ -309,7 +312,9 @@ async function runRoom(run, adv) {
   render();
   const party = partyFor({ name: "The player", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world);
   try {
-    await designRoom(io, env, { seed: run.seed, world: adv.world, party, handoff: run.arrives ? { stub: run.arrives, conditions: [] } : null, log: [], brief: run.brief || null, sketch: run.stages.sketch });
+    // The act's earlier rooms on this bench, by premise, as the campaign would pass them (D162).
+    const before = S.rooms.filter((x) => x.id !== run.id && x.adventure === run.adventure && x.act === run.act && x.at < run.at && x.stages?.sketch?.premise).map((x) => x.stages.sketch.premise).slice(0, 6);
+    await designRoom(io, env, { seed: run.seed, world: adv.world, party, handoff: run.arrives ? { stub: run.arrives, conditions: [] } : null, log: [], brief: run.brief || null, sketch: run.stages.sketch, earlier: before });
   } catch (e) {
     run.error = errorText(e);
     if (e instanceof CallFailed) run.failedCall = e.call;
@@ -330,7 +335,7 @@ function roomsTab() {
   const fitting = pinsFor(adv, r);
   r.motifs = fitting.motifs ?? [];
   if (CHALLENGED.includes(r.kind)) r.factions = fitting.factions ?? [];
-  for (const k of ["tone", "shape", "core", "prize", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
+  for (const k of ["tone", "shape", "core", "prize", "busy", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
   const set = (k, v) => ((S.room[k] = v), save(), render());
   const sel = (k, label, options, { random = "Random, as the game draws it" } = {}) =>
     h("label", { class: "field" }, label,
@@ -354,6 +359,7 @@ function roomsTab() {
       sel("kind", "Kind of room", KINDS.map((k) => [k, `${k}${ROOM_KINDS.includes(k) ? " (a room, no objective)" : ""}`]), { random: null }),
       sel("act", "Act", adventureActs(adv), { random: null }),
       sel("tone", "Tone", TONES.map((t) => [t, t])),
+      sel("busy", "Busy with", BUSY.map((t) => [t, t])),
       challenged || r.kind === "oddity" ? sel("xFactor", "X-factor", XFACTORS.map((t) => [t, t])) : null,
       challenged ? sel("shape", "Shape", SHAPES.map((t) => [t, t])) : null,
       challenged ? sel("core", "Built around", CORES.map((t) => [t, t])) : null,
@@ -363,7 +369,7 @@ function roomsTab() {
         : [["companion_a", `${authored[adv.companions[0]]?.name ?? "First companion"}'s`], ["companion_b", `${authored[adv.companions[1]]?.name ?? "Second companion"}'s`], ["none", "No one's"]]),
     ),
     challenged
-      ? h("div", { class: "field" }, h("span", { class: "muted small" }, "Factions in the room (none ticked: the game picks one or two)"),
+      ? h("div", { class: "field" }, h("span", { class: "muted small" }, "Whose place it is (none ticked: the game picks one)"),
         h("div", { class: "row" }, factionIds.map((f) => h("label", { class: "small" }, h("input", { type: "checkbox", id: `fac-${f}`, checked: r.factions.includes(f), onchange: () => toggle("factions", f) }), " ", adv.world.factions[f].name))))
       : null,
     h("div", { class: "field" }, h("span", { class: "muted small" }, `Motifs for a ${r.kind} (none ticked: the game draws ${challenged ? "two or three" : "one"})`),
@@ -417,6 +423,7 @@ function seedView(run) {
       ["Tone", mark("tone", seed.tone)],
       ["X-factor", seed.xFactor && mark("xFactor", seed.xFactor)],
       ["Shape", seed.shape && mark("shape", seed.shape)],
+      ["Busy with", seed.busy && mark("busy", seed.busy)],
       ["Built around", seed.core && mark("core", seed.core)],
       ["Prize", seed.prize && mark("prize", seed.prize)],
       ["Meaningful by", seed.meat],
