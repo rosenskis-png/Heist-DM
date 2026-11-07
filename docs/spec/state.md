@@ -14,7 +14,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **The player:** name, class, and the hidden secret, drawn from the world's, which reveals by act (`content/setting.js`, `playerSecretReveal`).
 - **Gear and items** the party holds.
 - **The encounter log:** one line per finished encounter. The sketch call reads it as background (D119).
-- **What the act has used:** the kinds, genres and motifs of its packets, so the next seed avoids repeats (D118).
+- **What the act has used:** the motifs and busy-withs of its rooms, and each generated room's premise, so the next seed avoids repeats and the next sketch goes somewhere new (D118, D162).
 - **The hand-off** from the last encounter (below).
 
 ## Live encounter state (bounded by the encounter)
