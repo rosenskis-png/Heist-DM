@@ -10,7 +10,7 @@ import { motifs } from "../content/motifs.js";
 import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
-import { TONES, XFACTORS, SHAPES, MEAT } from "../src/campaign/seed.js";
+import { TONES, XFACTORS, SHAPES, CORES, PRIZES } from "../src/campaign/seed.js";
 import { seedRoom, designRoom } from "../src/game/generate.js";
 import { pitchCall } from "../src/calls/pitch.js";
 import { tierFor, SPEEDS, CallFailed } from "../src/ask.js";
@@ -66,7 +66,7 @@ const S = {
   speed: store.get("forge.speed", "balanced"),
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
-  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", meat: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, tone: "", xFactor: "", shape: "", core: "", prize: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", ...store.get("forge.room", {}) },
   rooms: store.get("forge.rooms", []),
   busy: null, // what's running, for the status line
   calls: {}, // run id -> the call records (inputs and outputs), this page load only
@@ -262,7 +262,8 @@ function pinsFor(adv, r) {
   if (TONES.includes(r.tone)) p.tone = r.tone;
   if ((challenged || r.kind === "oddity") && XFACTORS.includes(r.xFactor)) p.xFactor = r.xFactor;
   if (challenged && SHAPES.includes(r.shape)) p.shape = r.shape;
-  if (challenged && MEAT.includes(r.meat)) p.meat = r.meat;
+  if (challenged && CORES.includes(r.core)) p.core = r.core;
+  if (challenged && PRIZES.includes(r.prize)) p.prize = r.prize;
   if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
   const fs = challenged ? r.factions.filter((f) => adv.world.factions[f]) : [];
   if (fs.length) p.factions = fs;
@@ -279,7 +280,7 @@ function seedWith(adv, r) {
   camp = { ...camp, used, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
-  for (const k of ["tone", "xFactor", "shape", "meat", "factions"]) if (p[k]) seed[k] = p[k];
+  for (const k of ["tone", "xFactor", "shape", "core", "prize", "factions"]) if (p[k]) seed[k] = p[k];
   if (p.spotlight) seed.spotlight = p.spotlight === "none" ? null : p.spotlight;
   if (p.motifs) seed.motifs = p.motifs.map((id) => motifs.find((m) => m.id === id));
   return seed;
@@ -329,7 +330,7 @@ function roomsTab() {
   const fitting = pinsFor(adv, r);
   r.motifs = fitting.motifs ?? [];
   if (CHALLENGED.includes(r.kind)) r.factions = fitting.factions ?? [];
-  for (const k of ["tone", "meat", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
+  for (const k of ["tone", "shape", "core", "prize", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
   const set = (k, v) => ((S.room[k] = v), save(), render());
   const sel = (k, label, options, { random = "Random, as the game draws it" } = {}) =>
     h("label", { class: "field" }, label,
@@ -355,7 +356,8 @@ function roomsTab() {
       sel("tone", "Tone", TONES.map((t) => [t, t])),
       challenged || r.kind === "oddity" ? sel("xFactor", "X-factor", XFACTORS.map((t) => [t, t])) : null,
       challenged ? sel("shape", "Shape", SHAPES.map((t) => [t, t])) : null,
-      challenged ? sel("meat", "What makes its choices meaningful", MEAT.map((t) => [t, t])) : null,
+      challenged ? sel("core", "Built around", CORES.map((t) => [t, t])) : null,
+      challenged ? sel("prize", "Prize", PRIZES.map((t) => [t, t])) : null,
       sel("spotlight", "Whose room it is", r.kind === "climax"
         ? [["both", "Both companions'"]]
         : [["companion_a", `${authored[adv.companions[0]]?.name ?? "First companion"}'s`], ["companion_b", `${authored[adv.companions[1]]?.name ?? "Second companion"}'s`], ["none", "No one's"]]),
@@ -415,7 +417,9 @@ function seedView(run) {
       ["Tone", mark("tone", seed.tone)],
       ["X-factor", seed.xFactor && mark("xFactor", seed.xFactor)],
       ["Shape", seed.shape && mark("shape", seed.shape)],
-      ["Meaningful by", seed.meat && mark("meat", seed.meat)],
+      ["Built around", seed.core && mark("core", seed.core)],
+      ["Prize", seed.prize && mark("prize", seed.prize)],
+      ["Meaningful by", seed.meat],
       ["Factions", seed.factions && mark("factions", seed.factions.join(", "))],
       ["Whose room", mark("spotlight", seed.spotlight === "both" ? "both companions'" : seed.spotlight ? `${authored[run.companions?.[seed.spotlight === "companion_a" ? 0 : 1]]?.name ?? seed.spotlight}'s` : seed.spotlight === null ? "no one's" : null)],
       ["Exits lead to", seed.exits.length ? seed.exits.join(", ") : "nothing: the act ends"],
@@ -425,11 +429,27 @@ function seedView(run) {
     run.arrives ? h("div", { class: "sub" }, h("span", { class: "muted small" }, "Arriving through"), h("p", {}, run.arrives)) : null));
 }
 
+// The sketch as a DM's prep note (D160). Rooms saved before it carry the old design statement and prose.
 function sketchView(sk) {
-  const d = sk.design;
+  const list = (xs) => h("ul", { class: "plain" }, xs.map((o) => h("li", {}, o)));
+  if (sk.design) {
+    const d = sk.design;
+    return h("div", { class: "stage" },
+      kv([["Start", d.start], ["Goal", d.goal], ["Challenge", d.challenge], ["Outcomes", list(d.outcomes)], ["X-factor", d.x_factor], ["Pressure", d.pressure]]),
+      prose(sk.sketch));
+  }
   return h("div", { class: "stage" },
-    kv([["Start", d.start], ["Goal", d.goal], ["Challenge", d.challenge], ["Outcomes", h("ul", { class: "plain" }, d.outcomes.map((o) => h("li", {}, o)))], ["X-factor", d.x_factor], ["Pressure", d.pressure]]),
-    prose(sk.sketch));
+    kv([
+      ["Premise", h("b", {}, sk.premise)],
+      ["Shape", sk.shape],
+      ["Things", h("span", {}, list(sk.things), h("span", { class: "chip" }, `${sk.things.length} things`))],
+      ["Cut", sk.cut],
+      ["Pressure", sk.pressure],
+      ["Outcomes", list(sk.outcomes)],
+      ["Notes", sk.notes],
+    ]),
+    h("span", { class: "muted small" }, "Opening, as sketched"),
+    h("div", { class: "opening" }, sk.opening));
 }
 
 // How big the room came out, against what the sketch prompt asks (D156). Shown, never enforced.
@@ -555,8 +575,8 @@ async function start() {
   render();
   try {
     const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-    const [encoded, ...prompts] = await Promise.all(["fixtures/generator/encoded.json", ...PROMPTS.map((n) => `prompts/${n}.md`)].map(text));
-    env = { prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])), examples: { encoded: JSON.parse(encoded) } };
+    const [encoded, sketches, ...prompts] = await Promise.all(["fixtures/generator/encoded.json", "fixtures/generator/sketches.json", ...PROMPTS.map((n) => `prompts/${n}.md`)].map(text));
+    env = { prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])), examples: { encoded: JSON.parse(encoded), sketches: JSON.parse(sketches) } };
   } catch (e) {
     document.getElementById("main").replaceChildren(h("p", { class: "err" }, `The Forge couldn't load: ${errorText(e)}`));
     return;

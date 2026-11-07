@@ -6,6 +6,8 @@ How to design a room that plays the way a great DM would run it, in a game where
 
 **This is not a prompt.** Rules in a prompt compete (`docs/principles.md`). The generator gets small slices as judgment; anything checkable becomes a check in code.
 
+**§16 governs.** It is the designer's discussion of 2026-11-07 on what plays in theatre of the mind (D160). Where an earlier section pulls toward more (more sides, inner lives, measured blockouts, hiding what's plain), §16 wins.
+
 ---
 
 ## 1. What a room is now
@@ -112,13 +114,11 @@ Define observers by their senses where it matters. Different senses make disguis
 
 ## 14. The generator's order
 
-1. **Seed** (code): the kind, the x-factor, the shape, what makes its choices meaningful, the tone, motifs, the act and the factions present, and the exits' kinds.
-2. **Design statement** (§2), then **blockout** (§10).
-3. **People** with wants, fears and what they'll never do, and at least two sides wanting different things.
-4. **Things** with properties (§4), and the **pressure** (§6).
-5. **Prizes and exits** (§7), and **the opening**: two or three short paragraphs, each about one thing (what's happening; what the party wants and who has it; what's coming and the ways on), everything usable named where it belongs, what things are doing in the world but never what they could do for the party (D136, D155, D159).
+1. **Seed** (code): what it fixes (the kind, the tone, whose room it is, the exits' kinds) and its leanings (the x-factor, a shape, what the room is built around, whether there's a prize, one or two motifs, the factions), which the sketch uses or leaves (D160).
+2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the cut, the pressure, the outcomes, notes, the opening (§16, `docs/spec/calls/sketch.md`).
+3. **Encode** turns the note into the packet, adding nothing (D156, D160).
 
-Keep it small: three or four zones, two or three people who matter, one or two sources of pressure, five or six things (D159). The good versions of a room have fewer branches and more connections. Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.
+Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.
 
 ## 15. Failure patterns
 
@@ -136,3 +136,39 @@ Keep it small: three or four zones, two or three people who matter, one or two s
 | Every room feels the same | the average room, every time | the seed's axes; the x-factor (§2, §14) |
 | Nothing resists | yes-and mush | constraints written down (§4, §5) |
 | Players argue at identical doors | undifferentiated exits | exits that feel different (§7) |
+
+## 16. Theatre of the mind
+
+The goal is emergent play: a few clear, obvious things that all bump into each other, so the complexity comes from what the players do, not from what was set up. The touchstones are the designer's: a mind flayer sergeant asleep beside a chest of loot at the top of the watchtower in the middle of a goblin camp, with gems in the ceiling, rotten walkways across it and caged spiders on the far side; goblins pressing wine round a two-storey vat while the hobgoblin at the door drinks the stock; a shaft of four stone rings strung with silk, a pincer-mouthed girl hanging in the hollow, and a living child at the bottom. The worked notes are `fixtures/generator/sketches.json`.
+
+**Things**
+- **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
+- **Two ways to hold together:** a place hard at its own work (the winery), or one big thing in a space (the watchtower).
+- **Bold, visible and a little pulpy** beats subtle and hidden. Detail counts by what players can do with it.
+- **People from outside:** what they're doing and what state they're in. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
+- **Everything cuts both ways,** and is in a state that can tip: asleep, caged, rotten, sinking.
+- **Many uses, not one.** Plain physical words suggest many; a hidden special property (a knife that cuts silk silently) is an answer key.
+- **The genre's old images supply the verbs:** the sleeping monster, the caged beast, the rotten walkway.
+
+**The core danger**
+- **Danger between the party and where it wants to be,** which is often just the way out. Escape alone is a whole objective.
+- **A risk, not a gate.** A lock, a password or a key on a belt has one answer. A danger beside the goal can only be managed, and managing it is the game.
+- **A temptation, not an obligation,** and often no prize at all.
+- **Pressure from the premise:** the sleeper stirring, the creature descending. One built-in source beats three bolted on.
+
+**The space**
+- **One shape anyone can picture from a sentence:** rings, a tower, a bridge, a pit, a stair, a deck.
+- **Places in relational words:** above, below, across, at the centre, on the far side. No measurements.
+- **The shape makes the trouble:** the way out lies past the danger, or toward it.
+- **Characters move; the ground doesn't change.** No terrain that changes state, no lines of sight to compute, no timing windows. A layout that needs a grid, a timer or a tracker is a video game.
+- **Leave the DM plenty to rule.**
+
+**The opening**
+- **A scene in motion,** told the way a person tells a friend what they saw.
+- **Teach how the room works with a small event** in the first seconds: a foot on the web, a head snapping round.
+- **Make the dilemma felt:** the child's whimper.
+
+**Why generators get this wrong:** people add rather than subtract; each thing looks fine alone and nothing checks the total; literary taste prefers subtle to bold; a seed's requirements turn into extra things (a required second side became a second faction in every early Forge room); and old defaults creep back (the key on the guard's belt in all three).
+
+**How the generator is steered toward it** is by form, order, questions and unexplained examples, not by rules or checks that reject (D160): the sketch is a short prep note written premise first; it asks itself questions it never writes down; it names a cut; its examples are shown with no commentary, so it learns the form rather than writing explanations that become routes; and the seed's axes are leanings, not requirements.
+

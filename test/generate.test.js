@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, XFACTORS } from "../src/campaign/seed.js";
+import { seedFor, XFACTORS, SHAPES, CORES, PRIZES } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
@@ -15,11 +15,13 @@ import { sketchSchema, encodeSchema } from "../schemas/index.js";
 import { worldOf } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { motifs } from "../content/motifs.js";
+import { validate } from "../src/validate.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const encoded = JSON.parse(file("fixtures/generator/encoded.json"));
 const prompts = Object.fromEntries(readdirSync(new URL("../prompts/", import.meta.url)).map((f) => [f.replace(".md", ""), file(`prompts/${f}`)]));
-const env = { prompts, examples: { encoded } };
+const sketches = JSON.parse(file("fixtures/generator/sketches.json"));
+const env = { prompts, examples: { encoded, sketches } };
 const world = worldOf();
 const party = partyFor({ name: "P", class: "rogue" }, ["fern", "nadia"], world);
 const SLOTS = [{ id: "player" }, { id: "companion_a" }, { id: "companion_b" }];
@@ -29,12 +31,12 @@ test("the seed asks a different question each time, suits the kind, and avoids t
   const seen = new Set();
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
-    assert.ok(XFACTORS.includes(seed.xFactor) && seed.shape && seed.meat && seed.tone && seed.factions.length);
-    assert.ok(seed.motifs.length >= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
+    assert.ok(XFACTORS.includes(seed.xFactor) && SHAPES.includes(seed.shape) && CORES.includes(seed.core) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length);
+    assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
     camp = next;
   }
-  assert.ok(seen.size >= 6, "motifs vary across an act");
+  assert.ok(seen.size >= 5, "motifs vary across an act");
   const calm = seedFor(newCampaign(), world, "campfire", ["encounter"]).seed;
   assert.equal(calm.xFactor, undefined);
   assert.equal(calm.motifs.length, 1);
@@ -80,7 +82,7 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
   // Enter an encounter so the room being written is one, as after a room's end.
   camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
   const calls = [];
-  const sketch = { design: { start: "Steam.", goal: "Get through.", challenge: "The players must cross the floor by passing as washers, and that's hard because the overseer knows every face.", outcomes: ["clean", "pressed"], x_factor: "get through", pressure: "The inspection." }, sketch: "Blockout: ..." };
+  const sketch = { premise: "Washers boil the garrison's linen in a steam-fogged laundry, and the overseer knows every face.", shape: "A long hall.", things: ["The vats."], cut: "nothing", pressure: "The inspection.", outcomes: ["clean", "pressed"], notes: "x", opening: "Steam." };
   const io = {
     sample: {
       json: async (input) => {
@@ -116,14 +118,14 @@ test("the designer's brief reaches the sketch only when given, and never encode 
   const c = { seed, world, party, brief: "A drowned chapel with a choir still singing." };
   assert.match(sketchInput(env, c, sketchSchema), /designer's brief[\s\S]*drowned chapel/);
   assert.doesNotMatch(sketchInput(env, { ...c, brief: "" }, sketchSchema), /designer's brief/);
-  const sketch = { design: {}, sketch: "x" };
+  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" };
   assert.doesNotMatch(encodeInput(env, { ...c, sketch }, encodeSchema), /drowned chapel/);
 });
 
 test("the generator's inputs stay small enough", () => {
   const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
   const c = { seed, world, party, handoff: { stub: "x", conditions: [] }, log: [] };
-  const sketch = { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "x" }, sketch: "x".repeat(6000) };
+  const sketch = { premise: "x", shape: "x", things: ["x".repeat(600)], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x".repeat(3000), opening: "x".repeat(2400) };
   const sizes = {
     sketch: sketchInput(env, c, sketchSchema),
     encode: encodeInput(env, { ...c, sketch }, encodeSchema),
@@ -152,7 +154,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
       },
     },
   };
-  const sketch = { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "none" }, sketch: "x" };
+  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" };
   const { packet } = await designRoom(io, env, { seed, world, party, sketch });
   assert.deepEqual(calls, ["encode", "encode"]);
   assert.equal(packet.mode, "room");
@@ -183,8 +185,17 @@ test("a reply with no JSON is tried once more, and what it said is kept (D159)",
   const { ask } = await import("../src/ask.js");
   let n = 0;
   const records = [];
-  const io = { sample: { json: async () => (n++ ? { design: { start: "x", goal: "x", challenge: "x", outcomes: ["x"], x_factor: "x", pressure: "x" }, sketch: "x" } : Promise.reject({ code: "invalid_json", message: "no JSON", text: "I'd rather not." })) }, onCall: (r) => records.push(r) };
+  const io = { sample: { json: async () => (n++ ? { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" } : Promise.reject({ code: "invalid_json", message: "no JSON", text: "I'd rather not." })) }, onCall: (r) => records.push(r) };
   const out = await ask(io, { call: "sketch", schema: sketchSchema, input: "x" });
-  assert.equal(out.sketch, "x");
+  assert.equal(out.premise, "x");
   assert.equal(records[0].noJson, "I'd rather not.");
+});
+
+test("the example rooms are prep notes the sketch schema accepts, and reach the sketch unexplained beside the seed's leanings (D160)", () => {
+  for (const ex of sketches) assert.deepEqual(validate(sketchSchema, ex), [], ex.premise);
+  const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
+  const input = sketchInput(env, { seed, world, party }, sketchSchema);
+  assert.match(input, /Example rooms[\s\S]*mind flayer/);
+  assert.match(input, /"fixed":[\s\S]*"leanings":/);
+  assert.doesNotMatch(input, /Worked example: a finished room/);
 });

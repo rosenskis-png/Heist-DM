@@ -3,10 +3,15 @@
 import { motifs } from "../../content/motifs.js";
 import { d100 } from "../engine/rng.js";
 
-// The axes a room can differ on (docs/design/encounter-craft.md §2, §3, §8, §10).
+// The axes a room can differ on (docs/design/encounter-craft.md §2, §8, §16). Fixed: kind, tone, whose room, exits.
+// Leanings, which the sketch may use or leave (D160): x-factor, shape, core, prize, motifs, factions.
 export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
-export const SHAPES = ["linear", "branching", "open", "hub"];
-export const MEAT = ["costs that differ in kind", "incomplete information", "a dilemma", "prizes that compete"];
+// One shape anyone can picture from a sentence (encounter-craft §16).
+export const SHAPES = ["rings or tiers around a hollow", "a tower or shaft", "a bridge or ledge over a drop", "a pit or bowl", "a long hall", "a stair or slope", "an island in something", "a crossroads", "a deck or platform"];
+// What the room is built around (encounter-craft §16).
+export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
+// Whether there's anything worth having beyond the way out; none is about half (encounter-craft §16).
+export const PRIZES = ["none: getting out is the whole of it", "something worth the risk"];
 export const TONES = ["very stressed about time", "tense", "even", "light", "a fantasy playground"];
 // Rooms with a challenge get every axis; the calm kinds get a tone and motifs, and the oddity a hook too.
 const CHALLENGED = ["encounter", "climax"];
@@ -36,7 +41,7 @@ export function seedFor(camp, world, kind, exits = []) {
   const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
   const fresh = fit.filter((m) => !used.includes(m.id));
   const pool = [...(fresh.length >= 2 ? fresh : fit)];
-  const n = CHALLENGED.includes(kind) ? 2 + roll(rng, 2) : 1;
+  const n = CHALLENGED.includes(kind) ? 1 + roll(rng, 2) : 1;
   const count = Math.min(n, pool.length);
   seed.motifs = [];
   while (seed.motifs.length < count) seed.motifs.push(pool.splice(roll(rng, pool.length), 1)[0]);
@@ -45,7 +50,8 @@ export function seedFor(camp, world, kind, exits = []) {
   if (CHALLENGED.includes(kind) || kind === "oddity") seed.xFactor = pickFrom(rng, XFACTORS);
   if (CHALLENGED.includes(kind)) {
     seed.shape = pickFrom(rng, SHAPES);
-    seed.meat = pickFrom(rng, MEAT);
+    seed.core = pickFrom(rng, CORES);
+    seed.prize = pickFrom(rng, PRIZES);
     const factions = Object.keys(world.factions);
     seed.factions = [pickFrom(rng, factions)];
     if (factions.length > 1 && roll(rng, 2)) seed.factions.push(pickFrom(rng, factions.filter((f) => f !== seed.factions[0])));

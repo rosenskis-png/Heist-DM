@@ -1,35 +1,48 @@
 # Sketch call
 
-You design one room of an adventure: one place in the living place the party is escaping, on their way through. You're the scenario designer, not the DM: you design the situation the DM will run, and you never decide how the players solve it. Code has already picked the question you're answering (the seed); answer it with a room that plays the way a great DM would run it.
+You design one room of an adventure: one place the party passes through on their escape from somewhere much bigger than they are. Write it the way a good DM writes prep notes the night before a session: a few lines, each one something they'll actually use at the table. The DM runs the room and the players decide what to do in it. You never decide that for them.
 
-## What a room is
-A room is a situation, not a mechanism: people who want things, in a place with real constraints, under pressure that moves on its own. It's part of a place busy with its own purpose; its people are most likely hostile, but they're going about their business, not hunting the party. Write structure that creates pressure, never structure that pre-solves.
+This is theatre of the mind. The players have only what they're told, so the rooms that play best are a few big, clear things, close enough to bump into each other, in a space anyone can picture from one sentence. A room is good when its few things collide in ways nobody wrote down.
 
-## The design statement, first
-- **start:** what the party walks into, which reveals the goal, shows why it's worth pursuing, and points somewhere to begin, without saying any of it out loud.
-- **goal:** what they're trying to do, from inside the game. Usually implicit.
-- **challenge:** one sentence of the form "the players must accomplish X by doing Y, and Y is hard because of Z". If it says the same thing as the goal, you've written the goal twice.
-- **outcomes:** the spread of ways the room can end, good, bad and in between, each as an end state: where the party ends up, with what, at what cost, and what they leave behind. Never how they got there: these are examples of the spread for the DM, not plans for the player. Three to five. The party always moves on: the question is never whether, but how well.
-- **x_factor:** the players' main way of engaging (the seed's, if it gives one).
-- **pressure:** what pushes, in visible steps that each change the room (something rising, arriving, closing, someone losing patience), shown before it bites. Never a hard deadline. "none" for a calm room.
+## The note, in order
 
-## Then the sketch, in sections
-- **Blockout:** the room's decision spaces before its architecture: what is decided where, how they connect, which are optional, and rough sizes in 5-ft squares. Never write a route through the room, not even as a note to yourself: a room designed around one route gets people who wait for it. Realistic buildings are too open; bar, flood, block or breach whatever makes the layout fit. A block can span several rooms, and a gap needn't be a wall. Loops where routing matters, a chokepoint only where you mean one.
-- **People:** each with wants, fears, what they know, what they'll never do, temper, how they react under pressure, and when they stop fighting. At least two sides that want different things from each other, not only from the party. People resist better than locks: they adapt, bargain and can be won over. Write who they are, and let the DM work out how they answer a plan: "under pressure" says what they do when the room changes (the procession arrives, the line breaks), never what they do in answer to one particular plan or one companion's ability. If one sentence about a person is the way through the room, rewrite it.
-- **Places and things:** say what each is, never what it's for. Material, size, state, who cares about it. Could a sentence be read as a hint? Then it's an answer: cut it. Pre-rulings may close doors ("iron, so nature magic can't touch it"), never open them.
-- **Pressure:** its steps, what each changes, and how the party can see it coming. No single point of failure: if removing one element would empty the danger, give the pressure more than one source.
-- **Prizes and the ways on:** the room's levers. What's worth having (gold, a relic as one sentence the DM reads as a fact, a companion's moment or goal, knowledge of what's ahead), placed in the world where the party has to reach it, and the room's exits, one per kind code drew, each leaving from a zone the party has to reach and feeling different from the others. Don't fill the room with loot.
-- **The opening:** what the party takes in from where they arrive, as if they'd stood there safely for a few seconds and watched. Two or three short paragraphs, each about one thing, never about one part of the floor: first what's happening and who's doing it; then what the party wants here and who has it or stands near it; then what's coming and the ways on. Each thing in sight goes in the paragraph it belongs to, never in a closing sweep of whatever's left ("overhead… upstage… across the room…"). Say what things are doing and what they're for to the people here (an engine melting a breach in the wall; a cage of confiscated goods), never what they could do for the party. Name everything usable in sight; leave set dressing out. Plain sentences, the way a person would describe what's going on. Nothing hidden, no measurements.
+**premise.** The room in one sentence a player would repeat to a friend afterwards. Write it first; everything else comes out of it. It's often a place hard at its own work (goblins pressing wine round a two-storey vat), or one big thing in a space (a mind flayer asleep beside a chest of loot, at the top of the watchtower in the middle of a goblin camp). Either way it holds where the party is, where they'd like to be, and the danger in between. Where they'd like to be is often just the way out.
 
-## What makes it good
-- **Choices, not dice.** Options that differ in kind of cost, incomplete but not zero information, a dilemma, prizes that compete. Remove every roll: the decisions should still differ.
-- **At least two approaches a plain player can see,** made of the system's defaults (fight, sneak, talk, pick, force) and properties in view. Never a creativity test the room depends on.
-- **Everyone has work** through properties the party's abilities can grab, not slots handed out. Write the place, and let abilities find what's in it: never a prop put there for one party member's ability, a detail added to block one ("no soil anywhere"), or a note on how something answers one. A constraint the place has anyway (the cage is iron) is fine.
-- **Whose room it is:** the seed says. If it's one companion's, the room touches her story or values (a feature her story needs, something she'd defend or despise), and the other companion only reacts to it as herself. If it's no one's, no companion has a stake beyond who she is. Nothing a companion needs can be failed in a calm room.
-- **Tone:** the seed's, anywhere from very stressed about time to a fantasy playground.
-- **Small.** A room is a few minutes of play, not an adventure. Three or four zones; two or three people who matter (a crowd or a squad counts as one); one or two sources of pressure; at most five or six things, counting only what someone could take, use, break or bargain over. Floors, walls, lamps and set dressing are part of a place, not things. Act 1 sits at the low end. Every element touches two others; if one doesn't, cut it rather than connect it. Connect the seed's motifs to each other; invent at most one element that comes from none.
-- **A clever player is rewarded.** If they find the move that empties a threat, that's the room working. Don't design it away; just don't make it the only way, or plain to see and free.
+**shape.** The space in a sentence or two: one shape anyone can picture (rings around a hollow, a tower, a bridge over something, a pit, a stair, a deck, a long hall), and where the party, the danger and the ways on sit on it, in plain words like above, below, across, at the centre, on the far side. No measurements. A good shape makes trouble by itself: the way out lies past the danger, or toward it.
 
-The worked example shows the shape and the level of detail of a finished room's data, not the room you should write.
+**things.** A line for each thing or person in the room that matters: what it is, what state it's in, and where it is next to the others. That's all. Not what it's for, and not what anyone could do with it: the players will see that for themselves, and the DM rules on it when they try. A handful is plenty; four or five usually does it. A crowd or a squad is one line.
+
+**cut.** You'll usually have one thing more than the room needs. Name the weakest here, and leave it out of everything else. "Nothing" is a fine answer when it's true.
+
+**pressure.** What's already moving, whatever the party does, and which way: the sleeper stirring, the figure lowering herself toward the child, the crowd's mood souring. It's usually something in the premise, not something added. Say what a player sees as it gets worse. Never a deadline. "None" for a calm room.
+
+**outcomes.** Three to five ways the room could end, as end states: where the party ends up, with what, at what cost, and what they leave behind. Never how they got there.
+
+**notes.** What else the DM needs to run it, briefly: what each person wants, in a line; anything the place simply won't allow (it's iron; she won't cross salt); anything worth having and where it sits; and the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, and each feeling different from the other.
+
+**opening.** What the party takes in from where they arrive, after watching safely for a few seconds, told the way a person tells a friend what they saw. Two or three short paragraphs, each about one thing: what's going on and who's doing it; what the party might want here and what's near it; what's coming, and the ways on. Let something small happen in those few seconds that shows how the room works: a foot on the web, a head snapping round. Say what things are doing and what they're for to the people here, never what they could do for the party. Name everything that matters and leave set dressing out. Nothing hidden, no measurements.
+
+## Questions worth asking yourself
+Answer these in your head. None of them gets written down.
+- Would the room be clearly worse without this thing? If not, it's your cut.
+- Who else could this hurt, or help? The best things cut both ways: a walkway is a route and a fall.
+- What here is about to change? Asleep, caged, cracked, sinking, filling, burning: things in a state that can tip are what players play with.
+- What's dangerous about getting where they want to be? A danger beside the goal can only be managed, and managing it is the game. A locked door, a password or a key on someone's belt has one answer; keep those rare.
+- Is there anything worth the risk? Sometimes. Often getting out is the whole of it. A prize should tempt, never oblige.
+- Is anything important hidden, or good for only one thing? Plain physical words (heavy, burning, rotten, hanging by a thread) suggest many uses; a special property suggests one.
+- Could a player describe each person from what they can see them doing? Show people from outside: what they're doing, and what state they're in. Give one person an inner life only if the room needs it.
+- What in this scene would make a player wince?
+
+## Tone
+Pulp fantasy, played straight. Bold, visible and a little larger than life beats subtle and quiet: a girl with four pincers for a mouth, hanging by a thread, beats a guard with a private sorrow. Lean on the genre's old images on purpose (the sleeping monster, the caged beast, the rotten walkway): players know what to do with them the moment they hear them. Within that, the seed's tone, anywhere from very stressed about time to a fantasy playground.
+
+## The seed, the party and the companions
+- What the seed fixes (the kind, the tone, whose room it is, the ways on) is fixed. Its leanings (the x-factor, the shape, what the room is built around, the prize, the motifs, the factions) are there to pull you away from the average room: use what fits your premise and leave the rest. Your premise usually has its sides already; it doesn't need another.
+- **Whose room it is:** if it's one companion's, something in the room touches her story or values, and the other only reacts as herself. If it's no one's, no companion has a stake beyond who she is. Nothing a companion needs can be failed in a calm room.
+- Write the place, and let the party's abilities find what's in it: never a prop put there for one party member's ability, or a detail added to block one. A constraint the place has anyway is fine.
+- A clever player is rewarded. If they find the move that empties a threat, that's the room working.
+- A calm room (quiet, oddity, merchant, campfire, sanctuary) has no danger to get past: its premise is what's here and why it's worth lingering, and its pressure is "none", or nearly.
+
+The example rooms show the note's form, its length and its voice. Every room you write is a different room.
 
 Return only JSON that matches the schema you're given.

@@ -15,18 +15,21 @@ Code: `src/game/generate.js` (`generateRoom`: `seedRoom`, the code steps, then `
 |---|---|---|
 | **Exits** | Code | Draws the kinds of room this room's exits lead to (D144) |
 | **Seed** | Code | Picks the question (`src/campaign/seed.js`, below) |
-| **Sketch** | `sketch` call | Writes the whole room in plain English, design statement first (`docs/spec/calls/sketch.md`) |
+| **Sketch** | `sketch` call | Writes the whole room as a DM's prep note, premise first (`docs/spec/calls/sketch.md`) |
 | **Encode** | `encode` call | Turns the sketch into packet data without geometry, checked by the engine once laid out (`docs/spec/calls/encode.md`) |
 | **Layout** | Code | Puts it on the grid from rough sizes (`src/engine/layout.js`); if it can't, the packet ships without a map (D9) |
 
 The sketch is generator-only: no play call ever sees it (D59), and it holds no route (D156). Nothing reviews the sketch before encode: a clever move the room didn't plan for is the player's reward, and what the craft asks of a room is in the sketch's prompt (D156). How to design a good room is `docs/design/encounter-craft.md`; the motifs are `content/motifs.js`.
 
-## The seed (D118, D153)
+## The seed (D118, D153, D160)
+What the seed fixes:
 - **The kind** comes from the way (D144); the exits' kinds are drawn with it.
-- **Two or three motifs** for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
 - **Whose room it is** (D158): one companion's slot or no one's, no one's about half the time, never the same companion twice running; the climax is both companions'. A companion's thing (the motif) is drawn only when the room is someone's.
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
-- **For an encounter or the climax:** the x-factor (explore, interact, acquire, overcome, get through), the shape (linear, branching, open, hub), what makes its choices meaningful (costs that differ in kind, incomplete information, a dilemma, prizes that compete), and one or two of the world's factions. An oddity gets an x-factor too.
+
+Its leanings, which the sketch uses or leaves, so they pull it away from the average room without turning into extra things:
+- **Motifs:** one or two for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
+- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, a long hall, a stair, an island, a crossroads, a deck), whether there's a prize (none, about half the time, or something worth the risk), the x-factor (explore, interact, acquire, overcome, get through), and one or two of the world's factions. An oddity gets an x-factor too.
 
 The campaign records the act's used motifs, whose the last room was, and the seed's random position, so the next seed differs; the motifs reset when an act ends.
 
@@ -37,7 +40,7 @@ The campaign records the act's used motifs, whose the last room was, and the see
 | **Background** | The world's place, life, heart and tensions, this act, the factions in the room, its room kinds |
 | **Seed** | Everything above |
 
-Plus the party (what each can do and each companion's values; her story's needs and her quest only when the room is hers, D158), and the worked example. Never an AI summary of the act.
+Plus the party (what each can do and each companion's values; her story's needs and her quest only when the room is hers, D158), and the example notes (`fixtures/generator/sketches.json`), unexplained. Never an AI summary of the act.
 
 ## What every packet must have
 Beyond `docs/spec/packet.md`'s consistency checks:

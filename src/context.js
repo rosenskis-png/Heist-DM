@@ -658,18 +658,23 @@ export function pitchInput(env, c, schema) {
 
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
-// What the room's sketch is built from: the seed's question, with its motifs.
+// What the room's sketch is built from (D160): what the seed fixes, and its leanings, which the sketch uses or leaves.
 const seedText = (seed) => ({
-  kind: seed.kind,
-  tone: seed.tone,
-  ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
-  ...(seed.shape ? { shape: seed.shape } : {}),
-  ...(seed.meat ? { what_makes_its_choices_meaningful: seed.meat } : {}),
-  whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
-    : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
-    : "no one's: the room touches no companion's story; they react to it as themselves",
-  motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern, decisions: m.decisions })),
-  exits: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
+  fixed: {
+    kind: seed.kind,
+    tone: seed.tone,
+    whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
+      : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
+      : "no one's: the room touches no companion's story; they react to it as themselves",
+    ways_on: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
+  },
+  leanings: {
+    ...(seed.core ? { built_around: seed.core } : {}),
+    ...(seed.shape ? { a_shape_you_might_use: seed.shape } : {}),
+    ...(seed.prize ? { prize: seed.prize } : {}),
+    ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
+    motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern })),
+  },
 });
 
 // The party as the designer needs it: what each can do, and what each companion values. Her story (the features it
@@ -703,20 +708,20 @@ function designWorld(world, seed) {
   };
 }
 
-// The sketch call (D117, D119): must honour the hand-off; the world and the act as background; the seed; the party;
-// the worked example. On the bench, the designer's brief (D154).
+// The sketch call (D117, D119, D160): must honour the hand-off; the world and the act as background; the seed; the
+// party; the example rooms, unexplained. On the bench, the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
     block("Your job", env.prompts.sketch),
     block("Output format", shapeText(schema)),
-    block("The question: this room's seed", seedText(c.seed)),
+    block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed)),
     block("The world", designWorld(c.world, c.seed)),
     c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    block("Worked example: a finished room's data (another room; match its detail, not its content)", env.examples?.encoded),
-    "Design the room.",
+    env.examples?.sketches ? block("Example rooms (other rooms, in other places)", env.examples.sketches) : null,
+    "Write the room's note.",
   ]);
 }
 
