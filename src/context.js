@@ -708,8 +708,8 @@ function designWorld(world, seed) {
   };
 }
 
-// The sketch call (D117, D119, D160): must honour the hand-off; the world and the act as background; the seed; the
-// party; the example rooms, unexplained. On the bench, the designer's brief (D154).
+// The sketch call (D117, D119, D161): must honour the hand-off; the world and the act as background; the seed; the
+// party. No example rooms: they become anchors (D161). On the bench, the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
@@ -720,7 +720,6 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    env.examples?.sketches ? block("Example rooms (other rooms, in other places)", env.examples.sketches) : null,
     "Write the room's note.",
   ]);
 }

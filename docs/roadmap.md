@@ -68,7 +68,7 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 
 **Still to do**
 1. **Run the generator on the bench.** The Forge (D154) shows single adventures and rooms for the designer to judge by eye; the stress tests are still to build: ten sketches per seed side by side, judged by the designer.
-2. **Worked examples:** more than the one encoded room, of different kinds, judged by the designer. The sketch has three example notes (D160), all encounters; calm rooms have none yet.
+2. **Worked examples:** more than the one encoded room, of different kinds, judged by the designer. The sketch sees no example rooms, because they became anchors (D161); `fixtures/generator/sketches.json` holds three worked notes for designers.
 3. **The page runs a campaign:** generate the next room while the closing narration plays, the verdict at a room's end, choosing an exit, the campfire and relic pick at the sanctuary.
 4. **The hand-off's remaining parts:** attachments, the world's memory and callbacks, and a companion's personal quest placed by act.
 5. **Clean out the engine-era material** the rethink replaces: `fixtures/cells/walkthrough.md`'s old design notes, and the Cells itself once a generated room replaces it (D139).

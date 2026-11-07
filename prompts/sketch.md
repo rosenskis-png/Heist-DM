@@ -6,9 +6,9 @@ This is theatre of the mind. The players have only what they're told, so the roo
 
 ## The note, in order
 
-**premise.** The room in one sentence a player would repeat to a friend afterwards. Write it first; everything else comes out of it. It's often a place hard at its own work (goblins pressing wine round a two-storey vat), or one big thing in a space (a mind flayer asleep beside a chest of loot, at the top of the watchtower in the middle of a goblin camp). Either way it holds where the party is, where they'd like to be, and the danger in between. Where they'd like to be is often just the way out.
+**premise.** The room in one short sentence a player would repeat to a friend afterwards: one idea, not three joined together. Write it first; everything else comes out of it. It's often a place hard at its own work, or one big thing in a space. Either way it holds where the party is, where they'd like to be, and the danger in between. Where they'd like to be is often just the way out.
 
-**shape.** The space in a sentence or two: one shape anyone can picture (rings around a hollow, a tower, a bridge over something, a pit, a stair, a deck, a long hall), and where the party, the danger and the ways on sit on it, in plain words like above, below, across, at the centre, on the far side. No measurements. A good shape makes trouble by itself: the way out lies past the danger, or toward it.
+**shape.** The space in a few sentences: one shape anyone can picture, and where the party, the danger and the ways on sit on it, in plain words like above, below, across, at the centre, on the far side. No measurements. Say how the space is used by the people in it: what moves where, and why things are where they are. A place at work has to actually work; its layout follows from what it does. A good shape makes trouble by itself: the way out lies past the danger, or toward it, and there's more than one way past.
 
 **things.** A line for each thing or person in the room that matters: what it is, what state it's in, and where it is next to the others. That's all. Not what it's for, and not what anyone could do with it: the players will see that for themselves, and the DM rules on it when they try. A handful is plenty; four or five usually does it. A crowd or a squad is one line.
 
@@ -18,12 +18,13 @@ This is theatre of the mind. The players have only what they're told, so the roo
 
 **outcomes.** Three to five ways the room could end, as end states: where the party ends up, with what, at what cost, and what they leave behind. Never how they got there.
 
-**notes.** What else the DM needs to run it, briefly: what each person wants, in a line; anything the place simply won't allow (it's iron; she won't cross salt); anything worth having and where it sits; and the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, and each feeling different from the other.
+**notes.** What else the DM needs to run it, briefly: what each person wants and fears, in a line; anything the place simply won't allow (it's iron; she won't cross salt), but never how anyone's senses work, or a rule a player would have to learn; anything worth having and where it sits; and the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, and each feeling different from the other.
 
-**opening.** What the party takes in from where they arrive, after watching safely for a few seconds, told the way a person tells a friend what they saw. Two or three short paragraphs, each about one thing: what's going on and who's doing it; what the party might want here and what's near it; what's coming, and the ways on. Let something small happen in those few seconds that shows how the room works: a foot on the web, a head snapping round. Say what things are doing and what they're for to the people here, never what they could do for the party. Name everything that matters and leave set dressing out. Nothing hidden, no measurements.
+**opening.** What the party takes in from where they arrive, after watching safely for a few seconds, told the way a person tells a friend what they saw. Two or three short paragraphs, each about one thing: what's going on and who's doing it; what the party might want here and what's near it; what's coming, and the ways on. Let something small happen in those few seconds that shows what's dangerous here. Say what things are doing and what they're for to the people here, never what they could do for the party. Name everything that matters and leave set dressing out. Nothing hidden, no measurements.
 
 ## Questions worth asking yourself
 Answer these in your head. None of them gets written down.
+- Could a player sketch the room on a napkin after hearing it once: what's above, what's below, which way is out, and why things are where they are?
 - Would the room be clearly worse without this thing? If not, it's your cut.
 - Who else could this hurt, or help? The best things cut both ways: a walkway is a route and a fall.
 - What here is about to change? Asleep, caged, cracked, sinking, filling, burning: things in a state that can tip are what players play with.
@@ -31,6 +32,7 @@ Answer these in your head. None of them gets written down.
 - Is there anything worth the risk? Sometimes. Often getting out is the whole of it. A prize should tempt, never oblige.
 - Is anything important hidden, or good for only one thing? Plain physical words (heavy, burning, rotten, hanging by a thread) suggest many uses; a special property suggests one.
 - Could a player describe each person from what they can see them doing? Show people from outside: what they're doing, and what state they're in. Give one person an inner life only if the room needs it.
+- Does anything here ask a player to balance, time, count, or keep track of who can see what? A DM can't run that from a sentence. Danger should be plain to see and dangerous whenever it's touched, not a machine with a rule.
 - What in this scene would make a player wince?
 
 ## Tone
@@ -42,7 +44,5 @@ Pulp fantasy, played straight. Bold, visible and a little larger than life beats
 - Write the place, and let the party's abilities find what's in it: never a prop put there for one party member's ability, or a detail added to block one. A constraint the place has anyway is fine.
 - A clever player is rewarded. If they find the move that empties a threat, that's the room working.
 - A calm room (quiet, oddity, merchant, campfire, sanctuary) has no danger to get past: its premise is what's here and why it's worth lingering, and its pressure is "none", or nearly.
-
-The example rooms show the note's form, its length and its voice. Every room you write is a different room.
 
 Return only JSON that matches the schema you're given.

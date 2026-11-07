@@ -191,11 +191,10 @@ test("a reply with no JSON is tried once more, and what it said is kept (D159)",
   assert.equal(records[0].noJson, "I'd rather not.");
 });
 
-test("the example rooms are prep notes the sketch schema accepts, and reach the sketch unexplained beside the seed's leanings (D160)", () => {
+test("the worked notes are prep notes the sketch schema accepts, and the sketch sees no example rooms, only the seed's fixed parts and leanings (D160, D161)", () => {
   for (const ex of sketches) assert.deepEqual(validate(sketchSchema, ex), [], ex.premise);
   const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
   const input = sketchInput(env, { seed, world, party }, sketchSchema);
-  assert.match(input, /Example rooms[\s\S]*mind flayer/);
   assert.match(input, /"fixed":[\s\S]*"leanings":/);
-  assert.doesNotMatch(input, /Worked example: a finished room/);
+  assert.doesNotMatch(input, /Example rooms|Worked example|mind flayer asleep/);
 });

@@ -7,7 +7,7 @@ import { d100 } from "../engine/rng.js";
 // Leanings, which the sketch may use or leave (D160): x-factor, shape, core, prize, motifs, factions.
 export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
 // One shape anyone can picture from a sentence (encounter-craft §16).
-export const SHAPES = ["rings or tiers around a hollow", "a tower or shaft", "a bridge or ledge over a drop", "a pit or bowl", "a long hall", "a stair or slope", "an island in something", "a crossroads", "a deck or platform"];
+export const SHAPES = ["rings or tiers around a hollow", "a tower or shaft", "a bridge or ledge over a drop", "a pit or bowl", "terraces down a slope", "an island in something", "a deck or platform", "a cage or frame hung in the air"];
 // What the room is built around (encounter-craft §16).
 export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
 // Whether there's anything worth having beyond the way out; none is about half (encounter-craft §16).

@@ -575,8 +575,8 @@ async function start() {
   render();
   try {
     const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-    const [encoded, sketches, ...prompts] = await Promise.all(["fixtures/generator/encoded.json", "fixtures/generator/sketches.json", ...PROMPTS.map((n) => `prompts/${n}.md`)].map(text));
-    env = { prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])), examples: { encoded: JSON.parse(encoded), sketches: JSON.parse(sketches) } };
+    const [encoded, ...prompts] = await Promise.all(["fixtures/generator/encoded.json", ...PROMPTS.map((n) => `prompts/${n}.md`)].map(text));
+    env = { prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])), examples: { encoded: JSON.parse(encoded) } };
   } catch (e) {
     document.getElementById("main").replaceChildren(h("p", { class: "err" }, `The Forge couldn't load: ${errorText(e)}`));
     return;

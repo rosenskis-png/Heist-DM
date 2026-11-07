@@ -29,7 +29,7 @@ What the seed fixes:
 
 Its leanings, which the sketch uses or leaves, so they pull it away from the average room without turning into extra things:
 - **Motifs:** one or two for an encounter or the climax, one for a calm room, suited to the kind and avoiding those the act has used where it can.
-- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, a long hall, a stair, an island, a crossroads, a deck), whether there's a prize (none, about half the time, or something worth the risk), the x-factor (explore, interact, acquire, overcome, get through), and one or two of the world's factions. An oddity gets an x-factor too.
+- **For an encounter or the climax:** what the room is built around (a place hard at its own work, one big thing in a space, a danger in the way), a shape (rings, a tower or shaft, a bridge or ledge, a pit, terraces, an island, a deck, a cage hung in the air), whether there's a prize (none, about half the time, or something worth the risk), the x-factor (explore, interact, acquire, overcome, get through), and one or two of the world's factions. An oddity gets an x-factor too.
 
 The campaign records the act's used motifs, whose the last room was, and the seed's random position, so the next seed differs; the motifs reset when an act ends.
 
@@ -40,7 +40,7 @@ The campaign records the act's used motifs, whose the last room was, and the see
 | **Background** | The world's place, life, heart and tensions, this act, the factions in the room, its room kinds |
 | **Seed** | Everything above |
 
-Plus the party (what each can do and each companion's values; her story's needs and her quest only when the room is hers, D158), and the example notes (`fixtures/generator/sketches.json`), unexplained. Never an AI summary of the act.
+Plus the party (what each can do and each companion's values; her story's needs and her quest only when the room is hers, D158), and no example rooms (D161). Never an AI summary of the act.
 
 ## What every packet must have
 Beyond `docs/spec/packet.md`'s consistency checks:

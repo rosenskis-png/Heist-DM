@@ -139,7 +139,7 @@ Nothing reviews the sketch (D156): a clever player who finds the move that empti
 
 ## 16. Theatre of the mind
 
-The goal is emergent play: a few clear, obvious things that all bump into each other, so the complexity comes from what the players do, not from what was set up. The touchstones are the designer's: a mind flayer sergeant asleep beside a chest of loot at the top of the watchtower in the middle of a goblin camp, with gems in the ceiling, rotten walkways across it and caged spiders on the far side; goblins pressing wine round a two-storey vat while the hobgoblin at the door drinks the stock; a shaft of four stone rings strung with silk, a pincer-mouthed girl hanging in the hollow, and a living child at the bottom. The worked notes are `fixtures/generator/sketches.json`.
+The goal is emergent play: a few clear, obvious things that all bump into each other, so the complexity comes from what the players do, not from what was set up. The touchstones are the designer's: a mind flayer sergeant asleep beside a chest of loot at the top of the watchtower in the middle of a goblin camp, with gems in the ceiling, rotten walkways across it and caged spiders on the far side; goblins pressing wine round a two-storey vat while the hobgoblin at the door drinks the stock; a shaft of four stone rings strung with silk, a pincer-mouthed girl hanging in the hollow, and a living child at the bottom. The worked notes are `fixtures/generator/sketches.json`, for designers; the generator never sees them (D161).
 
 **Things**
 - **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
@@ -158,9 +158,11 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 
 **The space**
 - **One shape anyone can picture from a sentence:** rings, a tower, a bridge, a pit, a stair, a deck.
+- **The place works.** Its layout follows from what its people do there: what moves where, and why things sit where they sit. A player could sketch it on a napkin after hearing it once.
+- **More than one way past the danger.**
 - **Places in relational words:** above, below, across, at the centre, on the far side. No measurements.
 - **The shape makes the trouble:** the way out lies past the danger, or toward it.
-- **Characters move; the ground doesn't change.** No terrain that changes state, no lines of sight to compute, no timing windows. A layout that needs a grid, a timer or a tracker is a video game.
+- **Characters move; the ground doesn't change.** No terrain that changes state, no lines of sight to compute, no timing windows, no machines with a rule to learn (a see-saw bridge to balance). A layout that needs a grid, a timer or a tracker is a video game.
 - **Leave the DM plenty to rule.**
 
 **The opening**
@@ -170,5 +172,5 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 
 **Why generators get this wrong:** people add rather than subtract; each thing looks fine alone and nothing checks the total; literary taste prefers subtle to bold; a seed's requirements turn into extra things (a required second side became a second faction in every early Forge room); and old defaults creep back (the key on the guard's belt in all three).
 
-**How the generator is steered toward it** is by form, order, questions and unexplained examples, not by rules or checks that reject (D160): the sketch is a short prep note written premise first; it asks itself questions it never writes down; it names a cut; its examples are shown with no commentary, so it learns the form rather than writing explanations that become routes; and the seed's axes are leanings, not requirements.
+**How the generator is steered toward it** is by form, order, questions and unexplained examples, not by rules or checks that reject (D160): the sketch is a short prep note written premise first; it asks itself questions it never writes down; it names a cut; it sees no example rooms, because every example becomes an anchor (D161); and the seed's axes are leanings, not requirements.
 
