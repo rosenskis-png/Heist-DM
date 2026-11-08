@@ -94,6 +94,15 @@ export default {
   suppressed: `to be someone's favourite. Met by choosing her freely and returning to her without asking her to give anything up; small rituals that are only theirs`,
   darkTriggers: "lies; possessiveness; cruelty to living things; neglect",
   outfit: `A leaf-green linen wrap top tied at the back, leaving her shoulders and midriff bare; a long, flowing skirt of layered green and cream gauze slit to the thigh; a braided leather belt hung with herb pouches; wooden and bone bangles; a thin gold anklet; bare feet; a sprig of silver mistletoe woven into her hair as her druidic focus.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
+  photo: {
+    role: "half-elf druid with softly pointed ears",
+    face: "Naturally beautiful face with a dusting of freckles across fair skin",
+    identity: "bright green eyes. Long, thick auburn-copper hair with a few thin braids and small wildflowers woven in. A soft, curvy, natural figure.",
+    garments: "A druid's leaf-green linen wrap top that leaves her shoulders and midriff bare, a flowing green and cream gauze skirt slit to the thigh, and wooden bangles",
+    bold: false,
+    expression: "easy, playful delight, completely unselfconscious",
+  },
   abilities: {
     combat: {
       id: "entangle",

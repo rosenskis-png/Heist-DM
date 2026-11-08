@@ -99,6 +99,16 @@ export default {
   suppressed: `to be wanted in her own face. Met by noticing her when she hasn't changed, and preferring it`,
   darkTriggers: `asking her to be someone else; interest in the other companion; rewarding her deceptions`,
   outfit: `A close-fitting charcoal tunic, sleeveless and high-collared; dark leather leggings; soft-soled boots; a plain belt of many small pockets. Nothing anyone would remember.`,
+  // Her picture identity in her own shape (D170): the fixed words in every photo prompt of her. See
+  // docs/spec/calls/photo.md.
+  photo: {
+    role: "athletic woman",
+    face: "Plain, forgettable face with a straight nose",
+    identity: "hazel eyes, straight dark-brunette hair to the jaw tucked behind one ear, with a firm, athletic body, strong shoulders and toned legs.",
+    garments: "A close-fitting sleeveless high-collared charcoal tunic, dark leather leggings, and a plain belt of many small pockets",
+    bold: false,
+    expression: "a small, private half-smile, eyes that watch more than they show",
+  },
   abilities: {
     combat: {
       id: "quiet_knife",

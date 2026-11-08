@@ -95,6 +95,16 @@ export default {
     },
   ],
   outfit: `Her sister's style in a skimpier, flirtier cut: a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, knee boots, and one piece of jewellery she has clearly borrowed from her sister.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her; each sister's tie entry replaces
+  // what her heritage changes. See docs/spec/calls/photo.md.
+  photo: {
+    role: "woman",
+    face: "Naturally pretty face with delicate features, light freckles",
+    identity: "big bright eyes, long glossy neatly brushed hair, with a slim, petite figure.",
+    garments: "She wears a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, and one bracelet that clearly belongs to someone else",
+    bold: true,
+    expression: "a mischievous, conspiratorial grin",
+  },
   abilities: {
     combat: {
       id: "helpless",
@@ -114,8 +124,8 @@ export default {
     limits: ["Impulsive when she wants something"],
   },
   // Lisa exists in relation to her older sister, the other companion (docs/spec/companions.md §6). `toPartner`
-  // goes to the sister's call; an entry in `by` sets or extends Lisa's own fields for that sister. `image` is for
-  // the parked portrait feature and reaches no prompt (D59).
+  // goes to the sister's call; an entry in `by` sets or extends Lisa's own fields for that sister. `photo` replaces
+  // what her heritage changes in her picture identity, and reaches only the photo call (D170).
   tie: {
     required: true,
     set: {
@@ -146,12 +156,10 @@ export default {
         secret: `Vesper fed on the first boy you ever loved, in front of you, to teach you that mortals are food. He was never the same. She called it a lesson and still thinks it was a kindness. You have never forgiven her. For the cruelty of it, you'll play matchmaker: talk him up to her, nudge her toward him, the better to take him later.`,
         bond: `Half-sisters through a succubus mother. Vesper taught her everything about seduction except restraint, and treats her as an apprentice who's getting dangerously good. The taboo is the student poaching from the master.`,
         partnerReacts: `amused at first, then territorial: Vesper can taste exactly who he's been thinking about`,
-        image: {
-          features: "deep red skin, small curled horns and a slim tail",
-          eyes: "bright gold",
-          hair: "black hair",
-          imgRole: `cambion woman with deep red skin, small curled horns and a slim tail, otherwise human body`,
-          img: `She wears a sexy crimson lace bralette, a scrap of sheer crimson silk tied low at the hips, and fine silver chains across her waist`,
+        photo: {
+          role: "cambion woman with deep red skin, small curled horns and a slim tail, otherwise human body",
+          identity: "bright gold eyes, long glossy neatly brushed black hair, with a slim, petite figure.",
+          garments: `She wears a sexy crimson lace bralette, a scrap of sheer crimson silk tied low at the hips, and fine silver chains across her waist`,
         },
       },
       nadia: {
@@ -167,12 +175,10 @@ export default {
         secret: `When Nadia left home, you begged her to take you. She promised, then left in the night without you, and you spent four years alone with a father who blamed you for it. She has never once apologised. You have never forgiven her. For the cruelty of it, you'll play matchmaker: cheer them on, the better to take him later.`,
         bond: `Blood sisters. Lisa grew up knowing Ember sees everything through Nadia's eyes, so sneaking around is riskier than with anyone else.`,
         partnerReacts: `Nadia is warm and protective; Ember is the wild card who may be scandalised, delighted, or keep the secret for a price`,
-        image: {
-          features: "golden-brown skin",
-          eyes: "bright brown",
-          hair: "black curls",
-          imgRole: "woman with golden-brown skin",
-          img: `She wears a sexy saffron silk bandeau so fine it clings like a second skin, a low-slung crimson skirt of near-transparent silk panels slit to the hip, and a fine gold coin chain at her hips`,
+        photo: {
+          role: "woman with golden-brown skin",
+          identity: "bright brown eyes, long glossy neatly brushed black curls, with a slim, petite figure.",
+          garments: `She wears a sexy saffron silk bandeau so fine it clings like a second skin, a low-slung crimson skirt of near-transparent silk panels slit to the hip, and a fine gold coin chain at her hips`,
         },
       },
       ruby: {
@@ -189,12 +195,10 @@ export default {
         secret: `Ruby says you're the one person who never left her. You remember it differently: her jealousy drove off every friend and every boy you ever had, once with a knife, and she called it protecting you. You have never forgiven her. You don't matchmake with Ruby; you flaunt.`,
         bond: `Half-sisters, same mother. Ruby's abandonment terror centres on Lisa, the one person who never left her. A romance with Lisa is Ruby's ultimate trigger: she could lose both of them at once.`,
         partnerReacts: `the highest-drama pairing on the roster: storms of terror and betrayal`,
-        image: {
-          features: "pale skin",
-          eyes: "bright grey",
-          hair: "black hair",
-          imgRole: "woman",
-          img: `She wears a sexy cropped oxblood leather bustier laced with black cord, tiny oxblood leather shorts, and thigh-high black boots`,
+        photo: {
+          role: "woman",
+          identity: "bright grey eyes, long glossy neatly brushed black hair, with a slim, petite figure.",
+          garments: `She wears a sexy cropped oxblood leather bustier laced with black cord, tiny oxblood leather shorts, and thigh-high black boots`,
         },
       },
       fern: {
@@ -210,12 +214,10 @@ export default {
         secret: `In a circle that shares everything, the one thing you ever asked to keep for yourself, the girl you loved the summer you were seventeen, Fern shared anyway. Fern still doesn't understand why that was wrong, and that's what you can't forgive. For the cruelty of it, you'll play matchmaker: Fern makes it easy.`,
         bond: `Blood sisters raised in the same circle. Fern has no jealousy about anything except fierce protectiveness of her little sister. Lisa's rebellion is wanting one thing exclusively in a family that shares everything.`,
         partnerReacts: "Fern's free love has exactly one exception, and Lisa is it",
-        image: {
-          features: "freckles and softly pointed ears",
-          eyes: "bright green",
-          hair: "auburn-copper hair",
-          imgRole: "half-elf woman with softly pointed ears, freckles",
-          img: `She wears a sexy thin, clinging leaf-green linen wrap top cut low in front and open at the sides, a short, nearly sheer cream-and-green gauze skirt slung low on her hips, flowers in her hair, bare feet`,
+        photo: {
+          role: "half-elf woman with softly pointed ears, freckles",
+          identity: "bright green eyes, long glossy neatly brushed auburn-copper hair, with a slim, petite figure.",
+          garments: `She wears a sexy thin, clinging leaf-green linen wrap top cut low in front and open at the sides, a short, nearly sheer cream-and-green gauze skirt slung low on her hips, flowers in her hair, bare feet`,
         },
       },
       annaleise: {
@@ -231,12 +233,10 @@ export default {
         bond: `Sisters from Sévrance, sent abroad together. Annaleise always got the attention; Lisa learned the act from her, and plays it with less innocence.`,
         partnerReacts: "a flood of Sévrançais, tears, and a very public kiss on him to prove a point",
         secret: `Back home, Annaleise found your love letters, told your parents they were hers as a joke, and read them aloud at a family dinner. The boy left town. Annaleise still thinks it was funny. You have never forgiven her. For the cruelty of it, you'll play matchmaker: cheer her on with him, the better to take him later.`,
-        image: {
-          features: "light olive skin",
-          eyes: "bright brown",
-          hair: "wavy chestnut-brunette hair",
-          imgRole: "woman with light olive skin",
-          img: `She wears a sexy cropped off-the-shoulder blouse, a tiny pleated wine-red skirt, and stockings with the garters showing`,
+        photo: {
+          role: "woman with light olive skin",
+          identity: "bright brown eyes, long glossy neatly brushed wavy chestnut-brunette hair, with a slim, petite figure.",
+          garments: `She wears a sexy cropped off-the-shoulder blouse, a tiny pleated wine-red skirt, and stockings with the garters showing`,
         },
       },
       sable: {
@@ -259,12 +259,10 @@ export default {
             impersonation: [{ chance: 20, when: [{ affection: ["<", -3] }] }, { chance: 5 }],
           },
         },
-        image: {
-          features: "short dark-brunette hair",
-          eyes: "bright hazel",
-          hair: "short dark-brunette hair",
-          imgRole: "small, wiry woman",
-          img: `She wears a sexy sleeveless charcoal crop top, tight dark leather shorts and soft boots`,
+        photo: {
+          role: "small, wiry woman",
+          identity: "bright hazel eyes, short dark-brunette hair, with a small, wiry figure.",
+          garments: `She wears a sexy sleeveless charcoal crop top, tight dark leather shorts and soft boots`,
         },
       },
       celeste: {
@@ -280,12 +278,10 @@ export default {
         bond: `Sisters raised in the Ordo Luminis. Celeste was chosen to seek the Luminous One; Lisa was left behind to sing in the choir.`,
         partnerReacts: "serene sorrow, then a terrible calm: she prays for Lisa's soul, aloud",
         secret: `The honour of seeking the Luminous One was promised to you. The elders gave it to Celeste after she told them you'd broken your vows. You hadn't. And you know how the prophecy ends: at the temple, he is "given back to the light", killed in a long rite that brings the god back. Celeste doesn't know you know. You could save him, or let him walk in. For now, you encourage her devotion to him, sweetly.`,
-        image: {
-          features: "luminous pale skin",
-          eyes: "pale blue-grey",
-          hair: "platinum-blonde hair",
-          imgRole: "slender woman with luminous pale skin",
-          img: `She wears a sexy sheer white silk shift barely to mid-thigh, open at the sides, with a gold cord at the waist`,
+        photo: {
+          role: "slender woman with luminous pale skin",
+          identity: "pale blue-grey eyes, long glossy neatly brushed platinum-blonde hair, with a slim, petite figure.",
+          garments: `She wears a sexy sheer white silk shift barely to mid-thigh, open at the sides, with a gold cord at the waist`,
         },
       },
     },

@@ -6,7 +6,7 @@ import { validate } from "./validate.js";
 export const TIERS = ["quick", "default", "complex"];
 
 // The middle position of the speed and quality setting (D58). The other two move every call one tier (D70).
-export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", encode: "default" };
+export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", encode: "default", photo: "default" };
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 

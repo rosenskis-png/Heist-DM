@@ -35,7 +35,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D21** The campaign layer is a hand-off: changed by D141
 - **D22** Rooms use the same packet: changed by D121
 - **D23** Two pillars: current
-- **D24** Parked features: changed by D104
+- **D24** Parked features: changed by D104, D170
 - **D25** Hand-author Act 1 before building the generator: archived
 - **D26** Encounter size ceiling: current
 - **D27** The romance floor stays; the stall floors stay banned: changed by D79
@@ -181,6 +181,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D167** The act call gives rooms abstract direction and pools dealt one at a time, never a picture: changed by D168, D169
 - **D168** Clues are journal pages read at camp; motifs return without examples; one strange thing a room: changed by D169
 - **D169** Rooms are generated D163-style; the act decides what comes up, not what rooms hold; worn-out props are retired: current
+- **D170** The Dressing Room: a bench for how companions look, where photo prompts return: current
 
 ---
 
@@ -1053,3 +1054,7 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Why:** The designer preferred the D163 rooms' charm and originality; every way the act tried to shape rooms (a region picture, busy lines, locals, a quirk limit) either anchored them or flattened them. The act's real job is what the room call can't know: what came before, what lies ahead, and what should come up in between. Campfires were already guaranteed by the leg count; the room before one had two exits to the same campfire. Hanging cages and ledgers or counting survived every prompt change, so they're named and checked.
 **Rules out:** Busy lines from the act; the act shaping a room's contents; a room before a campfire with two ways on; hanging cages, ledgers and counting.
 
+### D170. The Dressing Room: a bench for how companions look, where photo prompts return
+**Decided:** The designer's call (2026-11-08). Supersedes D24 for photo prompts, on the bench only. A bench page, the Dressing Room (`bench/dressing.html`, `bench/dressing.js`), is the place to work on a companion's appearance. Pick a companion and her partner (a tie changes her look and outfit), and it shows: her face and body, and her outfit, sorted into labelled groups by code from her file's own sentences, never reworded; exactly what each call is sent about her appearance (her own campfire call, the room calls, the other companion's view of her, and the DM's calls, which get none), drawn from the real context functions, with the whole call input on demand and her appearance marked in it; a draft editor over every field her appearance comes from, which re-runs all of it live and sends a draft to her notes as a change request with a word diff; Gravenhold's photo card; and notes per companion, kept in the page's db for the design thread to read and apply. The photo card is ported as the photo call (`docs/spec/calls/photo.md`): a picture identity per companion (`photo` in her file; a tie entry's `photo` replaces fields for that partner, and a second voice's `photo` stands her beside the companion), Gravenhold's fixed skeleton assembled by code (`src/campaign/photo.js`, `content/photo.js`), and a call that fills its slots from a moment described in words. Gravenhold's identity lines are kept as written where the look hasn't changed since; Annaleise, Sable and Celeste get new ones. The tie's portrait `image` becomes its `photo`.
+**Why:** The designer wants one place to see and adjust how a companion looks in a text game: what's written, what each call actually receives, and what she'd look like drawn. Her appearance lives in several fields (her look, her outfit or a tie's, a second voice's look, a picture identity) and the calls send different slices of it, so reading her file doesn't show what reaches the AI. Gravenhold's picture identities were tuned against an image model, which is why they're kept as a separate rendering rather than derived from her look each time; showing the two side by side is how drift gets caught.
+**Rules out:** Photos in play (still parked); the page writing to the repo (the design thread applies change requests); a second copy of the context assembly on the bench; `photo` reaching any call but the photo call.

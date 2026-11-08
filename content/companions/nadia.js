@@ -112,6 +112,8 @@ export default {
     name: "Ember",
     voice: `hot, blunt, laughing, unhurried, devoted to Nadia and very interested in him`,
     look: `Ember in her own body: bronze skin veined with moving ember-light, hair like slow fire, molten gold eyes, warm to the touch, in sheer veils of crimson and gold silk and heavy gold jewellery. She can hold this body only a little while and doesn't do it often, but it's familiar to her, an old dress she wears easily.`,
+    // Ember beside her in a photo, when the designer asks for her (D170).
+    photo: `Beside her is a fire spirit woman with bronze skin veined with moving ember-light, hair like slow fire and molten gold eyes, in sheer crimson silk.`,
     relayed: `Ember doesn't speak for herself or take her own body while anyone else is present, until she trusts him and feels safe with the other companion too. Now and then Nadia passes on what Ember likes, wants or thinks of him, in the third person, and lets it sit. Most of what Nadia says is her own, in her own voice: her ideas, her jokes, her answers. Asked something, Nadia answers it herself.`,
     // Ember's own tastes, which Nadia tells him about. Draft; the designer may rewrite.
     admires: `boldness; fire used without apology; blunt honesty; being treated as herself, not as Nadia's trick; anyone who makes Nadia laugh`,
@@ -122,6 +124,15 @@ export default {
     beat: "manifest",
   },
   outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles; a fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
+  photo: {
+    role: "dancer with a flame tattoo spiraling up one arm",
+    face: "Naturally beautiful face, warm brown skin",
+    identity: "warm brown eyes, waist-length black curls with tiny gold beads, with a tall, toned dancer's body with real curves.",
+    garments: "She wears a sexy jeweled saffron bandeau, a sheer crimson silk skirt slit high on both sides, and a coin belt low on her hips",
+    bold: true,
+    expression: "a warm, knowing, teasing smile",
+  },
   abilities: {
     combat: {
       id: "burst",

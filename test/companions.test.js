@@ -94,7 +94,7 @@ test("removing a companion leaves every other pairing working", () => {
 });
 
 test("every pairing builds a huddle and both campfire scenes, under the input limit, with no engine or UI data", () => {
-  const banned = ['"color"', '"rate"', '"leanFromHeat"', '"image"', '"imgRole"', '"by":', '"declared"', '"beatTurns"', '"gain"'];
+  const banned = ['"color"', '"rate"', '"leanFromHeat"', '"photo"', '"garments"', '"by":', '"declared"', '"beatTurns"', '"gain"'];
   for (const [a, b] of pairings(companions)) {
     const [x, y] = [companions[a], companions[b]];
     for (const input of [huddle(x, y), huddle(y, x), camp(x, y, [a]), camp(x, y, [a, b])]) {

@@ -109,6 +109,15 @@ export default {
   suppressed: `to be loved as a woman, not as the instrument of a prophecy. Met by asking what she wants, not what her duty is`,
   darkTriggers: `treating her only as a servant; accepting worship without care for her; walking toward the temple; claiming the prophecy as his due`,
   outfit: `White silk vestments in the Ordo's simple cut, sheer where the light comes through, belted with a gold cord and open at the sides to the hip; a gold sunburst pendant on a long chain; a thin gold circlet; sandals, or bare feet on holy days.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
+  photo: {
+    role: "priestess with a small gold sunburst marked on the inside of one wrist",
+    face: "Naturally beautiful, fine-boned face, luminous pale skin",
+    identity: "pale blue-grey eyes, platinum-blonde hair, almost white, falling straight past her waist and braided with thin gold thread, with a tall, slender body.",
+    garments: "White silk vestments, sheer where the light comes through, belted with a gold cord and open at the sides to the hip, and a thin gold circlet",
+    bold: false,
+    expression: "serene and adoring, eyes shining, a soft smile",
+  },
   abilities: {
     combat: {
       id: "dawnlight",

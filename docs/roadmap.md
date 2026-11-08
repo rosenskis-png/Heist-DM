@@ -83,6 +83,6 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 
 ## Later
 
-Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
+Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24; photos are on the bench, not yet in play, D170).
 
 - **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D157); judge the next batch for that. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.

@@ -89,6 +89,16 @@ export default {
   suppressed: `to be touched with tenderness, not as food, and wanted for herself. Met by tender touch, wanting her rather than the glamour, and telling her he wants real connection alongside the physical (this lands well with her)`,
   darkTriggers: `pure indulgence with nothing else; helping her complete the contract; cruelty she can savour`,
   outfit: `A black silk-and-lace halter top that barely covers and a low-slung skirt of sheer black panels split high on both legs; fine hell-forged gold body chains engraved with infernal script across her hips and waist; gold cuffs on her horns; the {builders_adj} ward-chains on her ankles worn as anklets.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
+  photo: {
+    age: 28,
+    role: "succubus with deep red skin, curled black horns, folded leathery wings and a long tail, otherwise human body",
+    face: "Naturally beautiful face, deep red skin",
+    identity: "gold eyes with slit pupils, long glossy black waves, with a soft, curvy hourglass body.",
+    garments: "She wears a sexy black silk-and-lace halter top, a sheer black skirt slit high on both legs, and thin iron chains around her ankles worn like jewellery",
+    bold: true,
+    expression: "a lazy, amused, hungry half-smile, heavy-lidded eyes",
+  },
   abilities: {
     combat: {
       id: "kiss",

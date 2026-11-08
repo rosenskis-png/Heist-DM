@@ -112,6 +112,15 @@ export default {
   suppressed: `to have a self: to be wanted for who she is, not only as his. Met by asking about her, encouraging her own skills, giving her something to be besides his`,
   darkTriggers: `appeasing every storm; letting her hurt rivals; encouraging violence done for him`,
   outfit: `A black leather corset vest laced with red cord over a loose, cropped white linen shirt sliding off one shoulder; high-waisted black leather breeches; worn thigh-high buckled boots; a thigh harness of throwing knives; a red silk sash knotted at her hip; a stolen dagger with a glowing red gem in the pommel; a short crimson half-cape taken off an enemy officer.`,
+  // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
+  photo: {
+    role: "rogue",
+    face: "Naturally pretty face scarred by combat, skin blemishes",
+    identity: "pale grey eyes, a small scar through one eyebrow, a choppy black bob with uneven blunt bangs, with a lithe, compact, toned body with curves.",
+    garments: "She wears a sexy black leather corset vest laced with red cord, high-waisted black leather breeches, and a single strip of cloth around her right wrist",
+    bold: true,
+    expression: "a creepy mix of innocent and loving mixed with dangerous and insane, deadly intense eyes that don't match her innocent toothy grin searching for approval",
+  },
   abilities: {
     combat: {
       id: "mine",

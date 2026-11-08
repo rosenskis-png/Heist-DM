@@ -59,6 +59,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `prompts/` | One prompt per AI call, plus the shared style guide |
 | `bench/` | The judgment test bench: an artifact page that runs the companion and campfire prompts on hand-written cases, plus Camp, free play with any two companions |
 | `bench/forge.html` | The Forge: the designer's bench for the generator. A campaign from a vibe (the world as the DM sees it, the pitch as the player reads it), then rooms in it by kind, pinned seed and brief, every stage shown (D154) |
+| `bench/dressing.html` | The Dressing Room: how each companion looks, sorted; exactly what each call is sent about her appearance; drafts and notes for the design thread; and photo prompts (D170) |
 | `fixtures/bench/` | The bench's huddle and campfire cases |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
