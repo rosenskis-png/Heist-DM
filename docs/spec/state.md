@@ -14,7 +14,9 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **The player:** name, class, and the hidden secret, drawn from the world's, which reveals by act (`content/setting.js`, `playerSecretReveal`).
 - **Gear and items** the party holds.
 - **The encounter log:** one line per finished encounter. The sketch call reads it as background (D119).
-- **What the act has used:** the kinds, genres and motifs of its packets, so the next seed avoids repeats (D118).
+- **What the act has used:** the motifs, busy-withs, shapes and centrepieces of its rooms, each generated room's kind and premise, its log lines, the signs of its peak shown, the people brought back, the locals, settings and news used, and whose story has been told, so the next seed avoids repeats and the next sketch goes somewhere new (D118, D162, D164).
+- **The act's plan** (`plan`, from the act call, D164), the **peaks** used so far, and the **history** of finished acts: each one's peak, premises and log lines, which the next act call reads.
+- **What the campaign remembers** (D164): the **clues** the party has found and those placed in any room (each placed once), and the **memory**, up to the last 30 people the verdicts named, from whom a later room may bring one back.
 - **The hand-off** from the last encounter (below).
 
 ## Live encounter state (bounded by the encounter)
@@ -41,7 +43,8 @@ The engine checks that every write names real things before committing it (`docs
 | Party call | Lines over the rings, stances, tagged reactions |
 | Companion call | Stances, tagged reactions (D20) |
 | Card confirmation | Stance decisions, checkpoints |
-| Verdict call | The room's rating and why, and each companion's reactions to how it went (D146) |
+| Verdict call | The room's rating and why, each companion's reactions to how it went (D146), and up to two people worth meeting again (D164) |
+| Act call | The act's plan: its region now, busy lines, holders, peak and its signs (D164) |
 | Engine | Ticks, routines, events, rolls, objective status, gold spent at a merchant, `down` at no toughness left, the event log, the hand-off |
 | Campfire | Relationship changes (including each one's view of the other), beliefs, storm level, caught asides, beats, memories, revealed secrets, commitments, her outfit |
 
@@ -49,7 +52,7 @@ The engine checks that every write names real things before committing it (`docs
 
 When an encounter ends, the engine writes a hand-off object, and the next packet's starting conditions are built from it:
 
-- gear, the gold the party has (what it had, less what it paid, plus rewards carried out) and the relics it carried out (D147); the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
+- gear, the gold the party has (what it had, less what it paid, plus rewards carried out), the relics it carried out (D147), and the clues it came away with (D164); the conditions the party carries until a campfire (D130), and the per-rest ability uses spent since the last one (D128);
 - companions present;
 - the exit used, and its next-scene stub (D119): `way_on` names it when the whole party ended in its zone (D144);
 - **attachments** (D123): who travels with the party and who is missing from it. The next packet must resolve each one, and the engine drops them when that encounter ends;

@@ -70,14 +70,15 @@ test("the pitch's world has Gravenhold's shape, and the check sends back one tha
   const { pitchSchema } = await import("../schemas/calls/pitch.js");
   const { pitchCall } = await import("../src/calls/pitch.js");
   assert.deepEqual(validate(pitchSchema, { pitch: "You wake in a cell.", world: worldOf() }), []);
-  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), acts: worldOf().acts.slice(0, 4) } }).length > 0, "five acts");
+  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), regions: worldOf().regions.slice(0, 4) } }).length > 0, "five regions");
+  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), mysteries: worldOf().mysteries.slice(0, 1) } }).length > 0, "at least two mysteries");
   const needy = Object.values(authored).filter((c) => c.needs?.length).slice(0, 2);
   const bare = { ...masquerade(), features: {} };
   const outs = [{ pitch: "x", world: bare }, { pitch: "You wake.", world: masquerade() }];
   const sent = [];
   const io = { sample: { json: async (input) => (sent.push(input), outs.shift()) } };
   const prompts = Object.fromEntries(readdirSync(new URL("../prompts/", import.meta.url)).map((f) => [f.replace(".md", ""), readFileSync(new URL(`../prompts/${f}`, import.meta.url), "utf8")]));
-  const out = await pitchCall(io, { prompts }, { companions: needy, vibe: "a gothic masquerade", rejected: [] });
+  const out = await pitchCall(io, { prompts }, { companions: needy, vibe: "a gothic masquerade", rejected: [], withExample: true });
   assert.equal(out.world.id, "chateau_noir");
   assert.equal(sent.length, 2, "the world missing a feature went back once");
   assert.ok(sent[0].includes("a gothic masquerade") && sent[0].includes("Worked example: Gravenhold"));
@@ -101,4 +102,24 @@ test("a session in a generated world fills companions from it, reads its world f
   const back = restore(serialize(session), packet);
   assert.equal(back.world.id, "chateau_noir");
   assert.ok(JSON.stringify(back.state.party[1]).includes("comital"));
+});
+
+test("a pitch's seed names the kind of heart and two different kinds of secret, and reaches the pitch (D157)", async () => {
+  const { pitchSeed } = await import("../src/campaign/world.js");
+  const { HEARTS, SECRETS } = await import("../content/pitch.js");
+  const { pitchInput } = await import("../src/context.js");
+  const { pitchSchema } = await import("../schemas/index.js");
+  const hearts = new Set();
+  for (let n = 1; n < 40; n++) {
+    const s = pitchSeed(n * 7919);
+    assert.ok(HEARTS.includes(s.heart) && s.secrets.every((x) => SECRETS.includes(x)) && s.secrets[0] !== s.secrets[1]);
+    hearts.add(s.heart);
+  }
+  assert.ok(hearts.size >= 5, "rerolls ask different questions");
+  assert.deepEqual(pitchSeed(42), pitchSeed(42));
+  const seed = pitchSeed(5);
+  const input = pitchInput({ prompts: { pitch: "x" } }, { companions: [], vibe: "", seed }, pitchSchema);
+  assert.ok(input.includes(seed.heart) && input.includes(seed.secrets[1]));
+  const { worldOf } = await import("../src/campaign/world.js");
+  assert.ok(worldOf().playerSecrets.every((t) => !/\b(he|his|him)\b/i.test(t)), "the player is they");
 });

@@ -55,9 +55,10 @@ Together these also give **context economy**: a lot of story per call, each call
 | `docs/design/encounter-craft.md` | How to design a good room, rethought for the DM era (D152); its sources in `docs/design/references/` |
 | `docs/design/companion-craft.md` | How to play the companions: tone, the romance floor, fellow-player behaviour |
 | `fixtures/cells/` | The Cells worked example, and a recorded card and account for the rat plan |
-| `content/` | Game data: companions, pairs, classes, rules, the rules every world shares (`setting.js`), the worlds (`worlds/`, Gravenhold first), the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
+| `content/` | Game data: companions, pairs, classes, rules, the rules every world shares (`setting.js`), the worlds (`worlds/`, Gravenhold first), the questions a pitch answers (`pitch.js`), the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
 | `bench/` | The judgment test bench: an artifact page that runs the companion and campfire prompts on hand-written cases, plus Camp, free play with any two companions |
+| `bench/forge.html` | The Forge: the designer's bench for the generator. A campaign from a vibe (the world as the DM sees it, the pitch as the player reads it), then rooms in it by kind, pinned seed and brief, every stage shown (D154) |
 | `fixtures/bench/` | The bench's huddle and campfire cases |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 

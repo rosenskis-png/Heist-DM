@@ -12,7 +12,7 @@ How to design a *good* packet is in `docs/design/encounter-craft.md`. The worked
 - **Optional objectives,** such as `item_held: gear_sack`.
 - **Purpose:** what this encounter is for, in one or two concrete sentences.
 - **Expected length,** in plans committed (e.g. 1–2, 3–5).
-- **No routes, ever.** The intent never lists solutions, obvious or alternative. The critique call plays approaches privately (D120), but they are never stored or sent. The engine rejects a packet with route-like fields.
+- **No routes, ever.** The intent never lists solutions, obvious or alternative. The engine rejects a packet with route-like fields.
 
 - **Attachments:** for each one the hand-off carries in (an NPC travelling with the party, a companion missing from it), how it resolves in this encounter (D123).
 - **Exits:** each way out names the zone the party leaves from, the kind of room code drew for it (`docs/spec/campaign.md` §2, D144), and a one-line stub for the next scene it leads to (D119).
@@ -36,7 +36,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 - **Connections:** what links two zones (door, bars, grate, drain, opening, stairs, crawl), with the biggest size that `fits` through (and, for a lockable one, `fits_unlocked`, D53), `see_through`, flags (`locked`), **which side each one is operated from** and whether it can be reached from the other side, the `key` if any, plus extra travel cost in ticks.
 - **Senses** (optional): per NPC, or per beat for an NPC on a routine, the zones they see and hear, for the DM to read. The party's own sight and hearing come from the map (`docs/spec/engine.md` §5).
 - **Light level** per zone.
-- **Things:** objects with properties (free text for the AI to judge, plus a size and any flags the engine checks), and where they are: a zone or a holder. Schedules move them through beats' `on_start` rules. A thing may carry a `reward`, gold or a relic, that the party gets if one of them holds it when the room ends, and a merchant's things carry a `price` (`docs/spec/campaign.md` §4, D147).
+- **Things:** objects with properties (free text for the AI to judge, plus a size and any flags the engine checks), and where they are: a zone or a holder. Schedules move them through beats' `on_start` rules. A thing may carry a `reward`, gold, a relic or a journal page from one of the world's mysteries (D164, D168), that the party gets if one of them holds it when the room ends, and a merchant's things carry a `price` (`docs/spec/campaign.md` §4, D147).
 - **Fixed facts:** physical facts that rule things out, including load-bearing material facts ("the hinges of cell 1 are rotten and give way under a heavy impact") and rulings made in advance ("plants only take hold on the mossy floor at the far end").
 - **Hidden things:** marked hidden. Included for the AI, never shown to the player until revealed.
 
@@ -48,7 +48,7 @@ The map is structure: an exact layout plus the relationships the AIs reason with
 Semantics: `docs/spec/engine.md`. Example: `content/encounters/cells.json`.
 
 ## 5. Opening description
-Written from the map after the map is final. Stored word for word and sent with every call in the encounter. It paints the scene (D49) and names everything the party can make out from where they start (`inSight`, `docs/spec/engine.md` §5), each in a phrase woven into the picture: that it's there, never its measurements and never what it's for, with every usable thing given the same weight (D136). Hidden things and what a person carries stay out. The packet's `name` is what the player sees it called ("The Cells").
+Written from the map after the map is final. Stored word for word and sent with every call in the encounter. It paints the scene as the party takes it in after a few safe seconds of watching (D155), in two or three short paragraphs, each about one thing rather than one part of the floor (D159): what's happening and who's doing it; what the party wants here and who has it; what's coming and the ways on. Plain sentences, never a tour of the floor plan; set dressing is optional. It names everything the party can make out from where they start (`inSight`, `docs/spec/engine.md` §5), each woven into that picture: what it is, what it's doing and what it's for to the people there, never its measurements and never what it could do for the party (D136, D155). Hidden things and what a person carries stay out. The packet's `name` is what the player sees it called ("The Cells").
 
 ---
 

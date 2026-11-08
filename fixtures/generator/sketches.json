@@ -1,0 +1,66 @@
+[
+  {
+    "premise": "The goblin camp's sergeant is a mind flayer, and it's asleep beside a chest of loot at the top of the watchtower in the middle of camp.",
+    "shape": "A wide cavern with the camp spread across its floor and a timber watchtower at the centre. The ceiling is high and crusted with gems, and old mining ladders and walkways web across it from the walls to the tower roof. The party comes in at one edge of camp. The deep tunnels lead off on the far side, past the tower; a flooded drift runs off behind the spider cage.",
+    "things": [
+      "The sergeant: a mind flayer, asleep in a hammock at the top of the watchtower.",
+      "A chest of loot, iron-bound and open, beside the hammock.",
+      "The goblins: a few dozen, eating, gambling and sleeping off a shift in the mines, all round the foot of the tower.",
+      "Gems crusting the cavern ceiling, high over the camp.",
+      "Mining ladders and walkways strung across the ceiling between the walls and the tower roof, rotten and cracked in places.",
+      "Two crag spiders in a timber cage on the far side of camp, being jabbed through the bars by a bored hobgoblin."
+    ],
+    "cut": "A goblin shaman reading bones by the fire. The camp has enough people in it.",
+    "pressure": "Goblins climb the tower to report, and each time the sergeant stirs a little more: it rolls over, then it mutters, then its tentacles start to twitch. The hobgoblin's game makes the spiders wilder; the cage creaks louder every time they hit it.",
+    "outcomes": [
+      "Out the far side with the best of the chest, the sergeant still asleep, and nobody in camp the wiser.",
+      "Out unnoticed with nothing from the chest.",
+      "The sergeant wakes, and they run for the deep tunnels with the camp in uproar behind them and a mind flayer that knows their faces.",
+      "The spiders get loose and the camp has its hands full; the party slips out in the chaos, one of them bitten.",
+      "Caught, dragged up the tower to be looked over, and marched on into the deep tunnels under guard."
+    ],
+    "notes": "The goblins want their supper, their winnings and their sleep, and fear the sergeant more than anything; none of them will wake it on purpose. The hobgoblin wants something to do. Nobody in the party could fight the mind flayer awake and win. Ways on: to an encounter, the deep tunnels past the tower, ringing with picks; to a quiet room, the flooded drift behind the spider cage, cold and still.",
+    "opening": "You come out of the tunnel at the edge of a goblin camp sprawled across a cavern floor: cookfires, bedrolls, and a few dozen goblins eating, gambling and mending picks after a shift in the mines. They're busy with themselves, and nobody's looking your way.\n\nIn the middle of camp stands a timber watchtower. At its top, in a hammock, something with a purple, tentacled face is asleep: the camp's sergeant, a mind flayer, by the way the goblins tiptoe round the foot of the tower. Beside the hammock sits an open chest with gold in it. High above it all the ceiling glitters with gems, and old mining ladders and walkways sag across it from the walls to the tower roof, a few planks missing.\n\nAs you watch, a goblin climbs the tower to report and the mind flayer rolls over in its sleep. The goblin freezes, then creeps back down. On the far side of camp a hobgoblin is jabbing a spear through the bars of a cage at two crag spiders, which hiss and throw themselves at the timber. Past the tower a tunnel rings with picks; behind the spider cage, a flooded drift runs off into the dark."
+  },
+  {
+    "premise": "Goblins are pressing wine in a hall built round a two-storey vat, and the hobgoblin guarding the door out is drinking the stock.",
+    "shape": "A tall hall with the great vat at its centre and a web of rafters, winches and ropes overhead for hauling grapes up to its rim. The party comes in by the grape chute at one end. The door out is at the far end, past the vat; a cellar hatch sits in the floor beside the stomping tubs.",
+    "things": [
+      "The great vat: two storeys of oak in the middle of the hall, full nearly to the brim, its staves weeping wine.",
+      "The goblin workers, shaky and pale, carrying fresh grapes to the stomping tubs and mashed grapes up to the vat.",
+      "Three stomping tubs in a row, purple to the knee, with goblins treading in them.",
+      "Rafters overhead, with winches and ropes hauling baskets up to the vat's rim.",
+      "The hobgoblin: huge, a great hammer across his knees, sitting in front of the far door, drinking from a ladle and laughing at the workers."
+    ],
+    "cut": "Rats in the grape bins. Nothing else in the room touches them.",
+    "pressure": "The hobgoblin gets drunker, louder and meaner: first he heckles, then he throws the ladle, then he's on his feet with the hammer looking for someone to blame. Meanwhile the vat fills; when it's full, the whole crew comes down to the floor to tap it.",
+    "outcomes": [
+      "Through the far door unseen, with the hobgoblin snoring in a puddle of wine.",
+      "Through the door after a fight, bruised, with the workers cheering the hobgoblin's fall.",
+      "Down the cellar hatch, soaked in wine, with the hall in an uproar above them.",
+      "Spotted and chased; they get out by whichever way is nearest, with the hobgoblin's hammer marks on one of them."
+    ],
+    "notes": "The workers want the shift over and fear the hobgoblin; they won't fight for him, and they won't risk their necks for strangers either. The hobgoblin wants more wine and someone to bully; made a fool of in front of the workers, he loses heart. Ways on: to an encounter, the far door, toward the clatter of a kitchen; to a quiet room, the cellar hatch, down to cool, dark racks.",
+    "opening": "The grape chute drops you into a hot, sweet-smelling hall at the height of the pressing. Goblins, shaky and pale, trudge back and forth with baskets: fresh grapes to three stomping tubs where others tread purple to the knee, and mashed grapes up to the rim of an enormous vat that fills the middle of the hall, two storeys of oak, its staves weeping wine. Overhead, ropes creak through winches in the rafters, hauling baskets up to the top.\n\nThe only door out is at the far end of the hall, and a hobgoblin the size of a wardrobe sits in front of it with a great hammer across his knees. He dips a ladle into a barrel, drinks, and laughs at the workers.\n\nAs you watch, a goblin stumbles on the vat's ladder and slops a basket. The hobgoblin roars with laughter and flings the ladle at him; the whole hall flinches and works faster. Beside the tubs, a cellar hatch stands half-open on the cool dark below."
+  },
+  {
+    "premise": "A pit of stacked stone rings strung with silk that a hungry thing hanging in the middle feels like its own skin, and a living child at the bottom.",
+    "shape": "A round shaft four rings deep around a hollow centre, every ring walled in bones and webbing. The party comes in on the top ring. The way out is a tunnel two rings down, directly across the hollow. The creature hangs in the hollow near the top; the child is on the floor at the bottom.",
+    "things": [
+      "The silk: over the walls and ledges of every ring and strung across the hollow, thickest near the bottom.",
+      "The hanging girl: fifteen or so, upside down on a single thread in the hollow near the top, four long pincers where her mouth should be. She snaps toward anything that touches the silk.",
+      "The sowers: three hollow-eyed figures in robes, with lanterns, working their way down the far side ring by ring.",
+      "The child: about nine, alive, alone on the floor at the bottom, terrified."
+    ],
+    "cut": "A glowing pool at the bottom. Lovely, and nothing touches it.",
+    "pressure": "Each time the silk tells her something, the girl lowers herself a body length, and she's already on her way to the child. The sowers keep working down, ring by ring, toward the level of the tunnel out.",
+    "outcomes": [
+      "Out through the tunnel with the child, the girl still hanging and the sowers none the wiser.",
+      "Out clean without the child, and her crying follows them down the tunnel.",
+      "The girl drops on the child and the pit erupts; they get out in the chaos, with or without her, and one of them is cut.",
+      "Caught in the silk and hauled up by the sowers, and carried on down the tunnel wrapped and helpless."
+    ],
+    "notes": "The sowers want their work done and hate the girl for feeding on it; they don't look up from their lanterns unless something's loud. The girl wants to feed, and the child is the warmest thing in the pit. Ways on: to an encounter, the tunnel two rings down across the hollow, where bells toll; to an oddity, a crack at the bottom beside the child, breathing cold sea air.",
+    "opening": "You come out onto a ledge at the top of a great round shaft: four rings of stone stacked down into the dark around a hollow centre, every ring walled in bones and webbing. Directly across from you, three figures in robes are working their way down the far side with lanterns, tending the cocoons on the walls. Two rings below you, on the far side, a tunnel leads out.\n\nIn the hollow, near the top, a girl of maybe fifteen hangs upside down by a single silk thread. Where her mouth should be she has four long, sharp pincers.\n\nAs you watch, one of the sowers steps on the webbing. Her head snaps round to face him, and she lowers herself a body length, pincers clicking. Far below, someone whimpers: on the floor at the bottom of the shaft is a little girl of nine or so, very much alive, staring up at the thing coming slowly down toward her. Beside her, a crack in the floor breathes cold, salty air."
+  }
+]

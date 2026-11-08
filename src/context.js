@@ -5,6 +5,8 @@ import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
 import { worldOf } from "./campaign/world.js";
+import { setting } from "../content/setting.js";
+import { STALE } from "../content/stale.js";
 import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
@@ -356,6 +358,7 @@ export function campfireInput(env, c, self, others, schema) {
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),
+    c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
     c.events ? block("The last encounter", c.events) : null,
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
@@ -647,8 +650,10 @@ export function pitchInput(env, c, schema) {
     block("Output format", shapeText(schema)),
     block("The companions in this party", c.companions.map((m) => ({ name: m.name, role: m.role, blurb: m.blurb }))),
     needs.length ? block("Features their stories need", needs) : null,
-    block("Worked example: Gravenhold", example),
+    c.withExample ? block("Worked example: Gravenhold", example) : null,
+    c.seed ? block("The question: this world's seed", { the_heart_is: c.seed.heart, the_player_secrets_are: c.seed.secrets }) : null,
     c.rejected?.length ? block("Pitches the player turned down (write something different)", c.rejected) : null,
+    block("Worn out: never build the world on these", STALE),
     block("The player's vibe", c.vibe || "No vibe given: surprise them."),
     "Write the world and its pitch.",
   ]);
@@ -657,69 +662,110 @@ export function pitchInput(env, c, schema) {
 
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
-// What the room's sketch is built from, for the sketch and critique calls: the seed's question, with its motifs.
-const seedText = (seed) => ({
-  kind: seed.kind,
-  tone: seed.tone,
-  ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
-  ...(seed.shape ? { shape: seed.shape } : {}),
-  ...(seed.meat ? { what_makes_its_choices_meaningful: seed.meat } : {}),
-  motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern, decisions: m.decisions })),
-  exits: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
-});
-
-// The party as the designer needs it: what each can do, and what each companion values and needs from the world.
-function designParty(c) {
-  const [player, ...companions] = c.party;
-  const act = c.seed.act;
-  return [
-    { id: "player", role: player.role, abilities: abilitiesFor(player.abilities) },
-    ...companions.map((m, i) => ({
-      slot: `companion_${"ab"[i]}`, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
-      abilities: abilitiesFor(m.abilities),
-      ...(m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
-      ...(m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
-    })),
-  ];
-}
-
-// The world as the sketch needs it: the place, its life, heart and tensions, this act, the factions in the room.
-function designWorld(world, seed) {
+// What a climax is built from (D163, D164): the act's goal and its peak, decided when the act began, the heart, and the
+// act's rooms so far, which the climax pays off. Sent only to a climax.
+function climaxText(c) {
+  const plan = c.plan;
+  const region = c.world.regions?.[c.seed.act - 1];
   return {
-    place: world.place, life: world.life, heart: world.heart, tensions: world.tensions,
-    this_act: world.acts[seed.act - 1],
-    factions: (seed.factions ?? []).map((f) => world.factions[f]),
-    room_kinds: world.roomKinds,
+    the_act: { region: region?.name, goal: plan?.goal ?? setting.arc[c.seed.act - 1]?.job, ...(plan?.state ? { what_has_changed: plan.state } : {}) },
+    who_stands_at_its_centre: plan?.peak ?? "the act's antagonist: whoever's design blocks the party's way",
+    the_heart: c.world.heart,
+    what_the_act_built_up: c.earlier?.length ? c.earlier : "the act so far",
   };
 }
 
-// The sketch call (D117, D119): must honour the hand-off; the world and the act as background; the seed; the party;
-// the worked example. Revising, it also gets its sketch and the critique.
+// What the room's sketch is built from (D160–D164): what the seed fixes, its leanings, and at most one prize and one
+// extra, each a slice code chose, never the pool it came from.
+const seedText = (seed, world) => ({
+  fixed: {
+    kind: seed.kind,
+    tone: seed.tone,
+    busy_with: seed.busy,
+    ...(seed.shape ? { shape: seed.shape } : {}),
+    ...(seed.centrepiece ? { centrepiece: seed.centrepiece } : {}),
+    ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),
+    whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
+      : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
+      : "no one's: the room touches no companion's story; they react to it as themselves",
+    ways_on: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
+    ...(seed.clue
+      ? { prize: { a_journal_page: { written_by: seed.clue.author }, how: "a loose page, torn from that writer's journal, somewhere in the room the party has to reach and can carry off. They'll read it at camp: nothing in the room says or shows what's on it, and nobody here knows" } }
+      : seed.prize ? { prize: seed.prize } : {}),
+    ...(seed.callback ? { someone_from_before: { ...seed.callback, how: "they turn up here, in whatever role fits the room; they may or may not help" } } : {}),
+    ...(seed.hint ? { a_sign_of_what_is_coming: { sign: seed.hint, how: "something the party sees or hears here, in passing; never who or what it's a sign of, in person" } } : {}),
+    ...(seed.news ? { news: { what: seed.news, how: "something the party hears or sees here of what's been set in motion; part of the room, not its subject" } } : {}),
+    ...(seed.setting ? { setting: seed.setting } : {}),
+  },
+  worn_out_never_use: STALE,
+  leanings: {
+    ...(seed.core ? { built_around: seed.core } : {}),
+    ...(seed.xFactor ? { x_factor: seed.xFactor } : {}),
+    motifs: (seed.motifs ?? []).map((m) => ({ name: m.name, pattern: m.pattern })),
+  },
+});
+
+// The party as the designer needs it: who each is, never their abilities, so no room is built around one (D164); what
+// each companion values; and her story (the features it needs, and her quest once its act is near) only when the room is
+// hers (D158).
+function designParty(c) {
+  const [player, ...companions] = c.party;
+  const act = c.seed.act;
+  const spot = c.seed.spotlight;
+  return [
+    { id: "player", role: player.role },
+    ...companions.map((m, i) => {
+      const slot = `companion_${"ab"[i]}`;
+      const hers = spot === "both" || spot === slot;
+      // Her story's feature once an act (D167); her other rooms touch her values.
+      const story = hers && c.seed.herStory !== false;
+      const thread = story && c.plan?.threads?.find((t) => t.slot === slot)?.beat;
+      return {
+        slot, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
+        ...(story && m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
+        ...(thread ? { her_thread_this_act: thread } : {}),
+        ...(hers && m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
+      };
+    }),
+  ];
+}
+
+// The world as the sketch needs it (D163, D169): the place, its life, heart and tensions, the act's setting in general,
+// its question and aim, and the faction whose place it is, with its rules and the rungs of its ladder below the act's
+// peak. Nothing particular from the act: every room invents its own.
+function designWorld(c) {
+  const { world, seed, plan } = c;
+  const region = world.regions?.[seed.act - 1];
+  const f = seed.factions?.[0] && world.factions[seed.factions[0]];
+  const peak = plan?.peak?.who ?? "";
+  const ladder = (f?.ladder ?? []).filter((l) => !(peak && (peak.includes(l.name) || l.name.includes(peak))));
+  return {
+    place: world.place, life: world.life, heart: world.heart, tensions: world.tensions,
+    this_act: {
+      ...(region ? { region: region.name } : {}),
+      setting: plan?.setting ?? (region ? `${region.what}. ${region.feel}` : undefined),
+      ...(plan ? { question: plan.question, aim: plan.aim } : {}),
+    },
+    ...(f ? { whose_place_it_is: { name: f.name, desc: f.desc, rules: f.rules, goal: f.goal, ...(ladder.length ? { its_people: ladder.slice(0, 2) } : {}) } } : {}),
+  };
+}
+
+// The sketch call (D117, D119, D161, D164): must honour the hand-off; the region and the owning faction as background;
+// the seed with its slices; the party; the premises of the act's earlier rooms (D162). No example rooms: they become
+// anchors (D161). On the bench, the designer's brief (D154).
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
     block("Your job", env.prompts.sketch),
     block("Output format", shapeText(schema)),
-    block("The question: this room's seed", seedText(c.seed)),
-    block("The world", designWorld(c.world, c.seed)),
+    block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed, c.world)),
+    c.earlier?.length ? block("The way so far this act, in order: this room follows on from it, and is a different kind of place", c.earlier) : null,
+    c.seed.kind === "climax" ? block("The climax", climaxText(c)) : null,
+    block("The world", designWorld(c)),
+    c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    block("Worked example: a finished room's data (another room; match its detail, not its content)", env.examples?.encoded),
-    c.previous ? block("Your sketch", c.previous) : null,
-    c.critique ? block("The critique of it", c.critique.problems) : null,
-    c.previous ? "Revise the sketch from the critique: cut, connect or swap, never add." : "Design the room.",
-  ]);
-}
-
-// The critique call (D120): the sketch, its seed and the party's abilities.
-export function critiqueInput(env, c, schema) {
-  return compose([
-    block("Your job", env.prompts.critique),
-    block("Output format", shapeText(schema)),
-    block("The room's seed", seedText(c.seed)),
-    block("The party", designParty(c)),
-    block("The sketch", c.sketch),
-    "Play it four ways and report what's wrong.",
+    "Write the room's note.",
   ]);
 }
 
@@ -728,11 +774,36 @@ export function encodeInput(env, c, schema) {
   return compose([
     block("Your job", env.prompts.encode),
     block("Output format", shapeText(schema)),
-    block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits }),
+    block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits, ...(c.seed.prize ? { the_only_prize: c.seed.prize } : {}), ...(c.seed.clue ? { the_clue_id: c.seed.clue.id } : {}) }),
     block("The party's slots", ["player", "companion_a", "companion_b"]),
     block("Worked example: a finished packet", env.examples?.encoded),
     block("The sketch", c.sketch),
     "Encode the sketch as the packet.",
+  ]);
+}
+
+// The act call (D164): the world's stable core, this act's job and scale, the region, and what the party has done:
+// each earlier act's peak and its rooms' premises and log lines, as facts. After Act 5, what the player wants.
+export function actInput(env, c, schema) {
+  const w = c.world;
+  const arc = setting.arc[c.act - 1];
+  return compose([
+    block("Your job", env.prompts.act),
+    block("Output format", shapeText(schema)),
+    block("The world", {
+      place: w.place, heart: w.heart, life: w.life, tensions: w.tensions,
+      factions: Object.fromEntries(Object.entries(w.factions).map(([id, f]) => [id, { name: f.name, desc: f.desc, rules: f.rules, goal: f.goal, ladder: f.ladder }])),
+      regions: w.regions.map((r, i) => `${i + 1}: ${r.name}, ${r.what}`),
+    }),
+    block(`This act: Act ${c.act}`, arc ? { job: arc.job, scale: arc.scale, region: w.regions[c.act - 1] } : { job: "whatever the player wants to do next", region: "beyond the place, wherever that leads" }),
+    c.earlier?.length ? block("What the party has done, act by act", c.earlier) : block("What the party has done", "Nothing yet: the adventure is just beginning."),
+    c.party?.length ? block("The companions", c.party.slice(1).map((m, i) => ({ slot: `companion_${"ab"[i]}`, name: m.name, role: m.role, beliefs: m.beliefs, ...(m.quest ? { her_quest: m.quest, from_act: m.questAct } : {}), ...(m.needs?.length ? { her_story_needs: m.needs.map((k) => w.features[k]) } : {}) }))) : null,
+    block("Worn out: never build on these", STALE),
+    c.peaks?.length ? block("Peaks already used (never again)", c.peaks) : null,
+    block("The world's mysteries (choose this act's from these ids)", (w.mysteries ?? []).map((m) => ({ id: m.id, truth: m.truth }))),
+    c.memory?.length ? block("People the party has met", c.memory.map((p) => ({ name: p.name, fate: p.fate, feels: p.feels }))) : null,
+    c.intent ? block("What the player says they want to do now", c.intent) : null,
+    "Decide the act.",
   ]);
 }
 

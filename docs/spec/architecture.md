@@ -11,7 +11,7 @@ Who does what, the encounter loop, and time. For why it's shaped this way, see `
 | **Engine** | none | Owns all state: the clock, routines and placed events, dice, the ledger's consistency, the objective, saves and the hand-off (`docs/spec/engine.md`). Pure code: no DOM, no AI calls (D12). It never judges whether an action is possible. |
 | **The DM** | Adjudicate, resolve, scene, question and verdict | Rules on plans and makes the card, plays a card out against the world as it really is and narrates it, answers questions, rules on what the player does or says aloud at the table, and judges how a room went once it's over (D146). |
 | **Companions** | The party call for both at the table; the companion call for a private word; the campfire | Voice the companions over the rings, in private and at the campfire (D132). |
-| **Generation** | Sketch, critique and encode, once per packet | Builds the next encounter, room or campfire from a seed code picks (`docs/spec/generation.md`). |
+| **Generation** | Sketch and encode, once per packet | Builds the next encounter, room or campfire from a seed code picks (`docs/spec/generation.md`). |
 
 Every AI call goes through the artifact runtime's `sample` (D2). Each call's contract is in `docs/spec/calls/`, and what each sees is in `docs/spec/context.md`.
 

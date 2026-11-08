@@ -6,14 +6,14 @@ import { validate } from "./validate.js";
 export const TIERS = ["quick", "default", "complex"];
 
 // The middle position of the speed and quality setting (D58). The other two move every call one tier (D70).
-export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", sketch: "complex", critique: "complex", encode: "default" };
+export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", encode: "default" };
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 
 // How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
 // runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
 // `test/budget.test.js` holds every DM call under its budget at the ledger's limits, mid-fight (D130).
-export const BUDGET = { adjudicate: 28672, resolve: 28672, scene: 28672, question: 21504, verdict: 25600, pitch: 16384, sketch: 32768, critique: 20480, encode: 28672, companion: 21504, party: 24576 };
+export const BUDGET = { adjudicate: 28672, resolve: 28672, scene: 28672, question: 21504, verdict: 25600, pitch: 24576, act: 20480, sketch: 32768, encode: 28672, companion: 21504, party: 24576 };
 
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
 const REPLAY = new Set(["adjudicate"]);
@@ -46,9 +46,16 @@ export async function ask(io, { call, input, schema, check = () => [] }) {
   }
   if (record.size > LIMIT) throw new CallFailed(call, [`its input is ${record.size} bytes, over the 256 KiB limit`], record);
   const opts = { modelTier: tier, cache: REPLAY.has(call), signal: io.signal };
-  // One backoff on rate_limited, never a loop.
+  // One backoff on rate_limited, one more try when the connection drops (upstream_error, the runtime's only
+  // transient failure, D156), and one more when the reply held no JSON, keeping what it said instead (`noJson`, D159).
+  // Never a loop.
   const send = (x) =>
     io.sample.json(x, opts).catch(async (e) => {
+      if (e?.code === "upstream_error") return io.sample.json(x, opts);
+      if (e?.code === "invalid_json") {
+        record.noJson = String(e.text ?? "").slice(0, 20000);
+        return io.sample.json(x, opts);
+      }
       if (e?.code !== "rate_limited") throw e;
       await pause(io.backoff ?? 15000, io.signal);
       return io.sample.json(x, opts);

@@ -16,7 +16,7 @@ How a campaign is put together above the encounter: acts, legs, rooms and campfi
 
 No map of the act is built in advance.
 - **When a room is written, code draws the kind of room each of its exits leads to,** from the act's weights, with the campaign's seeded generator. The act's map is just the tree of what has been drawn, and only the branch the party took is kept.
-- **Code counts.** It tracks how many rooms are left in this leg and how many legs are left in the act. When a leg's count runs out, every exit leads to its campfire. After the last leg, every exit leads to the climax, and the climax leads to the sanctuary. A campfire at the end of every leg is guaranteed by the count, not by checking a graph. Code: `src/campaign/way.js`.
+- **Code counts.** It tracks how many rooms are left in this leg and how many legs are left in the act. When a leg's count runs out, the room has one exit, to its campfire (D169). After the last leg, every exit leads to the climax, and the climax leads to the sanctuary. A campfire at the end of every leg is guaranteed by the count, not by checking a graph. Code: `src/campaign/way.js`.
 - **The counts and the kinds** (D144; starting values in `content/setting.js`, `way`):
   - A leg is three rooms. Each room's verdict (§3) moves the leg's strain: a rough room raises it, a good one eases it, never below nothing. Every four points add one more room, at most two a leg, and only while the leg still has rooms left. So a rough stretch takes longer to reach the campfire, but a campfire the exits already lead to stays where it is (D146). A room strain adds is always an encounter, never a quiet room or a merchant: more road to the fire, not a reward for doing worse (D149).
   - Every act has at least two legs, so every path has a campfire before the climax as well as the sanctuary after it. Each act opens on an encounter.
@@ -74,8 +74,10 @@ Every adventure is set in a world (`content/worlds/`, D150). The rules every wor
 - **Its life:** what it's busy with, whatever the party does.
 - **Its factions,** and the **tensions** between them: what they want from each other, not only from the party.
 - **Its features:** what it holds that companions' stories need. Each companion lists hers as `needs`, and a world that lacks one for a companion in the party has a problem to fix.
-- **Its acts:** each act's place, sanctuary, mechanics and goal, in the shared five-act shape.
-- **The player's secrets** it can draw from, **room kinds** with examples from the place, and **world facts that never change** (`invariants`, with act gates).
+- **Its factions' ladders:** three named leaders each, lowest first: a local face, a lieutenant and the top, each with a visible hook. Each act's peak climbs them (D164).
+- **Its regions:** the part of the place each act crosses, what it is, its sanctuary, the factions that hold it at first, and how it feels, rising from personal (Act 1) through communal and ancient to mythic (Act 4), then the aftermath (Act 5). What happens in an act is decided when it begins, by the act call (`docs/spec/calls/act.md`).
+- **Its mysteries:** truths the game never confirms, each with an edge (one place later where knowing it quietly helps, as a hidden fact in the packets it applies to) and a journal someone in the world wrote about it, torn into pages that rooms hold as rewards and the party reads at camp (D164, D168).
+- **The player's secrets** it can draw from, and **world facts that never change** (`invariants`, with act gates). The player's secrets and the rings are revealed by act, as story; the mysteries never are.
 
 Gravenhold is the default world and the worked example a generated world is written to match. A player who types a vibe at setup gets a world from the pitch call instead (`docs/spec/calls/pitch.md`, D151), in the same shape (`schemas/world.js`), holding every feature the two chosen companions need; the session keeps it whole and saves it, and it's never generated again. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
 
