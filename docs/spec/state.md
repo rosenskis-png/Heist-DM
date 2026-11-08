@@ -14,7 +14,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **The player:** name, class, and the hidden secret, drawn from the world's, which reveals by act (`content/setting.js`, `playerSecretReveal`).
 - **Gear and items** the party holds.
 - **The encounter log:** one line per finished encounter. The sketch call reads it as background (D119).
-- **What the act has used:** the motifs, busy-withs, shapes and centrepieces of its rooms, each generated room's premise, its log lines, the signs of its peak shown and the people brought back, so the next seed avoids repeats and the next sketch goes somewhere new (D118, D162, D164).
+- **What the act has used:** the motifs, busy-withs, shapes and centrepieces of its rooms, each generated room's premise, its log lines, the signs of its peak shown, the people brought back, the locals, settings and news used, and whose story has been told, so the next seed avoids repeats and the next sketch goes somewhere new (D118, D162, D164).
 - **The act's plan** (`plan`, from the act call, D164), the **peaks** used so far, and the **history** of finished acts: each one's peak, premises and log lines, which the next act call reads.
 - **What the campaign remembers** (D164): the **clues** the party has found and those placed in any room (each placed once), and the **memory**, up to the last 30 people the verdicts named, from whom a later room may bring one back.
 - **The hand-off** from the last encounter (below).

@@ -667,7 +667,7 @@ function climaxText(c) {
   const plan = c.plan;
   const region = c.world.regions?.[c.seed.act - 1];
   return {
-    the_act: { region: region?.name, goal: plan?.goal ?? setting.arc[c.seed.act - 1]?.job },
+    the_act: { region: region?.name, goal: plan?.goal ?? setting.arc[c.seed.act - 1]?.job, ...(plan?.state ? { what_has_changed: plan.state } : {}) },
     who_stands_at_its_centre: plan?.peak ?? "the act's antagonist: whoever's design blocks the party's way",
     the_heart: c.world.heart,
     what_the_act_built_up: c.earlier?.length ? c.earlier : "the act so far",
@@ -693,8 +693,11 @@ const seedText = (seed, world) => ({
       : seed.prize ? { prize: seed.prize } : {}),
     ...(seed.callback ? { someone_from_before: { ...seed.callback, how: "they turn up here, in whatever role fits the room; they may or may not help" } } : {}),
     ...(seed.hint ? { a_sign_of_what_is_coming: { sign: seed.hint, how: "something the party sees or hears here, in passing; never who or what it's a sign of, in person" } } : {}),
+    ...(seed.news ? { news: { what: seed.news, how: "something the party hears or sees here of what's been set in motion; part of the room, not its subject" } } : {}),
+    ...(seed.setting ? { setting: seed.setting } : {}),
+    ...(seed.local ? { a_local: { who: seed.local, how: "they're here about their own business; they belong to no side, and the room doesn't hang on them" } } : {}),
   },
-  leanings: { motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern })) },
+  ...(seed.motifs?.length ? { leanings: { motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern })) } } : {}),
 });
 
 // The party as the designer needs it: who each is, never their abilities, so no room is built around one (D164); what
@@ -709,25 +712,31 @@ function designParty(c) {
     ...companions.map((m, i) => {
       const slot = `companion_${"ab"[i]}`;
       const hers = spot === "both" || spot === slot;
+      // Her story's feature once an act (D167); her other rooms touch her values.
+      const story = hers && c.seed.herStory !== false;
       return {
         slot, name: m.name, role: m.role, beliefs: m.beliefs, admires: m.admires, despises: m.despises,
-        ...(hers && m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
+        ...(story && m.needs?.length ? { her_story_needs: m.needs.map((k) => c.world.features[k]) } : {}),
         ...(hers && m.quest && act >= (m.questAct ?? 99) - 1 ? { her_quest: m.quest } : {}),
       };
     }),
   ];
 }
 
-// The world as the sketch needs it (D164): the place in brief, the region as it is now, and the faction whose place it
-// is, with its local face. Never the heart or the tensions in an ordinary room: a climax gets the heart in its block.
+// The world as the sketch needs it (D164, D167): the place in brief, the region's name, the act's question and aim,
+// and the faction whose place it is. Nothing concrete that every room would share: no picture of the region, never the
+// heart or the tensions outside a climax, and no local face when that face is the act's peak.
 function designWorld(c) {
   const { world, seed, plan } = c;
   const region = world.regions?.[seed.act - 1];
   const f = seed.factions?.[0] && world.factions[seed.factions[0]];
+  const face = f?.ladder?.[0];
+  const isPeak = face && plan?.peak?.who && (plan.peak.who.includes(face.name) || face.name.includes(plan.peak.who));
   return {
     place: world.place,
-    the_region_now: plan?.region ?? (region ? `${region.name}: ${region.what}. ${region.feel}` : undefined),
-    ...(f ? { whose_place_it_is: { name: f.name, desc: f.desc, rules: f.rules, local_face: f.ladder?.[0] } } : {}),
+    ...(region ? { region: region.name } : {}),
+    ...(plan ? { this_act: { question: plan.question, aim: plan.aim } } : region ? { this_act: region.what } : {}),
+    ...(f ? { whose_place_it_is: { name: f.name, desc: f.desc, rules: f.rules, ...(face && !isPeak ? { local_face: face } : {}) } } : {}),
   };
 }
 
@@ -780,6 +789,8 @@ export function actInput(env, c, schema) {
     c.earlier?.length ? block("What the party has done, act by act", c.earlier) : block("What the party has done", "Nothing yet: the adventure is just beginning."),
     block("The kinds of busy-ness (name each busy line's kind from this list)", BUSY),
     c.peaks?.length ? block("Peaks already used (never again)", c.peaks) : null,
+    block("The world's mysteries (choose this act's from these ids)", (w.mysteries ?? []).map((m) => ({ id: m.id, truth: m.truth }))),
+    c.memory?.length ? block("People the party has met", c.memory.map((p) => ({ name: p.name, fate: p.fate, feels: p.feels }))) : null,
     c.intent ? block("What the player says they want to do now", c.intent) : null,
     "Decide the act.",
   ]);

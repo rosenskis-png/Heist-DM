@@ -1,31 +1,36 @@
-// Act call output: what an act holds, decided when it begins from what the party has done (D164). Contract:
-// docs/spec/calls/act.md. Generator-only: no play call sees it, only the rooms built from it.
+// Act call output: what an act holds, decided when it begins from what the party has done (D164, D167). Contract:
+// docs/spec/calls/act.md. Generator-only. What reaches more than one room is abstract (the question, the aim); what's
+// concrete is a pool code deals out one item to one room, each used once; the peak reaches only the climax.
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
 
+const pool = (min) => list(r("text"), min);
+
 export const actSchema = withDefs({
   $id: "act",
-  ...obj(["goal", "region", "holders", "busy", "peak", "hints"], {
-    // The act's job, in this world's terms.
+  ...obj(["goal", "question", "aim", "state", "holders", "busy", "locals", "settings", "news", "mysteries", "returning", "peak", "hints"], {
+    // The act's job, in this world's terms. The climax reads it.
     goal: r("text"),
-    // What the region is like now, given what the party has done.
-    region: r("text"),
+    // What the act is about, as a question the act answers. Every room reads it.
+    question: r("text"),
+    // What the party should come away knowing or holding by the act's end. Every room reads it.
+    aim: r("text"),
+    // What has changed in the region because of earlier acts, for the climax and the next act call; never a room.
+    state: r("text"),
     // The ids of the factions that hold the region now; code draws each room's owner from them.
     holders: list(r("id"), 1),
-    // What the region is busy with, one line per kind that happens here, the kind named as in the seed's list; code
-    // matches each to that list (`tidyAct`) and draws one per room, never repeating.
+    // Pools, one item to one room, each used once in the act.
     busy: list(obj(["kind", "line"], { kind: r("text"), line: r("text") }), 4),
-    // Who or what stands at the act's climax.
-    peak: obj(["who", "why", "wants", "turns", "where"], {
-      who: r("text"),
-      // Whose design blocks the party, and why it's them.
-      why: r("text"),
-      wants: r("text"),
-      // How it acts as the climax goes on: the turns of a boss fight.
-      turns: r("text"),
-      where: r("text"),
-    }),
-    // Visible signs of the peak that rooms may show, one at a time, before the climax.
-    hints: list(r("text"), 2),
+    locals: pool(5),
+    settings: obj(["quiet", "oddity", "campfire"], { quiet: pool(2), oddity: pool(2), campfire: pool(2) }),
+    news: pool(0),
+    // The ids of the one or two mysteries whose clues this act's rooms hold.
+    mysteries: list(r("id"), 1),
+    // Names from the people the party has met who might plausibly turn up in this region.
+    returning: pool(0),
+    // Who or what stands at the act's climax. Only the climax reads it.
+    peak: obj(["who", "why", "wants", "turns", "where"], { who: r("text"), why: r("text"), wants: r("text"), turns: r("text"), where: r("text") }),
+    // Visible signs of the peak, one at a time, before the climax.
+    hints: pool(2),
   }),
 });

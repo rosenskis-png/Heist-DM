@@ -68,6 +68,7 @@ Winning and losing aren't outcomes. They're the players' own judgment of the out
 
 - **Prizes are one lever among several,** never a room full of loot. Gold, a relic, an outfit, a companion moment, progress on a companion's goal, knowledge of what's ahead, or the choice of where to go next (D147). Optional content has diminishing returns, and too much drowns the room.
 - **The way on is part of the prize.** The party leaves by an exit it managed to reach (D144). One setup among many: to the left a prize guarded by one thing, leading to one kind of room; to the right another, leading elsewhere. A bold, successful party takes both and chooses; an adequate one takes one path; a poor one gets neither and is carried on. A forced way on should lead to a different kind of story, not simply a worse room.
+- **The harder way leads somewhere calmer.** When one way on leads to an encounter and another to a calm room, the encounter's is the easier to reach; reaching the calm one is the reward for doing well (D167).
 - **Exits feel different.** Warm wet air one way, a kitchen's clatter the other. Choosing between identical doors is the worst choice a room can offer. Nothing two rooms ahead is shown (D140).
 - **Momentum is progress that strengthens the party against what's coming,** not just progress. Things the party carries out (an ally, a weakness learned, a relic) should matter later. Inertia (what pushes back) and momentum are separate pulls, and the players should feel both.
 

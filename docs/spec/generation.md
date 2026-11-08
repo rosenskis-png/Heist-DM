@@ -41,7 +41,7 @@ What the seed fixes:
 - **The prize,** for an encounter, an oddity or a quiet room (D164): none about half the time, gold, a relic or a clue. A clue is one the campaign hasn't placed, with a carrier code draws (a journal page, a mural, a letter, a song, a talking prisoner…), each placed once in a campaign.
 - **At most one extra** (D164), never in two rooms running: **someone from before**, from the verdicts' memory, only in an encounter or an oddity, at most once an act each; or **a sign of the act's peak**, from its hints, at most one a leg.
 
-Its leaning: **one motif**, suited to the kind, avoiding those the act has used, which the sketch uses or leaves.
+From the act's pools (D167), each item used once in the act: **a local** for an encounter, oddity or quiet room, in place of the motif (without an act plan, one motif as a leaning); **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Clues come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
 
 The campaign records what the act has used (motifs, busy-withs, shapes, centrepieces, premises, signs, people brought back) and resets them when an act ends; the clues placed and the memory last the campaign.
 
@@ -49,9 +49,9 @@ The campaign records what the act has used (motifs, busy-withs, shapes, centrepi
 | Tier | Holds |
 |---|---|
 | **Must honour** | How the party arrives (the exit's stub, what it carries) and the last rooms' log lines |
-| **Background** | The place in brief, the region as the act's plan describes it now, and the faction whose place it is, with its rules and local face. Never the heart or the tensions, except at a climax |
+| **Background** | The place in brief, the region's name, the act's question and aim, and the faction whose place it is, with its rules and local face (none when that face is the act's peak). No picture of the region, and never the heart or the tensions, except at a climax |
 | **Seed** | Everything above, with its prize, any extra, and the act's earlier premises |
-| **Climax** | The act's goal and peak, the heart, and the act's rooms so far |
+| **Climax** | The act's goal, what has changed, and its peak, the heart, and the act's rooms so far |
 
 Plus the party: who each is, never their abilities, so no room is built around one; each companion's values; her story's needs and her quest only when the room is hers (D158). No example rooms (D161), and never an AI summary of the act. On the Forge, a designer's brief comes first where it and the seed disagree, and an unpinned busy-ness gives way to it (D166).
 

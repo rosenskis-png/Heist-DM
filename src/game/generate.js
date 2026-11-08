@@ -21,7 +21,7 @@ export function edgesFor(world, seed) {
 // log), what this act holds. After Act 5, `intent` is what the player says they want to do. Returns the campaign with
 // the act's plan.
 export async function beginAct(io, env, { camp, world, intent = null }) {
-  const plan = await actCall(io, env, { world, act: camp.act, earlier: camp.history ?? [], peaks: camp.peaks ?? [], intent });
+  const plan = await actCall(io, env, { world, act: camp.act, earlier: camp.history ?? [], peaks: camp.peaks ?? [], memory: camp.memory ?? [], intent });
   return actBegun(camp, plan);
 }
 

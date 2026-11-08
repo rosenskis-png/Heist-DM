@@ -22,6 +22,9 @@ const CHALLENGED = ["encounter", "climax"];
 const PRIZED = ["encounter", "oddity", "quiet"];
 const CALLBACK_KINDS = ["encounter", "oddity"];
 const HINT_KINDS = ["encounter", "oddity", "quiet"];
+// Rooms a local may turn up in, and the calm rooms the act gives settings for (D167).
+const LOCAL_KINDS = ["encounter", "oddity", "quiet"];
+const SET_KINDS = ["quiet", "oddity", "campfire"];
 // Whose room it is (D158): one companion's slot, or neither, which is the commonest; never the same companion twice in a
 // row. The climax is both companions' (D148: a choice at its peak, often between their threads).
 export const SLOTS = ["companion_a", "companion_b"];
@@ -54,11 +57,27 @@ export function seedFor(camp, world, kind, exits = []) {
   const room = (camp.roomNo ?? 0) + 1;
   const seed = { kind, act: camp.act, exits };
   seed.spotlight = spotlightFor(rng, kind, camp.spotlight ?? null);
-  // One motif, as a leaning (D164).
-  const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
-  seed.motifs = fit.length ? [pickFrom(rng, fresh(fit, used, (m) => m.id))] : [];
+  // With an act plan, a local from its pool instead of a motif (D167); without one, one motif as a leaning (D164).
+  const localsUsed = camp.localsUsed ?? [];
+  const locals = (plan?.locals ?? []).filter((l) => !localsUsed.includes(l));
+  if (plan?.locals?.length) {
+    seed.motifs = [];
+    if (LOCAL_KINDS.includes(kind) && locals.length) seed.local = pickFrom(rng, locals);
+  } else {
+    const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
+    seed.motifs = fit.length ? [pickFrom(rng, fresh(fit, used, (m) => m.id))] : [];
+  }
+  // A calm room's setting, from the act's: a different one from any used earlier in the act (D167).
+  const settingsUsed = camp.settingsUsed ?? [];
+  if (SET_KINDS.includes(kind) && plan?.settings?.[kind]?.length) seed.setting = pickFrom(rng, fresh(plan.settings[kind], settingsUsed));
+  // Her story's feature once an act; her other rooms touch her values (D167).
+  const storyShown = camp.storyShown ?? [];
+  if (seed.spotlight && seed.spotlight !== "both") seed.herStory = !storyShown.includes(seed.spotlight);
+  // Tone: a rough leg leans stressed, a smooth one playful, and the act darkens as it goes (D167).
   const lean = Math.max(-2, Math.min(2, Math.round(((camp.way.strain ?? 0) - 2) / 2)));
-  seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean))];
+  const legs = camp.way.legs ?? 1;
+  const late = legs > 1 ? Math.round((((camp.way.leg ?? 1) - 1) / (legs - 1)) * 1.5) : 0;
+  seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean - late))];
   // What it's busy with: a kind the act's region has, in the act's words when there is a plan.
   const usedBusy = camp.usedBusy ?? [];
   const busy = plan?.busy?.length ? pickFrom(rng, fresh(plan.busy, usedBusy, (b) => b.kind)) : { kind: pickFrom(rng, fresh(BUSY, usedBusy)) };
@@ -78,7 +97,8 @@ export function seedFor(camp, world, kind, exits = []) {
   if (PRIZED.includes(kind)) {
     seed.prize = weighted(rng, PRIZES, PRIZE_WEIGHTS);
     if (seed.prize === "a clue") {
-      const open = (world.mysteries ?? []).flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !placed.includes(c.id));
+      const live = plan?.mysteries?.length ? (world.mysteries ?? []).filter((m) => plan.mysteries.includes(m.id)) : world.mysteries ?? [];
+      const open = live.flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !placed.includes(c.id));
       if (open.length) {
         const c = pickFrom(rng, open);
         seed.clue = { id: c.id, mystery: c.mystery, says: c.says, carrier: pickFrom(rng, CARRIERS) };
@@ -91,13 +111,20 @@ export function seedFor(camp, world, kind, exits = []) {
   const quiet = camp.lastExtra === room - 1;
   if (!quiet && CALLBACK_KINDS.includes(kind) && roll(rng, 3) === 0) {
     const who = (camp.memory ?? []).filter((p) => !calledBack.includes(p.name));
-    if (who.length) seed.callback = pickFrom(rng, who);
+    // The act's picks first: people who'd plausibly be in this region (D167).
+    const likely = who.filter((p) => (plan?.returning ?? []).some((n) => p.name === n || p.name.startsWith(n) || n.startsWith(p.name)));
+    if (who.length) seed.callback = pickFrom(rng, likely.length ? likely : who);
   }
   if (!quiet && !seed.callback && HINT_KINDS.includes(kind) && camp.hintLeg !== camp.way.leg && roll(rng, 2) === 0) {
     const left = (plan?.hints ?? []).filter((h) => !hintsUsed.includes(h));
     if (left.length) seed.hint = pickFrom(rng, left);
   }
-  const extra = seed.callback || seed.hint;
+  const newsUsed = camp.newsUsed ?? [];
+  if (!quiet && !seed.callback && !seed.hint && kind !== "campfire" && kind !== "sanctuary" && roll(rng, 3) === 0) {
+    const left = (plan?.news ?? []).filter((n) => !newsUsed.includes(n));
+    if (left.length) seed.news = pickFrom(rng, left);
+  }
+  const extra = seed.callback || seed.hint || seed.news;
   return {
     seed,
     camp: {
@@ -111,6 +138,10 @@ export function seedFor(camp, world, kind, exits = []) {
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
       calledBack: seed.callback ? [...calledBack, seed.callback.name] : calledBack,
       hintsUsed: seed.hint ? [...hintsUsed, seed.hint] : hintsUsed,
+      localsUsed: seed.local ? [...localsUsed, seed.local] : localsUsed,
+      settingsUsed: seed.setting ? [...settingsUsed, seed.setting] : settingsUsed,
+      newsUsed: seed.news ? [...newsUsed, seed.news] : newsUsed,
+      storyShown: seed.herStory ? [...storyShown, seed.spotlight] : storyShown,
       ...(extra ? { lastExtra: room } : {}),
       ...(seed.hint ? { hintLeg: camp.way.leg } : {}),
       spotlight: seed.spotlight,

@@ -305,7 +305,11 @@ function seedWith(adv, r) {
   const usedCentres = earlier.map((x) => x.seed?.centrepiece).filter(Boolean);
   const cluesPlaced = inAdventure.map((x) => x.seed?.clue?.id).filter(Boolean);
   const hintsUsed = earlier.map((x) => x.seed?.hint).filter(Boolean);
-  camp = { ...camp, plan: planOf(adv, r.act), used, usedBusy, usedShapes, usedCentres, cluesPlaced, hintsUsed, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
+  const localsUsed = earlier.map((x) => x.seed?.local).filter(Boolean);
+  const settingsUsed = earlier.map((x) => x.seed?.setting).filter(Boolean);
+  const newsUsed = earlier.map((x) => x.seed?.news).filter(Boolean);
+  const storyShown = earlier.filter((x) => x.seed?.herStory).map((x) => x.seed.spotlight);
+  camp = { ...camp, plan: planOf(adv, r.act), used, usedBusy, usedShapes, usedCentres, cluesPlaced, hintsUsed, localsUsed, settingsUsed, newsUsed, storyShown, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
   for (const k of ["tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
@@ -324,7 +328,8 @@ function seedWith(adv, r) {
     seed.prize = p.prize;
     if (p.prize !== "a clue") delete seed.clue;
     else if (!seed.clue) {
-      const open = (adv.world.mysteries ?? []).flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !cluesPlaced.includes(c.id));
+      const live = camp.plan?.mysteries?.length ? (adv.world.mysteries ?? []).filter((m) => camp.plan.mysteries.includes(m.id)) : adv.world.mysteries ?? [];
+      const open = live.flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !cluesPlaced.includes(c.id));
       const c = open[Math.floor(Math.random() * open.length)];
       if (c) seed.clue = { id: c.id, mystery: c.mystery, says: c.says, carrier: CARRIERS[Math.floor(Math.random() * CARRIERS.length)] };
     }
@@ -353,7 +358,7 @@ async function beginActHere(adv, act) {
     const pl = planOf(adv, a);
     if (pl) peaks.push(pl.peak.who);
     const rooms = S.rooms.filter((x) => x.adventure === adv.id && x.act === a && x.stages?.sketch?.premise).map((x) => x.stages.sketch.premise).reverse();
-    earlier.push({ act: a, peak: pl?.peak?.who ?? null, rooms, log: [] });
+    earlier.push({ act: a, question: pl?.question ?? null, peak: pl?.peak?.who ?? null, state: pl?.state ?? null, rooms, log: [] });
   }
   try {
     const plan = await actCall(io, env, { world: adv.world, act, earlier, peaks });
@@ -383,9 +388,15 @@ function planView(adv, act) {
     plan ? [
       kv([
         ["Goal", plan.goal],
-        ["The region now", plan.region],
+        ["The act's question", plan.question],
+        ["Its aim", plan.aim],
+        ["What has changed", plan.state],
         ["Held by", plan.holders.map((f) => w.factions[f]?.name ?? f).join(", ")],
+        ["Live mysteries", (plan.mysteries ?? []).join(", ")],
         ["Busy with", h("ul", { class: "plain" }, plan.busy.map((b) => h("li", {}, h("b", {}, b.kind), ": ", b.line)))],
+        ["Locals", h("ul", { class: "plain" }, (plan.locals ?? []).map((x) => h("li", {}, x)))],
+        ["Settings", plan.settings ? h("div", {}, ...["quiet", "oddity", "campfire"].map((k) => h("p", { class: "small" }, h("b", {}, k), ": ", (plan.settings[k] ?? []).join(" · ")))) : null],
+        ["News", plan.news?.length ? h("ul", { class: "plain" }, plan.news.map((x) => h("li", {}, x))) : null],
         ["Peak", h("div", {}, h("p", {}, h("b", {}, plan.peak.who)), kv([["Why them", plan.peak.why], ["Wants", plan.peak.wants], ["Turns", plan.peak.turns], ["Where", plan.peak.where]]))],
         ["Signs of it", h("ul", { class: "plain" }, plan.hints.map((x) => h("li", {}, x)))],
       ]),
@@ -538,11 +549,15 @@ function seedView(run) {
       ["Prize", seed.clue ? mark("prize", h("span", {}, "a clue, as ", h("b", {}, seed.clue.carrier), `: "${seed.clue.says}"`)) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],
       ["A sign of what's coming", seed.hint],
+      ["News", seed.news],
+      ["A local", seed.local],
+      ["Setting", seed.setting],
+      ["Her story", seed.herStory === false ? "not this time (shown earlier in the act)" : seed.herStory ? "this room carries it" : null],
       ["Whose place", seed.factions && mark("factions", seed.factions.join(", "))],
       ["Whose room", mark("spotlight", seed.spotlight === "both" ? "both companions'" : seed.spotlight ? `${authored[run.companions?.[seed.spotlight === "companion_a" ? 0 : 1]]?.name ?? seed.spotlight}'s` : seed.spotlight === null ? "no one's" : null)],
       ["Exits lead to", seed.exits.length ? seed.exits.join(", ") : "nothing: the act ends"],
     ]),
-    h("div", { class: "sub" }, h("span", { class: "muted small" }, pinned.motifs ? "Motifs (pinned)" : "Motifs"), seed.motifs.map((m) => h("p", { class: "small" }, h("b", {}, m.name), ": ", m.pattern))),
+    seed.motifs?.length ? h("div", { class: "sub" }, h("span", { class: "muted small" }, pinned.motifs ? "Motif (pinned)" : "Motif"), seed.motifs.map((m) => h("p", { class: "small" }, h("b", {}, m.name), ": ", m.pattern))) : null,
     run.brief ? h("div", { class: "sub" }, h("span", { class: "muted small" }, "Your brief"), h("p", {}, run.brief)) : null,
     run.arrives ? h("div", { class: "sub" }, h("span", { class: "muted small" }, "Arriving through"), h("p", {}, run.arrives)) : null));
 }

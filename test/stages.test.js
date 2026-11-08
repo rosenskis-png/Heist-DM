@@ -22,8 +22,12 @@ const env = { prompts, examples: { encoded: JSON.parse(file("fixtures/generator/
 const world = worldOf();
 const party = partyFor({ name: "P", class: "rogue" }, ["fern", "nadia"], world);
 const plan = {
-  goal: "Cross the Warrens.", region: "The forges roar day and night.", holders: ["undead"],
+  goal: "Cross the Warrens.", question: "Can they cross the Warrens before the Court learns they're loose?", aim: "Learn the way down, and who holds it.",
+  state: "The forges have doubled their shifts since the escape.", holders: ["undead"],
   busy: [{ kind: "a feast or celebration", line: "the dead court's endless banquet" }, { kind: "hard labour", line: "thralls at the forges" }, { kind: "a rite or worship", line: "mourning bells for the Queen" }, { kind: "trade or a market", line: "the ash market" }],
+  locals: ["a ghoul barber who gossips while he shaves the dead", "a lost dwarven tour-guide ghost", "a rat king with a tiny crown", "twin lamplighters who never agree", "a mimic that thinks it's a door"],
+  settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
+  news: ["word that the goblins blame the Court for the escape"], mysteries: ["court_of_debts"], returning: [],
   peak: { who: "Lord Chamberlain Vesk", why: "his court holds the only stair down", wants: "a perfect banquet", turns: "courtesy, then knights, then the bells", where: "the banquet hall" },
   hints: ["black invitations nailed to doors", "a skeletal herald calling names", "candles lit for guests who never come"],
 };
@@ -85,7 +89,8 @@ test("the room never sees abilities, sees the heart only at a climax, and a clim
   const input = sketchInput(env, { seed: enc, world, party, plan }, sketchSchema);
   assert.doesNotMatch(input, /"abilities"/);
   assert.doesNotMatch(input, /"the_heart"|Every faction in the fortress wants it/);
-  assert.match(input, /the_region_now[\s\S]*forges roar/);
+  assert.match(input, /"question":"Can they cross the Warrens/);
+  assert.doesNotMatch(input, /doubled their shifts|banquet hall/, "no picture of the region, no state, no peak in an ordinary room");
   const climax = seedFor({ ...newCampaign({ act: 2 }), plan }, world, "climax", ["sanctuary"]).seed;
   const ci = sketchInput(env, { seed: climax, world, party, plan, earlier: ["x"] }, sketchSchema);
   assert.match(ci, /## The climax\n\n```json[\s\S]*Lord Chamberlain Vesk[\s\S]*Hollow King/);
@@ -99,6 +104,8 @@ test("the act call: its input holds the job, the history and the used peaks; its
   assert.match(input, /Peaks already used[\s\S]*Snagtooth/);
   assert.deepEqual(validate(actSchema, plan), []);
   assert.deepEqual(actProblems(plan, world, 3), []);
+  assert.deepEqual(tidyAct({ ...plan, mysteries: ["nonsense"] }, world, 3).mysteries, world.mysteries.map((m) => m.id), "unknown mysteries fall back to all");
+  assert.deepEqual(tidyAct({ ...plan, returning: ["Snick", "Nobody"] }, world, 3, [{ name: "Snick, a goblin runt" }]).returning, ["Snick"]);
   // Code tidies what it can instead of failing the act (D166): kinds worded loosely match the list; unknown holders go.
   const loose = { ...plan, holders: ["pirates", "undead"], busy: [{ kind: "Hard labor", line: "a" }, { kind: "a funeral", line: "b" }, { kind: "feasting", line: "c" }, { kind: "knitting", line: "d" }, { kind: "hard labour", line: "e" }] };
   const tidy = tidyAct(loose, world, 3);
@@ -154,4 +161,45 @@ test("the pitch asks for regions, ladders and mysteries, and can run without the
   assert.match(prompts.pitch, /Never about the rings or the player's secrets/);
   assert.ok(!("acts" in world) && !("roomKinds" in world) && !("openAct" in world));
   assert.ok(Object.values(world.factions).every((f) => f.ladder.length === 3 && !/alarm/i.test(f.rules)));
+});
+
+test("the act deals out one local, setting and piece of news at a time; clues come from its live mysteries; her story once an act; tone darkens late (D167)", () => {
+  let camp = { ...newCampaign({ seed: 9, act: 2 }), plan };
+  const locals = [], settings = [], news = [];
+  for (let i = 0; i < 12; i++) {
+    const kind = ["encounter", "quiet", "oddity", "campfire"][i % 4];
+    const { seed, camp: next } = seedFor(camp, world, kind, ["encounter"]);
+    assert.deepEqual(seed.motifs, [], "a local replaces the motif when the act has locals");
+    if (seed.local) { assert.ok(!locals.includes(seed.local)); locals.push(seed.local); }
+    if (seed.setting) { assert.ok(plan.settings[kind].includes(seed.setting)); settings.push(seed.setting); }
+    if (seed.news) news.push(seed.news);
+    if (seed.clue) assert.equal(seed.clue.mystery, "court_of_debts");
+    assert.equal(kind === "campfire" ? seed.local : undefined, undefined, "no local at a campfire");
+    camp = next;
+  }
+  assert.ok(locals.length && settings.length);
+  assert.ok(news.length <= 1, "each piece of news once");
+  const quiet = settings.filter((x) => plan.settings.quiet.includes(x));
+  const firsts = quiet.slice(0, plan.settings.quiet.length);
+  assert.equal(new Set(firsts).size, firsts.length, "a quiet setting differs from those used earlier in the act until the pool runs out");
+  // Her story's feature once an act.
+  let c2 = { ...newCampaign({ seed: 4, act: 2 }), plan };
+  const shown = [];
+  for (let i = 0; i < 20; i++) {
+    const { seed, camp: next } = seedFor(c2, world, "encounter", ["encounter"]);
+    if (seed.herStory) shown.push(seed.spotlight);
+    c2 = { ...next, spotlight: null };
+  }
+  assert.ok(shown.length <= 2 && new Set(shown).size === shown.length);
+  const story = (herStory) => sketchInput(env, { seed: { ...seedFor({ ...newCampaign(), plan }, world, "encounter", []).seed, spotlight: "companion_b", herStory }, world, party, plan }, sketchSchema);
+  assert.match(story(true), /her_story_needs/);
+  assert.doesNotMatch(story(false), /her_story_needs/);
+});
+
+test("no local face in a room when that face is the act's peak (D167)", () => {
+  const peakIsFace = { ...plan, holders: ["goblins"], peak: { ...plan.peak, who: "Snagtooth the Keymaster" } };
+  const { seed } = seedFor({ ...newCampaign({ act: 1 }), plan: peakIsFace }, world, "encounter", ["encounter"]);
+  assert.deepEqual(seed.factions, ["goblins"]);
+  assert.doesNotMatch(sketchInput(env, { seed, world, party, plan: peakIsFace }, sketchSchema), /local_face/);
+  assert.match(sketchInput(env, { seed, world, party, plan }, sketchSchema), /local_face/);
 });
