@@ -32,6 +32,8 @@ No map of the act is built in advance.
 - **How well a room went** decides how much choice the party gets of the next one. A room that went well can offer a choice between ways on; a room that went badly may have its way on chosen for it. A forced way on should lead to a different kind of next room, not simply a worse one. How a room offers or withholds that choice is part of its own design; it's one consequence among several, and no single shape is required.
 - **Momentum may build in either direction within a leg.** A great room can lead to better chances in the next, and a bad one to worse. The campfire is where it resets.
 
+- **Between rooms** (D171, `src/game/journey.js`): when a room ends the page runs the verdict, moves the campaign on by the exit taken, begins the act if it has no plan, and generates the next room while the player reads the verdict; "Go on" walks them in. A calm room ends when the player picks one of its ways on; the sanctuary ends when they rest, and the act ends once they pick the relics to keep. The menu can end any room as it stands. Gravenhold opens in the Cells; a pitched world generates its first room before the party wakes.
+
 ## 4. Gold, relics and merchants
 
 - **Gold** is one number. It's spent at merchants and carries through the whole game (D147).

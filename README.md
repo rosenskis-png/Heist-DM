@@ -58,7 +58,7 @@ Together these also give **context economy**: a lot of story per call, each call
 | `content/` | Game data: companions, pairs, classes, rules, the rules every world shares (`setting.js`), the worlds (`worlds/`, Gravenhold first), the questions a pitch answers (`pitch.js`), the relationship model's numbers, and the encounter packets (`content/encounters/`). The source of truth for content. |
 | `prompts/` | One prompt per AI call, plus the shared style guide |
 | `bench/` | The judgment test bench: an artifact page that runs the companion and campfire prompts on hand-written cases, plus Camp, free play with any two companions |
-| `bench/forge.html` | The Forge: the designer's bench for the generator. A campaign from a vibe (the world as the DM sees it, the pitch as the player reads it), then rooms in it by kind, pinned seed and brief, every stage shown (D154) |
+| `bench/forge.html` | The Forge: the designer's bench for the generator. A campaign from a vibe (the world as the DM sees it, the pitch as the player reads it), then rooms in it by kind, pinned seed and brief, every stage shown (D170) |
 | `fixtures/bench/` | The bench's huddle and campfire cases |
 | `legacy/` | Gravenhold, untouched and playable, with a readable copy and a map of what to reuse |
 
@@ -66,4 +66,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is the current phase, and Act 1 will be generated rather than written by hand (`docs/spec/generation.md`, D115–D124). Combat is decided (a fight is a plan, and the party always moves on: D130, D131), so the table (D127) is the next build. See `docs/roadmap.md`.
+**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is the current phase. Generation is built and frozen until play (D170), and the page runs a campaign, room after room (D171), so the next step is to play Act 1 from a new game. See `docs/roadmap.md`.

@@ -90,6 +90,8 @@ export function envFor(session, prompts) {
     companions: party.slice(1),
     connections: new Map(packet.map.connections.map((c) => [c.id, c])),
     standing: session.standing,
+    // How the companions stand with each other and the player, kept by the campaign across rooms (D171).
+    ...(session.camp?.romance ? { romance: session.camp.romance } : {}),
   };
 }
 
@@ -107,8 +109,10 @@ export function serialize(session) {
   return json;
 }
 
-export function restore(json, packet) {
+// `packet` is the hand-made one a save may be in (the Cells); a generated room travels whole in the save (D171).
+export function restore(json, cells) {
   const saved = typeof json === "string" ? JSON.parse(json) : json;
+  const packet = saved.packet ?? cells;
   if (saved.start.packet !== packet.id) throw new Error(`this save is for ${saved.start.packet}, not ${packet.id}`);
   // A save from before worlds (D150) is in Gravenhold.
   const world = saved.world ?? worldOf();

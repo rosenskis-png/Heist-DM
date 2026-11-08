@@ -1,6 +1,6 @@
 # Generation
 
-How the game builds its next encounter, room or campfire (D117). Built in Phase 7; until then the Cells is the only packet. Generated packets carry only what the DM reads (D116). How to design a *good* one is in `docs/design/encounter-craft.md`.
+How the game builds its next encounter, room or campfire (D117). The page runs it between rooms (D171). Generated packets carry only what the DM reads (D116). How to design a *good* one is in `docs/design/encounter-craft.md`.
 
 ---
 
@@ -13,7 +13,7 @@ Generation happens at three moments, each deciding only what it can decide well 
 Later stages see slices, never pools: a room gets one busy line, at most one clue, at most one extra, chosen by code, so nothing in a pool can take over every room.
 
 ## When it runs
-When an encounter or room ends and its hand-off is final (`docs/spec/state.md`), the next packet starts generating, during the closing narration and any room or campfire that follows. An act's call runs as the act begins (`beginAct`), before its first room. Loading a save never generates (D11).
+When an encounter or room ends and its hand-off is final (`docs/spec/state.md`), the verdict runs, and then the next packet generates while the player reads it (`nextRoom` in `src/game/journey.js`, D171): the verdict comes first because its rating moves the leg's strain, which decides the next room's ways on. An act's call runs as the act begins (`beginAct`), before its first room. Loading a save never generates (D11).
 
 ## The pipeline
 

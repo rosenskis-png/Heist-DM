@@ -21,6 +21,9 @@ On a phone the two are tabs, each with an unread marker, and the map and the par
 - **The party's sheet** lists each member's abilities, with what's left of the limited ones ("1 of 1 this encounter, 3 of 3 until a rest", D128), and the conditions they carry.
 - A companion's stance goes onto the draft for the player to decide.
 
+## Between rooms (D171)
+When a room ends, the table and Plans show how it ended, the DM's verdict (rating and why) as soon as it's in, the way on taken, and a status line while the next room is made (a minute or two); then "Go on". At the sanctuary, the player picks the relics the climax lets them keep, then begins the next act. A failed step offers "Try again". A calm room shows its ways on above the composer, and the sanctuary "Rest here, and end the act". The header names the act, the kind of room, and the party's gold and relics. The menu's "Leave this room…" ends a room as it stands, after a second tap.
+
 ## The card
 - **The plan is the player's prose,** usually numbered steps, with any timing and conditions they wrote (D35).
 - **Shown:** the DM's steps, the tick each happens on and the beats of the routines the party knows at that tick, when the whole plan is done (D77), each roll's band ("Easy", never a percentage; D33) with its one-line reason and what failure costs, the rulings it depends on, the DM's notes on it, and the stances with keep / resolved / override.
