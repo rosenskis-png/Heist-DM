@@ -96,7 +96,11 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
           const out = structuredClone(encoded);
           out.intent.exits = kinds.map((k, i) => ({ ...encoded.intent.exits[i % 2], id: `exit_${i}`, zone: ["back_stair", "servants_passage"][i % 2], leads_to: k }));
           out.act = 1;
-          // And its clue, when it drew one, as a thing whose reward is that clue (D164).
+          // And only its prize as a reward (D164): its clue, when it drew one.
+          for (const t of out.map.things) delete t.reward;
+          const prize = block.match(/"the_only_prize":"([^"]+)"/)?.[1];
+          if (prize === "gold") out.map.things[0].reward = { gold: 5 };
+          if (prize === "a relic") out.map.things[0].reward = { relic: { name: "a charm", text: "beasts hesitate" } };
           const clue = block.match(/"the_clue_id":"([a-z0-9_]+)"/)?.[1];
           if (clue) out.map.things.push({ id: "clue_page", name: "a torn page", properties: "paper, says something", location: { zone: "back_stair" }, reward: { clue } });
           return out;
@@ -144,7 +148,9 @@ test("the generator's inputs stay small enough", () => {
 });
 
 test("a room resumes from its sketch with only the encode call, and a dropped connection is tried once more (D156)", async () => {
-  const { seed } = seedFor(newCampaign(), world, "quiet", ["encounter"]);
+  // A quiet room with no prize, so the example's rewards come off (D164).
+  const seed = { ...seedFor(newCampaign(), world, "quiet", ["encounter"]).seed, prize: "none: getting out is the whole of it" };
+  delete seed.clue;
   const calls = [];
   let dropped = 0;
   const io = {
@@ -154,6 +160,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
         if (!dropped++) throw { code: "upstream_error", message: "the connection was lost" };
         const out = structuredClone(encoded);
         Object.assign(out, { mode: "room", act: 1 });
+        for (const t of out.map.things) delete t.reward;
         out.intent = { purpose: out.intent.purpose, exits: [{ ...encoded.intent.exits[0], leads_to: "encounter" }] };
         return out;
       },
@@ -231,4 +238,16 @@ test("shape and centrepiece are fixed, drawn from code's lists without repeats i
   const climax = seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed;
   assert.match(sketchInput(env, { seed: climax, world, party, earlier: ["x"] }, sketchSchema), /## The climax\n\n```json[\s\S]*who_stands_at_its_centre/);
   assert.doesNotMatch(prompts.sketch, /by a thread|pincer|lowering|sinking|mind flayer|winery|hung in the air/i, "the sketch prompt holds no concrete images");
+});
+
+test("only the seed's prize is a reward: no invented clue, no second prize (D164)", async () => {
+  const { encodeProblems } = await import("../src/calls/encode.js");
+  const base = structuredClone(encoded);
+  for (const t of base.map.things) delete t.reward;
+  const seed = { kind: "encounter", act: 2, exits: base.intent.exits.map((e) => e.leads_to), prize: "a relic" };
+  const packet = (rewards) => ({ ...structuredClone(base), act: 2, map: { ...structuredClone(base.map), things: [...base.map.things.map((t, i) => (rewards[i] ? { ...t, reward: rewards[i] } : t))] } });
+  assert.deepEqual(encodeProblems(packet([{ relic: { name: "a charm", text: "x" } }]), seed).filter((p) => /reward/.test(p)), []);
+  assert.ok(encodeProblems(packet([{ relic: { name: "a charm", text: "x" } }, { gold: 3 }]), seed).some((p) => /only prize/.test(p)));
+  assert.ok(encodeProblems(packet([{ clue: "engine_hungry", fixed: true }]), seed).some((p) => /clue the seed didn't place/.test(p)));
+  assert.ok(encodeProblems(packet([{ gold: 3 }]), { ...seed, prize: "none: getting out is the whole of it" }).some((p) => /no prize/.test(p)));
 });

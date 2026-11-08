@@ -25,7 +25,7 @@ For each faction: `name`, `short` (a few words), `desc`, `rules` (how they behav
 
 ## Mysteries
 Two to four mysteries: truths about the place that the game never confirms. A player who pieces one together might gain an edge; one who ignores them all can still finish. For each:
-- `id`, and the `truth`, in a sentence. Make it lore worth knowing: about how the heart was sealed, what a faction is bound by, what the builders feared.
+- `id`, and the `truth`, in a sentence: lore worth knowing about this place, each mystery about something different. Never about the rings or the player's secrets: those are revealed as story, not left as mysteries.
 - The `edge`: one place later in the adventure where knowing the truth quietly helps, and what becomes more likely to work there. `act` is when it starts to matter (2 to 5); `at` is "climax" for that act's climax, or a faction's id for that faction's rooms from then on; `text` says what's more likely to work, never an automatic win. Spread the edges across different acts.
 - Three to five `clues`, each with an `id` and what it `says`: the words or the picture itself, part of the truth said nearly outright and cut off before it says everything. Never what it's written on or who says it (the room that holds it decides that), and never a small detail to notice: each clue tells something plainly, and only all of them together tell the whole truth.
 

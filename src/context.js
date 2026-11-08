@@ -754,7 +754,7 @@ export function encodeInput(env, c, schema) {
   return compose([
     block("Your job", env.prompts.encode),
     block("Output format", shapeText(schema)),
-    block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits, ...(c.seed.clue ? { the_clue_id: c.seed.clue.id } : {}) }),
+    block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits, ...(c.seed.prize ? { the_only_prize: c.seed.prize } : {}), ...(c.seed.clue ? { the_clue_id: c.seed.clue.id } : {}) }),
     block("The party's slots", ["player", "companion_a", "companion_b"]),
     block("Worked example: a finished packet", env.examples?.encoded),
     block("The sketch", c.sketch),

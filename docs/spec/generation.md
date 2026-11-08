@@ -64,4 +64,4 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **A room has no objective or deadline** (D121). An outfit is a reward placed where it fits, for a companion in the party (D143).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
-- **It holds the seed's clue,** when it placed one, as a thing whose reward is that clue (D164).
+- **It holds the seed's clue,** when it placed one, as a thing whose reward is that clue, and no reward but the seed's prize (D164, D165).

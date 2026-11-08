@@ -69,6 +69,7 @@ const S = {
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
   setupExample: store.get("forge.example", true),
+  reuseSeed: false,
   room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
   // Each adventure's act plans, by "adventure:act" (D164).
   plans: store.get("forge.plans", {}),
@@ -128,8 +129,10 @@ async function pitch(another) {
   S.busy = "Imagining the adventure…";
   S.error = null;
   render();
-  const seed = pitchSeed((Math.random() * 2 ** 31) >>> 0);
-  const rec = { id, at: Date.now(), vibe: vibe.trim(), companions: [a, b], cls, rejected: rejected.length, seed, note: "" };
+  // The same question as the last pitch, when the designer wants to compare two worlds fairly (D164).
+  const last = S.adventures.find((x) => x.seed);
+  const seed = S.reuseSeed && last ? last.seed : pitchSeed((Math.random() * 2 ** 31) >>> 0);
+  const rec = { id, at: Date.now(), vibe: vibe.trim(), companions: [a, b], cls, rejected: rejected.length, seed, seedReused: Boolean(S.reuseSeed && last), note: "" };
   try {
     const out = await pitchCall(io, env, { companions: [authored[a], authored[b]], vibe: vibe.trim(), rejected, seed, noExample: !S.setupExample });
     rec.example = S.setupExample;
@@ -165,6 +168,7 @@ function adventureTab() {
         h("select", { id: "pick-cls", onchange: (e) => ((S.setup.cls = e.target.value), save()) }, Object.keys(classes).map((k) => h("option", { value: k, selected: S.setup.cls === k }, classes[k].name ?? k))))),
     h("label", { class: "field" }, "The vibe", vibe),
     h("label", { class: "small" }, h("input", { type: "checkbox", id: "use-example", checked: S.setupExample, onchange: (e) => ((S.setupExample = e.target.checked), save()) }), " Show Gravenhold as a worked example (untick to compare a world written without one)"),
+    S.adventures.some((x) => x.seed) ? h("label", { class: "small" }, h("input", { type: "checkbox", id: "reuse-seed", checked: S.reuseSeed, onchange: (e) => ((S.reuseSeed = e.target.checked), render()) }), " Reuse the last pitch's seed (the same kind of heart and secrets), to compare fairly") : null,
     h("div", { class: "row" },
       h("button", { class: "go", disabled: !canRun, onclick: () => pitch(false) }, "Pitch an adventure"),
       hasPrior ? h("button", { class: "plain", disabled: !canRun, onclick: () => pitch(true) }, "Pitch another, unlike the last") : null,
@@ -222,7 +226,7 @@ function adventureView(adv) {
   const dm = h("section", { class: "card" },
     h("span", { class: "dm-tag" }, "DM-facing · the campaign's shape"),
     h("h2", {}, w.name),
-    h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === false ? h("span", { class: "chip near" }, "written without the example") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
+    h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === false ? h("span", { class: "chip near" }, "written without the example") : null, adv.seedReused ? h("span", { class: "chip" }, "seed reused from the last pitch") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
     h("h3", {}, "The place"), kv([["Place", w.place], ["The way out", w.escape], ["Life", w.life]]),
     h("h3", {}, "The heart"), prose(w.heart),
     h("h3", {}, "Tensions"), h("ul", { class: "plain" }, w.tensions.map((t) => h("li", {}, t))),

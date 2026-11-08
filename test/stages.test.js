@@ -138,7 +138,8 @@ test("the pitch asks for regions, ladders and mysteries, and can run without the
   const c = { companions: [], vibe: "x", rejected: [] };
   assert.match(pitchInput(env, c, pitchSchema), /Worked example: Gravenhold/);
   assert.doesNotMatch(pitchInput(env, { ...c, noExample: true }, pitchSchema), /Worked example: Gravenhold/);
-  assert.doesNotMatch(prompts.pitch, /mechanics|roomKinds|room kinds|openAct|its records|alarm/i);
+  assert.doesNotMatch(prompts.pitch, /mechanics|roomKinds|room kinds|openAct|its records|alarm|how the heart was sealed|what a faction is bound by/i);
+  assert.match(prompts.pitch, /Never about the rings or the player's secrets/);
   assert.ok(!("acts" in world) && !("roomKinds" in world) && !("openAct" in world));
   assert.ok(Object.values(world.factions).every((f) => f.ladder.length === 3 && !/alarm/i.test(f.rules)));
 });

@@ -23,6 +23,13 @@ export function encodeProblems(out, seed) {
   if (seed.kind === "merchant" && !packet.map.things.some((t) => t.price)) problems.push("a merchant has something with a price");
   if (packet.act !== seed.act) problems.push(`the act is ${seed.act}`);
   if (seed.clue && !packet.map.things.some((t) => t.reward?.clue === seed.clue.id)) problems.push(`the clue is a thing whose reward is {"clue": "${seed.clue.id}"}`);
+  // Only the seed's prize is a reward (D164): no clue the world doesn't hold, no second prize.
+  for (const t of packet.map.things.filter((x) => x.reward?.clue && x.reward.clue !== seed.clue?.id)) problems.push(`${t.id}'s reward is a clue the seed didn't place; take its reward off`);
+  if (seed.prize) {
+    const want = { gold: "gold", "a relic": "relic", "a clue": "clue" }[seed.prize] ?? null;
+    const extra = packet.map.things.filter((x) => x.reward && Object.keys(x.reward).find((k) => k !== "fixed") !== want);
+    for (const t of extra) problems.push(want ? `${t.id} has a reward, but the room's only prize is ${seed.prize}; take its reward off` : `${t.id} has a reward, but this room has no prize; take its reward off`);
+  }
   return problems;
 }
 

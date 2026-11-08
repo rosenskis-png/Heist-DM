@@ -175,7 +175,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D161** The sketch sees no example rooms; the place must work, and nothing is a machine with a rule: current
 - **D162** Rooms vary by what's happening and whose place it is, and people's attention is said plainly: changed by D164
 - **D163** The sketch prompt holds no images; code draws the shape and its centrepiece; a climax is a showdown: changed by D164
-- **D164** Generation in three stages: the world once, the act when it begins, the room when it's entered: current
+- **D164** Generation in three stages: the world once, the act when it begins, the room when it's entered: changed by D165
+- **D165** Only the seed's prize is a reward; mysteries never cover the rings or the player's secrets: current
 
 ---
 
@@ -1022,4 +1023,9 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 - **Between rooms:** a packet thing may carry a clue as its reward, found by holding it or, when `fixed`, by being in plain sight. The verdict names up to two people worth meeting again, which the campaign keeps (the last 30). The campaign keeps clues found and placed, each act's history, and the act's plan. The campfire is given the words of the clues found, to wonder about. The player's secrets and the rings stay story reveals by act.
 **Why:** The worlds copied Gravenhold's act text almost word for word (every Act 1 goal was "escape the cell block, recover some gear, learn who your companions are"), and `mechanics` carried the engine era's stealth-simulation vocabulary (tally counts, alarm networks) into rooms; `roomKinds`' examples anchored rooms (bugbears). Peaks fixed at world generation would make the party fight a faction it had allied with, and Act 5 could never answer Act 4. Any pool a room sees becomes an anchor, so later stages get slices chosen by code. The designer's notes set the rest: clues are rewards, not deliveries, and blatant (a journal page, not a breath that doesn't fog); mysteries are lore that might give an edge, never a puzzle the DM confirms; missing a clue is fine; alliances are fragile and personal, so a returning person matters more than a faction score; abilities removed from the sketch end rooms built around one.
 **Rules out:** World-written act content; a peak chosen before the act; faction standing as a score; a DM, companion or reveal confirming a mystery; a clue as a subtle detail; any pool sent whole to a room.
+
+### D165. Only the seed's prize is a reward; mysteries never cover the rings or the player's secrets
+**Decided:** The designer's call (2026-11-08), from the first A/B of worlds with and without the Gravenhold example. Refines D164. Encode is told the room's only prize and the check sends back any other reward: a clue the seed didn't place, or a second prize. The sketch is told only a clue says anything about the place's lore. The pitch prompt drops its illustrations of what a mystery might be about, and says mysteries are never about the rings or the player's secrets. The Forge can reuse the last pitch's seed, so a world with the example and one without answer the same question.
+**Why:** One room turned its relic into a tablet reciting lore, and encode gave it a clue id the world doesn't hold; another added a second prize the seed never drew. Both worlds wrote a "how the heart was sealed" and a "faction bound by an oath" mystery, the prompt's own two illustrations; one wrote a mystery explaining the rings, which are a story reveal. The two worlds drew different seeds, so the A/B couldn't separate the example from the seed.
+**Rules out:** Rewards the seed didn't draw; lore in a non-clue prize; a mystery about the rings or the player's secrets.
 
