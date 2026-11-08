@@ -8,11 +8,13 @@
 - **The rating,** 1 to 10, against anchors written into the prompt for 3 (a rough room), 6 (an ordinary one) and 9 (a great one), so it uses the whole range rather than settling on a polite 7.
 - **Why:** one or two sentences, from the record.
 - **Reactions:** for each companion, what about how the room went moved how she feels, by her own values, as tagged reactions (D20).
+- **People:** up to two people from the room worth meeting again: who they are, what became of them, how they feel about the party (D164).
 
 ## What the engine does with it
 - The rating moves how everyone feels when they reach camp: each companion's regard for the player, and her affection and trust toward the other (D131, numbers in `content/relationship.js`, `morale`). Each companion's reactions then apply to her, within the usual caps.
 - The rating moves the leg's strain, which can lengthen the leg (`docs/spec/campaign.md` §2).
 - After the climax, the rating decides how many relics the party keeps into the next act (§5).
+- Its people join the campaign's memory (`camp.memory`, the last 30), from which a later encounter or oddity may bring one back (`docs/spec/generation.md`).
 
 Nothing inside the room depends on it: it runs after the room is over.
 

@@ -1,7 +1,8 @@
 // The Gravenhold world (docs/spec/campaign.md §9, D150): the place every adventure in it escapes, and everything about it
 // that changes with the world. The rules every world shares are in content/setting.js. Extracted from Gravenhold
-// (legacy/gravenhold.html), except `invariants`, which comes from the design docs, and `roles`, `heart`, `life`,
-// `tensions` and `features`, written for D150. acts[0] is Act 1.
+// (legacy/gravenhold.html), except `invariants`, which comes from the design docs, `roles`, `heart`, `life`,
+// `tensions` and `features`, written for D150, and `regions`, `mysteries` and the factions' ladders, written for D164.
+// regions[0] is Act 1's.
 export default {
   id: "gravenhold",
   name: "Gravenhold",
@@ -45,84 +46,116 @@ export default {
       name: "The Red Maw",
       short: "goblin warband",
       desc: `Goblins and hobgoblins of the Red Maw warband, serving Kharzakul, a young red dragon nesting in the gate tower.`,
-      rules: `Chaotic and numerous, weak alone. Bribes work, loyalty doesn’t; grudges and infighting are exploitable. Noise draws crowds. War drums signal alarms. Hobgoblin officers are disciplined exceptions.`,
+      rules: `Chaotic and numerous, weak alone. Bribes work, loyalty doesn’t; grudges and infighting are exploitable. Noise draws crowds. Hobgoblin officers are disciplined exceptions.`,
       goal: `Kharzakul means to devour the vault’s prisoner and become ancient overnight. Captives are tribute and key-blood.`,
-      boss: "Warchief Grizzak, and Kharzakul himself",
+      ladder: [
+        { name: "Snagtooth the Keymaster", hook: "a fat goblin jailer who wears every key in the block on a chain of ear-bones" },
+        { name: "Warchief Grizzak", hook: "a scarred hobgoblin who has never lost a duel and duels anyone who questions him" },
+        { name: "Kharzakul", hook: "a young red dragon coiled on the gate tower's hoard, hungry to become ancient overnight" },
+      ],
     },
     illithid: {
       name: "The Silent Colony",
       short: "mind flayer colony",
       desc: `Mind flayers and their thralls, linked to an elder brain grown in the old dwarven forges.`,
-      rules: `Telepathy: planning aloud near thralls or flayers risks being overheard; disciplined minds can shield (Lore or Insight). Thralls share senses, so one seeing you can mean all know. The elder brain’s pulse is the alarm.`,
+      rules: `Telepathy: planning aloud near thralls or flayers risks being overheard; disciplined minds can shield. Thralls share senses, so one seeing you can mean all know.`,
       goal: `The colony means to dominate the vault’s prisoner and make it a brain of brains. Captives are specimens and keys.`,
-      boss: "Ulitharid Xel’voth, and the elder brain",
+      ladder: [
+        { name: "Thrall-Overseer Bek", hook: "a dwarf thrall with blank eyes who speaks for the colony in a voice that isn't his" },
+        { name: "Ulitharid Xel’voth", hook: "a towering mind flayer with six tentacles, who collects the brains of clever prisoners" },
+        { name: "The elder brain", hook: "a vast brain floating in a forge-vat, its pulse felt through every wall" },
+      ],
     },
     undead: {
       name: "The Court of Ash",
       short: "lich court",
       desc: `The undead court of the Lich Queen Morvaine: dead nobles, bound knights, and the Ashbound, her living servants.`,
-      rules: `Undead sense life (warmth, breath, heartbeat), not sight; masking life is stealth. Fire and holy power matter. They never tire. Court etiquette binds them: old courtesies can be invoked and bargained with. Mourning bells are the alarm.`,
+      rules: `Fire and holy power matter. They never tire. Court etiquette binds them: old courtesies can be invoked and bargained with.`,
       goal: `Morvaine means to merge with the vault’s prisoner and become a god of death. Captives are vessels and keys.`,
-      boss: "Lord Chamberlain Vesk, and Morvaine herself",
+      ladder: [
+        { name: "Sir Hollin the Ashbound", hook: "a living knight in a dead court's livery, desperate to earn his own undeath" },
+        { name: "Lord Chamberlain Vesk", hook: "a skeletal courtier who forgives anything but bad manners" },
+        { name: "Morvaine, the Lich Queen", hook: "a queen in a crown of grave-candles, who means to wear the Hollow King like a cloak" },
+      ],
     },
     drow: {
       name: "House Vaelith",
       short: "exiled drow house",
       desc: `An exiled drow house and its slaves, rebuilding power in the dark beneath the mountain.`,
-      rules: `Bright light weakens them. House politics: rival daughters and ambitious priestesses can be played against each other. Spider-silk alarm webs, poison, slaves of many peoples who may be allies.`,
+      rules: `Bright light weakens them. House politics: rival daughters and ambitious priestesses can be played against each other. Poison, and slaves of many peoples who may be allies.`,
       goal: `Matron Ilphara means to bind the vault’s prisoner as her house’s patron and buy their way back into the Underdark.`,
-      boss: "First Daughter Quavra, and Matron Ilphara",
+      ladder: [
+        { name: "Slavemaster Nilzra", hook: "a drow with a whip of living spider-silk who sells prisoners to whoever pays" },
+        { name: "First Daughter Quavra", hook: "the matron's heir, who would trade her mother to the dragon for a throne" },
+        { name: "Matron Ilphara", hook: "the house's mother, carried on a palanquin of spiders, who means to bind the Hollow King as her god" },
+      ],
     },
   },
-  acts: [
+  regions: [
     {
       name: "The Cells",
+      what: `the prison block under the gate tower, where the goblins keep tribute and prisoners for the dragon`,
       sanctuary: `a collapsed shrine to a forgotten dwarven god, half-buried in rubble, one candle niche still whole`,
-      mechanics: `guard rhythms, keys and cell locks, noise discipline, improvised tools; the party has almost no gear`,
-      goal: `escape the cell block, recover some gear, learn who your companions are`,
+      holders: ["goblins"],
+      feel: `cramped, filthy and loud; torchlight, chains, goblin jeering, the dragon's heat through the stone above`,
     },
     {
       name: "The Warrens",
-      sanctuary:
-        "a forgotten cistern behind a forge wall: warm stone, dripping water",
-      mechanics: `an alarm network (bells, drums, runners), crowds, the enemy’s internal politics and grudges, disguises, other prisoners who can help or betray`,
-      goal: `cross the working levels, find the way down, learn what the enemy is really doing`,
+      what: `the old dwarven working levels: forges, kitchens and halls, now run by four powers who hate each other`,
+      sanctuary: "a forgotten cistern behind a forge wall: warm stone, dripping water",
+      holders: ["goblins", "illithid", "undead"],
+      feel: `crowded and busy; forge-glow, thrall gangs, a dead court's etiquette in the great halls, everyone watching everyone`,
     },
     {
       name: "The Undercroft",
+      what: `the deep dwarven halls the occupiers fear: archives, wards and the machinery that keeps the vault shut`,
       sanctuary: `a dwarven reading hall with a natural hot spring, shelves of stone books`,
-      mechanics: `dwarven mechanisms with consistent rules (water locks, counterweights, rune-wards, pressure systems), ancient guardians, the fortress’s own history`,
-      goal: `uncover why Gravenhold was built and why each of you was taken; find the way to the Sanctum and the forgotten shaft`,
+      holders: ["drow", "undead"],
+      feel: `vast, dark and silent; carved halls going on forever, old wards humming, drow lights far off`,
     },
     {
       name: "The Sanctum",
-      sanctuary: "a sealed warden’s tomb: carved stone sleepers, utter silence",
-      mechanics: `the faction’s strongest magic and elite guards, ritual sites, every earlier mechanic combined`,
-      goal: `decide whether to slip past the ritual, sabotage it, or stop it at a cost; reach the shaft`,
+      what: `the vault's antechambers, where every faction is racing to finish its ritual on the Hollow King`,
+      sanctuary: "a sealed warden's tomb: carved stone sleepers, utter silence",
+      holders: ["goblins", "illithid", "undead", "drow"],
+      feel: `enormous and shaking; four rituals at once, the Hollow King's heartbeat in the floor`,
     },
     {
       name: "The Ascent",
+      what: `the forgotten dwarven shaft below the vault, climbing up through the mountain to the sky`,
       sanctuary: `a ledge in the shaft where, far above, a thread of real sky shows stars`,
-      mechanics: `climbing, pursuit, collapse; allies freed earlier return and enemies spared come back`,
-      goal: "get out of Gravenhold alive, together",
+      holders: ["goblins", "drow"],
+      feel: `a long climb through collapse and pursuit, with whatever the party did below coming after them`,
     },
   ],
-  openAct: {
-    min: 2,
-    sanctuary: "wherever the road offers shelter",
-    mechanics: `the open world beyond Gravenhold; its consequences follow the party; the same puzzle standards apply`,
-    goal: "whatever the story becomes",
-  },
+  mysteries: [
+    {
+      id: "seal_of_fire",
+      truth: `The dwarves sealed the Hollow King with fire: the vault's wards are forge-runes, and flame still binds it.`,
+      edge: { act: 4, at: "climax", text: `Steps that turn fire on the Hollow King or its bindings are more likely to work than they look.` },
+      clues: [
+        { id: "forge_runes", says: `"...the runes must be struck hot, in the vault's own forge, or the King will..."` },
+        { id: "burned_warden", says: `Dwarves with torches drive a great shadow down into a pit; one of them burns on the threshold, holding the door.` },
+        { id: "cold_wards", says: `"Where the forges went cold, the wards went quiet. Keep the fires lit below, whatever it costs."` },
+        { id: "ash_hymn", says: `"Fire on the door, fire on the King, fire till the deep stops stirring."` },
+      ],
+    },
+    {
+      id: "court_of_debts",
+      truth: `The Court of Ash is bound by the dwarves' old oaths of hospitality: a guest who claims the old rite can't be harmed at table.`,
+      edge: { act: 2, at: "undead", text: `In the Court of Ash's rooms, invoking dwarven guest-rite or old courtesies makes its people far more likely to hold back.` },
+      clues: [
+        { id: "guest_tablet", says: `"Who breaks bread under this roof by the old rite shall not be..."` },
+        { id: "chamberlain_rule", says: `"Even the Queen bows to a guest who asks the rite. Even the dead keep that much."` },
+        { id: "spared_thrall", says: `"I asked for bread the dwarf way, and the dead man put down his sword and let me go."` },
+      ],
+    },
+  ],
   playerSecrets: [
     `A forgotten ancestor of theirs was of the dwarven Warden-line; the vault’s final seal answers to their blood.`,
     `Years ago the vault’s prisoner touched their dreams and chose them as a vessel; it whispers more clearly the deeper they go.`,
     `They were not captured. They volunteered to infiltrate Gravenhold for a crown agent, and their memory was magically sealed to protect the mission; fragments return.`,
   ],
-  roomKinds: {
-    exploration: `a place built for open exploration: lore, history, wonder, planning the next move (a vast collapsed hall, a dwarven gallery, an underground river)`,
-    social: `a place built around people: someone to trade with, learn from, or deal with, who is not an immediate threat (a black-marketeer serving prisoners, a fellow captive, an off-duty guard who doesn't care)`,
-    respite: `a place that invites lingering and closeness: no time pressure, beauty or comfort, somewhere to wash and talk (a hot spring, a quiet chapel, a moonlit shaft)`,
-  },
   // World facts that never change once in play (docs/spec/context.md, act gates).
   invariants: [
     {

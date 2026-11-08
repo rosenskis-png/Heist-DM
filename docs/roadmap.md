@@ -73,7 +73,8 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 4. **The hand-off's remaining parts:** attachments, the world's memory and callbacks, and a companion's personal quest placed by act.
 5. **Clean out the engine-era material** the rethink replaces: `fixtures/cells/walkthrough.md`'s old design notes, and the Cells itself once a generated room replaces it (D139).
 6. **Play Act 1** from a new game.
-7. **Iterate the prep-note sketch on the Forge** (D160): the designer makes rooms, and the thread reads what went well and badly against the craft's §16. *Recommendation:* change one lever at a time (the prompt's wording, the examples, the seed's leanings), and judge whether rooms copy the examples before adding more of them.
+7. **Judge the three stages on the Forge** (D164, on `claude/three-stage-calls`): worlds with and without the example, act plans across all five acts, and rooms with clues, returning people and signs of the peak. *Recommendation:* begin each act in order on one adventure, so the act calls see real history.
+8. **Iterate the prep-note sketch on the Forge** (D160): the designer makes rooms, and the thread reads what went well and badly against the craft's §16. *Recommendation:* change one lever at a time (the prompt's wording, the examples, the seed's leanings), and judge whether rooms copy the examples before adding more of them.
 
 **Open questions**
 1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no critique to read them, D156). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).

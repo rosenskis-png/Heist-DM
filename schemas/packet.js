@@ -65,8 +65,15 @@ const thing = obj(["id", "name", "properties", "location"], {
   location,
   hidden: { type: "boolean" },
   // What it's worth to the party if they hold it when the room ends (D147): gold, or a relic, a passive edge the DM
-  // reads as a fact.
-  reward: { oneOf: [obj(["gold"], { gold: { type: "integer", minimum: 1 } }), obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) })] },
+  // reads as a fact; or a clue to one of the world's mysteries (D164), found by holding it, or by being in plain sight
+  // when it can't be carried (`fixed`: a mural, a song).
+  reward: {
+    oneOf: [
+      obj(["gold"], { gold: { type: "integer", minimum: 1 } }),
+      obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) }),
+      obj(["clue"], { clue: r("id"), fixed: { type: "boolean" } }),
+    ],
+  },
   // What it costs, at a merchant: the party pays when one of them takes it (D147).
   price: { type: "integer", minimum: 1 },
 });

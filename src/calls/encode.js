@@ -22,6 +22,7 @@ export function encodeProblems(out, seed) {
   if (want !== got) problems.push(`the exits must lead to exactly: ${want || "nothing"} (they lead to: ${got || "nothing"})`);
   if (seed.kind === "merchant" && !packet.map.things.some((t) => t.price)) problems.push("a merchant has something with a price");
   if (packet.act !== seed.act) problems.push(`the act is ${seed.act}`);
+  if (seed.clue && !packet.map.things.some((t) => t.reward?.clue === seed.clue.id)) problems.push(`the clue is a thing whose reward is {"clue": "${seed.clue.id}"}`);
   return problems;
 }
 

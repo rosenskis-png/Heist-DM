@@ -70,7 +70,8 @@ test("the pitch's world has Gravenhold's shape, and the check sends back one tha
   const { pitchSchema } = await import("../schemas/calls/pitch.js");
   const { pitchCall } = await import("../src/calls/pitch.js");
   assert.deepEqual(validate(pitchSchema, { pitch: "You wake in a cell.", world: worldOf() }), []);
-  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), acts: worldOf().acts.slice(0, 4) } }).length > 0, "five acts");
+  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), regions: worldOf().regions.slice(0, 4) } }).length > 0, "five regions");
+  assert.ok(validate(pitchSchema, { pitch: "x", world: { ...worldOf(), mysteries: worldOf().mysteries.slice(0, 1) } }).length > 0, "at least two mysteries");
   const needy = Object.values(authored).filter((c) => c.needs?.length).slice(0, 2);
   const bare = { ...masquerade(), features: {} };
   const outs = [{ pitch: "x", world: bare }, { pitch: "You wake.", world: masquerade() }];

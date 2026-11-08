@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, XFACTORS, SHAPES, CENTREPIECES, CORES, PRIZES, BUSY } from "../src/campaign/seed.js";
+import { seedFor, SHAPES, CENTREPIECES, PRIZES, BUSY, CARRIERS } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
@@ -31,9 +31,9 @@ test("the seed asks a different question each time, suits the kind, and avoids t
   const seen = new Set();
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
-    assert.ok(XFACTORS.includes(seed.xFactor) && SHAPES.includes(seed.shape) && CORES.includes(seed.core) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length === 1);
+    assert.ok(SHAPES.includes(seed.shape) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length === 1);
     assert.ok(BUSY.includes(seed.busy) && !(camp.usedBusy ?? []).includes(seed.busy), "what the place is busy with doesn't repeat within an act");
-    assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
+    assert.ok(seed.motifs.length === 1 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
     camp = next;
   }
@@ -96,6 +96,9 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
           const out = structuredClone(encoded);
           out.intent.exits = kinds.map((k, i) => ({ ...encoded.intent.exits[i % 2], id: `exit_${i}`, zone: ["back_stair", "servants_passage"][i % 2], leads_to: k }));
           out.act = 1;
+          // And its clue, when it drew one, as a thing whose reward is that clue (D164).
+          const clue = block.match(/"the_clue_id":"([a-z0-9_]+)"/)?.[1];
+          if (clue) out.map.things.push({ id: "clue_page", name: "a torn page", properties: "paper, says something", location: { zone: "back_stair" }, reward: { clue } });
           return out;
         }
         return sketch;

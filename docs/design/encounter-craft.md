@@ -167,6 +167,11 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 
 **The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163).
 
+**Lore, clues and edges** (D164)
+- **Clues are rewards,** like gold: somewhere the party has to reach, missable, and they say what they say outright, the way a journal page or a mural would, cut off before the end. Never a detail to notice.
+- **A mystery is never confirmed.** Its truth quietly makes something more likely to work in one place later (the edge, a hidden fact in that packet); a player who pieced it together might use it, a lucky one might stumble on it, and nobody at the table ever says so.
+- **Allies are people, not a faction score.** Someone the party helped may turn up again in an encounter or an oddity and vouch for them, or not.
+
 **The opening**
 - **A scene in motion,** told the way a person tells a friend what they saw.
 - **Teach how the room works with a small event** in the first seconds: a foot on the web, a head snapping round.

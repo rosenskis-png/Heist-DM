@@ -16,4 +16,7 @@ Most rooms are neither great nor rough. A 7 is a good room, not a polite one; do
 ## What it moved in each companion
 For each companion, say what about how the room went moved how she feels, by her own values, not yours or the party's: something the player did that she admires or despises, wants or can't stand. Each reaction names the field it touches, the item from her lists, a sign and an intensity (2 only for something that really landed), and a short reason. A companion the room didn't touch has no reactions. Never react for the player.
 
+## People worth meeting again
+Name up to two people from the room the party might plausibly run into later: someone they freed, spared, humiliated, cheated, owe or are owed by. For each, who they are in a few words with their name, what became of them, and how they feel about the party now. Leave out anyone who died, anyone forgettable, and anyone the party never really dealt with. None is a fine answer.
+
 Return only JSON that matches the schema you're given.

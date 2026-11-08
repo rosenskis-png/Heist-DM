@@ -49,3 +49,6 @@ export function pitchSeed(n) {
   while (second === first) second = pick(SECRETS);
   return { heart, secrets: [first, second] };
 }
+
+// What the clues the party has found say (D164), for the campfire: their words, never the truths behind them.
+export const clueTexts = (world, ids = []) => (world.mysteries ?? []).flatMap((m) => m.clues).filter((c) => ids.includes(c.id)).map((c) => c.says);

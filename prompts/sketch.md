@@ -41,16 +41,19 @@ Answer these in your head. None of them gets written down.
 Pulp fantasy, played straight. Bold, visible and a little larger than life beats subtle and quiet. Lean on the genre's old, plain images on purpose: players know what to do with them the moment they hear them. Within that, the seed's tone, anywhere from very stressed about time to a fantasy playground.
 
 ## The seed, the party and the companions
-- What the seed fixes (the kind, the tone, what the place is busy with, whose place it is, the shape and its centrepiece, whose room it is, the ways on) is fixed. Fit each to this world loosely, even when the world is famous for something else: "busy with" is what's going on here today; the shape is the space's rough form; the centrepiece is the one thing the eye goes to. Its leanings (the x-factor, what the room is built around, the prize, the motifs) are there to pull you away from the average room: use what fits your premise and leave the rest. Your premise usually has its sides already; it doesn't need another.
+- What the seed fixes is fixed: the kind, the tone, what the place is busy with, whose place it is, the shape and its centrepiece, whose room it is, the ways on, and the prize. Fit each to this world loosely: "busy with" is what's going on here today; the shape is the space's rough form; the centrepiece is the one thing the eye goes to. Its motif is a leaning: use it if it fits your premise. Your premise usually has its sides already; it doesn't need another.
+- **The prize** is a reward somewhere the party has to reach, a thing they can take or a sight they have to get to, and missing it is fine. A clue is a prize like gold: it says what it says outright, in the form it's carried in, cut off where it's cut off. Never a small detail to notice, never more than it says, and never a hint of what it means.
+- **Someone from before,** when the seed names one, turns up here in whatever role fits the room: working, held, passing through, in charge. How they feel about the party is said; whether they help is up to them, and the room doesn't hang on them.
+- **A sign of what's coming,** when the seed names one, is seen or heard here in passing, as part of the room. Never the one it's a sign of, in person.
+- You're never told the party's abilities: write the place, and the party will find their own uses for it.
 - If you're told which rooms the party has already passed through this act, make this one a different kind of place, with different people doing different things, and a different kind of danger.
 - **Whose room it is:** if it's one companion's, something in the room touches her story or values, and the other only reacts as herself. If it's no one's, no companion has a stake beyond who she is. Nothing a companion needs can be failed in a calm room.
-- Write the place, and let the party's abilities find what's in it: never a prop put there for one party member's ability, or a detail added to block one. A constraint the place has anyway is fine.
 - A clever player is rewarded. If they find the move that empties a threat, that's the room working.
 - A calm room (quiet, oddity, merchant, campfire, sanctuary) has no danger to get past: its premise is what's here and why it's worth lingering, and its pressure is "none", or nearly.
 
 ## The climax
 A climax is the act's showdown, not a harder room. The party always gets through it; what's at stake is how. When you're given the climax block:
-- **Someone stands at its centre:** the act's antagonist, present, wanting something now, and acting. They change the room as it goes, the way a boss fight has turns, and they answer what the party does. A hazard alone is not a climax.
+- **Someone stands at its centre,** as the climax block says: present, wanting something now, and acting in the turns it gives. They change the room as it goes, and they answer what the party does. A hazard alone is not a climax.
 - **The act pays off here:** what the party passed through this act shows up again, changed, and the companions' threads meet.
 - **A choice at the peak:** something the party can't have both of, often between the two companions' threads.
 - It can be bigger than a room: more people, more noise, the place coming apart. Keep it legible all the same: one shape, a few big things, everyone's eyes said plainly.

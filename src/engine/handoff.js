@@ -36,6 +36,8 @@ export function handoff(s) {
     const r = s.packet.map.things.find((t) => t.id === id)?.reward?.relic;
     return r ? [{ id, name: r.name, text: r.text }] : [];
   });
+  // Clues the party came away with (D164): one they hold, or one that can't be carried and stood in plain sight.
+  const clues = s.packet.map.things.filter((t) => t.reward?.clue && (gear.includes(t.id) || (t.reward.fixed && !t.hidden))).map((t) => t.reward.clue);
   const exit = [...new Set(party.map((id) => zoneOf(s, id)))];
   // The way on: the exit whose zone the whole party ended in, if any (docs/spec/campaign.md §3).
   const wayOn = exit.length === 1 ? (s.packet.intent.exits ?? []).find((e) => e.zone === exit[0])?.id ?? null : null;
@@ -57,6 +59,7 @@ export function handoff(s) {
     gear,
     gold,
     relics,
+    clues,
     // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
     conditions: s.conditions.map((c) => ({ ...c })),
     // Per-rest ability uses spent so far, this encounter's included; per-encounter uses refill now (D128).

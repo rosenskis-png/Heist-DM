@@ -74,8 +74,10 @@ Every adventure is set in a world (`content/worlds/`, D150). The rules every wor
 - **Its life:** what it's busy with, whatever the party does.
 - **Its factions,** and the **tensions** between them: what they want from each other, not only from the party.
 - **Its features:** what it holds that companions' stories need. Each companion lists hers as `needs`, and a world that lacks one for a companion in the party has a problem to fix.
-- **Its acts:** each act's place, sanctuary, mechanics and goal, in the shared five-act shape.
-- **The player's secrets** it can draw from, **room kinds** with examples from the place, and **world facts that never change** (`invariants`, with act gates).
+- **Its factions' ladders:** three named leaders each, lowest first: a local face, a lieutenant and the top, each with a visible hook. Each act's peak climbs them (D164).
+- **Its regions:** the part of the place each act crosses, what it is, its sanctuary, the factions that hold it at first, and how it feels, rising from personal (Act 1) through communal and ancient to mythic (Act 4), then the aftermath (Act 5). What happens in an act is decided when it begins, by the act call (`docs/spec/calls/act.md`).
+- **Its mysteries:** truths the game never confirms, each with an edge (one place later where knowing it quietly helps, as a hidden fact in the packets it applies to) and partial clues, which rooms hold as rewards (D164).
+- **The player's secrets** it can draw from, and **world facts that never change** (`invariants`, with act gates). The player's secrets and the rings are revealed by act, as story; the mysteries never are.
 
 Gravenhold is the default world and the worked example a generated world is written to match. A player who types a vibe at setup gets a world from the pitch call instead (`docs/spec/calls/pitch.md`, D151), in the same shape (`schemas/world.js`), holding every feature the two chosen companions need; the session keeps it whole and saves it, and it's never generated again. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
 
