@@ -7,10 +7,10 @@
 
 ## Returns (`schemas/calls/pitch.js`)
 - **The pitch:** a few sentences in the second person that sell the adventure, without spoiling the heart's secret or the player's.
-- **The world,** in the shape of `schemas/world.js` (`docs/spec/campaign.md` §9): the place and its way out, its roles, heart, life, factions with their ladders and the tensions between them, features, its five regions on the rising curve, two to four mysteries with their edges and clues, the player's secrets and world facts (D164).
+- **The world,** in the shape of `schemas/world.js` (`docs/spec/campaign.md` §9): the place and its way out, its roles, heart, life, factions with their ladders and the tensions between them, features, its five regions on the rising curve, two to four mysteries, each with its edge and a journal torn into pages (D168), the player's secrets and world facts (D164).
 
 ## Validated by the engine
-The world's shape (exactly five regions, every role, at least two factions with three-rung ladders, two tensions, two mysteries and two player secrets), and that it holds every feature the chosen companions need (`worldProblems`). Failures go back for one retry.
+The world's shape (exactly five regions, every role, at least two factions with three-rung ladders, two tensions, two mysteries each with at least three pages, and two player secrets), and that it holds every feature the chosen companions need (`worldProblems`). Failures go back for one retry.
 
 ## Where it goes
 The setup screen shows the world's name and the pitch. The player can ask for another (up to the last three pitches are sent as turned down), go back to Gravenhold, or begin. The session keeps the chosen world whole, saves it, and never generates it again; companions' slots and world facts come from it (D150).

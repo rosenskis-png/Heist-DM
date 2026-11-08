@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, SHAPES, CENTREPIECES, PRIZES, BUSY, CARRIERS } from "../src/campaign/seed.js";
+import { seedFor, SHAPES, CENTREPIECES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";

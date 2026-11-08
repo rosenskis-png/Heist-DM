@@ -38,10 +38,10 @@ What the seed fixes:
 - **What the place is busy with** (D162): a kind from the act's busy lines, with its line in the act's words, never repeated within an act (without a plan, a kind from `BUSY`).
 - **Whose place it is,** for an encounter, the climax or an oddity: one of the factions that hold the region now, by the act's plan (or the region's holders).
 - **The shape and its centrepiece** (D163), from wide lists, neither repeated within an act.
-- **The prize,** for an encounter, an oddity or a quiet room (D164): none about half the time, gold, a relic or a clue. A clue is one the campaign hasn't placed, with a carrier code draws (a journal page, a mural, a letter, a song, a talking prisoner…), each placed once in a campaign.
+- **The prize,** for an encounter, an oddity or a quiet room (D164, D168): none about half the time, gold, a relic or a journal page. A page is one the campaign hasn't placed, from the act's live mysteries; the sketch is told only who wrote it, never its words, which the party reads at camp.
 - **At most one extra** (D164), never in two rooms running: **someone from before**, from the verdicts' memory, only in an encounter or an oddity, at most once an act each; or **a sign of the act's peak**, from its hints, at most one a leg.
 
-From the act's pools (D167), each item used once in the act: **a local** for an encounter, oddity or quiet room, in place of the motif (without an act plan, one motif as a leaning); **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Clues come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
+Its leaning is **one motif**, a situation's shape with no examples, not repeated in the act where it can be helped (D168). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
 
 The campaign records what the act has used (motifs, busy-withs, shapes, centrepieces, premises, signs, people brought back) and resets them when an act ends; the clues placed and the memory last the campaign.
 
@@ -64,4 +64,4 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **A room has no objective or deadline** (D121). An outfit is a reward placed where it fits, for a companion in the party (D143).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
-- **It holds the seed's clue,** when it placed one, as a thing whose reward is that clue, and no reward but the seed's prize (D164, D165).
+- **It holds the seed's journal page,** when it placed one, as a thing the party can carry whose reward is that page, and no reward but the seed's prize (D164, D165, D168).

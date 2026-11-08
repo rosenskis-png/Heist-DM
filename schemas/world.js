@@ -26,14 +26,20 @@ const region = obj(["name", "what", "sanctuary", "holders", "feel"], {
   holders: list(r("id"), 1),
   feel: r("text"),
 });
-// A mystery (D164): a hidden truth that is never confirmed, an edge it quietly gives in one place later, and partial
-// clues that say part of it outright. Clues are rewards a room may hold; the edge reaches only the packets it applies in.
-const mystery = obj(["id", "truth", "edge", "clues"], {
+// A mystery (D164, D168): a hidden truth that is never confirmed, an edge it quietly gives in one place later, and a
+// journal someone in the world wrote about it, torn into pages. A page is a reward a room may hold; the party reads it at
+// camp. The edge reaches only the packets it applies in.
+const mystery = obj(["id", "truth", "edge", "journal"], {
   id: r("id"),
   truth: r("text"),
   // `at` is "climax" (that act's climax) or a faction id (that faction's rooms, from that act on).
   edge: obj(["act", "at", "text"], { act: { type: "integer", minimum: 2, maximum: 5 }, at: r("text"), text: r("text") }),
-  clues: list(obj(["id", "says"], { id: r("id"), says: r("text") }), 3),
+  journal: obj(["author", "pages"], {
+    // Who wrote it, in a phrase ("a Haskan loremaster, dying").
+    author: r("text"),
+    // The journal in order, torn into pages; what the truth needs is spread across them.
+    pages: list(obj(["id", "text"], { id: r("id"), text: r("text") }), 3),
+  }),
 });
 
 export const worldShape = obj(["id", "name", "place", "escape", "roles", "heart", "life", "tensions", "features", "factions", "regions", "mysteries", "playerSecrets", "invariants"], {

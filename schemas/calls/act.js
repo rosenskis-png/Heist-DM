@@ -8,7 +8,7 @@ const pool = (min) => list(r("text"), min);
 
 export const actSchema = withDefs({
   $id: "act",
-  ...obj(["goal", "question", "aim", "state", "holders", "busy", "locals", "settings", "news", "mysteries", "returning", "peak", "hints"], {
+  ...obj(["goal", "question", "aim", "state", "holders", "busy", "settings", "news", "mysteries", "returning", "peak", "hints"], {
     // The act's job, in this world's terms. The climax reads it.
     goal: r("text"),
     // What the act is about, as a question the act answers. Every room reads it.
@@ -21,7 +21,6 @@ export const actSchema = withDefs({
     holders: list(r("id"), 1),
     // Pools, one item to one room, each used once in the act.
     busy: list(obj(["kind", "line"], { kind: r("text"), line: r("text") }), 4),
-    locals: pool(5),
     settings: obj(["quiet", "oddity", "campfire"], { quiet: pool(2), oddity: pool(2), campfire: pool(2) }),
     news: pool(0),
     // The ids of the one or two mysteries whose clues this act's rooms hold.

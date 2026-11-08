@@ -13,17 +13,14 @@ export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship
 export const SHAPES = ["a street or alley", "a long gallery or nave", "a warren of small chambers", "a garden or orchard", "a market of stalls", "a river crossing or ford", "a field of pillars or columns", "a wide stair hall", "a courtyard open to the sky", "a ship's deck or barge", "a pit or bowl", "terraces down a slope", "a tower or shaft", "a bridge or ledge over a drop", "an island in something", "a cave of natural rock", "a ruin half fallen in", "a crossroads of tunnels"];
 export const CENTREPIECES = ["a statue or idol", "a great machine", "a fire or forge", "a tree or great growth", "a throne or seat of honour", "a wreck", "a pool or spring", "a beast", "a tower or scaffold", "an altar", "a table set for many", "a gate or portcullis", "a pile of something valuable", "a cart, wagon or vessel", "a grave or tomb", "a bell, drum or horn", "a map, model or mural", "a hole in the floor"];
 // What's worth having beyond the way out (D164): nothing about half the time; a clue is one more kind of reward.
-export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a clue"];
+export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a journal page"];
 const PRIZE_WEIGHTS = [10, 4, 2, 4];
-// How a clue is carried (D164): drawn by code, so clues don't all become journals. Each says something outright.
-export const CARRIERS = ["a torn journal page", "a mural or carving", "a letter", "an inscription", "a map with notes on it", "a song someone is singing", "remains with a note on them", "a prisoner who talks", "a banner or tapestry", "a book or scroll", "words scratched into a wall by someone desperate", "a plaque on a statue or tomb"];
 // Rooms with a challenge; rooms that may hold a prize; rooms a returning character may turn up in (the designer's call).
 const CHALLENGED = ["encounter", "climax"];
 const PRIZED = ["encounter", "oddity", "quiet"];
 const CALLBACK_KINDS = ["encounter", "oddity"];
 const HINT_KINDS = ["encounter", "oddity", "quiet"];
-// Rooms a local may turn up in, and the calm rooms the act gives settings for (D167).
-const LOCAL_KINDS = ["encounter", "oddity", "quiet"];
+// The calm rooms the act gives settings for (D167).
 const SET_KINDS = ["quiet", "oddity", "campfire"];
 // Whose room it is (D158): one companion's slot, or neither, which is the commonest; never the same companion twice in a
 // row. The climax is both companions' (D148: a choice at its peak, often between their threads).
@@ -57,16 +54,9 @@ export function seedFor(camp, world, kind, exits = []) {
   const room = (camp.roomNo ?? 0) + 1;
   const seed = { kind, act: camp.act, exits };
   seed.spotlight = spotlightFor(rng, kind, camp.spotlight ?? null);
-  // With an act plan, a local from its pool instead of a motif (D167); without one, one motif as a leaning (D164).
-  const localsUsed = camp.localsUsed ?? [];
-  const locals = (plan?.locals ?? []).filter((l) => !localsUsed.includes(l));
-  if (plan?.locals?.length) {
-    seed.motifs = [];
-    if (LOCAL_KINDS.includes(kind) && locals.length) seed.local = pickFrom(rng, locals);
-  } else {
-    const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
-    seed.motifs = fit.length ? [pickFrom(rng, fresh(fit, used, (m) => m.id))] : [];
-  }
+  // One motif, a situation's shape, as a leaning (D164, D168), not repeated in the act where it can be helped.
+  const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
+  seed.motifs = fit.length ? [pickFrom(rng, fresh(fit, used, (m) => m.id))] : [];
   // A calm room's setting, from the act's: a different one from any used earlier in the act (D167).
   const settingsUsed = camp.settingsUsed ?? [];
   if (SET_KINDS.includes(kind) && plan?.settings?.[kind]?.length) seed.setting = pickFrom(rng, fresh(plan.settings[kind], settingsUsed));
@@ -96,13 +86,12 @@ export function seedFor(camp, world, kind, exits = []) {
   const placed = camp.cluesPlaced ?? [];
   if (PRIZED.includes(kind)) {
     seed.prize = weighted(rng, PRIZES, PRIZE_WEIGHTS);
-    if (seed.prize === "a clue") {
+    if (seed.prize === "a journal page") {
       const live = plan?.mysteries?.length ? (world.mysteries ?? []).filter((m) => plan.mysteries.includes(m.id)) : world.mysteries ?? [];
-      const open = live.flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !placed.includes(c.id));
-      if (open.length) {
-        const c = pickFrom(rng, open);
-        seed.clue = { id: c.id, mystery: c.mystery, says: c.says, carrier: pickFrom(rng, CARRIERS) };
-      } else seed.prize = "gold";
+      // A journal page (D168): its writer reaches the sketch, never its words, which the party reads at camp.
+      const open = live.flatMap((m) => m.journal.pages.map((p) => ({ id: p.id, mystery: m.id, author: m.journal.author }))).filter((p) => !placed.includes(p.id));
+      if (open.length) seed.clue = pickFrom(rng, open);
+      else seed.prize = "gold";
     }
   }
   // At most one extra, never two rooms running: a returning character, or a sign of the act's peak (D164).
@@ -138,7 +127,6 @@ export function seedFor(camp, world, kind, exits = []) {
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
       calledBack: seed.callback ? [...calledBack, seed.callback.name] : calledBack,
       hintsUsed: seed.hint ? [...hintsUsed, seed.hint] : hintsUsed,
-      localsUsed: seed.local ? [...localsUsed, seed.local] : localsUsed,
       settingsUsed: seed.setting ? [...settingsUsed, seed.setting] : settingsUsed,
       newsUsed: seed.news ? [...newsUsed, seed.news] : newsUsed,
       storyShown: seed.herStory ? [...storyShown, seed.spotlight] : storyShown,

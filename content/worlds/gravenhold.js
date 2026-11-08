@@ -133,22 +133,28 @@ export default {
       id: "seal_of_fire",
       truth: `The dwarves sealed the Hollow King with fire: the vault's wards are forge-runes, and flame still binds it.`,
       edge: { act: 4, at: "climax", text: `Steps that turn fire on the Hollow King or its bindings are more likely to work than they look.` },
-      clues: [
-        { id: "forge_runes", says: `"...the runes must be struck hot, in the vault's own forge, or the King will..."` },
-        { id: "burned_warden", says: `Dwarves with torches drive a great shadow down into a pit; one of them burns on the threshold, holding the door.` },
-        { id: "cold_wards", says: `"Where the forges went cold, the wards went quiet. Keep the fires lit below, whatever it costs."` },
-        { id: "ash_hymn", says: `"Fire on the door, fire on the King, fire till the deep stops stirring."` },
-      ],
+      journal: {
+        author: "Brannoc, the last forge-warden of Gravenhold, writing as the fortress emptied",
+        pages: [
+          { id: "seal_of_fire_1", text: `The King woke in the third winter of the long dark. Stone did not hold it. Iron did not hold it. Our wardens died in the vault door, and the deep shook for nine days.` },
+          { id: "seal_of_fire_2", text: `Thane Ursk had the vault forge lit and the runes struck hot, one hundred and eight of them, each one quenched in the King's own shadow. Where the hot runes touched it, it drew back. It hates the fire. It always hated the fire.` },
+          { id: "seal_of_fire_3", text: `The runes hold only while the forges below burn. Already the far wards go quiet where the fires were let die. I have told the thane. He says there are no hands left to stoke them.` },
+          { id: "seal_of_fire_4", text: `If you are reading this, the forges are cold and the King is stirring. Do not go down with steel. Go down with fire, and strike it where the old runes are, and it may yet go back to sleep.` },
+        ],
+      },
     },
     {
       id: "court_of_debts",
       truth: `The Court of Ash is bound by the dwarves' old oaths of hospitality: a guest who claims the old rite can't be harmed at table.`,
       edge: { act: 2, at: "undead", text: `In the Court of Ash's rooms, invoking dwarven guest-rite or old courtesies makes its people far more likely to hold back.` },
-      clues: [
-        { id: "guest_tablet", says: `"Who breaks bread under this roof by the old rite shall not be..."` },
-        { id: "chamberlain_rule", says: `"Even the Queen bows to a guest who asks the rite. Even the dead keep that much."` },
-        { id: "spared_thrall", says: `"I asked for bread the dwarf way, and the dead man put down his sword and let me go."` },
-      ],
+      journal: {
+        author: "Hesta, a dwarven steward who served the Court of Ash after it took the halls",
+        pages: [
+          { id: "court_of_debts_1", text: `The dead lords kept our halls and kept our manners, more strictly than we ever did. They will not sit to meat without the old words said, and they cannot bear a broken courtesy.` },
+          { id: "court_of_debts_2", text: `Today a prisoner asked for bread by the guest-rite, the way my grandmother taught me: hand on the board, head bowed, the three words. Lord Vesk himself put down his knife.` },
+          { id: "court_of_debts_3", text: `It is older than they are. Whoever eats under this roof by the rite may not be harmed under it while the meal lasts. Even the Queen is bound. I think it is the only law left that she fears.` },
+        ],
+      },
     },
   ],
   playerSecrets: [

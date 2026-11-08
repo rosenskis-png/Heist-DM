@@ -15,11 +15,10 @@ Rooms must stay original and different from each other, so whatever reaches more
 | **aim** | what the party should come away knowing or holding | every room |
 | **state** | what has changed in the region because of earlier acts | the climax, the next act call |
 | **holders** | the factions that hold the region now | code, drawing each room's owner |
-| **busy** | four or more lines, each a kind from the seed's list, each different people in a different kind of place | one room each |
-| **locals** | five to eight inhabitants who belong to no side and aren't the threat | one encounter, oddity or quiet room each, in place of a motif |
+| **busy** | four or more lines, each a kind from the seed's list, the ordinary business of the place, each different people in a different kind of place | one room each |
 | **settings** | two or three places for each calm kind (`quiet`, `oddity`, `campfire`) | one calm room each, a different one from earlier in the act until they run out |
 | **news** | what the party might hear of what earlier acts set in motion | one room each, as the room's one extra |
-| **mysteries** | the one or two whose clues this act's rooms hold | code, drawing clues |
+| **mysteries** | the one or two whose journal pages this act's rooms may hold | code, drawing pages |
 | **returning** | people met before who might plausibly turn up here | code, drawing someone from before |
 | **peak** | who or what stands at the climax: why them (whose design blocks the party), what they want, how they act in turns, where | the climax |
 | **hints** | two or three visible signs of the peak | one room each, as the room's one extra |

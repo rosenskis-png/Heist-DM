@@ -4,7 +4,7 @@ An act is beginning. You decide what it holds, from what the party has actually 
 
 That's the point to hold onto. Rooms must stay original and different from each other. So whatever every room will read must be abstract: a question, an aim. Everything concrete you write goes into a pool, and code hands one item from it to one room, never the same item twice. Nothing you write paints a picture every room will copy.
 
-This is pulp fantasy played straight: bold, visible and a little larger than life.
+This is pulp fantasy played straight: bold and visible, but grounded. The strange is strong because it's rare.
 
 ## What you write
 - **goal:** the act's job, given to you, in this world's terms. Only the climax reads it.
@@ -12,11 +12,10 @@ This is pulp fantasy played straight: bold, visible and a little larger than lif
 - **aim:** what the party should come away knowing or holding by the act's end. One sentence.
 - **state:** what has changed in the region because of what came before. Only the climax and the next act read it.
 - **holders:** the ids of the factions that hold the region now. Start from the region's holders, and change them if what happened would.
-- **busy:** what the region is busy with, one line for each kind that really happens here, named as in the list you're given, at least four. Each line involves different people in a different kind of place from the others, so no two rooms built from them feel alike, and none leans on the region's one famous feature.
-- **locals:** five to eight inhabitants who belong to no faction and aren't the threat: odd, specific, memorable, alive with their own small business. Each different in kind from the others. One will turn up in a room now and then.
+- **busy:** what the region is busy with, one line for each kind that really happens here, named as in the list you're given, at least four. Say plainly what this place's people would be doing, the ordinary business of a place like this, not a curiosity. Each line involves different people in a different kind of place from the others, so no two rooms built from them feel alike, and none leans on the region's one famous feature.
 - **settings:** for each calm kind of room (`quiet`, `oddity`, `campfire`), two or three places that could only exist in this region: strange, beautiful, funny or haunting, and different from each other. A quiet room is a breath; an oddity is something wondrous or strange with a story; a campfire is somewhere safe and memorable to sleep.
 - **news:** what the party might hear or see of what earlier acts set in motion, each a line on its own. None if it's Act 1.
-- **mysteries:** the ids of one or two of the world's mysteries whose clues this act's rooms should hold: the ones closest to this act's question.
+- **mysteries:** the ids of one or two of the world's mysteries whose journal pages this act's rooms may hold: the ones closest to this act's question.
 - **returning:** names, exactly as given, of people the party has met who might plausibly turn up in this region. None if there are none.
 - **peak:** who or what stands at the act's climax.
   - **who:** one of the factions' leaders, from the rung that fits this act, or something that isn't a person when the act calls for it. In Act 4 it may be several designs coming to a head at once.

@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, BUSY, CARRIERS } from "../src/campaign/seed.js";
+import { seedFor, BUSY } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded, endAct, actBegun } from "../src/campaign/run.js";
 import { worldOf, clueTexts } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
@@ -25,7 +25,6 @@ const plan = {
   goal: "Cross the Warrens.", question: "Can they cross the Warrens before the Court learns they're loose?", aim: "Learn the way down, and who holds it.",
   state: "The forges have doubled their shifts since the escape.", holders: ["undead"],
   busy: [{ kind: "a feast or celebration", line: "the dead court's endless banquet" }, { kind: "hard labour", line: "thralls at the forges" }, { kind: "a rite or worship", line: "mourning bells for the Queen" }, { kind: "trade or a market", line: "the ash market" }],
-  locals: ["a ghoul barber who gossips while he shaves the dead", "a lost dwarven tour-guide ghost", "a rat king with a tiny crown", "twin lamplighters who never agree", "a mimic that thinks it's a door"],
   settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
   news: ["word that the goblins blame the Court for the escape"], mysteries: ["court_of_debts"], returning: [],
   peak: { who: "Lord Chamberlain Vesk", why: "his court holds the only stair down", wants: "a perfect banquet", turns: "courtesy, then knights, then the bells", where: "the banquet hall" },
@@ -48,7 +47,7 @@ test("the act's plan reaches its rooms: busy lines in its words, owners from its
   assert.ok(world.regions[0].holders.includes(bare.factions[0]));
 });
 
-test("a clue is a prize, placed once in a campaign, with a carrier code drew; at most one extra a room, never two rooms running (D164)", () => {
+test("a journal page is a prize, placed once in a campaign, by its writer, never its words; at most one extra a room, never two rooms running (D164, D168)", () => {
   let camp = { ...newCampaign({ seed: 3, act: 2 }), plan, memory: [{ name: "Sir Hollin", fate: "spared at the gate", feels: "owes them" }] };
   const placed = [];
   let last = false;
@@ -56,8 +55,8 @@ test("a clue is a prize, placed once in a campaign, with a carrier code drew; at
     const kind = ["encounter", "oddity", "quiet", "merchant"][i % 4];
     const { seed, camp: next } = seedFor(camp, world, kind, ["encounter"]);
     if (seed.clue) {
-      assert.equal(seed.prize, "a clue");
-      assert.ok(CARRIERS.includes(seed.clue.carrier));
+      assert.equal(seed.prize, "a journal page");
+      assert.ok(seed.clue.author && !seed.clue.text && !seed.clue.says, "the writer, never the words");
       assert.ok(!placed.includes(seed.clue.id), "a clue is placed once");
       placed.push(seed.clue.id);
     }
@@ -122,12 +121,13 @@ test("the act call: its input holds the job, the history and the used peaks; its
 
 test("what the campaign remembers: clues found, people worth meeting again, and each act's history (D164)", () => {
   const packet = structuredClone(env.examples.encoded);
-  packet.map.things.push({ id: "page", name: "a torn page", properties: "paper", location: { zone: packet.start.positions.player }, reward: { clue: "forge_runes" } });
-  packet.map.things.push({ id: "mural", name: "a mural", properties: "paint", location: { zone: packet.map.zones[0].id }, reward: { clue: "burned_warden", fixed: true } });
+  packet.map.things.push({ id: "page", name: "a torn page", properties: "paper", location: { zone: packet.start.positions.player }, reward: { clue: "seal_of_fire_1" } });
+  packet.map.things.push({ id: "page2", name: "another torn page", properties: "paper", location: { zone: packet.map.zones[0].id }, reward: { clue: "seal_of_fire_2" } });
   const s = load({ packet: layout(packet).packet, party });
   s.holder.page = "player";
+  s.holder.page2 = "player";
   const h = handoff(s);
-  assert.deepEqual(h.clues.sort(), ["burned_warden", "forge_runes"]);
+  assert.deepEqual(h.clues.sort(), ["seal_of_fire_1", "seal_of_fire_2"]);
   const people = [{ name: "Snick, a goblin runt", fate: "freed from the cage", feels: "owes them" }];
   assert.deepEqual(validate(verdictSchema, { rating: 6, why: "x", reactions: [], people }), []);
   assert.ok(validate(verdictSchema, { rating: 6, why: "x", reactions: [], people: [...people, ...people, ...people] }).length, "two at most");
@@ -135,7 +135,9 @@ test("what the campaign remembers: clues found, people worth meeting again, and 
   camp = roomEnded(camp, { handoff: { ...h, conditions: [], spent: {} }, verdict: { rating: 6, why: "x", reactions: [], people }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
   assert.deepEqual(camp.memory.map((p) => p.name), ["Snick, a goblin runt"]);
   assert.equal(camp.clues.length, 2);
-  assert.equal(clueTexts(world, camp.clues).length, 2);
+  const read = clueTexts(world, camp.clues);
+  assert.equal(read.length, 2);
+  assert.ok(read.every((p) => p.from.startsWith("Brannoc") && p.page), "each page read at camp with its writer");
   const ended = endAct({ ...camp, way: { ...camp.way, here: "sanctuary" } }, [], 2);
   assert.equal(ended.act, 2);
   assert.deepEqual(ended.history[0].peak, "Lord Chamberlain Vesk");
@@ -163,26 +165,24 @@ test("the pitch asks for regions, ladders and mysteries, and can run without the
   assert.ok(Object.values(world.factions).every((f) => f.ladder.length === 3 && !/alarm/i.test(f.rules)));
 });
 
-test("the act deals out one local, setting and piece of news at a time; clues come from its live mysteries; her story once an act; tone darkens late (D167)", () => {
+test("the act deals out one setting and piece of news at a time; pages come from its live mysteries; a motif, never a local; her story once an act (D167, D168)", () => {
   let camp = { ...newCampaign({ seed: 9, act: 2 }), plan };
-  const locals = [], settings = [], news = [];
+  const settings = [], news = [];
   for (let i = 0; i < 12; i++) {
     const kind = ["encounter", "quiet", "oddity", "campfire"][i % 4];
     const { seed, camp: next } = seedFor(camp, world, kind, ["encounter"]);
-    assert.deepEqual(seed.motifs, [], "a local replaces the motif when the act has locals");
-    if (seed.local) { assert.ok(!locals.includes(seed.local)); locals.push(seed.local); }
+    assert.equal(seed.local, undefined, "no locals");
+    assert.ok(seed.motifs.length <= 1);
     if (seed.setting) { assert.ok(plan.settings[kind].includes(seed.setting)); settings.push(seed.setting); }
     if (seed.news) news.push(seed.news);
     if (seed.clue) assert.equal(seed.clue.mystery, "court_of_debts");
-    assert.equal(kind === "campfire" ? seed.local : undefined, undefined, "no local at a campfire");
     camp = next;
   }
-  assert.ok(locals.length && settings.length);
+  assert.ok(settings.length);
   assert.ok(news.length <= 1, "each piece of news once");
   const quiet = settings.filter((x) => plan.settings.quiet.includes(x));
   const firsts = quiet.slice(0, plan.settings.quiet.length);
   assert.equal(new Set(firsts).size, firsts.length, "a quiet setting differs from those used earlier in the act until the pool runs out");
-  // Her story's feature once an act.
   let c2 = { ...newCampaign({ seed: 4, act: 2 }), plan };
   const shown = [];
   for (let i = 0; i < 20; i++) {
@@ -194,6 +194,11 @@ test("the act deals out one local, setting and piece of news at a time; clues co
   const story = (herStory) => sketchInput(env, { seed: { ...seedFor({ ...newCampaign(), plan }, world, "encounter", []).seed, spotlight: "companion_b", herStory }, world, party, plan }, sketchSchema);
   assert.match(story(true), /her_story_needs/);
   assert.doesNotMatch(story(false), /her_story_needs/);
+  // A page reaches the sketch as its writer, never its words.
+  const paged = { ...seedFor({ ...newCampaign(), plan }, world, "encounter", []).seed, prize: "a journal page", clue: { id: "court_of_debts_2", mystery: "court_of_debts", author: world.mysteries[1].journal.author } };
+  const pi = sketchInput(env, { seed: paged, world, party, plan }, sketchSchema);
+  assert.match(pi, /a_journal_page[\s\S]*Hesta/);
+  assert.doesNotMatch(pi, /put down his knife/);
 });
 
 test("no local face in a room when that face is the act's peak (D167)", () => {
@@ -202,4 +207,13 @@ test("no local face in a room when that face is the act's peak (D167)", () => {
   assert.deepEqual(seed.factions, ["goblins"]);
   assert.doesNotMatch(sketchInput(env, { seed, world, party, plan: peakIsFace }, sketchSchema), /local_face/);
   assert.match(sketchInput(env, { seed, world, party, plan }, sketchSchema), /local_face/);
+});
+
+test("motifs are situations without examples; the act has no locals; a room holds one strange thing at most (D168)", async () => {
+  const { motifs } = await import("../content/motifs.js");
+  assert.ok(motifs.every((m) => !/\(|: [a-z]+, [a-z]/.test(m.pattern)), "no example lists in a motif");
+  assert.ok(!("locals" in actSchema.properties));
+  assert.match(prompts.sketch, /One strange thing a room, at most/);
+  assert.doesNotMatch(prompts.sketch, /A local,/);
+  assert.match(prompts.pitch, /tear it into three to five `pages`/);
 });

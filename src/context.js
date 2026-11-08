@@ -358,7 +358,7 @@ export function campfireInput(env, c, self, others, schema) {
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),
-    c.clues?.length ? block("Things the party has found about this place (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
+    c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
     c.events ? block("The last encounter", c.events) : null,
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
@@ -689,13 +689,12 @@ const seedText = (seed, world) => ({
       : "no one's: the room touches no companion's story; they react to it as themselves",
     ways_on: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
     ...(seed.clue
-      ? { prize: { a_clue: seed.clue.says, carried_as: seed.clue.carrier, how: "a reward somewhere in the room the party has to reach: it says this outright, cut off where it's cut off" } }
+      ? { prize: { a_journal_page: { written_by: seed.clue.author }, how: "a loose page, torn from that writer's journal, somewhere in the room the party has to reach and can carry off. They'll read it at camp: nothing in the room says or shows what's on it, and nobody here knows" } }
       : seed.prize ? { prize: seed.prize } : {}),
     ...(seed.callback ? { someone_from_before: { ...seed.callback, how: "they turn up here, in whatever role fits the room; they may or may not help" } } : {}),
     ...(seed.hint ? { a_sign_of_what_is_coming: { sign: seed.hint, how: "something the party sees or hears here, in passing; never who or what it's a sign of, in person" } } : {}),
     ...(seed.news ? { news: { what: seed.news, how: "something the party hears or sees here of what's been set in motion; part of the room, not its subject" } } : {}),
     ...(seed.setting ? { setting: seed.setting } : {}),
-    ...(seed.local ? { a_local: { who: seed.local, how: "they're here about their own business; they belong to no side, and the room doesn't hang on them" } } : {}),
   },
   ...(seed.motifs?.length ? { leanings: { motifs: seed.motifs.map((m) => ({ name: m.name, pattern: m.pattern })) } } : {}),
 });

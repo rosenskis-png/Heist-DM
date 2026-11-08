@@ -50,5 +50,7 @@ export function pitchSeed(n) {
   return { heart, secrets: [first, second] };
 }
 
-// What the clues the party has found say (D164), for the campfire: their words, never the truths behind them.
-export const clueTexts = (world, ids = []) => (world.mysteries ?? []).flatMap((m) => m.clues).filter((c) => ids.includes(c.id)).map((c) => c.says);
+// The journal pages the party has found (D164, D168), for the campfire, where they're read: who wrote each, and its words,
+// never the truth behind them.
+export const clueTexts = (world, ids = []) =>
+  (world.mysteries ?? []).flatMap((m) => m.journal.pages.filter((p) => ids.includes(p.id)).map((p) => ({ from: m.journal.author, page: p.text })));

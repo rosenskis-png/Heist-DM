@@ -10,7 +10,7 @@ import { motifs } from "../content/motifs.js";
 import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
-import { TONES, SHAPES, CENTREPIECES, PRIZES, BUSY, CARRIERS } from "../src/campaign/seed.js";
+import { TONES, SHAPES, CENTREPIECES, PRIZES, BUSY } from "../src/campaign/seed.js";
 import { seedRoom, designRoom, edgesFor } from "../src/game/generate.js";
 import { actCall } from "../src/calls/act.js";
 import { pitchCall } from "../src/calls/pitch.js";
@@ -222,7 +222,7 @@ function adventureView(adv) {
   const mysteries = (w.mysteries ?? []).map((m) =>
     h("div", { class: "sub" }, h("h4", {}, m.id.replaceAll("_", " ")),
       kv([["Truth (never told)", m.truth], ["Edge", `${m.edge.text} (from act ${m.edge.act}, ${m.edge.at === "climax" ? "at its climax" : `in ${w.factions[m.edge.at]?.name ?? m.edge.at}'s rooms`})`],
-        ["Clues", h("ul", { class: "plain" }, m.clues.map((c) => h("li", {}, c.says)))]])));
+        ["Journal", h("div", {}, h("p", { class: "small muted" }, m.journal.author), h("ol", { class: "plain" }, m.journal.pages.map((p) => h("li", {}, p.text))))]])));
   const dm = h("section", { class: "card" },
     h("span", { class: "dm-tag" }, "DM-facing · the campaign's shape"),
     h("h2", {}, w.name),
@@ -326,12 +326,12 @@ function seedWith(adv, r) {
   }
   if (p.prize) {
     seed.prize = p.prize;
-    if (p.prize !== "a clue") delete seed.clue;
+    if (p.prize !== "a journal page") delete seed.clue;
     else if (!seed.clue) {
       const live = camp.plan?.mysteries?.length ? (adv.world.mysteries ?? []).filter((m) => camp.plan.mysteries.includes(m.id)) : adv.world.mysteries ?? [];
-      const open = live.flatMap((m) => m.clues.map((c) => ({ ...c, mystery: m.id }))).filter((c) => !cluesPlaced.includes(c.id));
+      const open = live.flatMap((m) => m.journal.pages.map((pg) => ({ id: pg.id, mystery: m.id, author: m.journal.author }))).filter((c) => !cluesPlaced.includes(c.id));
       const c = open[Math.floor(Math.random() * open.length)];
-      if (c) seed.clue = { id: c.id, mystery: c.mystery, says: c.says, carrier: CARRIERS[Math.floor(Math.random() * CARRIERS.length)] };
+      if (c) seed.clue = c;
     }
   }
   if (p.callback) {
@@ -394,7 +394,6 @@ function planView(adv, act) {
         ["Held by", plan.holders.map((f) => w.factions[f]?.name ?? f).join(", ")],
         ["Live mysteries", (plan.mysteries ?? []).join(", ")],
         ["Busy with", h("ul", { class: "plain" }, plan.busy.map((b) => h("li", {}, h("b", {}, b.kind), ": ", b.line)))],
-        ["Locals", h("ul", { class: "plain" }, (plan.locals ?? []).map((x) => h("li", {}, x)))],
         ["Settings", plan.settings ? h("div", {}, ...["quiet", "oddity", "campfire"].map((k) => h("p", { class: "small" }, h("b", {}, k), ": ", (plan.settings[k] ?? []).join(" · ")))) : null],
         ["News", plan.news?.length ? h("ul", { class: "plain" }, plan.news.map((x) => h("li", {}, x))) : null],
         ["Peak", h("div", {}, h("p", {}, h("b", {}, plan.peak.who)), kv([["Why them", plan.peak.why], ["Wants", plan.peak.wants], ["Turns", plan.peak.turns], ["Where", plan.peak.where]]))],
@@ -536,6 +535,12 @@ function roomView(run) {
 
 const stage = (title, body, chip) => h("div", { class: "stage" }, h("div", { class: "stage-head" }, h("h3", {}, title), chip), body);
 
+// What a page says, for the designer: the sketch never sees it, and the party reads it at camp (D168).
+function pageText(run, id) {
+  const adv = S.adventures.find((a) => a.id === run.adventure) ?? (run.adventure === "gravenhold" ? GRAVENHOLD() : null);
+  return adv?.world.mysteries?.flatMap((m) => m.journal?.pages ?? []).find((p) => p.id === id)?.text ?? null;
+}
+
 function seedView(run) {
   const seed = run.seed;
   const pinned = run.pinned ?? {};
@@ -546,11 +551,10 @@ function seedView(run) {
       ["Shape", seed.shape && mark("shape", seed.shape)],
       ["Centrepiece", seed.centrepiece && mark("centrepiece", seed.centrepiece)],
       ["Busy with", seed.busy && mark("busy", seed.busyLine ? `${seed.busy}: ${seed.busyLine}` : seed.busy)],
-      ["Prize", seed.clue ? mark("prize", h("span", {}, "a clue, as ", h("b", {}, seed.clue.carrier), `: "${seed.clue.says}"`)) : seed.prize && mark("prize", seed.prize)],
+      ["Prize", seed.clue ? mark("prize", h("span", {}, "a journal page by ", h("b", {}, seed.clue.author), pageText(run, seed.clue.id) ? `: "${pageText(run, seed.clue.id)}"` : "")) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],
       ["A sign of what's coming", seed.hint],
       ["News", seed.news],
-      ["A local", seed.local],
       ["Setting", seed.setting],
       ["Her story", seed.herStory === false ? "not this time (shown earlier in the act)" : seed.herStory ? "this room carries it" : null],
       ["Whose place", seed.factions && mark("factions", seed.factions.join(", "))],

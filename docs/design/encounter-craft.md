@@ -145,7 +145,7 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 **Things**
 - **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
 - **Two ways to hold together:** a place hard at its own work (the winery), or one big thing in a space (the watchtower).
-- **Bold, visible and a little pulpy** beats subtle and hidden. Detail counts by what players can do with it.
+- **Bold, visible and a little pulpy** beats subtle and hidden, **but one strange thing a room, at most** (D168). Everything else is what you'd expect in such a place, so the strange thing stands out. Stacked quirks (an odd local, an odd clue-giver, an odd premise) read as gonzo. Detail counts by what players can do with it.
 - **People from outside:** what they're doing, what state they're in, and where their attention is. Someone who watches everything at once leaves nothing to play with; say plainly who's busy, who's arguing, who only looks up at a shout. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
 - **Everything cuts both ways,** and is in a state that can tip: asleep, caged, rotten, sinking.
 - **Many uses, not one.** Plain physical words suggest many; a hidden special property (a knife that cuts silk silently) is an answer key.
@@ -169,7 +169,7 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 **The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163).
 
 **Lore, clues and edges** (D164)
-- **Clues are rewards,** like gold: somewhere the party has to reach, missable, and they say what they say outright, the way a journal page or a mural would, cut off before the end. Never a detail to notice.
+- **Clues are journal pages,** rewards like gold: somewhere the party has to reach, missable, carried off and read at camp (D168). Each mystery's journal is written whole by someone in the world and torn into pages, with what the truth needs spread across them. Nobody in a room shouts lore.
 - **A mystery is never confirmed.** Its truth quietly makes something more likely to work in one place later (the edge, a hidden fact in that packet); a player who pieced it together might use it, a lucky one might stumble on it, and nobody at the table ever says so.
 - **Allies are people, not a faction score.** Someone the party helped may turn up again in an encounter or an oddity and vouch for them, or not.
 
