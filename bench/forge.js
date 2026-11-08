@@ -314,16 +314,8 @@ function seedWith(adv, r) {
   const p = pinsFor(adv, r);
   for (const k of ["tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
   // On the bench a brief comes first (D166): an unpinned busy-ness gives way to it.
-  if (r.brief.trim() && !p.busy) {
-    delete seed.busy;
-    delete seed.busyLine;
-  }
-  if (p.busy) {
-    seed.busy = p.busy;
-    const line = camp.plan?.busy?.find((b) => b.kind === p.busy)?.line;
-    if (line) seed.busyLine = line;
-    else delete seed.busyLine;
-  }
+  if (r.brief.trim() && !p.busy) delete seed.busy;
+  if (p.busy) seed.busy = p.busy;
   if (p.prize) {
     seed.prize = p.prize;
     if (p.prize !== "a journal page") delete seed.clue;
@@ -361,7 +353,8 @@ async function beginActHere(adv, act) {
     earlier.push({ act: a, question: pl?.question ?? null, peak: pl?.peak?.who ?? null, state: pl?.state ?? null, rooms, log: [] });
   }
   try {
-    const plan = await actCall(io, env, { world: adv.world, act, earlier, peaks });
+    const party = partyFor({ name: "P", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world);
+    const plan = await actCall(io, env, { world: adv.world, act, earlier, peaks, party });
     S.plans[`${adv.id}:${act}`] = { ...plan, at: Date.now(), calls: slim(S.calls[id]) };
     persist("acts", { id: `${adv.id}-${act}-${id}`, at: Date.now(), adventure: adv.id, act, plan, calls: S.calls[id] });
   } catch (e) {
@@ -388,12 +381,13 @@ function planView(adv, act) {
     plan ? [
       kv([
         ["Goal", plan.goal],
+        ["Setting", plan.setting],
         ["The act's question", plan.question],
         ["Its aim", plan.aim],
         ["What has changed", plan.state],
         ["Held by", plan.holders.map((f) => w.factions[f]?.name ?? f).join(", ")],
         ["Live mysteries", (plan.mysteries ?? []).join(", ")],
-        ["Busy with", h("ul", { class: "plain" }, plan.busy.map((b) => h("li", {}, h("b", {}, b.kind), ": ", b.line)))],
+        ["Companion threads", plan.threads?.length ? h("ul", { class: "plain" }, plan.threads.map((t) => h("li", {}, h("b", {}, authored[adv.companions[t.slot === "companion_a" ? 0 : 1]]?.name ?? t.slot), ": ", t.beat))) : "none this act"],
         ["Settings", plan.settings ? h("div", {}, ...["quiet", "oddity", "campfire"].map((k) => h("p", { class: "small" }, h("b", {}, k), ": ", (plan.settings[k] ?? []).join(" · ")))) : null],
         ["News", plan.news?.length ? h("ul", { class: "plain" }, plan.news.map((x) => h("li", {}, x))) : null],
         ["Peak", h("div", {}, h("p", {}, h("b", {}, plan.peak.who)), kv([["Why them", plan.peak.why], ["Wants", plan.peak.wants], ["Turns", plan.peak.turns], ["Where", plan.peak.where]]))],
@@ -427,7 +421,7 @@ async function runRoom(run, adv) {
   const party = partyFor({ name: "The player", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world);
   try {
     // The act's earlier rooms on this bench, by premise, as the campaign would pass them (D162).
-    const before = S.rooms.filter((x) => x.id !== run.id && x.adventure === run.adventure && x.act === run.act && x.at < run.at && x.stages?.sketch?.premise).map((x) => x.stages.sketch.premise).slice(0, 6);
+    const before = S.rooms.filter((x) => x.id !== run.id && x.adventure === run.adventure && x.act === run.act && x.at < run.at && x.stages?.sketch?.premise).map((x) => `${x.kind}: ${x.stages.sketch.premise}`).slice(0, 8).reverse();
     await designRoom(io, env, { seed: run.seed, world: adv.world, party, handoff: run.arrives ? { stub: run.arrives, conditions: [] } : null, log: [], brief: run.brief || null, sketch: run.stages.sketch, earlier: before, plan: planOf(adv, run.act) });
   } catch (e) {
     run.error = errorText(e);
@@ -550,7 +544,9 @@ function seedView(run) {
       ["Tone", mark("tone", seed.tone)],
       ["Shape", seed.shape && mark("shape", seed.shape)],
       ["Centrepiece", seed.centrepiece && mark("centrepiece", seed.centrepiece)],
-      ["Busy with", seed.busy && mark("busy", seed.busyLine ? `${seed.busy}: ${seed.busyLine}` : seed.busy)],
+      ["Busy with", seed.busy && mark("busy", seed.busy)],
+      ["Built around", seed.core],
+      ["X-factor", seed.xFactor],
       ["Prize", seed.clue ? mark("prize", h("span", {}, "a journal page by ", h("b", {}, seed.clue.author), pageText(run, seed.clue.id) ? `: "${pageText(run, seed.clue.id)}"` : "")) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],
       ["A sign of what's coming", seed.hint],

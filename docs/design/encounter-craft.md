@@ -145,7 +145,8 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 **Things**
 - **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
 - **Two ways to hold together:** a place hard at its own work (the winery), or one big thing in a space (the watchtower).
-- **Bold, visible and a little pulpy** beats subtle and hidden, **but one strange thing a room, at most** (D168). Everything else is what you'd expect in such a place, so the strange thing stands out. Stacked quirks (an odd local, an odd clue-giver, an odd premise) read as gonzo. Detail counts by what players can do with it.
+- **Bold, visible and a little pulpy** beats subtle and hidden. Detail counts by what players can do with it. Stacked quirks (an odd local, an odd clue-giver, an odd premise) read as gonzo; the act gives rooms direction, never characters or curiosities to fit in (D169).
+- **Worn-out props are retired** (D169): hanging cages, ledgers and counting turned up in nearly every generated room and world, so every seed lists them as never to use, and a sketch that does goes back once.
 - **People from outside:** what they're doing, what state they're in, and where their attention is. Someone who watches everything at once leaves nothing to play with; say plainly who's busy, who's arguing, who only looks up at a shout. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
 - **Everything cuts both ways,** and is in a state that can tip: asleep, caged, rotten, sinking.
 - **Many uses, not one.** Plain physical words suggest many; a hidden special property (a knife that cuts silk silently) is an answer key.

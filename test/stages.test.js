@@ -23,28 +23,30 @@ const world = worldOf();
 const party = partyFor({ name: "P", class: "rogue" }, ["fern", "nadia"], world);
 const plan = {
   goal: "Cross the Warrens.", question: "Can they cross the Warrens before the Court learns they're loose?", aim: "Learn the way down, and who holds it.",
+  setting: "The old dwarven working levels, run by four powers who hate each other.",
   state: "The forges have doubled their shifts since the escape.", holders: ["undead"],
-  busy: [{ kind: "a feast or celebration", line: "the dead court's endless banquet" }, { kind: "hard labour", line: "thralls at the forges" }, { kind: "a rite or worship", line: "mourning bells for the Queen" }, { kind: "trade or a market", line: "the ash market" }],
+  threads: [{ slot: "companion_b", beat: "the dead court keeps a record of her people's hearth" }],
   settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
   news: ["word that the goblins blame the Court for the escape"], mysteries: ["court_of_debts"], returning: [],
   peak: { who: "Lord Chamberlain Vesk", why: "his court holds the only stair down", wants: "a perfect banquet", turns: "courtesy, then knights, then the bells", where: "the banquet hall" },
   hints: ["black invitations nailed to doors", "a skeletal herald calling names", "candles lit for guests who never come"],
 };
 
-test("the act's plan reaches its rooms: busy lines in its words, owners from its holders, never repeating (D164)", () => {
+test("the act's holders own its rooms; busy-ness is a generic kind, never repeating; the room before a campfire has one way on (D164, D169)", async () => {
   let camp = { ...newCampaign({ seed: 5, act: 2 }), plan };
   const kinds = [];
   for (let i = 0; i < 4; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter"]);
     assert.deepEqual(seed.factions, ["undead"]);
-    assert.ok(plan.busy.some((b) => b.kind === seed.busy && b.line === seed.busyLine));
+    assert.ok(BUSY.includes(seed.busy) && !seed.busyLine);
     kinds.push(seed.busy);
     camp = next;
   }
   assert.equal(new Set(kinds).size, 4);
-  const bare = seedFor(newCampaign({ seed: 5 }), world, "encounter", []).seed;
-  assert.ok(BUSY.includes(bare.busy) && !bare.busyLine);
-  assert.ok(world.regions[0].holders.includes(bare.factions[0]));
+  const { seedRoom } = await import("../src/game/generate.js");
+  let c = newCampaign({ seed: 2 });
+  c = { ...c, way: { ...c.way, left: 0, here: "encounter" } };
+  assert.equal(seedRoom(c, world).seed.exits.length, 1, "one way on, to the campfire");
 });
 
 test("a journal page is a prize, placed once in a campaign, by its writer, never its words; at most one extra a room, never two rooms running (D164, D168)", () => {
@@ -83,13 +85,13 @@ test("an edge reaches only the packets it applies in, as a hidden fact, and neve
   assert.doesNotMatch(input, /more likely to work|seal_of_fire|turn fire/);
 });
 
-test("the room never sees abilities, sees the heart only at a climax, and a climax stands its act's peak at the centre (D164)", () => {
+test("the room never sees abilities, sees the act's setting but not its state, and a climax stands its act's peak at the centre (D164, D169)", () => {
   const enc = seedFor({ ...newCampaign({ act: 2 }), plan }, world, "encounter", ["encounter"]).seed;
   const input = sketchInput(env, { seed: enc, world, party, plan }, sketchSchema);
   assert.doesNotMatch(input, /"abilities"/);
-  assert.doesNotMatch(input, /"the_heart"|Every faction in the fortress wants it/);
-  assert.match(input, /"question":"Can they cross the Warrens/);
-  assert.doesNotMatch(input, /doubled their shifts|banquet hall/, "no picture of the region, no state, no peak in an ordinary room");
+  assert.match(input, /"setting":"The old dwarven working levels[\s\S]*"question":"Can they cross the Warrens/);
+  assert.doesNotMatch(input, /doubled their shifts|banquet hall/, "no state and no peak in an ordinary room");
+  assert.match(input, /worn_out_never_use/);
   const climax = seedFor({ ...newCampaign({ act: 2 }), plan }, world, "climax", ["sanctuary"]).seed;
   const ci = sketchInput(env, { seed: climax, world, party, plan, earlier: ["x"] }, sketchSchema);
   assert.match(ci, /## The climax\n\n```json[\s\S]*Lord Chamberlain Vesk[\s\S]*Hollow King/);
@@ -103,15 +105,13 @@ test("the act call: its input holds the job, the history and the used peaks; its
   assert.match(input, /Peaks already used[\s\S]*Snagtooth/);
   assert.deepEqual(validate(actSchema, plan), []);
   assert.deepEqual(actProblems(plan, world, 3), []);
+  assert.match(actInput(env, { world, act: 3, earlier: [], peaks: [], party }, actSchema), /## The companions[\s\S]*Worn out/);
   assert.deepEqual(tidyAct({ ...plan, mysteries: ["nonsense"] }, world, 3).mysteries, world.mysteries.map((m) => m.id), "unknown mysteries fall back to all");
   assert.deepEqual(tidyAct({ ...plan, returning: ["Snick", "Nobody"] }, world, 3, [{ name: "Snick, a goblin runt" }]).returning, ["Snick"]);
-  // Code tidies what it can instead of failing the act (D166): kinds worded loosely match the list; unknown holders go.
-  const loose = { ...plan, holders: ["pirates", "undead"], busy: [{ kind: "Hard labor", line: "a" }, { kind: "a funeral", line: "b" }, { kind: "feasting", line: "c" }, { kind: "knitting", line: "d" }, { kind: "hard labour", line: "e" }] };
-  const tidy = tidyAct(loose, world, 3);
-  assert.deepEqual(tidy.busy.map((b) => b.kind), ["hard labour", "a burial or mourning", "a feast or celebration"]);
-  assert.deepEqual(tidy.holders, ["undead"]);
+  // Code tidies what it can instead of failing the act (D166): unknown holders go, falling back to the region's.
+  const loose = { ...plan, holders: ["pirates", "undead"] };
+  assert.deepEqual(tidyAct(loose, world, 3).holders, ["undead"]);
   assert.deepEqual(tidyAct({ ...plan, holders: ["pirates"] }, world, 3).holders, world.regions[2].holders);
-  assert.ok(actProblems({ ...plan, busy: [{ kind: "knitting", line: "x" }, { kind: "sewing", line: "y" }, { kind: "baking", line: "z" }, { kind: "pottery", line: "w" }] }, world, 3).length, "nothing usable goes back");
   const io = { sample: { json: async () => loose } };
   const next = await beginAct(io, env, { camp, world });
   assert.equal(next.plan.peak.who, "Lord Chamberlain Vesk");
@@ -172,7 +172,7 @@ test("the act deals out one setting and piece of news at a time; pages come from
     const kind = ["encounter", "quiet", "oddity", "campfire"][i % 4];
     const { seed, camp: next } = seedFor(camp, world, kind, ["encounter"]);
     assert.equal(seed.local, undefined, "no locals");
-    assert.ok(seed.motifs.length <= 1);
+    assert.ok(seed.motifs.length <= 2);
     if (seed.setting) { assert.ok(plan.settings[kind].includes(seed.setting)); settings.push(seed.setting); }
     if (seed.news) news.push(seed.news);
     if (seed.clue) assert.equal(seed.clue.mystery, "court_of_debts");
@@ -201,19 +201,25 @@ test("the act deals out one setting and piece of news at a time; pages come from
   assert.doesNotMatch(pi, /put down his knife/);
 });
 
-test("no local face in a room when that face is the act's peak (D167)", () => {
+test("a faction's people in a room never include the act's peak (D167, D169)", () => {
   const peakIsFace = { ...plan, holders: ["goblins"], peak: { ...plan.peak, who: "Snagtooth the Keymaster" } };
   const { seed } = seedFor({ ...newCampaign({ act: 1 }), plan: peakIsFace }, world, "encounter", ["encounter"]);
   assert.deepEqual(seed.factions, ["goblins"]);
-  assert.doesNotMatch(sketchInput(env, { seed, world, party, plan: peakIsFace }, sketchSchema), /local_face/);
-  assert.match(sketchInput(env, { seed, world, party, plan }, sketchSchema), /local_face/);
+  assert.doesNotMatch(sketchInput(env, { seed, world, party, plan: peakIsFace }, sketchSchema), /Snagtooth/);
+  assert.match(sketchInput(env, { seed, world, party, plan }, sketchSchema), /Snagtooth/);
 });
 
-test("motifs are situations without examples; the act has no locals; a room holds one strange thing at most (D168)", async () => {
+test("motifs are situations without examples; the act has no locals or busy lines; worn-out props are refused (D168, D169)", async () => {
   const { motifs } = await import("../content/motifs.js");
+  const { sketchProblems } = await import("../src/calls/sketch.js");
   assert.ok(motifs.every((m) => !/\(|: [a-z]+, [a-z]/.test(m.pattern)), "no example lists in a motif");
-  assert.ok(!("locals" in actSchema.properties));
-  assert.match(prompts.sketch, /One strange thing a room, at most/);
-  assert.doesNotMatch(prompts.sketch, /A local,/);
+  assert.ok(!("locals" in actSchema.properties) && !("busy" in actSchema.properties));
+  assert.doesNotMatch(prompts.sketch, /One strange thing/);
   assert.match(prompts.pitch, /tear it into three to five `pages`/);
+  const note = { premise: "x", shape: "x", things: ["x"], cut: "x", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" };
+  assert.deepEqual(sketchProblems(note), []);
+  assert.ok(sketchProblems({ ...note, things: ["A hanging cage over the pit."] }).length);
+  assert.ok(sketchProblems({ ...note, notes: "The clerk keeps a ledger." }).length);
+  assert.ok(sketchProblems({ ...note, pressure: "The counting goes on." }).length);
+  assert.deepEqual(sketchProblems({ ...note, things: ["A counter of polished brass", "a cage of bones on the floor"] }), [], "not every count or cage");
 });

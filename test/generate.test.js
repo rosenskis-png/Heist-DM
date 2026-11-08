@@ -33,7 +33,7 @@ test("the seed asks a different question each time, suits the kind, and avoids t
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
     assert.ok(SHAPES.includes(seed.shape) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length === 1);
     assert.ok(BUSY.includes(seed.busy) && !(camp.usedBusy ?? []).includes(seed.busy), "what the place is busy with doesn't repeat within an act");
-    assert.ok(seed.motifs.length === 1 && seed.motifs.every((m) => m.kinds.includes("encounter")));
+    assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
     camp = next;
   }
@@ -119,7 +119,7 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
   const s = load({ packet: room.packet, party });
   assert.equal(s.tick, 0);
   assert.ok(room.camp.used.length > 0);
-  assert.deepEqual(room.camp.premises, [sketch.premise], "the campaign keeps the premise for the act's next sketches");
+  assert.deepEqual(room.camp.premises, [`encounter: ${sketch.premise}`], "the campaign keeps each room's kind and premise for the act's next sketches");
 });
 
 test("the designer's brief reaches the sketch only when given, and never encode (D154)", () => {
@@ -214,10 +214,10 @@ test("the worked notes are prep notes the sketch schema accepts, and the sketch 
 test("the act's earlier premises reach the next sketch, and the campaign keeps each new one (D162)", async () => {
   const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
   const input = sketchInput(env, { seed, world, party, earlier: ["A goblin oil works round a boiling cauldron."] }, sketchSchema);
-  assert.match(input, /Rooms the party has already passed through[\s\S]*goblin oil works/);
+  assert.match(input, /The way so far this act[\s\S]*goblin oil works/);
   assert.match(input, /"busy_with":/);
   assert.match(input, /"whose_place_it_is":/);
-  assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## Rooms the party has already/);
+  assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## The way so far/);
 });
 
 test("shape and centrepiece are fixed, drawn from code's lists without repeats in an act; the climax alone gets its block; the prompt holds no images (D163)", () => {

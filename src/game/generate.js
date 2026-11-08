@@ -20,8 +20,8 @@ export function edgesFor(world, seed) {
 // The act call when an act begins (D164): from the world and the campaign's history (each earlier act's peak, rooms and
 // log), what this act holds. After Act 5, `intent` is what the player says they want to do. Returns the campaign with
 // the act's plan.
-export async function beginAct(io, env, { camp, world, intent = null }) {
-  const plan = await actCall(io, env, { world, act: camp.act, earlier: camp.history ?? [], peaks: camp.peaks ?? [], memory: camp.memory ?? [], intent });
+export async function beginAct(io, env, { camp, world, party = [], intent = null }) {
+  const plan = await actCall(io, env, { world, act: camp.act, earlier: camp.history ?? [], peaks: camp.peaks ?? [], memory: camp.memory ?? [], party, intent });
   return actBegun(camp, plan);
 }
 
@@ -33,7 +33,9 @@ export const EXITS = { encounter: 2, climax: 1, quiet: 1, oddity: 2, merchant: 1
 export function seedRoom(camp, world) {
   const kind = camp.way.here;
   const drawn = drawExits(camp, EXITS[kind] ?? 1);
-  return seedFor(drawn.camp, world, kind, drawn.kinds);
+  // The room before a campfire, the climax or the sanctuary has one way on, to it (D169).
+  const kinds = drawn.kinds.every((k) => ["campfire", "climax", "sanctuary"].includes(k)) ? drawn.kinds.slice(0, 1) : drawn.kinds;
+  return seedFor(drawn.camp, world, kind, kinds);
 }
 
 // The AI half, from a seed: sketch, encode, layout. `c` holds the seed, world, party, handoff and log (and, on the bench
@@ -57,5 +59,5 @@ export async function generateRoom(io, env, { camp, world, party, handoff = null
   const { seed, camp: next } = seedRoom(camp, world);
   const { packet, mapped, sketch } = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null });
   // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162).
-  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), sketch.premise] } };
+  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`] } };
 }

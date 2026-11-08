@@ -8,9 +8,11 @@ const pool = (min) => list(r("text"), min);
 
 export const actSchema = withDefs({
   $id: "act",
-  ...obj(["goal", "question", "aim", "state", "holders", "busy", "settings", "news", "mysteries", "returning", "peak", "hints"], {
+  ...obj(["goal", "setting", "question", "aim", "state", "holders", "threads", "settings", "news", "mysteries", "returning", "peak", "hints"], {
     // The act's job, in this world's terms. The climax reads it.
     goal: r("text"),
+    // The region in general, in a sentence or two: what this part of the place is and who's in it. Every room reads it.
+    setting: r("text"),
     // What the act is about, as a question the act answers. Every room reads it.
     question: r("text"),
     // What the party should come away knowing or holding by the act's end. Every room reads it.
@@ -19,8 +21,9 @@ export const actSchema = withDefs({
     state: r("text"),
     // The ids of the factions that hold the region now; code draws each room's owner from them.
     holders: list(r("id"), 1),
+    // What should come up for each companion this act, if anything: her room reads it.
+    threads: list(obj(["slot", "beat"], { slot: { enum: ["companion_a", "companion_b"] }, beat: r("text") })),
     // Pools, one item to one room, each used once in the act.
-    busy: list(obj(["kind", "line"], { kind: r("text"), line: r("text") }), 4),
     settings: obj(["quiet", "oddity", "campfire"], { quiet: pool(2), oddity: pool(2), campfire: pool(2) }),
     news: pool(0),
     // The ids of the one or two mysteries whose clues this act's rooms hold.

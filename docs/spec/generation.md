@@ -21,7 +21,7 @@ Code: `src/game/generate.js` (`generateRoom`: `seedRoom`, the code steps, then `
 
 | Step | Who | Does |
 |---|---|---|
-| **Exits** | Code | Draws the kinds of room this room's exits lead to (D144) |
+| **Exits** | Code | Draws the kinds of room this room's exits lead to (D144); the room before a campfire, the climax or the sanctuary has one way on, to it (D169) |
 | **Seed** | Code | Picks the question (`src/campaign/seed.js`, below) |
 | **Sketch** | `sketch` call | Writes the whole room as a DM's prep note, premise first (`docs/spec/calls/sketch.md`) |
 | **Encode** | `encode` call | Turns the sketch into packet data without geometry, checked by the engine once laid out (`docs/spec/calls/encode.md`) |
@@ -35,13 +35,13 @@ What the seed fixes:
 - **The kind** comes from the way (D144); the exits' kinds are drawn with it.
 - **Whose room it is** (D158): one companion's slot or no one's, no one's about half the time, never the same companion twice running; the climax is both companions'. A companion's thing (the motif) is drawn only when the room is someone's.
 - **The tone,** from very stressed about time to a fantasy playground, leaning toward stress when the leg's strain is high.
-- **What the place is busy with** (D162): a kind from the act's busy lines, with its line in the act's words, never repeated within an act (without a plan, a kind from `BUSY`).
+- **What the place is busy with** (D162, D169): a generic kind from `BUSY`, never repeated within an act; the sketch fits it to the world.
 - **Whose place it is,** for an encounter, the climax or an oddity: one of the factions that hold the region now, by the act's plan (or the region's holders).
 - **The shape and its centrepiece** (D163), from wide lists, neither repeated within an act.
 - **The prize,** for an encounter, an oddity or a quiet room (D164, D168): none about half the time, gold, a relic or a journal page. A page is one the campaign hasn't placed, from the act's live mysteries; the sketch is told only who wrote it, never its words, which the party reads at camp.
 - **At most one extra** (D164), never in two rooms running: **someone from before**, from the verdicts' memory, only in an encounter or an oddity, at most once an act each; or **a sign of the act's peak**, from its hints, at most one a leg.
 
-Its leaning is **one motif**, a situation's shape with no examples, not repeated in the act where it can be helped (D168). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
+Its leanings (D163, D169): **one or two motifs** for an encounter or the climax, one for any other room, each a situation's shape with no examples (D168); for an encounter or the climax, **what it's built around** and the **x-factor** (an oddity gets an x-factor too). **Worn out:** every seed lists the props rooms must never build on (`content/stale.js`: hanging cages, ledgers and counting), and a sketch that uses one goes back once (D169). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
 
 The campaign records what the act has used (motifs, busy-withs, shapes, centrepieces, premises, signs, people brought back) and resets them when an act ends; the clues placed and the memory last the campaign.
 
@@ -49,8 +49,8 @@ The campaign records what the act has used (motifs, busy-withs, shapes, centrepi
 | Tier | Holds |
 |---|---|
 | **Must honour** | How the party arrives (the exit's stub, what it carries) and the last rooms' log lines |
-| **Background** | The place in brief, the region's name, the act's question and aim, and the faction whose place it is, with its rules and local face (none when that face is the act's peak). No picture of the region, and never the heart or the tensions, except at a climax |
-| **Seed** | Everything above, with its prize, any extra, and the act's earlier premises |
+| **Background** | As in D163 (D169): the world's place, life, heart and tensions; the act's setting in general, its question and aim; and the faction whose place it is, with its rules, goal and the people of its ladder below the act's peak. Nothing particular from the act |
+| **Seed** | Everything above, with its prize, any extra, and **the way so far**: each room already passed this act, in order, by kind and premise, so this one follows on from them and is a different kind of place |
 | **Climax** | The act's goal, what has changed, and its peak, the heart, and the act's rooms so far |
 
 Plus the party: who each is, never their abilities, so no room is built around one; each companion's values; her story's needs and her quest only when the room is hers (D158). No example rooms (D161), and never an AI summary of the act. On the Forge, a designer's brief comes first where it and the seed disagree, and an unpinned busy-ness gives way to it (D166).

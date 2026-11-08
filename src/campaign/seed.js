@@ -5,6 +5,9 @@ import { motifs } from "../../content/motifs.js";
 import { d100 } from "../engine/rng.js";
 
 export const TONES = ["very stressed about time", "tense", "even", "light", "a fantasy playground"];
+// The players' main way of engaging, and what the room is built around: leanings the sketch uses or leaves (D163, D169).
+export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
+export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
 // What the place is busy with when the party arrives (D162). The act call writes what each kind looks like in this
 // region (D164); code draws a kind per room, never repeating within an act.
 export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship", "a punishment or execution", "trade or a market", "getting ready for a raid", "sleep or the night watch", "sickness or a plague", "ruin and decay", "beasts or monsters kept or loose", "a burial or mourning", "a contest or a game", "building or repair", "training or drill"];
@@ -54,9 +57,13 @@ export function seedFor(camp, world, kind, exits = []) {
   const room = (camp.roomNo ?? 0) + 1;
   const seed = { kind, act: camp.act, exits };
   seed.spotlight = spotlightFor(rng, kind, camp.spotlight ?? null);
-  // One motif, a situation's shape, as a leaning (D164, D168), not repeated in the act where it can be helped.
+  // One or two motifs for an encounter or the climax, one for any other room: situations' shapes, as leanings (D163,
+  // D169), not repeated in the act where it can be helped.
   const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
-  seed.motifs = fit.length ? [pickFrom(rng, fresh(fit, used, (m) => m.id))] : [];
+  const pool = [...fresh(fit, used, (m) => m.id)];
+  const n = Math.min(CHALLENGED.includes(kind) ? 1 + roll(rng, 2) : 1, pool.length);
+  seed.motifs = [];
+  while (seed.motifs.length < n) seed.motifs.push(pool.splice(roll(rng, pool.length), 1)[0]);
   // A calm room's setting, from the act's: a different one from any used earlier in the act (D167).
   const settingsUsed = camp.settingsUsed ?? [];
   if (SET_KINDS.includes(kind) && plan?.settings?.[kind]?.length) seed.setting = pickFrom(rng, fresh(plan.settings[kind], settingsUsed));
@@ -68,11 +75,11 @@ export function seedFor(camp, world, kind, exits = []) {
   const legs = camp.way.legs ?? 1;
   const late = legs > 1 ? Math.round((((camp.way.leg ?? 1) - 1) / (legs - 1)) * 1.5) : 0;
   seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean - late))];
-  // What it's busy with: a kind the act's region has, in the act's words when there is a plan.
+  // What it's busy with: a kind, never repeated in the act; the sketch fits it to the world (D162, D169).
   const usedBusy = camp.usedBusy ?? [];
-  const busy = plan?.busy?.length ? pickFrom(rng, fresh(plan.busy, usedBusy, (b) => b.kind)) : { kind: pickFrom(rng, fresh(BUSY, usedBusy)) };
-  seed.busy = busy.kind;
-  if (busy.line) seed.busyLine = busy.line;
+  seed.busy = pickFrom(rng, fresh(BUSY, usedBusy));
+  if (CHALLENGED.includes(kind) || kind === "oddity") seed.xFactor = pickFrom(rng, XFACTORS);
+  if (CHALLENGED.includes(kind)) seed.core = pickFrom(rng, CORES);
   const usedShapes = camp.usedShapes ?? [];
   const usedCentres = camp.usedCentres ?? [];
   seed.shape = pickFrom(rng, fresh(SHAPES, usedShapes));
