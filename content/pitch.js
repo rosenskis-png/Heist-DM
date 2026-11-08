@@ -19,6 +19,6 @@ export const SECRETS = [
   "something the player has carried for years without knowing what it is",
   "a memory of the player's that isn't true",
   "a debt or a promise the player owes to someone in the place",
-  "a tie of blood or birth between the player and the place",
-  "something the heart wants from the player, and why",
+  "someone the player loves, held or working somewhere in the place",
+  "a rival or enemy from the player's past who has risen to power here",
 ];

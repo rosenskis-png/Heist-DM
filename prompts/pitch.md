@@ -26,11 +26,11 @@ For each faction: `name`, `short` (a few words), `desc`, `rules` (how they behav
 ## Mysteries
 Two to four mysteries: truths about the place that the game never confirms. A player who pieces one together might gain an edge; one who ignores them all can still finish. For each:
 - `id`, and the `truth`, in a sentence: lore worth knowing about this place, each mystery about something different. Never about the rings or the player's secrets: those are revealed as story, not left as mysteries.
-- The `edge`: one place later in the adventure where knowing the truth quietly helps, and what becomes more likely to work there. `act` is when it starts to matter (2 to 5); `at` is "climax" for that act's climax, or a faction's id for that faction's rooms from then on; `text` says what's more likely to work, never an automatic win. Spread the edges across different acts.
+- The `edge`: one place later in the adventure where knowing the truth quietly helps, and what becomes more likely to work there. `act` is when it starts to matter (2 to 5); `at` is "climax" for that act's climax, or a faction's id for that faction's rooms from then on; `text` says what's more likely to work, never an automatic win, and never something that depends on timing, counting or balance. Spread the edges across different acts.
 - Three to five `clues`, each with an `id` and what it `says`: the words or the picture itself, part of the truth said nearly outright and cut off before it says everything. Never what it's written on or who says it (the room that holds it decides that), and never a small detail to notice: each clue tells something plainly, and only all of them together tell the whole truth.
 
 ## Roles
-Companions' stories name the place through roles, which you fill with short noun phrases that read naturally in a sentence: `place` (its name), `kind` (what sort of place: fortress, manor, abbey), `builders` (who built it long ago) and `builders_adj` (their adjective), `rulers` (who holds it now), `commander` (their leader), `master` (who runs the prison), `working` (its working levels), `depths` (its old deep parts), and `sanctum` (its seat of power). Use "the" where the phrase needs it.
+Companions' stories name the place through roles, which you fill with short noun phrases that read naturally in a sentence: `place` (its name), `kind` (what sort of place: fortress, manor, abbey), `builders` (who built it long ago) and `builders_adj` (their adjective), `rulers` (who holds it now), `commander` (their leader), `master` (who runs the prison), `working` (its working levels), `depths` (its old deep parts), and `sanctum` (its seat of power). Each is a short phrase that reads naturally in a sentence ("the warden", "the occupiers"), never a person's name. Use "the" where the phrase needs it.
 
 ## Features the companions need
 The companions in this party each have a story that needs the place to hold something, listed with what Gravenhold made of it. Put every one in `features` under the same key, made to fit your world, and let them matter.
@@ -40,10 +40,10 @@ The companions in this party each have a story that needs the place to hold some
 - `life`: what the place is busy with, whatever the party does: several different things, not one.
 - `tensions`: two or three lines on what the factions want from each other.
 - `playerSecrets`: two secrets, one of each kind the seed names, each tying the player to the place, revealed over the acts. They needn't touch the heart. The player's gender isn't known: always write them as "they".
-- `invariants`: world facts that never change, each optionally gated to the act it first applies in. One or two is plenty.
+- `invariants`: world facts that never change, each optionally gated to the act it first applies in. One or two is plenty. Never one that states a mystery's truth or gives its edge away.
 - `id`: a short lowercase id for the world.
 
-When Gravenhold is shown, it's a worked example of the shape and the level of detail, not of the content: its heart and secrets answer a different seed.
+When Gravenhold is shown, it's a worked example of the shape and the level of detail, not of the content or the wording: its heart and secrets answer a different seed.
 
 ## The pitch
 A few sentences in the second person that sell this adventure to the player: where they wake, what the place is, what it's busy with, and what they'll have to get through. Don't spoil the heart's secret, the mysteries or the player's secrets.

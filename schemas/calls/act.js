@@ -2,7 +2,6 @@
 // docs/spec/calls/act.md. Generator-only: no play call sees it, only the rooms built from it.
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";
-import { BUSY } from "../../src/campaign/seed.js";
 
 export const actSchema = withDefs({
   $id: "act",
@@ -13,8 +12,9 @@ export const actSchema = withDefs({
     region: r("text"),
     // The ids of the factions that hold the region now; code draws each room's owner from them.
     holders: list(r("id"), 1),
-    // What the region is busy with, one line per kind that happens here; code draws a kind per room, never repeating.
-    busy: list(obj(["kind", "line"], { kind: { enum: BUSY }, line: r("text") }), 4),
+    // What the region is busy with, one line per kind that happens here, the kind named as in the seed's list; code
+    // matches each to that list (`tidyAct`) and draws one per room, never repeating.
+    busy: list(obj(["kind", "line"], { kind: r("text"), line: r("text") }), 4),
     // Who or what stands at the act's climax.
     peak: obj(["who", "why", "wants", "turns", "where"], {
       who: r("text"),

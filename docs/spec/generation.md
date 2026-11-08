@@ -53,7 +53,7 @@ The campaign records what the act has used (motifs, busy-withs, shapes, centrepi
 | **Seed** | Everything above, with its prize, any extra, and the act's earlier premises |
 | **Climax** | The act's goal and peak, the heart, and the act's rooms so far |
 
-Plus the party: who each is, never their abilities, so no room is built around one; each companion's values; her story's needs and her quest only when the room is hers (D158). No example rooms (D161), and never an AI summary of the act.
+Plus the party: who each is, never their abilities, so no room is built around one; each companion's values; her story's needs and her quest only when the room is hers (D158). No example rooms (D161), and never an AI summary of the act. On the Forge, a designer's brief comes first where it and the seed disagree, and an unpinned busy-ness gives way to it (D166).
 
 ## What every packet must have
 Beyond `docs/spec/packet.md`'s consistency checks:

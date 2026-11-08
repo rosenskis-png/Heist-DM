@@ -6,6 +6,7 @@ import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
 import { worldOf } from "./campaign/world.js";
 import { setting } from "../content/setting.js";
+import { BUSY } from "./campaign/seed.js";
 import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
@@ -649,7 +650,7 @@ export function pitchInput(env, c, schema) {
     block("Output format", shapeText(schema)),
     block("The companions in this party", c.companions.map((m) => ({ name: m.name, role: m.role, blurb: m.blurb }))),
     needs.length ? block("Features their stories need", needs) : null,
-    c.noExample ? null : block("Worked example: Gravenhold", example),
+    c.withExample ? block("Worked example: Gravenhold", example) : null,
     c.seed ? block("The question: this world's seed", { the_heart_is: c.seed.heart, the_player_secrets_are: c.seed.secrets }) : null,
     c.rejected?.length ? block("Pitches the player turned down (write something different)", c.rejected) : null,
     block("The player's vibe", c.vibe || "No vibe given: surprise them."),
@@ -742,7 +743,7 @@ export function sketchInput(env, c, schema) {
     c.earlier?.length ? block("Rooms the party has already passed through this act: this one is somewhere different", c.earlier) : null,
     c.seed.kind === "climax" ? block("The climax", climaxText(c)) : null,
     block("The world", designWorld(c)),
-    c.brief ? block("The designer's brief: what this room should hold (fit it to the seed)", c.brief) : null,
+    c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
     "Write the room's note.",
@@ -777,6 +778,7 @@ export function actInput(env, c, schema) {
     }),
     block(`This act: Act ${c.act}`, arc ? { job: arc.job, scale: arc.scale, region: w.regions[c.act - 1] } : { job: "whatever the player wants to do next", region: "beyond the place, wherever that leads" }),
     c.earlier?.length ? block("What the party has done, act by act", c.earlier) : block("What the party has done", "Nothing yet: the adventure is just beginning."),
+    block("The kinds of busy-ness (name each busy line's kind from this list)", BUSY),
     c.peaks?.length ? block("Peaks already used (never again)", c.peaks) : null,
     c.intent ? block("What the player says they want to do now", c.intent) : null,
     "Decide the act.",

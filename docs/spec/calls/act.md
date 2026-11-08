@@ -14,7 +14,7 @@
 - **hints:** two or three visible signs of the peak, each on its own, that rooms show one at a time before the climax.
 
 ## Validated by the engine
-The schema, holders that are the world's factions, and each kind of busy-ness once (`actProblems`). Failures go back for one retry.
+The schema. Code then tidies rather than rejects (`tidyAct`, D166): each busy line's kind is matched to the seed's list even when worded loosely ("hard labor", "a funeral"), duplicates and kinds that match nothing are dropped, and holders that aren't the world's factions are dropped (the region's holders if none are left). Only an act with fewer than two usable busy lines goes back for one retry (`actProblems`). The input lists the kinds to name.
 
 ## Where it goes
 The campaign keeps it as `camp.plan` and the peak in `camp.peaks`, never chosen again (`actBegun` in `src/campaign/run.js`; `beginAct` in `src/game/generate.js`). Each room's seed draws from it, and a climax's sketch stands its peak at the centre (`docs/spec/generation.md`). When the act ends, its peak, premises and log lines go into `camp.history` for the next act call.

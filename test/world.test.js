@@ -78,7 +78,7 @@ test("the pitch's world has Gravenhold's shape, and the check sends back one tha
   const sent = [];
   const io = { sample: { json: async (input) => (sent.push(input), outs.shift()) } };
   const prompts = Object.fromEntries(readdirSync(new URL("../prompts/", import.meta.url)).map((f) => [f.replace(".md", ""), readFileSync(new URL(`../prompts/${f}`, import.meta.url), "utf8")]));
-  const out = await pitchCall(io, { prompts }, { companions: needy, vibe: "a gothic masquerade", rejected: [] });
+  const out = await pitchCall(io, { prompts }, { companions: needy, vibe: "a gothic masquerade", rejected: [], withExample: true });
   assert.equal(out.world.id, "chateau_noir");
   assert.equal(sent.length, 2, "the world missing a feature went back once");
   assert.ok(sent[0].includes("a gothic masquerade") && sent[0].includes("Worked example: Gravenhold"));

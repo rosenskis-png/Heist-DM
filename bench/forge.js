@@ -68,7 +68,7 @@ const S = {
   speed: store.get("forge.speed", "balanced"),
   adventures: store.get("forge.adventures", []),
   current: store.get("forge.current", null),
-  setupExample: store.get("forge.example", true),
+  setupExample: store.get("forge.example2", false),
   reuseSeed: false,
   room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
   // Each adventure's act plans, by "adventure:act" (D164).
@@ -86,7 +86,7 @@ const save = () => {
   store.set("forge.adventures", S.adventures.slice(0, 30));
   store.set("forge.rooms", S.rooms.slice(0, 40));
   store.set("forge.plans", S.plans);
-  store.set("forge.example", S.setupExample);
+  store.set("forge.example2", S.setupExample);
 };
 
 let env, sample, db;
@@ -134,7 +134,7 @@ async function pitch(another) {
   const seed = S.reuseSeed && last ? last.seed : pitchSeed((Math.random() * 2 ** 31) >>> 0);
   const rec = { id, at: Date.now(), vibe: vibe.trim(), companions: [a, b], cls, rejected: rejected.length, seed, seedReused: Boolean(S.reuseSeed && last), note: "" };
   try {
-    const out = await pitchCall(io, env, { companions: [authored[a], authored[b]], vibe: vibe.trim(), rejected, seed, noExample: !S.setupExample });
+    const out = await pitchCall(io, env, { companions: [authored[a], authored[b]], vibe: vibe.trim(), rejected, seed, withExample: S.setupExample });
     rec.example = S.setupExample;
     Object.assign(rec, { pitch: out.pitch, world: out.world });
     S.adventures.unshift(rec);
@@ -167,7 +167,7 @@ function adventureTab() {
       h("label", { class: "field" }, "Player class",
         h("select", { id: "pick-cls", onchange: (e) => ((S.setup.cls = e.target.value), save()) }, Object.keys(classes).map((k) => h("option", { value: k, selected: S.setup.cls === k }, classes[k].name ?? k))))),
     h("label", { class: "field" }, "The vibe", vibe),
-    h("label", { class: "small" }, h("input", { type: "checkbox", id: "use-example", checked: S.setupExample, onchange: (e) => ((S.setupExample = e.target.checked), save()) }), " Show Gravenhold as a worked example (untick to compare a world written without one)"),
+    h("label", { class: "small" }, h("input", { type: "checkbox", id: "use-example", checked: S.setupExample, onchange: (e) => ((S.setupExample = e.target.checked), save()) }), " Show Gravenhold as a worked example (off by default: worlds written without it came out more original, D166)"),
     S.adventures.some((x) => x.seed) ? h("label", { class: "small" }, h("input", { type: "checkbox", id: "reuse-seed", checked: S.reuseSeed, onchange: (e) => ((S.reuseSeed = e.target.checked), render()) }), " Reuse the last pitch's seed (the same kind of heart and secrets), to compare fairly") : null,
     h("div", { class: "row" },
       h("button", { class: "go", disabled: !canRun, onclick: () => pitch(false) }, "Pitch an adventure"),
@@ -226,7 +226,7 @@ function adventureView(adv) {
   const dm = h("section", { class: "card" },
     h("span", { class: "dm-tag" }, "DM-facing · the campaign's shape"),
     h("h2", {}, w.name),
-    h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === false ? h("span", { class: "chip near" }, "written without the example") : null, adv.seedReused ? h("span", { class: "chip" }, "seed reused from the last pitch") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
+    h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === true ? h("span", { class: "chip near" }, "written with the example") : null, adv.seedReused ? h("span", { class: "chip" }, "seed reused from the last pitch") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
     h("h3", {}, "The place"), kv([["Place", w.place], ["The way out", w.escape], ["Life", w.life]]),
     h("h3", {}, "The heart"), prose(w.heart),
     h("h3", {}, "Tensions"), h("ul", { class: "plain" }, w.tensions.map((t) => h("li", {}, t))),
@@ -309,6 +309,11 @@ function seedWith(adv, r) {
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
   for (const k of ["tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
+  // On the bench a brief comes first (D166): an unpinned busy-ness gives way to it.
+  if (r.brief.trim() && !p.busy) {
+    delete seed.busy;
+    delete seed.busyLine;
+  }
   if (p.busy) {
     seed.busy = p.busy;
     const line = camp.plan?.busy?.find((b) => b.kind === p.busy)?.line;
@@ -356,6 +361,8 @@ async function beginActHere(adv, act) {
     persist("acts", { id: `${adv.id}-${act}-${id}`, at: Date.now(), adventure: adv.id, act, plan, calls: S.calls[id] });
   } catch (e) {
     S.actError = { text: errorText(e), records: e instanceof CallFailed ? [e.record] : S.calls[id] };
+    // A failed act call is kept too, so the design thread can see why (D166).
+    persist("acts", { id: `${adv.id}-${act}-${id}`, at: Date.now(), adventure: adv.id, act, error: errorText(e), calls: e instanceof CallFailed ? [e.record] : S.calls[id] });
   }
   S.busy = null;
   save();

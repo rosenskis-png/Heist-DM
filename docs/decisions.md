@@ -168,15 +168,16 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D154** The Forge: the designer's bench for adventures and rooms: changed by D156, D159
 - **D155** The opening shows the situation in motion, and what things are for in the world: changed by D159
 - **D156** The sketch goes straight to encode, small, with no route in it: changed by D159
-- **D157** Code draws the kind of heart and the kinds of player secret: changed by D164
+- **D157** Code draws the kind of heart and the kinds of player secret: changed by D164, D166
 - **D158** The seed says whose room it is, and most rooms are no one's: current
 - **D159** Openings in paragraphs, fewer things, and rooms not shaped around one ability: current
 - **D160** The sketch is a DM's prep note, premise first, steered by form and examples rather than rules: changed by D161
 - **D161** The sketch sees no example rooms; the place must work, and nothing is a machine with a rule: current
 - **D162** Rooms vary by what's happening and whose place it is, and people's attention is said plainly: changed by D164
 - **D163** The sketch prompt holds no images; code draws the shape and its centrepiece; a climax is a showdown: changed by D164
-- **D164** Generation in three stages: the world once, the act when it begins, the room when it's entered: changed by D165
+- **D164** Generation in three stages: the world once, the act when it begins, the room when it's entered: changed by D165, D166
 - **D165** Only the seed's prize is a reward; mysteries never cover the rings or the player's secrets: current
+- **D166** Worlds are written without the example; the act call tidies what it can; no chosen-one secrets: current
 
 ---
 
@@ -1028,4 +1029,9 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-08), from the first A/B of worlds with and without the Gravenhold example. Refines D164. Encode is told the room's only prize and the check sends back any other reward: a clue the seed didn't place, or a second prize. The sketch is told only a clue says anything about the place's lore. The pitch prompt drops its illustrations of what a mystery might be about, and says mysteries are never about the rings or the player's secrets. The Forge can reuse the last pitch's seed, so a world with the example and one without answer the same question.
 **Why:** One room turned its relic into a tablet reciting lore, and encode gave it a clue id the world doesn't hold; another added a second prize the seed never drew. Both worlds wrote a "how the heart was sealed" and a "faction bound by an oath" mystery, the prompt's own two illustrations; one wrote a mystery explaining the rings, which are a story reveal. The two worlds drew different seeds, so the A/B couldn't separate the example from the seed.
 **Rules out:** Rewards the seed didn't draw; lore in a non-clue prize; a mystery about the rings or the player's secrets.
+
+### D166. Worlds are written without the example; the act call tidies what it can; no chosen-one secrets
+**Decided:** The designer's call (2026-11-08), from a fair A/B (the same vibe and seed, with and without Gravenhold as the worked example). Refines D157 and D164. The pitch no longer sees Gravenhold unless the Forge asks (`withExample`, off by default). The pitch prompt adds what the example used to teach: roles are short phrases, never names; no world fact states a mystery's truth; no edge depends on timing, counting or balance. The secret kinds "a tie of blood or birth" and "what the heart wants from the player" become "someone the player loves, held or working in the place" and "a rival or enemy from the player's past risen to power here". The act call names busy kinds as free text from a list in its input, and code matches them (`tidyAct`), drops unknown holders, and sends back only an act with fewer than two usable lines; a failed act call is kept on the Forge. On the Forge, a brief comes first where it and the seed disagree.
+**Why:** With the example, the world copied Gravenhold's sanctuaries ("a ledge… real stars", "a cooling-cistern"), escape, heartbeat fact and its oath mystery, as it had in the first test; without it, the world was more original and more cohesive (a festival every faction converges on), and its slips (named roles, a fact giving a mystery away, a timing edge) were the prompt's to close. Both worlds made the player a chosen one of the builders' blood: the seed list asked for it. "Begin act 1" failed on the Forge, and failures weren't saved; the strictest part of the act call was an exact-match list for busy kinds and holders, which a loosely worded reply failed twice. A brief for an epic duel was bent into a feast by an unpinned busy-ness.
+**Rules out:** The worked example by default; an exact-match list the model must reproduce; chosen-one secret kinds.
 

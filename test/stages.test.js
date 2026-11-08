@@ -8,7 +8,7 @@ import { newCampaign, roomEnded, endAct, actBegun } from "../src/campaign/run.js
 import { worldOf, clueTexts } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { edgesFor, beginAct } from "../src/game/generate.js";
-import { actProblems } from "../src/calls/act.js";
+import { actProblems, tidyAct } from "../src/calls/act.js";
 import { sketchInput, actInput } from "../src/context.js";
 import { sketchSchema, actSchema, verdictSchema } from "../schemas/index.js";
 import { validate } from "../src/validate.js";
@@ -98,11 +98,18 @@ test("the act call: its input holds the job, the history and the used peaks; its
   assert.match(input, /why the place exists/);
   assert.match(input, /Peaks already used[\s\S]*Snagtooth/);
   assert.deepEqual(validate(actSchema, plan), []);
-  assert.deepEqual(actProblems(plan, world), []);
-  assert.ok(actProblems({ ...plan, holders: ["pirates"] }, world).length);
-  const io = { sample: { json: async () => plan } };
+  assert.deepEqual(actProblems(plan, world, 3), []);
+  // Code tidies what it can instead of failing the act (D166): kinds worded loosely match the list; unknown holders go.
+  const loose = { ...plan, holders: ["pirates", "undead"], busy: [{ kind: "Hard labor", line: "a" }, { kind: "a funeral", line: "b" }, { kind: "feasting", line: "c" }, { kind: "knitting", line: "d" }, { kind: "hard labour", line: "e" }] };
+  const tidy = tidyAct(loose, world, 3);
+  assert.deepEqual(tidy.busy.map((b) => b.kind), ["hard labour", "a burial or mourning", "a feast or celebration"]);
+  assert.deepEqual(tidy.holders, ["undead"]);
+  assert.deepEqual(tidyAct({ ...plan, holders: ["pirates"] }, world, 3).holders, world.regions[2].holders);
+  assert.ok(actProblems({ ...plan, busy: [{ kind: "knitting", line: "x" }, { kind: "sewing", line: "y" }, { kind: "baking", line: "z" }, { kind: "pottery", line: "w" }] }, world, 3).length, "nothing usable goes back");
+  const io = { sample: { json: async () => loose } };
   const next = await beginAct(io, env, { camp, world });
   assert.equal(next.plan.peak.who, "Lord Chamberlain Vesk");
+  assert.deepEqual(next.plan.holders, ["undead"]);
   assert.deepEqual(next.peaks, ["Snagtooth the Keymaster", "Lord Chamberlain Vesk"]);
 });
 
@@ -136,8 +143,13 @@ test("the pitch asks for regions, ladders and mysteries, and can run without the
   const { pitchInput } = await import("../src/context.js");
   const { pitchSchema } = await import("../schemas/calls/pitch.js");
   const c = { companions: [], vibe: "x", rejected: [] };
-  assert.match(pitchInput(env, c, pitchSchema), /Worked example: Gravenhold/);
-  assert.doesNotMatch(pitchInput(env, { ...c, noExample: true }, pitchSchema), /Worked example: Gravenhold/);
+  assert.doesNotMatch(pitchInput(env, c, pitchSchema), /Worked example: Gravenhold/, "no example unless asked (D166)");
+  assert.match(pitchInput(env, { ...c, withExample: true }, pitchSchema), /Worked example: Gravenhold/);
+  assert.match(prompts.pitch, /never a person's name/);
+  assert.match(prompts.pitch, /never something that depends on timing, counting or balance/);
+  assert.match(prompts.pitch, /Never one that states a mystery's truth/);
+  const { SECRETS } = await import("../content/pitch.js");
+  assert.ok(!SECRETS.some((k) => /blood or birth|heart wants/.test(k)), "no chosen-one secret kinds");
   assert.doesNotMatch(prompts.pitch, /mechanics|roomKinds|room kinds|openAct|its records|alarm|how the heart was sealed|what a faction is bound by/i);
   assert.match(prompts.pitch, /Never about the rings or the player's secrets/);
   assert.ok(!("acts" in world) && !("roomKinds" in world) && !("openAct" in world));
