@@ -187,7 +187,7 @@ export default {
           outfit: `Ruby's laced-leather style in her own colour and a skimpier cut: a cropped oxblood leather bustier laced with black cord, tiny oxblood leather shorts, thigh-high black boots.`,
         },
         append: {
-          look: `Her heritage here: pale skin, grey eyes and black hair, like her sister's.`,
+          look: `Her heritage here: pale skin, grey eyes and blonde hair, like her sister's.`,
           pursuit: `If Ruby comes at her, she fights back, physically, knives and all. She's been waiting years for it.`,
           voice: `Grew up with Ruby: the same lopsided grin, the same hands-everywhere physicality, the same habit of deciding something and doing it immediately. But Lisa's intensity is playful, not desperate. She sounds like her sister at times and like herself at others: clearly her own person, clearly raised together.`,
         },
@@ -197,7 +197,7 @@ export default {
         partnerReacts: `the highest-drama pairing on the roster: storms of terror and betrayal`,
         photo: {
           role: "woman",
-          identity: "bright grey eyes, long glossy neatly brushed black hair, with a slim, petite figure.",
+          identity: "bright grey eyes, long glossy neatly brushed blonde hair, with a slim, petite figure.",
           garments: `She wears a sexy cropped oxblood leather bustier laced with black cord, tiny oxblood leather shorts, and thigh-high black boots`,
         },
       },
