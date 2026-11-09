@@ -57,34 +57,29 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 
 ## Phase 7: The generator
 
-Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the encode call turns it into a ruled-mode packet, and code lays it out (D116–D119, D156). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the encode call turns it into a ruled-mode packet, and code lays it out (D116–D119, D172). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
 - On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
 - Act 1 plays end to end from a new game: generated encounters and rooms, a campfire ending every leg, the climax, and every separation resolved before its campfire.
 
-**Built, in one pass, for the next thread to critique and perfect** (D152, D153), then cut to two calls after the first Forge room (D155, D156): the rethought craft (`docs/design/encounter-craft.md`, with the Angry GM reading notes in `docs/design/references/`), the motif library (`content/motifs.js`), the seed (`src/campaign/seed.js`), the sketch and encode calls with their prompts, the layout (`src/engine/layout.js`), the pipeline (`src/game/generate.js`), and one worked example of a finished room's data (`fixtures/generator/encoded.json`). One room has been sketched against a model on the Forge; its encode never finished.
+**Built:** the three stages, the room pipeline and the Forge, consolidated and frozen in D172; and the page runs a campaign (D173): verdicts between rooms, the next room generated while the player reads, ways on from calm rooms, relics kept at the sanctuary, a new act after it.
 
 **Still to do**
-1. **Run the generator on the bench.** The Forge (D154) shows single adventures and rooms for the designer to judge by eye; the stress tests are still to build: ten sketches per seed side by side, judged by the designer.
-2. **Worked examples:** more than the one encoded room, of different kinds, judged by the designer. The sketch sees no example rooms, because they became anchors (D161); `fixtures/generator/sketches.json` holds three worked notes for designers.
-3. **The page runs a campaign:** generate the next room while the closing narration plays, the verdict at a room's end, choosing an exit, the campfire and relic pick at the sanctuary.
-4. **The hand-off's remaining parts:** attachments, the world's memory and callbacks, and a companion's personal quest placed by act.
+1. **Play Act 1** from a new game, in a pitched world and in Gravenhold. This is the exit test, and it decides what happens to everything else here: a change to generation comes from a failure in play (D172). *Recommendation:* export a post-mortem from the developer view at the end of each room that felt wrong, and note which room and why before reading any call output.
+2. **The campfire conversation at a campfire room.** A campfire is a generated calm room for now (D173); the campfire call (`docs/spec/calls/campfire.md`) and its relationship beats aren't wired to it. *Recommendation:* add it when the first campfire in play feels empty, not before.
+3. **The ten-room batch,** only if play leaves a question about variety: ten rooms from one world on the Forge, scored against a rubric written before reading them (D172).
+4. **Separations and post-game acts,** which the runner doesn't do yet (D173). *Recommendation:* wait for Act 1.
 5. **Clean out the engine-era material** the rethink replaces: `fixtures/cells/walkthrough.md`'s old design notes, and the Cells itself once a generated room replaces it (D139).
-6. **Play Act 1** from a new game.
-7. **Judge the three stages on the Forge** (D164, on `claude/three-stage-calls`): worlds with and without the example, act plans across all five acts, and rooms with clues, returning people and signs of the peak. *Recommendation:* begin each act in order on one adventure, so the act calls see real history.
-8. **Iterate the prep-note sketch on the Forge** (D160): the designer makes rooms, and the thread reads what went well and badly against the craft's §16. *Recommendation:* change one lever at a time (the prompt's wording, the examples, the seed's leanings), and judge whether rooms copy the examples before adding more of them.
-
-9. **Wire the Dressing Room into the game page** (D171; `docs/spec/ui.md`): at start, `readLooks(db)` and `withLooks(authored, looks)` give the roster, passed to `newSession`, `restore` and `partyFor` as `roster`; a menu entry mounts `mountDressingRoom(el, { live: true, db, sample, onLooks, onClose })`. Publish its files with the game's: `src/ui/dressing.js`, `src/ui/dressing-css.js`, `src/campaign/looks.js` and `prompts/photo.md`.
 
 **Open questions**
-1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no critique to read them, D156). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
+1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no review call to read them, D172). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 2. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
-3. **Waiting for the next packet.** Generation is two calls, a `complex` sketch and a `default` encode, charged to the player (D2, D156). The first Forge room's sketch took about two minutes. *Recommendation:* start as soon as the hand-off is final, during the closing narration and any room or campfire (`docs/spec/generation.md`), and measure the wait on the Forge before optimizing.
+3. **Waiting for the next packet.** A room is two calls, a `complex` sketch and a `default` encode, after the verdict (D173); on the Forge a room takes 75 to 130 seconds, and the act call adds its own at each act's start. *Recommendation:* measure the wait in play before optimizing; the verdict has to come first, since its rating moves the next room's ways on.
 
 ## Later
 
 Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24; photos are on the bench, not yet in play, D170).
 
-- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D157); judge the next batch for that. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.
+- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D172); judge them in play. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.

@@ -9,6 +9,9 @@ import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
+import { campaignOf, startAdventure, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
+import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
@@ -17,7 +20,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "encode", "verdict"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -33,6 +36,10 @@ const STATUS = {
   resolve: "The dice are down. The DM plays it out…",
   scene: "The DM considers…",
   pitch: "Imagining your adventure…",
+  act: "The DM plans the act…",
+  sketch: "The DM sketches the next room…",
+  encode: "The DM sets out the room…",
+  verdict: "The DM weighs how that went…",
 };
 
 const SPEED = [
@@ -48,9 +55,13 @@ const paras = (t) => (t ?? "").split(/\n+/).filter(Boolean);
 
 async function loadAll() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-  const [packetText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
-  const [sample, downloads, store] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore()]);
-  return { packet: JSON.parse(packetText), prompts: Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]])), sample, downloads, store };
+  const [packetText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
+  const [sample, downloads, store, db] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore(), window.claude?.use("db") ?? null]);
+  // The companions with the Dressing Room's live looks laid over them (D171), before any party is built.
+  const { roster } = withLooks(authored, db ? await readLooks(db) : {});
+  const all = Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]]));
+  // What generation is given (D173): the prompts, and the worked example of a finished room for encode.
+  return { packet: JSON.parse(packetText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
 }
 
 // ---------- the app ----------
@@ -80,7 +91,7 @@ function Title({ env, onNew, onLoad }) {
   }, []);
   const open = async (slot) => {
     try {
-      onLoad(slot, restore(await env.store.load(slot), env.packet));
+      onLoad(slot, restore(await env.store.load(slot), env.packet, env.roster));
     } catch (e) {
       setError(`That save couldn't be loaded: ${errorText(e)}`);
     }
@@ -90,7 +101,7 @@ function Title({ env, onNew, onLoad }) {
     ev.target.value = "";
     if (!f) return;
     try {
-      const session = restore(await f.text(), env.packet);
+      const session = restore(await f.text(), env.packet, env.roster);
       const free = SLOTS.find((s) => !slots?.[s]) ?? SLOTS[0];
       onLoad(free, session);
     } catch (e) {
@@ -126,7 +137,7 @@ function Setup({ env, slot, onBack, onBegin }) {
   const [name, setName] = useState("");
   const [chosen, setChosen] = useState([]);
   const pick = (id) => setChosen((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length < 2 ? [...c, id] : [c[1], id]));
-  const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen) : null;
+  const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen, worldOf(), env.roster) : null;
   const problems = party ? partyProblems(party.slice(1)) : [];
   // The adventure's world (D151): Gravenhold unless the player asks for a pitch from a vibe. A pitch is written for
   // the two companions chosen, so choosing again clears it.
@@ -150,9 +161,28 @@ function Setup({ env, slot, onBack, onBegin }) {
       setBusy(false);
     }
   };
-  const begin = () => {
+  // Gravenhold opens in its hand-made Cells; a pitched world plans its first act and generates its first room before
+  // the party wakes (D173), which takes a minute or two.
+  const [making, setMaking] = useState(null);
+  const begin = async () => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
-    onBegin(newSession({ packet: env.packet, player: { name: name.trim(), class: "rogue" }, companions: chosen, seed, world: pitched?.world ?? worldOf() }));
+    const player = { name: name.trim(), class: "rogue" };
+    if (!pitched) {
+      const session = newSession({ packet: env.packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
+      campaignOf(session);
+      return onBegin(session);
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const io = { sample: env.sample, speed: prefs.get().speed, onStart: (call) => setMaking(STATUS[call] ?? "Thinking…") };
+      onBegin(await startAdventure(io, env.gen, { player, companions: chosen, world: pitched.world, seed, roster: env.roster }));
+    } catch (e) {
+      setError(`The first room couldn't be made: ${errorText(e)} Try again.`);
+    } finally {
+      setBusy(false);
+      setMaking(null);
+    }
   };
   return html`<main className="setup gutter">
     <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onBack}>Back</button>
@@ -167,11 +197,12 @@ function Setup({ env, slot, onBack, onBegin }) {
     <p className="muted">Gravenhold, unless you'd like an adventure of your own: type a vibe ("trapped in a creepy noble's masquerade, gothic and eldritch", "an epic escape from hell") and ask for a pitch.</p>
     <label className="field"><span>Your vibe</span><input id="vibe" value=${vibe} placeholder="Leave empty to be surprised" onChange=${(e) => setVibe(e.target.value)} /></label>
     <div style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-      <button onClick=${pitch} disabled=${!env.sample || !party || problems.length > 0 || busy}>${busy ? STATUS.pitch : pitched ? "Pitch me another" : "Pitch me an adventure"}</button>
+      <button onClick=${pitch} disabled=${!env.sample || !party || problems.length > 0 || busy}>${busy && !making ? STATUS.pitch : pitched ? "Pitch me another" : "Pitch me an adventure"}</button>
       ${pitched ? html`<button className="link" onClick=${() => setPitched(null)}>Back to Gravenhold</button>` : null}
     </div>
     ${error ? html`<p className="error">${error}</p>` : null}
-    ${pitched ? html`<div className="pitch"><strong>${pitched.world.name}</strong>${paras(pitched.pitch).map((t, i) => html`<p key=${i}>${t}</p>`)}<p className="muted small">Until encounters are generated, the first encounter is still Gravenhold's cells; the companions' stories and the world's facts follow this world.</p></div>` : null}
+    ${pitched ? html`<div className="pitch"><strong>${pitched.world.name}</strong>${paras(pitched.pitch).map((t, i) => html`<p key=${i}>${t}</p>`)}</div>` : null}
+    ${making ? html`<p className="muted">${making} The first act and its first room take a minute or two.</p>` : null}
     <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
   </main>`;
 }
@@ -202,6 +233,20 @@ function Game({ env, slot, initial, onQuit }) {
   const calls = useRef([]);
   const later = useRef(null);
   const s = session.state;
+  const where = whereView(session);
+  const [leaving, setLeaving] = useState(false);
+  // The Dressing Room (D171), a dev panel over the page: it edits how companions look, and an applied change reaches
+  // this game at once, by rebuilding the party from the new roster.
+  const [dressing, setDressing] = useState(false);
+  const dressRef = useRef(null);
+  useEffect(() => {
+    if (!dressing || !dressRef.current) return;
+    mountDressingRoom(dressRef.current, {
+      live: true, db: env.db, sample: env.sample,
+      onLooks: (roster) => (env.roster = roster, relook(session, roster, env.packet), refresh(), save()),
+      onClose: () => setDressing(false),
+    });
+  }, [dressing]);
 
   // A call whose input crossed its budget is recorded in the save, so growth never goes unnoticed (D76).
   const onOver = (w) => (session.warnings ??= []).push({ ...w, tick: session.state.tick, at: Date.now() });
@@ -257,12 +302,13 @@ function Game({ env, slot, initial, onQuit }) {
       if (e?.code !== "declined") setSaved(errorText(e));
     }
   };
-  const props = { session, env, io, run, busy, refresh, touch, colors, onQuit };
+  const props = { session, env, io, run, busy, refresh, touch, colors, onQuit, betweenError: error?.where === "between" ? error.text : null };
 
+  if (dressing) return html`<div className="dressing-host" ref=${dressRef}></div>`;
   return html`<div className="game">
     <header className="top">
       <div className="topbar gutter">
-        <span className="where">${s.packet.name ?? "Encounter"}</span>
+        <span className="where">${s.packet.name ?? "Encounter"}${where ? html`<span className="muted small"> · Act ${where.act}, ${where.here === "campfire" ? "camp" : where.here}${where.gold ? ` · ${where.gold} gold` : ""}${where.relics.length ? ` · ${where.relics.length} relic${where.relics.length > 1 ? "s" : ""}` : ""}</span>` : null}</span>
         <${Clock} clock=${clockView(s)} compact=${true} />
         <button className="iconbtn" aria-expanded=${menu} onClick=${() => setMenu(!menu)}>Menu</button>
       </div>
@@ -275,6 +321,12 @@ function Game({ env, slot, initial, onQuit }) {
               <button className="ghost" onClick=${save}>Save now</button>
               <button className="ghost" onClick=${() => exportFile(`heist-dm-${session.player.name || "save"}-tick${s.tick}.json`, serialize(session))}>Export save</button>
               <button className="ghost" aria-pressed=${dev} onClick=${() => setDev(!dev)}>${dev ? "Hide" : "Show"} developer view</button>
+              <button className="ghost" onClick=${() => (setMenu(false), setDressing(true))}>Dressing Room</button>
+              ${!session.ended
+                ? leaving
+                  ? html`<span><button className="link danger" onClick=${() => (leaveBy(session, null), setLeaving(false), setMenu(false), refresh(), save())}>End this room as it stands</button><button className="link" onClick=${() => setLeaving(false)}>Stay</button></span>`
+                  : html`<button className="link" onClick=${() => setLeaving(true)}>Leave this room…</button>`
+                : null}
               <button className="link" onClick=${onQuit}>Back to the title screen</button>
             </div>
             ${saved ? html`<span className="muted small">${saved}</span>` : null}
@@ -326,7 +378,7 @@ function hintFor(target, s) {
 }
 const PLACEHOLDER = { dm: "From her cell, could she see the key peg?", do: "I feel along the bench for a loose nail.", party: "How do we get those keys?" };
 
-function TableTab({ session, env, io, run, busy, error, refresh, colors, onQuit, goPlans }) {
+function TableTab({ session, env, io, run, busy, error, betweenError, refresh, colors, onQuit, goPlans }) {
   const s = session.state;
   const [to, setTo] = useState("dm");
   const [text, setText] = useState("");
@@ -371,8 +423,9 @@ function TableTab({ session, env, io, run, busy, error, refresh, colors, onQuit,
       return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span>${e.rulings ? html`<span className="ruled">${e.rulings.map((r, i) => html`<span key=${i}>Holds from now on: ${r}</span>`)}</span>` : null}</div>`;
     })}
     <div ref=${end}></div>
+    ${!ended && s.packet.mode === "room" ? html`<${WaysOn} session=${session} busy=${busy} refresh=${refresh} run=${run} />` : null}
     ${ended
-      ? html`<${Ending} session=${session} onQuit=${onQuit} />`
+      ? html`<${Between} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${betweenError} refresh=${refresh} onQuit=${onQuit} />`
       : html`<div className="composer">
           <div className="to" role="group" aria-label="Who it's for">
             ${chip("dm", "Ask the DM")}${chip("do", "Do something")}
@@ -430,7 +483,7 @@ function PlanRun({ entry, open, animate, onDone }) {
   </details>`;
 }
 
-function PlansTab({ session, env, io, run, busy, error, refresh, touch, onQuit, fresh, setFresh }) {
+function PlansTab({ session, env, io, run, busy, error, betweenError, refresh, touch, onQuit, fresh, setFresh }) {
   const [onCard, setOnCard] = useState(true);
   const stale = cardStale(session);
   const runs = session.feeds.plans;
@@ -445,7 +498,7 @@ function PlansTab({ session, env, io, run, busy, error, refresh, touch, onQuit, 
     ${fresh !== null
       ? null
       : session.ended
-      ? html`<${Ending} session=${session} onQuit=${onQuit} />`
+      ? html`<${Between} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${betweenError} refresh=${refresh} onQuit=${onQuit} />`
       : session.card && !stale && onCard
         ? html`<${CardSheet} session=${session} busy=${busy} error=${error} onEdit=${() => setOnCard(false)} onRun=${play} />`
         : html`<${DraftBuilder} session=${session} busy=${busy} error=${error} touch=${touch} stale=${stale}
@@ -578,15 +631,55 @@ function CardSheet({ session, busy, error, onEdit, onRun }) {
   </section></div></div>`;
 }
 
-function Ending({ session, onQuit }) {
+// A calm room has no objective: the party moves on when the player says so, by one of its ways on (D173). The sanctuary
+// has none: resting there ends the act.
+function WaysOn({ session, busy, refresh, run }) {
+  const exits = session.state.packet.intent.exits ?? [];
+  const go = (id) => run("table", async () => leaveBy(session, id));
+  return html`<div className="ways">
+    <span className="small muted">${exits.length ? "When you're ready to move on:" : "When you're ready:"}</span>
+    ${exits.length
+      ? exits.map((e) => html`<button key=${e.id} className="ghost" disabled=${!!busy} onClick=${() => go(e.id)}>${e.stub ?? `On to a ${e.leads_to}`}</button>`)
+      : html`<button className="ghost" disabled=${!!busy} onClick=${() => go(null)}>Rest here, and end the act</button>`}
+  </div>`;
+}
+
+// Between rooms (D173): how the room ended, then, without being asked, the DM's verdict and the next room, generated
+// while the player reads; at the sanctuary, the relics to keep before the next act. Each step is saved as it lands, so a
+// reload picks up where it stopped, and a failed step can be tried again.
+function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const h = session.ended;
   const s = session.state;
-  const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward].find((o) => o?.id === h.outcome)?.label ?? h.outcome;
+  const b = session.between;
+  const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward].find((o) => o?.id === h.outcome)?.label ?? (h.outcome === "left" ? "You move on" : h.outcome === "rested" ? "You rest" : h.outcome);
+  const [keep, setKeep] = useState([]);
+  const step = !b ? "judge" : b.actOver ? "relics" : !b.packet ? "next" : "ready";
+  useEffect(() => {
+    if (busy || error) return;
+    if (step === "judge") run("between", () => judgeRoom(session, io, env.prompts));
+    else if (step === "next") run("between", () => nextRoom(session, io, env.gen, env.roster));
+  }, [step, !!busy, !!error]);
+  const camp = session.camp;
+  const allowed = camp?.keep ?? 0;
+  const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < allowed ? [...k, id] : k));
   return html`<section className="ending">
     <h2>${label}</h2>
-    <p className="muted">${h.log}</p>
-    <p className="small muted">The next encounter isn't built yet. Your save keeps this ending.</p>
-    <button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>
+    ${b?.verdict ? html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>` : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
+    ${b?.exit?.stub ? html`<p className="muted">${b.forced ? "You're carried on. " : ""}${b.exit.stub}</p>` : null}
+    ${step === "relics" && b.last
+      ? html`<p>You're out. That's the end of the adventure, for now.</p><button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>`
+      : step === "relics"
+      ? html`<div className="relics">
+          <p>${allowed ? `The act is over. Keep up to ${allowed} of what you found into Act ${camp.act + 1}:` : `The act is over. Nothing you found comes with you into Act ${camp.act + 1}.`}</p>
+          ${camp.relics.map((r) => html`<label key=${r.id} className="relic"><input type="checkbox" id=${`keep-${r.id}`} checked=${keep.includes(r.id)} disabled=${!keep.includes(r.id) && keep.length >= allowed} onChange=${() => toggle(r.id)} /> <b>${r.name}</b> <span className="muted">${r.text}</span></label>`)}
+          <button className="primary" style=${{ justifySelf: "start" }} disabled=${!!busy} onClick=${() => (endTheAct(session, keep), refresh())}>Begin Act ${camp.act + 1}</button>
+        </div>`
+      : null}
+    ${step === "next" ? html`<p className="muted">${busy ?? "The DM prepares what's next…"} The next room takes a minute or two.</p>` : null}
+    ${step === "ready" ? html`<button className="primary" style=${{ justifySelf: "start" }} onClick=${() => run("table", async () => enterRoom(session, env.roster))}>Go on</button>` : null}
+    ${error ? html`<p className="error">${error} <button className="link" onClick=${() => run("between", async () => {})}>Try again</button></p>` : null}
+    ${session.past?.length > 1 ? html`<details><summary className="small muted">The way so far (${session.past.length} rooms)</summary><ol className="small">${session.past.map((r, i) => html`<li key=${i}><b>${r.name}</b>${r.rating ? ` · ${r.rating}/10` : ""}${r.why ? `: ${r.why}` : ""}</li>`)}</ol></details>` : null}
+    <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onQuit}>Save and go to the title screen</button>
   </section>`;
 }
 

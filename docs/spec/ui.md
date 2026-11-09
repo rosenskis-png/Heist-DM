@@ -21,6 +21,9 @@ On a phone the two are tabs, each with an unread marker, and the map and the par
 - **The party's sheet** lists each member's abilities, with what's left of the limited ones ("1 of 1 this encounter, 3 of 3 until a rest", D128), and the conditions they carry.
 - A companion's stance goes onto the draft for the player to decide.
 
+## Between rooms (D173)
+When a room ends, the table and Plans show how it ended, the DM's verdict (rating and why) as soon as it's in, the way on taken, and a status line while the next room is made (a minute or two); then "Go on". At the sanctuary, the player picks the relics the climax lets them keep, then begins the next act. A failed step offers "Try again". A calm room shows its ways on above the composer, and the sanctuary "Rest here, and end the act". The header names the act, the kind of room, and the party's gold and relics. The menu's "Leave this room…" ends a room as it stands, after a second tap.
+
 ## The card
 - **The plan is the player's prose,** usually numbered steps, with any timing and conditions they wrote (D35).
 - **Shown:** the DM's steps, the tick each happens on and the beats of the routines the party knows at that tick, when the whole plan is done (D77), each roll's band ("Easy", never a percentage; D33) with its one-line reason and what failure costs, the rulings it depends on, the DM's notes on it, and the stances with keep / resolved / override.
@@ -54,7 +57,7 @@ Gravenhold's `Game` component is built around one chat log and is not reused. It
 - **Read aloud** (D104): narration and companion lines spoken with the browser's voices (`src/ui/speech.js`), downloaded Premium and Enhanced voices first. A voice per companion, her second voice and the narrator, each choosable and previewable; each companion speaks at her file's `rate`; asides are quieter; a disguised companion speaks in the voice of the face she wears. Speech starts from a tap (iOS requires it), then can read each new answer automatically. On the bench it lives in Camp.
 
 ## Dressing Room (D171)
-A dev panel behind the menu: the Dressing Room (`src/ui/dressing.js`), mounted with `live`, over the page. It edits how companions look (`docs/spec/companions.md` §8) and applies changes to the game's live looks at once. The page reads the live looks (`readLooks`) and lays them over the roster (`withLooks`) when it starts, and again when the panel applies a change (`onLooks`), before it builds a party.
+A dev panel behind the menu: the Dressing Room (`src/ui/dressing.js`), mounted with `live`, over the page. It edits how companions look (`docs/spec/companions.md` §8) and applies changes to the game's live looks at once. The page reads the live looks (`readLooks`) and lays them over the roster (`withLooks`) when it starts, and again when the panel applies a change (`onLooks`), before it builds a party; a room in progress has its party rebuilt from the new roster (`relook` in `src/game/journey.js`). Its menu entry is "Dressing Room".
 
 ## Developer view
 A panel behind the menu showing every call this session: its tier, size and time, whether it retried and why, its raw output and its assembled input. It also shows the playtest counts (exchanges, card edits, and the exchange by which everyone had left where they started), the recorded companion reactions, the ledger, canon and the event log, any budget warnings, and exports the session's replay log (D60). Held in memory only and never stored (D10).
