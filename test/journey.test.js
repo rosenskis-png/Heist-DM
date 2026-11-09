@@ -1,4 +1,4 @@
-// The campaign runner (D171): a whole act on scripted call outputs, from the Cells through generated rooms, a campfire,
+// The campaign runner (D173): a whole act on scripted call outputs, from the Cells through generated rooms, a campfire,
 // the climax and the sanctuary, into Act 2; and a save taken between rooms that resumes where it stopped.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -95,4 +95,16 @@ test("a generated world starts with its act call and a generated first room", as
   assert.equal(session.state.packet.mode, "encounter");
   assert.equal(session.camp.plan.peak.who, "Lord Chamberlain Vesk");
   assert.equal(session.feeds.table[0].text, session.packet.opening);
+});
+
+test("the live looks reach a room in progress: the party is rebuilt, the room keeps its place (D171, D173)", async () => {
+  const { relook } = await import("../src/game/journey.js");
+  const { companions: authored } = await import("../content/companions/index.js");
+  const { withLooks } = await import("../src/campaign/looks.js");
+  const session = newSession({ packet: cells, player: { name: "P", class: "rogue" }, companions: ["fern", "nadia"], seed: 2, world });
+  const tick = session.state.tick;
+  const { roster } = withLooks(authored, { fern: { outfit: "a green cloak and nothing else" } });
+  relook(session, roster, cells);
+  assert.equal(session.state.party.find((p) => p.id === "fern").outfit, "a green cloak and nothing else");
+  assert.equal(session.state.tick, tick);
 });

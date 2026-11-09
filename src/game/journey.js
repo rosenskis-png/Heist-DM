@@ -1,4 +1,4 @@
-// The campaign runner (docs/spec/campaign.md, D171): one room after another. When a room ends, the verdict judges it and
+// The campaign runner (docs/spec/campaign.md, D173): one room after another. When a room ends, the verdict judges it and
 // the campaign moves on (`judgeRoom`); the next room is generated (`nextRoom`), beginning the act first if it has no
 // plan yet; then the party walks into it (`enterRoom`). Calm rooms end when the party takes a way on (`leaveBy`); the
 // sanctuary ends the act once the player picks the relics to keep (`endTheAct`). Everything lives in the session, so a
@@ -10,8 +10,9 @@ import { setting } from "../../content/setting.js";
 import { beginAct, generateRoom } from "./generate.js";
 import { verdictCall } from "../calls/verdict.js";
 import { ledgerText } from "../context.js";
-import { load } from "../engine/index.js";
+import { load, bindParty } from "../engine/index.js";
 import { act, envFor, post, partyFor, newSession } from "./session.js";
+import { companions as authored } from "../../content/companions/index.js";
 import { emptyDraft } from "./draft.js";
 
 // The rooms the party has been through, kept for the page: name, how it ended, and the verdict's rating and reason.
@@ -29,14 +30,14 @@ export function campaignOf(session) {
 }
 
 // A new adventure in a generated world (D151): the act call, then the first room, before the party wakes. `env` has the
-// prompts and the worked example. Returns the session.
-export async function startAdventure(io, env, { player, companions, world, seed }) {
-  const party = partyFor(player, companions, world);
+// prompts and the worked example; `roster` the companions with any live looks over them. Returns the session.
+export async function startAdventure(io, env, { player, companions, world, seed, roster = authored }) {
+  const party = partyFor(player, companions, world, roster);
   const members = party.slice(1);
   let camp = newCampaign({ seed, members, romance: newRomance(members, pairs, { act: 1 }) });
   camp = await beginAct(io, env, { camp, world, party });
   const room = await generateRoom(io, env, { camp, world, party });
-  const session = newSession({ packet: room.packet, player, companions, seed, world });
+  const session = newSession({ packet: room.packet, player, companions, seed, world, roster });
   Object.assign(session, { camp: room.camp, packet: room.packet, past: [] });
   return session;
 }
@@ -84,8 +85,8 @@ export function endTheAct(session, chosen = []) {
 
 // The next room, generated while the closing narration is read (docs/spec/generation.md): the act call first when the
 // act has no plan yet, then the room from the way on the party took. `env` has the prompts and the worked example.
-export async function nextRoom(session, io, env) {
-  const party = partyFor(session.player, session.companions, session.world);
+export async function nextRoom(session, io, env, roster = authored) {
+  const party = partyFor(session.player, session.companions, session.world, roster);
   let camp = campaignOf(session);
   if (!camp.plan) camp = session.camp = await beginAct(io, env, { camp, world: session.world, party });
   const b = session.between ?? {};
@@ -98,12 +99,12 @@ export async function nextRoom(session, io, env) {
 
 // The party walks into the generated room: the engine loads it with what they carry (hurts, spent uses, gold and
 // relics), the table starts fresh with its opening, and the replay log starts again for the new room (D60).
-export function enterRoom(session) {
+export function enterRoom(session, roster = authored) {
   const packet = session.between?.packet;
   if (!packet) throw new Error("the next room isn't ready");
   const camp = session.camp;
   const seed = (session.start.seed * 31 + 7 * (session.past?.length ?? 0) + 1) >>> 0 || 1;
-  const party = partyFor(session.player, session.companions, session.world);
+  const party = partyFor(session.player, session.companions, session.world, roster);
   session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics });
   Object.assign(session, {
     act: camp.act,
@@ -127,4 +128,12 @@ export function whereView(session) {
   if (!camp) return null;
   const arc = setting.arc[camp.act - 1];
   return { act: camp.act, acts: setting.arc.length, leg: camp.way.leg, legs: camp.way.legs ?? arc?.legs ?? null, here: camp.way.here, gold: camp.gold, relics: camp.relics };
+}
+
+// The live looks changed mid-room (D171): the party is rebuilt from the new roster, and the room bound to it again.
+// Nothing else in the room changes. `packet` is the room as written (the Cells, or the generated one in the session).
+export function relook(session, roster, packet) {
+  const party = partyFor(session.player, session.companions, session.world, roster);
+  session.state = { ...session.state, party, packet: bindParty(session.packet ?? packet, party) };
+  return session;
 }

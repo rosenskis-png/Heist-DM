@@ -9,7 +9,9 @@ import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
-import { campaignOf, startAdventure, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, whereView } from "../src/game/journey.js";
+import { campaignOf, startAdventure, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
+import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
@@ -54,10 +56,12 @@ const paras = (t) => (t ?? "").split(/\n+/).filter(Boolean);
 async function loadAll() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
   const [packetText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
-  const [sample, downloads, store] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore()]);
+  const [sample, downloads, store, db] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore(), window.claude?.use("db") ?? null]);
+  // The companions with the Dressing Room's live looks laid over them (D171), before any party is built.
+  const { roster } = withLooks(authored, db ? await readLooks(db) : {});
   const all = Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]]));
-  // What generation is given (D171): the prompts, and the worked example of a finished room for encode.
-  return { packet: JSON.parse(packetText), prompts: all, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
+  // What generation is given (D173): the prompts, and the worked example of a finished room for encode.
+  return { packet: JSON.parse(packetText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
 }
 
 // ---------- the app ----------
@@ -87,7 +91,7 @@ function Title({ env, onNew, onLoad }) {
   }, []);
   const open = async (slot) => {
     try {
-      onLoad(slot, restore(await env.store.load(slot), env.packet));
+      onLoad(slot, restore(await env.store.load(slot), env.packet, env.roster));
     } catch (e) {
       setError(`That save couldn't be loaded: ${errorText(e)}`);
     }
@@ -97,7 +101,7 @@ function Title({ env, onNew, onLoad }) {
     ev.target.value = "";
     if (!f) return;
     try {
-      const session = restore(await f.text(), env.packet);
+      const session = restore(await f.text(), env.packet, env.roster);
       const free = SLOTS.find((s) => !slots?.[s]) ?? SLOTS[0];
       onLoad(free, session);
     } catch (e) {
@@ -133,7 +137,7 @@ function Setup({ env, slot, onBack, onBegin }) {
   const [name, setName] = useState("");
   const [chosen, setChosen] = useState([]);
   const pick = (id) => setChosen((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length < 2 ? [...c, id] : [c[1], id]));
-  const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen) : null;
+  const party = chosen.length === 2 ? partyFor({ name: name.trim(), class: "rogue" }, chosen, worldOf(), env.roster) : null;
   const problems = party ? partyProblems(party.slice(1)) : [];
   // The adventure's world (D151): Gravenhold unless the player asks for a pitch from a vibe. A pitch is written for
   // the two companions chosen, so choosing again clears it.
@@ -158,13 +162,13 @@ function Setup({ env, slot, onBack, onBegin }) {
     }
   };
   // Gravenhold opens in its hand-made Cells; a pitched world plans its first act and generates its first room before
-  // the party wakes (D171), which takes a minute or two.
+  // the party wakes (D173), which takes a minute or two.
   const [making, setMaking] = useState(null);
   const begin = async () => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
     const player = { name: name.trim(), class: "rogue" };
     if (!pitched) {
-      const session = newSession({ packet: env.packet, player, companions: chosen, seed, world: worldOf() });
+      const session = newSession({ packet: env.packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
       campaignOf(session);
       return onBegin(session);
     }
@@ -172,7 +176,7 @@ function Setup({ env, slot, onBack, onBegin }) {
     setError(null);
     try {
       const io = { sample: env.sample, speed: prefs.get().speed, onStart: (call) => setMaking(STATUS[call] ?? "Thinking…") };
-      onBegin(await startAdventure(io, env.gen, { player, companions: chosen, world: pitched.world, seed }));
+      onBegin(await startAdventure(io, env.gen, { player, companions: chosen, world: pitched.world, seed, roster: env.roster }));
     } catch (e) {
       setError(`The first room couldn't be made: ${errorText(e)} Try again.`);
     } finally {
@@ -231,6 +235,18 @@ function Game({ env, slot, initial, onQuit }) {
   const s = session.state;
   const where = whereView(session);
   const [leaving, setLeaving] = useState(false);
+  // The Dressing Room (D171), a dev panel over the page: it edits how companions look, and an applied change reaches
+  // this game at once, by rebuilding the party from the new roster.
+  const [dressing, setDressing] = useState(false);
+  const dressRef = useRef(null);
+  useEffect(() => {
+    if (!dressing || !dressRef.current) return;
+    mountDressingRoom(dressRef.current, {
+      live: true, db: env.db, sample: env.sample,
+      onLooks: (roster) => (env.roster = roster, relook(session, roster, env.packet), refresh(), save()),
+      onClose: () => setDressing(false),
+    });
+  }, [dressing]);
 
   // A call whose input crossed its budget is recorded in the save, so growth never goes unnoticed (D76).
   const onOver = (w) => (session.warnings ??= []).push({ ...w, tick: session.state.tick, at: Date.now() });
@@ -288,6 +304,7 @@ function Game({ env, slot, initial, onQuit }) {
   };
   const props = { session, env, io, run, busy, refresh, touch, colors, onQuit, betweenError: error?.where === "between" ? error.text : null };
 
+  if (dressing) return html`<div className="dressing-host" ref=${dressRef}></div>`;
   return html`<div className="game">
     <header className="top">
       <div className="topbar gutter">
@@ -304,6 +321,7 @@ function Game({ env, slot, initial, onQuit }) {
               <button className="ghost" onClick=${save}>Save now</button>
               <button className="ghost" onClick=${() => exportFile(`heist-dm-${session.player.name || "save"}-tick${s.tick}.json`, serialize(session))}>Export save</button>
               <button className="ghost" aria-pressed=${dev} onClick=${() => setDev(!dev)}>${dev ? "Hide" : "Show"} developer view</button>
+              <button className="ghost" onClick=${() => (setMenu(false), setDressing(true))}>Dressing Room</button>
               ${!session.ended
                 ? leaving
                   ? html`<span><button className="link danger" onClick=${() => (leaveBy(session, null), setLeaving(false), setMenu(false), refresh(), save())}>End this room as it stands</button><button className="link" onClick=${() => setLeaving(false)}>Stay</button></span>`
@@ -613,7 +631,7 @@ function CardSheet({ session, busy, error, onEdit, onRun }) {
   </section></div></div>`;
 }
 
-// A calm room has no objective: the party moves on when the player says so, by one of its ways on (D171). The sanctuary
+// A calm room has no objective: the party moves on when the player says so, by one of its ways on (D173). The sanctuary
 // has none: resting there ends the act.
 function WaysOn({ session, busy, refresh, run }) {
   const exits = session.state.packet.intent.exits ?? [];
@@ -626,7 +644,7 @@ function WaysOn({ session, busy, refresh, run }) {
   </div>`;
 }
 
-// Between rooms (D171): how the room ended, then, without being asked, the DM's verdict and the next room, generated
+// Between rooms (D173): how the room ended, then, without being asked, the DM's verdict and the next room, generated
 // while the player reads; at the sanctuary, the relics to keep before the next act. Each step is saved as it lands, so a
 // reload picks up where it stopped, and a failed step can be tried again.
 function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
@@ -639,7 +657,7 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   useEffect(() => {
     if (busy || error) return;
     if (step === "judge") run("between", () => judgeRoom(session, io, env.prompts));
-    else if (step === "next") run("between", () => nextRoom(session, io, env.gen));
+    else if (step === "next") run("between", () => nextRoom(session, io, env.gen, env.roster));
   }, [step, !!busy, !!error]);
   const camp = session.camp;
   const allowed = camp?.keep ?? 0;
@@ -658,7 +676,7 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
         </div>`
       : null}
     ${step === "next" ? html`<p className="muted">${busy ?? "The DM prepares what's next…"} The next room takes a minute or two.</p>` : null}
-    ${step === "ready" ? html`<button className="primary" style=${{ justifySelf: "start" }} onClick=${() => run("table", async () => enterRoom(session))}>Go on</button>` : null}
+    ${step === "ready" ? html`<button className="primary" style=${{ justifySelf: "start" }} onClick=${() => run("table", async () => enterRoom(session, env.roster))}>Go on</button>` : null}
     ${error ? html`<p className="error">${error} <button className="link" onClick=${() => run("between", async () => {})}>Try again</button></p>` : null}
     ${session.past?.length > 1 ? html`<details><summary className="small muted">The way so far (${session.past.length} rooms)</summary><ol className="small">${session.past.map((r, i) => html`<li key=${i}><b>${r.name}</b>${r.rating ? ` · ${r.rating}/10` : ""}${r.why ? `: ${r.why}` : ""}</li>`)}</ol></details>` : null}
     <button className="link" style=${{ justifySelf: "start", paddingLeft: 0 }} onClick=${onQuit}>Save and go to the title screen</button>

@@ -18,7 +18,7 @@ What the engine holds and who may write it. The packet (`docs/spec/packet.md`) i
 - **The act's plan** (`plan`, from the act call, D164), the **peaks** used so far, and the **history** of finished acts: each one's peak, premises and log lines, which the next act call reads.
 - **What the campaign remembers** (D164): the **clues** the party has found and those placed in any room (each placed once), and the **memory**, up to the last 30 people the verdicts named, from whom a later room may bring one back.
 - **The hand-off** from the last encounter (below).
-- **Between rooms** (D171): the verdict, the way on taken and the next room once it's generated (`between`), and a record of the rooms passed (`past`: name, rating, why). The campaign itself is `camp` (`src/campaign/run.js`), with the companions' relationship state.
+- **Between rooms** (D173): the verdict, the way on taken and the next room once it's generated (`between`), and a record of the rooms passed (`past`: name, rating, why). The campaign itself is `camp` (`src/campaign/run.js`), with the companions' relationship state.
 
 ## Live encounter state (bounded by the encounter)
 - **The ledger** (`docs/spec/engine.md` §2): positions and holdings, flags, the DM's facts, the party's conditions, toughness, threats and moods, who's off their routine, and what the party has revealed.
@@ -64,7 +64,7 @@ When an encounter ends, the engine writes a hand-off object, and the next packet
 Only the hand-off, memories and commitments cross between encounters (principle 4). Nothing is summarized.
 
 ## Saves (D11)
-A save is a snapshot of campaign state plus the current encounter's state, including its event log, and what the table said: every feed, the draft card and its stances, any open conversation (D74), the replay log, and the last 40 call outputs without their inputs, oldest dropped first if the save would pass 200 KB (D135). The developer view exports it for a post-mortem. The sheets come back from content by id, and the Cells by its id; a generated room is kept whole in the save, as is the next one if it's waiting (D171). Saves are three slots per player in the artifact's `db`, under the player's own private path, with JSON export and import. Loading a save never calls an AI. Code: `src/game/session.js`, `app/store.js`.
+A save is a snapshot of campaign state plus the current encounter's state, including its event log, and what the table said: every feed, the draft card and its stances, any open conversation (D74), the replay log, and the last 40 call outputs without their inputs, oldest dropped first if the save would pass 200 KB (D135). The developer view exports it for a post-mortem. The sheets come back from content by id, and the Cells by its id; a generated room is kept whole in the save, as is the next one if it's waiting (D173). Saves are three slots per player in the artifact's `db`, under the player's own private path, with JSON export and import. Loading a save never calls an AI. Code: `src/game/session.js`, `app/store.js`.
 
 ## Replay (D60)
 The engine is `apply(state, action) → state`, and state includes the random generator's position. A replay log is the encounter's starting inputs (packet, party, campaign values, seed) plus every action in order: validated AI outputs, committed cards, ticks passing. Applying it again gives deep-equal state. It's a test and debugging tool: a save carries it (D135), but restoring a save never replays it (D11).

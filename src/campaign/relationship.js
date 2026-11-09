@@ -3,7 +3,7 @@
 // does differently is declared in her file. Code never names a companion (D8).
 import * as R from "../../content/relationship.js";
 import { pairEntry } from "./roster.js";
-import { newWardrobe, equip } from "./wardrobe.js";
+import { newWardrobe, equip, owned } from "./wardrobe.js";
 import { d100 } from "../engine/rng.js";
 
 const clamp = (v, [lo, hi]) => Math.max(lo, Math.min(hi, v));
@@ -281,7 +281,7 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
     s = r.state;
   }
   if (out.segments.some((x) => x.speaker === "second_voice") && !secondVoiceState(rom, c, scene)?.speaks) problems.push("no second voice speaks in this scene");
-  if (out.outfit && !rom.wardrobe?.[c.id]?.owned[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
+  if (out.outfit && !owned(rom, c)[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
   if (out.form && !c.shapeshift) problems.push("she can't change her shape (form must be null)");
   const top = c.escalation?.tiers.length ?? 0;
@@ -320,7 +320,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);
   r.commitments = [...r.commitments, ...out.commitments];
   r.revealed = [...new Set([...r.revealed, ...out.secrets])];
-  return out.outfit ? equip(s, c.id, out.outfit) : s;
+  return out.outfit ? equip(s, c, out.outfit) : s;
 }
 
 // With no change to a baseline track this answer, a value below the baseline rises toward it (D93).

@@ -35,7 +35,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D21** The campaign layer is a hand-off: changed by D141
 - **D22** Rooms use the same packet: changed by D121
 - **D23** Two pillars: current
-- **D24** Parked features: changed by D104
+- **D24** Parked features: changed by D104, D170
 - **D25** Hand-author Act 1 before building the generator: archived
 - **D26** Encounter size ceiling: current
 - **D27** The romance floor stays; the stall floors stay banned: changed by D79
@@ -97,7 +97,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D83** Personal quests are placed in packets; unwritten pairs start at 0: current
 - **D84** The fade comes just before anything explicit: current
 - **D85** Camp with both companions: two calls, alternating, and one of them moves something: changed by D88
-- **D86** Outfits are things a companion owns and wears: current
+- **D86** Outfits are things a companion owns and wears: changed by D171
 - **D87** A second voice may take her own body in any private scene: changed by D89
 - **D88** Camp with both is about the two of them too; each has her own view of the other: changed by D90, D92
 - **D89** A second voice waits for its gate, then chooses: changed by D98
@@ -181,8 +181,10 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D167** The act call gives rooms abstract direction and pools dealt one at a time, never a picture: archived
 - **D168** Clues are journal pages read at camp; motifs return without examples; one strange thing a room: archived
 - **D169** Rooms are generated D163-style; the act decides what comes up, not what rooms hold; worn-out props are retired: archived
-- **D170** The generator as it stands, in one entry, and frozen until play: current
-- **D171** The page runs a campaign: current
+- **D170** The Dressing Room: a bench for how companions look, where photo prompts return: changed by D171
+- **D171** Live looks: companions' appearance changes without a republish, from a dev panel in the game: current
+- **D172** The generator as it stands, in one entry, and frozen until play: current
+- **D173** The page runs a campaign: current
 
 ---
 
@@ -967,57 +969,67 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Rules out:** Building rooms or motifs from the Cells, the heist or the cavern; properties that say what a thing is for; binary deadlines as a room's pressure.
 
 ### D153. The generator, built in one pass
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D154. The Forge: the designer's bench for adventures and rooms
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D155. The opening shows the situation in motion, and what things are for in the world
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D156. The sketch goes straight to encode, small, with no route in it
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D157. Code draws the kind of heart and the kinds of player secret
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D158. The seed says whose room it is, and most rooms are no one's
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D159. Openings in paragraphs, fewer things, and rooms not shaped around one ability
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D160. The sketch is a DM's prep note, premise first, steered by form and examples rather than rules
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D161. The sketch sees no example rooms; the place must work, and nothing is a machine with a rule
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D162. Rooms vary by what's happening and whose place it is, and people's attention is said plainly
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D163. The sketch prompt holds no images; code draws the shape and its centrepiece; a climax is a showdown
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D164. Generation in three stages: the world once, the act when it begins, the room when it's entered
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D165. Only the seed's prize is a reward; mysteries never cover the rings or the player's secrets
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D166. Worlds are written without the example; the act call tidies what it can; no chosen-one secrets
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D167. The act call gives rooms abstract direction and pools dealt one at a time, never a picture
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D168. Clues are journal pages read at camp; motifs return without examples; one strange thing a room
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
 ### D169. Rooms are generated D163-style; the act decides what comes up, not what rooms hold; worn-out props are retired
-*Archived (history since D170): the entry is in `docs/decisions-archive.md`.*
+*Archived (history since D172): the entry is in `docs/decisions-archive.md`.*
 
-### D170. The generator as it stands, in one entry, and frozen until play
+### D170. The Dressing Room: a bench for how companions look, where photo prompts return
+**Decided:** The designer's call (2026-11-08). Supersedes D24 for photo prompts, on the bench only. A bench page, the Dressing Room (`bench/dressing.html`, `bench/dressing.js`), is the place to work on a companion's appearance. Pick a companion and her partner (a tie changes her look and outfit), and it shows: her face and body, and her outfit, sorted into labelled groups by code from her file's own sentences, never reworded; exactly what each call is sent about her appearance (her own campfire call, the room calls, the other companion's view of her, and the DM's calls, which get none), drawn from the real context functions, with the whole call input on demand and her appearance marked in it; a draft editor over every field her appearance comes from, which re-runs all of it live and sends a draft to her notes as a change request with a word diff; Gravenhold's photo card; and notes per companion, kept in the page's db for the design thread to read and apply. The photo card is ported as the photo call (`docs/spec/calls/photo.md`): a picture identity per companion (`photo` in her file; a tie entry's `photo` replaces fields for that partner, and a second voice's `photo` stands her beside the companion), Gravenhold's fixed skeleton assembled by code (`src/campaign/photo.js`, `content/photo.js`), and a call that fills its slots from a moment described in words. Gravenhold's identity lines are kept as written where the look hasn't changed since; Annaleise, Sable and Celeste get new ones. The tie's portrait `image` becomes its `photo`.
+**Why:** The designer wants one place to see and adjust how a companion looks in a text game: what's written, what each call actually receives, and what she'd look like drawn. Her appearance lives in several fields (her look, her outfit or a tie's, a second voice's look, a picture identity) and the calls send different slices of it, so reading her file doesn't show what reaches the AI. Gravenhold's picture identities were tuned against an image model, which is why they're kept as a separate rendering rather than derived from her look each time; showing the two side by side is how drift gets caught.
+**Rules out:** Photos in play (still parked); the page writing to the repo (the design thread applies change requests); a second copy of the context assembly on the bench; `photo` reaching any call but the photo call.
+
+### D171. Live looks: companions' appearance changes without a republish, from a dev panel in the game
+**Decided:** The designer's call (2026-11-09), ahead of publishing the prototype. Refines D86 and D170. How a companion looks can be changed after the game is published, without republishing it: the game's db holds live looks, changes to the appearance fields of her file by path (her look, outfits, the outfit she starts in, her picture identity, her second voice's look, and what a tie changes of these), and the game lays them over the roster every time it loads, before it builds a party (`src/campaign/looks.js`). A change to any other field, or one that breaks her file's schema, is left out and reported. The Dressing Room becomes a module (`src/ui/dressing.js`) that the bench page mounts and the game mounts as a dev panel; mounted in the game, a draft can be applied to the live looks, reverted, or sent to her notes. A new field, `wears`, chooses the outfit she starts a game in. The wardrobe state keeps only what play changes (what she has on and what she's gained in play); the outfits her file gives her are read from it every time, so a file or live change reaches existing saves, and an outfit taken away leaves her in her usual one. Her file stays the base: the design thread folds live looks into it now and then and clears them.
+**Why:** The designer will keep changing how companions look after the game is published (a new outfit, a haircut, the outfit she starts in, and outfits generated as rewards) and shouldn't need a thread and a republish for each. The game can only read its own db, so the editor has to live in the game. Saves copying outfit text would have frozen every change out of existing games.
+**Rules out:** Live changes to anything but appearance (voice, personality and story stay in the files); live looks that can break a game; saves that copy her file's outfits.
+
+### D172. The generator as it stands, in one entry, and frozen until play
 **Decided:** The designer's call (2026-11-08), after a review of D153–D169: seventeen entries in three days, several undoing each other, each judged on three to seven Forge rooms. They are archived as the history of how generation got here (D145), and this entry is what holds. The detail is in the specs: `docs/spec/generation.md`, the calls' specs (`pitch`, `act`, `sketch`, `encode`), the craft's §16 and `docs/design/companion-craft.md`.
 - **Three stages.** The world is written once by the pitch call, without the worked example unless the Forge asks: regions on a rising curve, factions with ladders of named leaders, mysteries whose truth is never confirmed, each with an edge and a journal torn into pages. Code draws its seed first: the kind of heart and two kinds of player secret, never chosen-one kinds; the player is always "they". The act call runs when an act begins, and decides what should come up in it, never what a room holds: a general setting, its question and aim, what has changed, who holds it, each companion's thread, settings for calm rooms, news, live mysteries, people likely to return, and its peak (chosen by whose design blocks the party, never repeated) with signs. The room is generated when it's entered.
 - **A room** is code's seed, the sketch call, the encode call, the edges that apply as hidden facts, and the layout. No call reviews the sketch: a clever move the room didn't plan for is the player's reward. The seed fixes the kind and its ways on (one way on before a campfire, the climax or the sanctuary), whose room it is (one companion or, about half the time, no one), the tone, what the place is busy with, whose place it is, the space's shape and centrepiece (neither repeated in an act), the prize (none, gold, a relic or a journal page) and at most one extra (someone from before, a sign of the peak, or news), never two rooms running. It leans on one or two motifs without examples, what the room is built around and the x-factor.
@@ -1028,7 +1040,7 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Why:** Rooms reached D169 by way of D163, then five decisions that changed how the act shapes rooms, then back to D163 plus structure. At that sample size an LLM's variance is bigger than most prompt edits, so rounds were partly answering noise; and the campaign layer (mysteries, edges, ladders, rationed extras, remembered people) grew without a player ever meeting it, which is the first two reflexes in `docs/principles.md` one level up. What holds is kept here so one entry can be read instead of seventeen; the archive keeps each round's reasons word for word.
 **Rules out:** Prompt rounds driven by a few bench rooms; adding to the campaign layer before play asks for it.
 
-### D171. The page runs a campaign
+### D173. The page runs a campaign
 **Decided:** The designer's call (2026-11-08), roadmap item 3 of Phase 7. The game page plays one room after another (`src/game/journey.js`). Gravenhold opens in the Cells; a pitched world runs its act call and generates its first room before the party wakes. When a room ends, the page runs the verdict, the campaign moves on by the exit taken (`roomEnded`), the act call runs if the act has no plan, and the next room is generated while the player reads the verdict; "Go on" walks them in, with what they carry (hurts, spent uses, gold, relics), a fresh table and a fresh replay log. A calm room ends when the player picks one of its ways on; the sanctuary ends the act once the player picks the relics the climax allows, and the next act begins; after Act 5 the adventure ends. The menu can end any room as it stands, so play is never stuck. The campaign, the current generated room, the room waiting to be entered and a record of rooms passed (name, rating, why) live in the session, so a save taken between rooms resumes there and a generated room travels whole in the save. The companions' relationship state is kept by the campaign and read by every call. Not yet: the campfire conversation (a campfire is a generated calm room for now), separations, and post-game acts.
-**Why:** The phase's exit is Act 1 played end to end from a new game, and only play can say which of D170's machinery earns its place. Everything the runner needed existed (`seedRoom`, `designRoom`, the act and verdict calls, `roomEnded`, `endAct`); what was missing was the loop.
+**Why:** The phase's exit is Act 1 played end to end from a new game, and only play can say which of D172's machinery earns its place. Everything the runner needed existed (`seedRoom`, `designRoom`, the act and verdict calls, `roomEnded`, `endAct`); what was missing was the loop.
 **Rules out:** Generating a room while the player is still in the last one (the verdict decides the next room's kind and the leg's strain); a dead end when a room won't finish on its own.

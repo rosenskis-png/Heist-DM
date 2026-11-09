@@ -57,29 +57,29 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 
 ## Phase 7: The generator
 
-Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the encode call turns it into a ruled-mode packet, and code lays it out (D116–D119, D170). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
+Generation as `docs/spec/generation.md` describes it: code picks a seed, the sketch call designs the whole encounter in plain English, the encode call turns it into a ruled-mode packet, and code lays it out (D116–D119, D172). It builds rooms (D121) and campfires (D122, D142) into the campaign's one-way legs (D140), and carries attachments and callbacks across the hand-off (D123). Act 1 is generated with it.
 
 **Exit:**
 - Generated packets pass validation within one retry, and stay inside the calls' budgets (D76).
 - On the bench, ten sketches from the same act read as different encounters, and the designer judges them as good as the worked sketches the rethink produces (D139).
 - Act 1 plays end to end from a new game: generated encounters and rooms, a campfire ending every leg, the climax, and every separation resolved before its campfire.
 
-**Built:** the three stages, the room pipeline and the Forge, consolidated and frozen in D170; and the page runs a campaign (D171): verdicts between rooms, the next room generated while the player reads, ways on from calm rooms, relics kept at the sanctuary, a new act after it.
+**Built:** the three stages, the room pipeline and the Forge, consolidated and frozen in D172; and the page runs a campaign (D173): verdicts between rooms, the next room generated while the player reads, ways on from calm rooms, relics kept at the sanctuary, a new act after it.
 
 **Still to do**
-1. **Play Act 1** from a new game, in a pitched world and in Gravenhold. This is the exit test, and it decides what happens to everything else here: a change to generation comes from a failure in play (D170). *Recommendation:* export a post-mortem from the developer view at the end of each room that felt wrong, and note which room and why before reading any call output.
-2. **The campfire conversation at a campfire room.** A campfire is a generated calm room for now (D171); the campfire call (`docs/spec/calls/campfire.md`) and its relationship beats aren't wired to it. *Recommendation:* add it when the first campfire in play feels empty, not before.
-3. **The ten-room batch,** only if play leaves a question about variety: ten rooms from one world on the Forge, scored against a rubric written before reading them (D170).
-4. **Separations and post-game acts,** which the runner doesn't do yet (D171). *Recommendation:* wait for Act 1.
+1. **Play Act 1** from a new game, in a pitched world and in Gravenhold. This is the exit test, and it decides what happens to everything else here: a change to generation comes from a failure in play (D172). *Recommendation:* export a post-mortem from the developer view at the end of each room that felt wrong, and note which room and why before reading any call output.
+2. **The campfire conversation at a campfire room.** A campfire is a generated calm room for now (D173); the campfire call (`docs/spec/calls/campfire.md`) and its relationship beats aren't wired to it. *Recommendation:* add it when the first campfire in play feels empty, not before.
+3. **The ten-room batch,** only if play leaves a question about variety: ten rooms from one world on the Forge, scored against a rubric written before reading them (D172).
+4. **Separations and post-game acts,** which the runner doesn't do yet (D173). *Recommendation:* wait for Act 1.
 5. **Clean out the engine-era material** the rethink replaces: `fixtures/cells/walkthrough.md`'s old design notes, and the Cells itself once a generated room replaces it (D139).
 
 **Open questions**
-1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no review call to read them, D170). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
+1. **Quality checks.** *Recommendation:* the checks in `docs/spec/packet.md` produce warnings, not rejections, shown on the Forge for the designer, never sent to the sketch as rules (there's no review call to read them, D172). Add one: every route to the objective crossing three or more separate barriers in a row (the slog). Drop any that test triggers, meters or sense links, which packets don't have (D125).
 2. **Clocks that aren't a person.** Routines belong to NPCs, so a tide or a bell tower has no home. *Recommendation:* a placed event for a one-off, and a routine on a thing for a cycle, when a generated packet first needs one.
-3. **Waiting for the next packet.** A room is two calls, a `complex` sketch and a `default` encode, after the verdict (D171); on the Forge a room takes 75 to 130 seconds, and the act call adds its own at each act's start. *Recommendation:* measure the wait in play before optimizing; the verdict has to come first, since its rating moves the next room's ways on.
+3. **Waiting for the next packet.** A room is two calls, a `complex` sketch and a `default` encode, after the verdict (D173); on the Forge a room takes 75 to 130 seconds, and the act call adds its own at each act's start. *Recommendation:* measure the wait in play before optimizing; the verdict has to come first, since its rating moves the next room's ways on.
 
 ## Later
 
-Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24).
+Acts 2–5, the open world after Gravenhold (Gravenhold's "open" mode), and the parked features (D24; photos are on the bench, not yet in play, D170).
 
-- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D170); judge them in play. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.
+- **Judge the pitch on the bench.** The pitch call is built (D151) and offered on the setup screen. Six worlds on the Forge all wrote the same heart and the same two player secrets as Gravenhold, so code now draws their kinds (D172); judge them in play. *Recommendation:* run it on a handful of vibes and companion pairs; read each world against Gravenhold for the frame (a living place much bigger than the party, a heart the factions want, tensions between them), for how well it fits the companions' needs, and for rerolls that really differ. Add a critique call only if the frame is missed.

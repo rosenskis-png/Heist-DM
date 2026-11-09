@@ -21,7 +21,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 |---|---|
 | Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D104), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
-| Look | `look` (her body and face), `outfit` (what she usually wears), and optionally `wardrobe`: other outfits she owns from the start (§7) |
+| Look | `look` (her body and face), `outfit` (what she usually wears), optionally `wardrobe`: other outfits she owns from the start (§7), and optionally `photo`: her picture identity, the fixed words in every photo prompt of her (`docs/spec/calls/photo.md`, D170) |
 | Story | `why`, `first`, `quest`, `questAct`, and `needs`: what her story needs the world to hold, as keys of a world's `features` (D150) |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
@@ -45,7 +45,7 @@ Each channel sends an allowlist of fields (D59).
 - **In encounters** (the huddle, private channels, and the DM's calls that voice her), a companion is her brief (D79): name, race, role, `voice`, `beliefs`, `rules`, `pursuit`, `planning.hunch` and `reaches_for`, skills and abilities (effect text only), and her standing: a mood from warm, glad, steady, wary, grumpy, jealous, with why, and what she has learned. With it go the special cases she acts on in the scene (D114): what she has on, her second voice, her shape, and her tie without its secret. Code: `briefProfile` and `encounterCases` in `src/context.js`.
 - **At the campfire** she gets her full profile: identity, fantasy, look, voice, depth, rules, skills and abilities, gated as below, plus her special cases as resolved for the party and scene (§6). The campfire writes her standing and what she learned. Code: `ownProfile` in `src/context.js`.
 
-Fields on no list, such as `color`, `rate`, `leanFromHeat`, a tie's `image`, and any special-case data the engine hasn't resolved, are never sent.
+Fields on no list, such as `color`, `rate`, `leanFromHeat`, `photo` (only the photo call reads it), and any special-case data the engine hasn't resolved, are never sent.
 
 The gates are data (`reveal` in `content/relationship.js`, D80):
 
@@ -118,7 +118,7 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 **Add:** write `content/companions/<id>.js` with the fields in §2, and add one line to `content/companions/index.js`. Optionally add pair dynamics with existing companions to `content/pairs.js`. `node --test` tells you what's missing or misspelled.
 
-**Change:** her look, outfit, voice, personality and abilities are all fields in her file. Nothing else reads them by name, so editing the file is the whole change.
+**Change:** her look, outfit, voice, personality and abilities are all fields in her file. Nothing else reads them by name, so editing the file is the whole change. The Dressing Room (`bench/dressing.html`, D170) shows what each call is sent about her appearance, and tries a change before it's made.
 
 **Remove:** delete the file and its registry line. Entries that name her in `pairs.js` or in another companion's `tie.by` are simply ignored.
 
@@ -131,8 +131,8 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 | Declaration | What it does | Example |
 |---|---|---|
-| `tie: { required, set, append, toPartner, triangle, start, partnerStart, mask, limits, secret, mirrorsWhenOpen, by: { <other id>: { set, append, gift, bond, partnerReacts, secret, image } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.shared: false` rules out the shared beat. `start` and `partnerStart` give both starting views, `mask` the view her partner believes she holds, `limits` cap her view of her partner until their `until` beat, `secret` reaches only her call, and `mirrorsWhenOpen` hands her her partner's pursuit once everything is in the open (D99). With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `image` is for the parked portraits and reaches no prompt. | Lisa and her older sister |
-| `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter?, inCompany?, beat }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private she may take her own body (`look`); whether she does is the scene's call (D87). With the optional `manifestsAfter`, she can only once that flag is set or ready. With the optional gate `inCompany`, she may also speak and take her own body in company, in person (D98). `beat` is reported the first time she does. | Nadia's Ember |
+| `tie: { required, set, append, toPartner, triangle, start, partnerStart, mask, limits, secret, mirrorsWhenOpen, by: { <other id>: { set, append, gift, bond, partnerReacts, secret, photo } } }` | She exists in relation to another companion. With that companion in the party, `set` replaces her fields and `append` extends them (the tie's own, then the entry's), with `{partner}` filled in. Her call gets `bond` and `gift`; the other's call gets `toPartner`, `bond`, `partnerReacts` and whether she knows. `triangle.shared: false` rules out the shared beat. `start` and `partnerStart` give both starting views, `mask` the view her partner believes she holds, `limits` cap her view of her partner until their `until` beat, `secret` reaches only her call, and `mirrorsWhenOpen` hands her her partner's pursuit once everything is in the open (D99). With `required`, she can't join a party without a matching entry, and the setup screen doesn't offer it (`pairings` in `src/campaign/roster.js`). `photo` replaces fields of her picture identity with that partner, for the photo call only (D170). | Lisa and her older sister |
+| `secondVoice: { id, name, voice, look, relayed, admires, despises, manifestsAfter?, inCompany?, beat, photo? }` | A second character in her, with her own tastes (`admires`, `despises`), which her call always gets. In company, her call gets `relayed` and the companion speaks of her in the third person. In private she speaks with her own voice, and the campfire may give her lines (`second_voice`). In person and in private she may take her own body (`look`); whether she does is the scene's call (D87). With the optional `manifestsAfter`, she can only once that flag is set or ready. With the optional gate `inCompany`, she may also speak and take her own body in company, in person (D98). `beat` is reported the first time she does. The optional `photo` is a line that stands her beside the companion in a photo (D170). | Nadia's Ember |
 | `extraBeats: [{ id, cooldown?, once?, when?, text, cooling? }]` | A beat of her own, allowed once `cooldown` campaign turns have passed since the last, only once with `once`, and only while the gate `when` holds. Her campfire call gets `text` while it's allowed and `cooling` while it isn't. | Lisa's reconciliation |
 | `escalation: { name, tiers, rises, calms, actsOnOther? }` | A state that builds and falls slowly (D97): `rises` says what starts and raises it (D109); her call sees her level and every tier, says where it stands after each answer, and it falls at most one level an answer. From `actsOnOther`, she may act physically on the other companion. | Ruby's storms |
 | `inOthers: { affection, respect, trust }`, `recalibrates` | How she judges the other companion on each axis, and how she takes a wrong read (D94). | Fern loses respect, never fondness |
@@ -145,11 +145,17 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 ## 7. Wardrobe (D86)
 
-An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
+An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. A new game starts her in her file's `wears` (an outfit she owns from the start), or her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
 
-She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state. Getting wet, torn or half-undressed is texture, not a change of outfit.
+She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state, and holds only what play changes: what she has on and what she's gained in play. The outfits her file gives her are read from her file (with her live looks, §8) every time, so a change to them reaches every save (D171). If what she has on is taken away, she's in her usual outfit. Getting wet, torn or half-undressed is texture, not a change of outfit.
 
-## 8. Not carried over
+## 8. Live looks (D171)
+
+How a companion looks can change without a republish. The game's db holds live looks: for each companion, changes to the appearance fields of her file (`look`, `outfit`, `wears`, her `wardrobe`, `photo`, `secondVoice.look` and `photo`, and what a tie changes of these), by path, with null taking a file outfit away. The game lays them over the roster every time it loads (`withLooks` in `src/campaign/looks.js`), before it builds the party, so new games and loaded saves alike use them; saves keep only ids and play state, never her looks. Changes to any other field, or that make her file fail its schema, are left out and reported, so a bad edit can't break a game.
+
+They're made in the Dressing Room (`src/ui/dressing.js`), mounted in the game as a dev panel, where a draft can be applied, reverted, or sent to her notes for the design thread. Her file stays the base: the design thread folds live looks into it now and then, and clears them.
+
+## 9. Not carried over
 - Betrayal (D7).
 - The group-dynamic hints (`DYN_PHASE`, `pickDynamic`) and the hidden deliberation phase. Both shaped the companions' talk from outside; the huddle now lets them talk as themselves.
 - The DM writing companion dialogue inside narration. The companions' own talk happens in their own calls.

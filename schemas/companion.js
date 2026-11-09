@@ -28,6 +28,11 @@ const gate = list({ type: "object", minProperties: 1, additionalProperties: term
 // place when the player sits with that one alone, by the first alternative whose gate holds.
 const shapeshift = obj(["text"], { text: t, impersonation: list(obj(["chance"], { chance: { type: "integer", minimum: 0, maximum: 100 }, when: gate })) });
 
+// Her picture identity (D170): the fixed words in every photo prompt of her, written for an image model. `age` is
+// for a companion whose `age` isn't a number; `bold` keeps the word "sexy" on her main garment.
+const photoFields = { age: { type: "integer", minimum: 18 }, role: t, face: t, identity: t, garments: t, bold: { type: "boolean" }, expression: t };
+const photo = obj(["role", "face", "identity", "garments", "bold", "expression"], photoFields);
+
 // A tie's entry for one other companion: fields it sets or extends, and what it adds.
 const tieEntry = obj([], {
   set: { type: "object", additionalProperties: t },
@@ -39,8 +44,8 @@ const tieEntry = obj([], {
   grants: obj([], { shapeshift }),
   // What she holds against or hides from this partner: always in her own call, never in the partner's (D99).
   secret: t,
-  // The parked portrait feature (D24). On no allowlist.
-  image: { type: "object", additionalProperties: t },
+  // What this partner changes in her picture identity (D170). On no allowlist; only the photo call reads it.
+  photo: obj([], { role: t, face: t, identity: t, garments: t, expression: t }),
 });
 // A view of another companion: one number (affection) or any of the three axes (D92).
 const view = { oneOf: [{ type: "integer", minimum: -10, maximum: 10 }, { ...some(axes, { type: "integer", minimum: -10, maximum: 10 }) }] };
@@ -70,6 +75,7 @@ export const companionFileSchema = withDefs({
       fantasy: t,
       look: t,
       outfit: t,
+      photo,
       why: t,
       first: t,
       pursuit: t,
@@ -161,12 +167,16 @@ export const companionFileSchema = withDefs({
         // Optional: she may speak and take her own body in company, in person, while this gate holds (D98).
         inCompany: gate,
         beat: r("id"),
+        // Her in a photo beside the companion, when asked for (D170).
+        photo: t,
       }),
       extraBeats: list(obj(["id", "text"], { id: r("id"), cooldown: { type: "integer", minimum: 0 }, once: { type: "boolean" }, when: gate, text: t, cooling: t })),
       stageLabels: some(Object.keys(stageLabels), t),
       notes: list(obj(["when", "text"], { when: gate, text: t })),
       // Outfits she owns from the start besides her `outfit` (docs/spec/companions.md §7).
       wardrobe: { type: "object", propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: obj(["name", "text"], { name: t, text: t }) },
+      // The outfit she starts in: "usual" or a key of her `wardrobe` (D171).
+      wears: r("id"),
     },
   ),
 });

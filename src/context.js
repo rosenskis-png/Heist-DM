@@ -12,6 +12,7 @@ import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
 import { resolveParty, pairEntry } from "./campaign/roster.js";
 import { wearing, wardrobeFor } from "./campaign/wardrobe.js";
+import { photoOf } from "./campaign/photo.js";
 
 // Act-tagged worked examples: kept only from their act on (docs/spec/context.md §3).
 export function promptFor(text, act) {
@@ -166,7 +167,7 @@ function relationshipFor(c, rom, members) {
 const romanceOf = (env, members) => env.romance ?? Rel.newRomance(members, env.pairs ?? pairs, { act: env.act });
 
 // What the other companion sees of her, including how she looks right now (a shapeshifter's current form, D101).
-const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c) } : {}), abilities: abilitiesFor(c.abilities) });
+export const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c) } : {}), abilities: abilitiesFor(c.abilities) });
 
 // Compact JSON: indentation would cost about a third more input on every call.
 const block = (title, body) => `## ${title}\n\n${typeof body === "string" ? body : "```json\n" + JSON.stringify(body) + "\n```"}`;
@@ -313,7 +314,7 @@ export function partyInput(env, c, companions, huddle, schema) {
 
 // Her declared special cases that shape how she acts in an encounter (D114): what she has on, her second voice,
 // her shape, and her tie without its secret. Gated fields, notes and her private agenda stay at camp (D79).
-function encounterCases(c, rom, members, scene) {
+export function encounterCases(c, rom, members, scene) {
   const own = ownProfile(c, rom, members, scene, { planning: false });
   const out = {};
   for (const k of ["outfit", "second_voice", "shapeshift", "you_know"]) if (own[k] !== undefined) out[k] = own[k];
@@ -363,6 +364,28 @@ export function campfireInput(env, c, self, others, schema) {
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
+}
+
+// The photo call (docs/spec/calls/photo.md, D170): her picture identity, how the game describes her and what she
+// has on, and the moment to catch. No name, no story and no style guide: the slots are for an image model. `c.moment`
+// is the moment in words; `c.beside` asks for her second voice beside her, when she has a photo line for it.
+export function photoInput(env, c, self, others, schema) {
+  const [me, ...rest] = resolveParty([self, ...others], env.world);
+  const rom = romanceOf(env, [me, ...rest]);
+  const id = photoOf(me, rom);
+  const her = {
+    age: id.age,
+    role: id.role,
+    face: id.face,
+    identity: id.identity,
+    look: rom.rel[me.id]?.form ?? me.look,
+    wearing: wearing(rom, me),
+    garments_line: id.garments,
+    register: id.bold ? "bold" : "soft",
+    usual_expression: id.expression,
+    ...(c.beside && id.beside ? { second_voice_beside_her: true } : {}),
+  };
+  return compose([block("Your job", env.prompts.photo), block("Output format", shapeText(schema)), block("She is", her), block("The moment", c.moment)]);
 }
 
 export function graderInput(flaws, said) {
