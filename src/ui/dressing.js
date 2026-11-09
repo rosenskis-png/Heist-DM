@@ -1,24 +1,29 @@
-// The Dressing Room (D170): the designer's bench for how companions look. Pick a companion and her partner (a tie
-// changes her look and outfit) and see her face and body and her outfit sorted from her file's own sentences;
-// exactly what each call is sent about her appearance, from the real context functions; and her photo prompt
-// (docs/spec/calls/photo.md). A draft over any field her appearance comes from re-runs all of it live, and goes to
-// her notes as a change request. Notes are saved to the page's db for the design thread to read and apply.
-import { companions as authored } from "../content/companions/index.js";
-import { pairs } from "../content/pairs.js";
-import { classes } from "../content/classes.js";
-import { photo as PHOTO } from "../content/photo.js";
-import { resolveParty, partyProblems } from "../src/campaign/roster.js";
-import { worldOf, inWorld } from "../src/campaign/world.js";
-import * as Rel from "../src/campaign/relationship.js";
-import { equip, wardrobeFor, wearing } from "../src/campaign/wardrobe.js";
-import { photoOf, photoPrompt } from "../src/campaign/photo.js";
-import { ownProfile, encounterCases, publicProfile, campfireInput, partyInput } from "../src/context.js";
-import { photoCall } from "../src/calls/photo.js";
-import { CallFailed } from "../src/ask.js";
-import { campfireSchema, partySchema } from "../schemas/index.js";
-import { load as loadEncounter } from "../src/engine/index.js";
+// The Dressing Room (D170, D171): the designer's tool for how companions look, mounted by the bench page
+// (bench/dressing.html) and, as a dev panel, by the game. Pick a companion and her partner (a tie changes her look
+// and outfit) and see her face and body and her outfit sorted from her own sentences; exactly what each call is sent
+// about her appearance, from the real context functions; and her photo prompt (docs/spec/calls/photo.md). A draft
+// over any field her appearance comes from re-runs all of it live. Mounted with `live`, inside the game, a draft can
+// be applied to the game's live looks (src/campaign/looks.js), which the game lays over the files every time it
+// loads; anywhere, it can go to her notes as a change request. Notes and live looks are kept in the page's db,
+// where the design thread reads them.
+import { companions as authored } from "../../content/companions/index.js";
+import { pairs } from "../../content/pairs.js";
+import { classes } from "../../content/classes.js";
+import { photo as PHOTO } from "../../content/photo.js";
+import { resolveParty, partyProblems } from "../campaign/roster.js";
+import { worldOf, inWorld } from "../campaign/world.js";
+import * as Rel from "../campaign/relationship.js";
+import { equip, wardrobeFor, wearing, owned, equipped } from "../campaign/wardrobe.js";
+import { withLooks, withChanges, changeProblems, getPath } from "../campaign/looks.js";
+import { css } from "./dressing-css.js";
+import { photoOf, photoPrompt } from "../campaign/photo.js";
+import { ownProfile, encounterCases, publicProfile, campfireInput, partyInput } from "../context.js";
+import { photoCall } from "../calls/photo.js";
+import { CallFailed } from "../ask.js";
+import { campfireSchema, partySchema } from "../../schemas/index.js";
+import { load as loadEncounter } from "../engine/index.js";
 
-const url = (p) => new URL(`../${p}`, import.meta.url);
+const url = (p) => new URL(`../../${p}`, import.meta.url);
 const h = (tag, attrs = {}, ...kids) => {
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs ?? {})) {
@@ -93,27 +98,30 @@ let notes = store.get("dress.localNotes", []);
 
 // ---------- drafts ----------
 
-const getPath = (o, path) => path.split(".").reduce((x, k) => (x == null ? undefined : x[k]), o);
-function setPath(o, path, v) {
-  const ks = path.split(".");
-  let x = o;
-  for (const k of ks.slice(0, -1)) x = x[k] ??= {};
-  x[ks.at(-1)] = v;
-}
+// Live looks, by companion (`looks/<id>` in the db: { changes, at }), and the roster with them laid over the files.
+let looks = {};
+let live = { roster: authored, problems: {} };
+const setLooks = (next) => ((looks = next), (live = withLooks(authored, looks)));
+const liveOf = (id) => looks[id] ?? {};
 const draftOf = (id) => S.drafts[id] ?? {};
-// Her file with the draft applied: what every preview on the page runs on.
-function drafted(id) {
-  const d = draftOf(id);
-  if (!Object.keys(d).length) return authored[id];
-  const c = structuredClone(authored[id]);
-  for (const [p, v] of Object.entries(d)) setPath(c, p, v);
-  return c;
-}
+// Her file, with her live looks and then the draft: what every preview on the page runs on.
+const drafted = (id) => withChanges(live.roster[id], draftOf(id));
+// What a field says before the draft: her live looks, or her file.
+const baseOf = (id, path) => getPath(live.roster[id], path);
 function setDraft(id, path, v) {
-  const was = getPath(authored[id], path);
+  const was = baseOf(id, path);
   const d = { ...draftOf(id) };
+  // A field of something the draft already sets whole (an outfit it added) changes that instead.
+  const whole = Object.keys(d).find((k) => path.startsWith(`${k}.`) && d[k] && typeof d[k] === "object");
+  if (whole) {
+    const obj = structuredClone(d[whole]);
+    obj[path.slice(whole.length + 1)] = v;
+    S.drafts = { ...S.drafts, [id]: { ...d, [whole]: obj } };
+    return save();
+  }
   if (v === was || (v === "" && was === undefined)) delete d[path];
   else d[path] = v;
+  if (v === null) for (const k of Object.keys(d)) if (k.startsWith(`${path}.`)) delete d[k];
   const all = { ...S.drafts, [id]: d };
   if (!Object.keys(d).length) delete all[id];
   S.drafts = all;
@@ -140,7 +148,7 @@ function sceneOf(id) {
   let rom = Rel.newRomance(members, pairs, { act: 1 });
   if (S.late) Object.assign(rom.rel[me.id], { heat: 9, intimacy: 8, payoff: true, involved: true, vuln: true, deep: true });
   const eq = S.equipped[id];
-  if (eq && rom.wardrobe[me.id]?.owned[eq]) rom = equip(rom, me.id, eq);
+  if (eq && owned(rom, me)[eq]) rom = equip(rom, me, eq);
   return { id, pid, self, other, members, me, them, rom };
 }
 
@@ -155,8 +163,8 @@ function lookSources(c, pid) {
   return out;
 }
 function outfitSource(c, pid, rom) {
-  const eq = rom.wardrobe[c.id]?.equipped ?? "usual";
-  if (eq !== "usual") return { path: `wardrobe.${eq}.text`, label: rom.wardrobe[c.id].owned[eq].name };
+  const eq = equipped(rom, c);
+  if (eq !== "usual") return { path: `wardrobe.${eq}.text`, label: owned(rom, c)[eq].name };
   if (tieEntry(c, pid)?.set?.outfit !== undefined) return { path: `tie.by.${pid}.set.outfit`, label: `Usual, with ${authored[pid].name}` };
   if (tieEntry(c, pid) && c.tie.set?.outfit !== undefined) return { path: "tie.set.outfit", label: "Usual, from her tie" };
   return { path: "outfit", label: "Usual outfit" };
@@ -295,7 +303,8 @@ const toggle = (label, on, onclick) => h("button", { class: `btn ghost small${on
 
 // One editable field of her file: what it says now, the draft, and where it lives.
 function field(id, path, label, { rows = 3, number = false, check = false } = {}) {
-  const was = getPath(authored[id], path);
+  const was = baseOf(id, path);
+  const isLive = path in liveOf(id);
   const d = draftOf(id);
   const changed = path in d;
   const value = changed ? d[path] : was ?? (check ? false : "");
@@ -307,7 +316,7 @@ function field(id, path, label, { rows = 3, number = false, check = false } = {}
   return h(
     "label",
     { class: "field" },
-    h("span", {}, label, h("span", { class: "path" }, path), changed ? h("button", { class: "btn ghost small", onclick: update((e) => (e.preventDefault(), setDraft(id, path, was))) }, "Undo") : null),
+    h("span", {}, label, h("span", { class: "path" }, path), isLive ? h("span", { class: "tag src" }, "live") : null, changed ? h("button", { class: "btn ghost small", onclick: update((e) => (e.preventDefault(), setDraft(id, path, was))) }, "Undo") : null),
     control,
   );
 }
@@ -371,7 +380,7 @@ function lookCard(sc) {
     editing
       ? h("div", { class: "editor" },
         h("p", { class: "tiny muted" }, `Edits to ${fileOf(id)}. Everything on the page follows the draft; nothing is saved to the file until the design thread applies it.`),
-        lookSources(authored[id], pid).map((s) => field(id, s.path, s.label, { rows: 4 })),
+        lookSources(live.roster[id], pid).map((s) => field(id, s.path, s.label, { rows: 4 })),
         sv ? field(id, "secondVoice.look", `${sv.name}'s look`, { rows: 3 }) : null)
       : null,
   );
@@ -379,37 +388,50 @@ function lookCard(sc) {
 
 function outfitCard(sc) {
   const { id, pid, self, me, rom } = sc;
-  const w = rom.wardrobe[me.id];
+  const all = owned(rom, me);
+  const on = equipped(rom, me);
   const src = outfitSource(self, pid, rom);
   const text = wearing(rom, me);
   const raw = S.raw.outfit;
   const editing = S.editing.outfit;
-  const own = Object.entries(w.owned);
-  const fileOutfits = Object.keys(self.wardrobe ?? {});
+  const extra = Object.keys(self.wardrobe ?? {});
+  const starts = self.wears && all[self.wears] ? self.wears : "usual";
   const addOutfit = update(() => {
-    const oid = `new_${Object.keys(self.wardrobe ?? {}).filter((k) => k.startsWith("new_")).length + 1}`;
-    setDraft(id, `wardrobe.${oid}.name`, "New outfit");
-    setDraft(id, `wardrobe.${oid}.text`, "");
+    let n = 1;
+    while (self.wardrobe?.[`outfit_${n}`] || draftOf(id)[`wardrobe.outfit_${n}`] === null) n++;
+    const oid = `outfit_${n}`;
+    setDraft(id, `wardrobe.${oid}`, { name: "New outfit", text: "Describe it here." });
     S.equipped = { ...S.equipped, [id]: oid };
     S.editing.outfit = true;
   });
+  const remove = (oid) =>
+    update(() => {
+      setDraft(id, `wardrobe.${oid}`, null);
+      if (S.equipped[id] === oid) S.equipped = { ...S.equipped, [id]: "usual" };
+      if (self.wears === oid) setDraft(id, "wears", undefined);
+    });
   return h(
     "section",
     { class: "card", id: "outfit-card" },
     h("div", { class: "head" }, h("h2", {}, "Outfit"),
       h("div", { class: "row" }, seg("outfit-view", [[false, "Sorted"], [true, "As written"]], !!raw, update((v) => (S.raw.outfit = v))), toggle("Edit", editing, update(() => (S.editing.outfit = !editing))))),
-    h("div", { class: "row" }, h("span", { class: "small muted" }, "Wearing"),
-      own.length > 1
-        ? seg("wearing", own.map(([oid, o]) => [oid, o.name]), w.equipped, update((v) => (S.equipped = { ...S.equipped, [id]: v })))
-        : h("span", { class: "chip ok" }, src.label),
-      h("button", { class: "btn ghost small", onclick: addOutfit }, "Try a new outfit")),
+    h("div", { class: "row" }, h("span", { class: "small muted" }, "Previewing"),
+      Object.keys(all).length > 1 ? seg("wearing", Object.entries(all).map(([oid, o]) => [oid, o.name]), on, update((v) => (S.equipped = { ...S.equipped, [id]: v }))) : h("span", { class: "chip ok" }, src.label)),
     raw ? h("div", { class: "raw" }, h("p", {}, text || "(empty)")) : sortedList(sortOutfit(text), OUTFIT_GROUPS, "Nothing written yet."),
     h("p", { class: "tiny muted" }, `Written in ${fileOf(id)} → ${src.path}. Getting wet, torn or half-undressed is texture in the scene, not a change of outfit.`),
+    h("div", { class: "row" },
+      h("label", { class: "inline" }, "She starts a game in",
+        h("select", { id: `dr-wears-${id}`, onchange: update((e) => setDraft(id, "wears", e.target.value === "usual" && !live.roster[id].wears ? undefined : e.target.value)) },
+          Object.entries(all).filter(([oid]) => oid === "usual" || extra.includes(oid)).map(([oid, o]) => h("option", { value: oid, selected: oid === starts }, o.name)))),
+      h("button", { class: "btn ghost small", onclick: addOutfit }, "Add an outfit")),
     editing
       ? h("div", { class: "editor" },
-        h("p", { class: "tiny muted" }, `Edits to ${fileOf(id)}. A new outfit becomes one more she owns from the start (her file's wardrobe).`),
-        field(id, outfitSource(authored[id], pid, { wardrobe: { [id]: { equipped: "usual" } } }).path, "Her usual outfit", { rows: 4 }),
-        [...new Set([...fileOutfits, ...Object.keys(authored[id].wardrobe ?? {})])].flatMap((oid) => [field(id, `wardrobe.${oid}.name`, "Outfit name", { rows: 1 }), field(id, `wardrobe.${oid}.text`, "What it looks like", { rows: 3 })]))
+        h("p", { class: "tiny muted" }, `Edits to ${fileOf(id)}. Outfits added here are hers from the start of every game, saves included.`),
+        field(id, outfitSource(live.roster[id], pid, null).path, "Her usual outfit", { rows: 4 }),
+        extra.map((oid) => h("div", { class: "sub" },
+          field(id, `wardrobe.${oid}.name`, "Outfit name", { rows: 1 }),
+          field(id, `wardrobe.${oid}.text`, "What it looks like", { rows: 3 }),
+          h("div", { class: "row" }, h("button", { class: "btn danger small", onclick: remove(oid) }, "Remove this outfit")))))
       : null,
   );
 }
@@ -559,7 +581,7 @@ function photoCard(sc) {
   const prompt = photoPrompt(pic, ps.slots, { beside: ps.beside });
   const out = h("pre", { class: "prompt-out", id: "photo-prompt" }, prompt);
   const lookGap = missing(me.look, `${pic.role} ${pic.face} ${pic.identity}`);
-  const usual = (rom.wardrobe[me.id]?.equipped ?? "usual") === "usual";
+  const usual = equipped(rom, me) === "usual";
   const outfitGap = usual && me.photo?.garments ? missing(wearing(rom, me), pic.garments) : [];
   const setSlot = (k) => update((e) => {
     const v = e.target.type === "checkbox" ? e.target.checked : e.target.value;
@@ -570,7 +592,7 @@ function photoCard(sc) {
     const p = PHOTO.scenes[Number(e.target.value)];
     if (p) ps.slots = { ...ps.slots, setting: p.setting, light: p.light, surroundings: p.surroundings, light_source: p.light_source, grit: p.grit };
   });
-  const ageEditable = typeof authored[id].age !== "number" || authored[id].photo?.age !== undefined;
+  const ageEditable = typeof live.roster[id].age !== "number" || live.roster[id].photo?.age !== undefined;
   return h(
     "section",
     { class: "card", id: "photo-card" },
@@ -582,13 +604,13 @@ function photoCard(sc) {
     h("div", { class: "chips" },
       lookGap.length ? h("span", { class: "chip near" }, `In her look, not her picture: ${lookGap.join(", ")}`) : h("span", { class: "chip ok" }, "Her picture covers her look's colours and features"),
       outfitGap.length ? h("span", { class: "chip info" }, `Left out of her garments line: ${outfitGap.join(", ")}`) : null,
-      !authored[id].photo ? h("span", { class: "chip bad" }, "No picture identity in her file: defaults in use") : null),
+      !live.roster[id].photo ? h("span", { class: "chip bad" }, "No picture identity in her file: defaults in use") : null),
     editing
       ? h("div", { class: "editor" },
         h("p", { class: "tiny muted" }, `Edits to ${fileOf(id)}. Ordinary words, short and concrete: these go to an image model, not a reader.`),
         ageEditable ? field(id, "photo.age", "Age in the picture", { number: true }) : null,
         PHOTO_KEYS.map((k) => {
-          const s = photoSource(authored[id], pid, k);
+          const s = photoSource(live.roster[id], pid, k);
           return field(id, s.path, `${k[0].toUpperCase()}${k.slice(1)}${s.label === "Her picture" ? "" : ` (${s.label})`}`, { rows: k === "role" || k === "face" ? 2 : 3 });
         }),
         field(id, "photo.bold", 'Bold (keeps "sexy")', { check: true }),
@@ -712,16 +734,51 @@ function notesCard(sc) {
   );
 }
 
-// ---------- drafts ----------
+// ---------- drafts and live looks ----------
+
+const dropDraft = (id) => (S.drafts = Object.fromEntries(Object.entries(S.drafts).filter(([k]) => k !== id)));
+const shownValue = (v) => (v === null ? "(removed)" : v === undefined ? "" : typeof v === "object" ? JSON.stringify(v) : String(v));
+
+// Write her live looks: the changes from her file, checked first so a bad edit never reaches the game.
+async function writeLooks(id, changes) {
+  const problems = changeProblems(authored[id], changes);
+  if (problems.length) {
+    S.flash = `Not applied: ${problems.slice(0, 3).join("; ")}`;
+    render();
+    return false;
+  }
+  try {
+    if (Object.keys(changes).length) await db.collection("looks").doc(id).set({ changes, at: Date.now() });
+    else await db.collection("looks").doc(id).delete();
+    S.flash = "Applied to the game. New and loaded games use it.";
+    opts.onLooks?.(withLooks(authored, { ...looks, [id]: changes }).roster);
+    return true;
+  } catch (e) {
+    S.flash = `Couldn't apply: ${errorText(e)}`;
+    render();
+    return false;
+  }
+}
 
 function draftCard(sc) {
   const d = draftOf(sc.id);
-  const changes = Object.entries(d).map(([path, to]) => ({ path, from: getPath(authored[sc.id], path) ?? "", to: to ?? "" }));
+  const changes = Object.entries(d).map(([path, to]) => ({ path, from: shownValue(baseOf(sc.id, path)), to: shownValue(to) }));
   const send = async () => {
     const ok = await saveNote({ kind: "change", text: S.sendText.trim(), partner: sc.pid, file: fileOf(sc.id), changes });
     if (!ok) return;
-    S.drafts = Object.fromEntries(Object.entries(S.drafts).filter(([k]) => k !== sc.id));
+    dropDraft(sc.id);
     S.sendText = "";
+    S.reviewing = false;
+    save();
+    render();
+  };
+  const apply = async () => {
+    // The draft wins; a removed outfit takes its live fields with it; a change back to the file's value isn't one.
+    const gone = Object.keys(d).filter((p) => d[p] === null);
+    const kept = Object.fromEntries(Object.entries(liveOf(sc.id)).filter(([p]) => !gone.some((g) => p.startsWith(`${g}.`))));
+    const next = Object.fromEntries(Object.entries({ ...kept, ...d }).filter(([p, v]) => v !== undefined && JSON.stringify(v) !== JSON.stringify(getPath(authored[sc.id], p))));
+    if (!(await writeLooks(sc.id, next))) return;
+    dropDraft(sc.id);
     S.reviewing = false;
     save();
     render();
@@ -730,14 +787,43 @@ function draftCard(sc) {
     "section",
     { class: "card", id: "draft-card" },
     h("div", { class: "head" }, h("h2", {}, `Draft for ${sc.me.name}`), h("button", { class: "btn ghost small", onclick: update(() => (S.reviewing = false)) }, "Close")),
-    changes.map((c) => h("div", { class: "field" }, h("span", { class: "path" }, `${fileOf(sc.id)} → ${c.path}`), diffView(String(c.from), String(c.to)))),
+    changes.map((c) => h("div", { class: "field" }, h("span", { class: "path" }, `${fileOf(sc.id)} → ${c.path}`), diffView(c.from, c.to))),
     h("textarea", { id: "send-text", rows: 2, placeholder: "Anything the design thread should know (optional)", oninput: (e) => (S.sendText = e.target.value) }, S.sendText),
-    h("div", { class: "row" }, h("button", { class: "btn", onclick: send }, "Send to her notes"), h("span", { class: "tiny muted" }, "Sending clears the draft; the note keeps it, and can load it back.")),
+    h("div", { class: "row" },
+      opts.live && db ? h("button", { class: "btn", onclick: apply }, "Apply to the game") : null,
+      h("button", { class: opts.live && db ? "btn ghost" : "btn", onclick: send }, "Send to her notes"),
+      S.flash ? h("span", { class: "status" }, S.flash) : null),
+    h("p", { class: "tiny muted" }, opts.live && db
+      ? "Applying makes it part of her looks in this game at once, for new games and saves alike, until it's reverted or folded into her file. Sending files it as a change request for the design thread instead."
+      : "Sending clears the draft; the note keeps it, and can load it back."),
+  );
+}
+
+function liveCard(sc) {
+  const changes = liveOf(sc.id);
+  const paths = Object.keys(changes);
+  const problems = live.problems[sc.id];
+  if (!paths.length && !problems) return null;
+  const confirming = S.confirm === "revert-all";
+  return h(
+    "section",
+    { class: "card", id: "live-card" },
+    h("div", { class: "head" }, h("h2", {}, "Live in the game"), h("span", { class: "chip info" }, `${paths.length} change${paths.length === 1 ? "" : "s"} over her file`)),
+    problems ? h("p", { class: "err small" }, `These don't fit her file, so the game ignores them: ${problems.slice(0, 3).join("; ")}`) : null,
+    paths.map((p) => h("div", { class: "field" },
+      h("span", {}, h("span", { class: "path" }, `${fileOf(sc.id)} → ${p}`), opts.live && db ? h("button", { class: "btn ghost small", onclick: () => writeLooks(sc.id, Object.fromEntries(Object.entries(changes).filter(([k]) => k !== p))) }, "Revert") : null),
+      diffView(shownValue(getPath(authored[sc.id], p)), shownValue(changes[p])))),
+    h("p", { class: "tiny muted" }, "The design thread can fold these into her file and clear them; until then the game lays them over it every time it loads."),
+    opts.live && db
+      ? h("div", { class: "row" }, confirming
+        ? [h("button", { class: "btn danger small", onclick: () => ((S.confirm = null), writeLooks(sc.id, {})) }, "Revert all"), h("button", { class: "btn ghost small", onclick: update(() => (S.confirm = null)) }, "Keep")]
+        : h("button", { class: "btn danger small", onclick: update(() => (S.confirm = "revert-all")) }, "Revert all to her file"))
+      : null,
   );
 }
 
 function draftBar() {
-  const bar = document.getElementById("draftbar");
+  const bar = R.draftbar;
   const n = Object.keys(draftOf(S.id)).length;
   if (S.tab !== "companion" || !n) return bar.replaceChildren();
   const confirming = S.confirm === "discard";
@@ -745,8 +831,8 @@ function draftBar() {
     h("div", { class: "draftbar" }, h("div", { class: "wrap" },
       h("span", { class: "grow" }, `Draft: ${n} change${n === 1 ? "" : "s"} to ${authored[S.id].name}. Everything above shows it.`),
       confirming
-        ? [h("button", { class: "btn danger small", onclick: update(() => { S.drafts = Object.fromEntries(Object.entries(S.drafts).filter(([k]) => k !== S.id)); S.confirm = null; S.reviewing = false; }) }, "Discard it"), h("button", { class: "btn ghost small", onclick: update(() => (S.confirm = null)) }, "Keep")]
-        : [h("button", { class: "btn small", onclick: update(() => { S.reviewing = true; scrollTo({ top: 0, behavior: "smooth" }); }) }, "Review and send"), h("button", { class: "btn ghost small", onclick: update(() => (S.confirm = "discard")) }, "Discard")])),
+        ? [h("button", { class: "btn danger small", onclick: update(() => { dropDraft(S.id); S.confirm = null; S.reviewing = false; }) }, "Discard it"), h("button", { class: "btn ghost small", onclick: update(() => (S.confirm = null)) }, "Keep")]
+        : [h("button", { class: "btn small", onclick: update(() => { S.reviewing = true; R.top.scrollIntoView({ behavior: "smooth" }); }) }, opts.live && db ? "Review and apply" : "Review and send"), h("button", { class: "btn ghost small", onclick: update(() => (S.confirm = "discard")) }, "Discard")])),
   );
 }
 
@@ -774,7 +860,7 @@ function lineup() {
 // ---------- render ----------
 
 function strip() {
-  document.getElementById("strip").replaceChildren(
+  R.strip.replaceChildren(
     ...ids.map((id) => {
       const c = authored[id];
       const open = notes.filter((n) => n.who === id && n.status !== "done").length;
@@ -784,14 +870,14 @@ function strip() {
         draftOf(id) && Object.keys(draftOf(id)).length ? h("span", { class: "badge draft" }, "draft") : null);
     }),
   );
-  document.getElementById("tabs").replaceChildren(
+  R.tabs.replaceChildren(
     ...[["companion", "Companion"], ["lineup", "Lineup"]].map(([t, l]) => h("button", { "aria-current": S.tab === t ? "page" : "false", onclick: update(() => (S.tab = t)) }, l)),
   );
-  document.getElementById("dbstate").textContent = { loading: "Connecting…", slow: "Notes are slow to load", db: "Notes saved for the design thread", local: "Notes in this browser", error: "Notes couldn't load" }[dbMode];
+  R.dbstate.textContent = { loading: "Connecting…", slow: "Notes are slow to load", db: "Notes saved for the design thread", local: "Notes in this browser", error: "Notes couldn't load" }[dbMode];
 }
 
 function render() {
-  const main = document.getElementById("main");
+  const main = R.main;
   const focused = document.activeElement;
   const fid = focused?.id;
   const sel = fid && focused.selectionStart != null ? [focused.selectionStart, focused.selectionEnd] : null;
@@ -801,11 +887,11 @@ function render() {
     if (S.tab === "lineup") parts = [h("p", { class: "small muted" }, "Every companion at a glance, with her first partner where a tie changes her: the first sentence of each group, to spot two who read alike."), lineup()];
     else {
       const sc = sceneOf(S.id);
-      parts = [S.reviewing && Object.keys(draftOf(S.id)).length ? draftCard(sc) : null, hero(sc), lookCard(sc), outfitCard(sc), sendsCard(sc), photoCard(sc), notesCard(sc)];
+      parts = [S.reviewing && Object.keys(draftOf(S.id)).length ? draftCard(sc) : null, hero(sc), liveCard(sc), lookCard(sc), outfitCard(sc), sendsCard(sc), photoCard(sc), notesCard(sc)];
     }
   } catch (e) {
     console.error(e);
-    parts = [h("section", { class: "card" }, h("h2", {}, "This draft doesn't run"), h("p", { class: "err" }, errorText(e)), h("button", { class: "btn ghost", onclick: update(() => (S.drafts = Object.fromEntries(Object.entries(S.drafts).filter(([k]) => k !== S.id)))) }, "Discard the draft"))];
+    parts = [h("section", { class: "card" }, h("h2", {}, "This draft doesn't run"), h("p", { class: "err" }, errorText(e)), h("button", { class: "btn ghost", onclick: update(() => dropDraft(S.id)) }, "Discard the draft"))];
   }
   main.replaceChildren(...parts.filter(Boolean));
   draftBar();
@@ -818,10 +904,13 @@ function render() {
   }
 }
 
-// ---------- start ----------
+// ---------- mounting ----------
+
+let opts = {};
+const R = {};
 
 async function connect() {
-  [sample, db] = await Promise.all([window.claude?.use?.("sample") ?? null, window.claude?.use?.("db") ?? null]);
+  [sample, db] = await Promise.all([opts.sample !== undefined ? opts.sample : window.claude?.use?.("sample") ?? null, opts.db !== undefined ? opts.db : window.claude?.use?.("db") ?? null]);
   if (!db) {
     dbMode = "local";
     render();
@@ -845,10 +934,32 @@ async function connect() {
       render();
     },
   );
+  // The live looks this page applies (the game's own, when mounted in it).
+  db.collection("looks").onSnapshot(
+    (snap) => {
+      setLooks(Object.fromEntries(snap.docs.map((d) => [d.id, d.data().changes ?? {}])));
+      render();
+    },
+    (e) => console.warn("looks", e),
+  );
   render();
 }
 
-async function start() {
+// Mount the Dressing Room in `root`. Options: `live` (inside the game: drafts can be applied to its live looks),
+// `db` and `sample` (the runtime's, when the host already has them; otherwise the page asks for its own), `looks`
+// (the live looks the host already loaded) and `onLooks(roster)` (called with the new roster after an apply, so the
+// host can rebuild its party). The page fetches its prompts and the Cells packet from the repo's own paths.
+export async function mountDressingRoom(root, options = {}) {
+  opts = options;
+  if (opts.looks) setLooks(opts.looks);
+  if (!document.getElementById("dressing-room-css")) document.head.append(h("style", { id: "dressing-room-css" }, css));
+  R.top = h("div", { class: "dr-top" });
+  R.tabs = h("nav", { "aria-label": "Views" });
+  R.dbstate = h("span", { class: "dbstate" });
+  R.strip = h("div", { class: "wrap strip", role: "toolbar", "aria-label": "Companions" });
+  R.main = h("main", { class: "wrap" }, h("p", { class: "muted" }, "Loading the roster…"));
+  R.draftbar = h("div");
+  root.replaceChildren(h("div", { class: "dr" }, R.top, h("header", { class: "top" }, h("div", { class: "wrap bar" }, h("h1", {}, "Dressing Room"), R.tabs, R.dbstate, opts.onClose ? h("button", { class: "btn ghost small", onclick: opts.onClose }, "Close") : null), R.strip), R.main, R.draftbar));
   render();
   try {
     const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
@@ -862,4 +973,13 @@ async function start() {
   connect();
 }
 
-start();
+// The live looks stored in a db, as `withLooks` takes them (src/campaign/looks.js): for the game to lay over the
+// roster when it starts, before it builds a party. Empty when there are none or the db can't be read.
+export async function readLooks(db) {
+  try {
+    const snap = await db.collection("looks").get();
+    return Object.fromEntries(snap.docs.map((d) => [d.id, d.data().changes ?? {}]));
+  } catch {
+    return {};
+  }
+}

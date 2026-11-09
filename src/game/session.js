@@ -14,12 +14,13 @@ export function playerSheet(player) {
 
 // The party: the player, then the two companions the player chose, which the packet places by slot (D8).
 // Each companion as she is in the adventure's world: her stories' role nouns filled in (D150).
-export const partyFor = (player, companionIds, world = worldOf()) => [playerSheet(player), ...companionIds.map((id) => inWorld(authored[id], world))];
+// `roster` is the companions with any live looks laid over them (src/campaign/looks.js, D171); their files by default.
+export const partyFor = (player, companionIds, world = worldOf(), roster = authored) => [playerSheet(player), ...companionIds.map((id) => inWorld(roster[id], world))];
 
 // `companions` is the two companion ids the player chose.
 // `world` is the adventure's world: Gravenhold, or one the pitch call wrote (D151), kept whole in the save.
-export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1, world = worldOf() }) {
-  const party = partyFor(player, companions, world);
+export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1, world = worldOf(), roster = authored }) {
+  const party = partyFor(player, companions, world, roster);
   const state = load({ packet, party, seed });
   const session = {
     v: 3,
@@ -107,12 +108,12 @@ export function serialize(session) {
   return json;
 }
 
-export function restore(json, packet) {
+export function restore(json, packet, roster = authored) {
   const saved = typeof json === "string" ? JSON.parse(json) : json;
   if (saved.start.packet !== packet.id) throw new Error(`this save is for ${saved.start.packet}, not ${packet.id}`);
   // A save from before worlds (D150) is in Gravenhold.
   const world = saved.world ?? worldOf();
-  const party = partyFor(saved.player, saved.companions, world);
+  const party = partyFor(saved.player, saved.companions, world, roster);
   // A save from before fights were plans (D130) has HP instead of toughness, conditions and threats.
   const { hp, ...state } = saved.state;
   state.toughness ??= Object.fromEntries(packet.people.map((p) => [p.id, toughnessOf(p)]));

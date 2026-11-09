@@ -175,6 +175,8 @@ export const companionFileSchema = withDefs({
       notes: list(obj(["when", "text"], { when: gate, text: t })),
       // Outfits she owns from the start besides her `outfit` (docs/spec/companions.md §7).
       wardrobe: { type: "object", propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: obj(["name", "text"], { name: t, text: t }) },
+      // The outfit she starts in: "usual" or a key of her `wardrobe` (D171).
+      wears: r("id"),
     },
   ),
 });

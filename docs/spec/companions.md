@@ -145,11 +145,17 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 
 ## 7. Wardrobe (D86)
 
-An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
+An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. A new game starts her in her file's `wears` (an outfit she owns from the start), or her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
 
-She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state. Getting wet, torn or half-undressed is texture, not a change of outfit.
+She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state, and holds only what play changes: what she has on and what she's gained in play. The outfits her file gives her are read from her file (with her live looks, §8) every time, so a change to them reaches every save (D171). If what she has on is taken away, she's in her usual outfit. Getting wet, torn or half-undressed is texture, not a change of outfit.
 
-## 8. Not carried over
+## 8. Live looks (D171)
+
+How a companion looks can change without a republish. The game's db holds live looks: for each companion, changes to the appearance fields of her file (`look`, `outfit`, `wears`, her `wardrobe`, `photo`, `secondVoice.look` and `photo`, and what a tie changes of these), by path, with null taking a file outfit away. The game lays them over the roster every time it loads (`withLooks` in `src/campaign/looks.js`), before it builds the party, so new games and loaded saves alike use them; saves keep only ids and play state, never her looks. Changes to any other field, or that make her file fail its schema, are left out and reported, so a bad edit can't break a game.
+
+They're made in the Dressing Room (`src/ui/dressing.js`), mounted in the game as a dev panel, where a draft can be applied, reverted, or sent to her notes for the design thread. Her file stays the base: the design thread folds live looks into it now and then, and clears them.
+
+## 9. Not carried over
 - Betrayal (D7).
 - The group-dynamic hints (`DYN_PHASE`, `pickDynamic`) and the hidden deliberation phase. Both shaped the companions' talk from outside; the huddle now lets them talk as themselves.
 - The DM writing companion dialogue inside narration. The companions' own talk happens in their own calls.

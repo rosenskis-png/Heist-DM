@@ -53,5 +53,8 @@ Gravenhold's `Game` component is built around one chat log and is not reused. It
 - **Saves:** save now, export the save as JSON, and import one from the title screen (D74).
 - **Read aloud** (D104): narration and companion lines spoken with the browser's voices (`src/ui/speech.js`), downloaded Premium and Enhanced voices first. A voice per companion, her second voice and the narrator, each choosable and previewable; each companion speaks at her file's `rate`; asides are quieter; a disguised companion speaks in the voice of the face she wears. Speech starts from a tap (iOS requires it), then can read each new answer automatically. On the bench it lives in Camp.
 
+## Dressing Room (D171)
+A dev panel behind the menu: the Dressing Room (`src/ui/dressing.js`), mounted with `live`, over the page. It edits how companions look (`docs/spec/companions.md` §8) and applies changes to the game's live looks at once. The page reads the live looks (`readLooks`) and lays them over the roster (`withLooks`) when it starts, and again when the panel applies a change (`onLooks`), before it builds a party.
+
 ## Developer view
 A panel behind the menu showing every call this session: its tier, size and time, whether it retried and why, its raw output and its assembled input. It also shows the playtest counts (exchanges, card edits, and the exchange by which everyone had left where they started), the recorded companion reactions, the ledger, canon and the event log, any budget warnings, and exports the session's replay log (D60). Held in memory only and never stored (D10).

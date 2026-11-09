@@ -461,8 +461,8 @@ test("she owns her usual outfit, can be given more, and her profile describes wh
   const silk = { name: "Silk dress", text: "A long dress of green silk." };
   let s = romance(members);
   assert.equal(W.wearing(s, P), P.outfit);
-  assert.throws(() => W.equip(s, P.id, "silk"));
-  s = W.equip(W.addOutfit(s, P.id, "silk", silk), P.id, "silk");
+  assert.throws(() => W.equip(s, P, "silk"));
+  s = W.equip(W.addOutfit(s, P.id, "silk", silk), P, "silk");
   const input = huddle(P, Q, env({ romance: s }));
   assert.ok(input.includes(JSON.stringify(silk.text)) && !input.includes(JSON.stringify(P.outfit)));
   assert.equal(s.wardrobe[Q.id].equipped, "usual"); // only hers
@@ -477,11 +477,11 @@ test("she owns her usual outfit, can be given more, and her profile describes wh
   assert.equal(W.wearing(Rel.applyCampfire(s, P, members, { ...out, outfit: null }), P), silk.text);
 });
 
-test("a tie's outfit is her usual one in that party", { skip: !tied }, () => {
+test("a tie's outfit is her usual one in that party", { skip: !tied }, async () => {
   const partner = companions[Object.keys(tied.tie.by).find((id) => companions[id])];
   const m = resolveParty([tied, partner]);
   const set = tied.tie.by[partner.id].set?.outfit;
-  if (set) assert.equal(Rel.newRomance(m).wardrobe[tied.id].owned.usual.text, set);
+  if (set) assert.equal((await import("../src/campaign/wardrobe.js")).wearing(Rel.newRomance(m), m[0]), set);
 });
 
 // ---------- campfire with both (D85) ----------

@@ -1,7 +1,7 @@
 // Photo prompts (docs/spec/calls/photo.md, D170): a companion's picture identity, and the text-to-image prompt
 // assembled from it and the slots the photo call fills. Pure, like the wardrobe.
 import { photo as P } from "../../content/photo.js";
-import { wearing } from "./wardrobe.js";
+import { wearing, equipped } from "./wardrobe.js";
 
 // The slots the photo call fills, in the order the prompt uses them.
 export const SLOTS = ["setting", "light", "position", "action", "face_extra", "garments", "grit", "surroundings", "light_source", "expression"];
@@ -11,14 +11,13 @@ export const SLOTS = ["setting", "light", "position", "action", "face_extra", "g
 // Her `garments` line is her file's while she wears her usual outfit, and what she has on otherwise.
 export function photoOf(c, rom) {
   const p = c.photo ?? {};
-  const w = rom?.wardrobe?.[c.id];
-  const usual = !w || w.equipped === "usual";
+  const usual = equipped(rom, c) === "usual";
   return {
     age: p.age ?? c.age,
     role: p.role ?? c.race,
     face: p.face ?? P.face,
     identity: p.identity ?? "",
-    garments: usual && p.garments ? p.garments : rom ? wearing(rom, c) : c.outfit,
+    garments: usual && p.garments ? p.garments : wearing(rom, c),
     bold: !!p.bold,
     expression: p.expression ?? "",
     beside: c.secondVoice?.photo ?? null,

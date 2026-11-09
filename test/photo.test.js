@@ -44,7 +44,7 @@ test("her garments line follows what she has on", () => {
   const c = Object.values(authored).find((x) => x.photo && !x.tie);
   const rom = Rel.newRomance([c], pairs);
   assert.equal(photoOf(c, rom).garments, c.photo.garments);
-  const changed = equip(addOutfit(rom, c.id, "gown", { name: "Gown", text: "A long green velvet gown." }), c.id, "gown");
+  const changed = equip(addOutfit(rom, c.id, "gown", { name: "Gown", text: "A long green velvet gown." }), c, "gown");
   assert.equal(photoOf(c, changed).garments, "A long green velvet gown.");
 });
 
@@ -76,4 +76,41 @@ test("the call's input names no one and carries no story; its output fits the sc
   assert.deepEqual(validate(photoSchema, slots), []);
   assert.deepEqual(Object.keys(photoSchema.properties), SLOTS);
   assert.deepEqual(photoProblems({ ...slots, action: "Wren laughs" }, ["Wren"]).length, 1);
+});
+
+// ---------- live looks (D171) ----------
+
+test("live looks change a companion's appearance and nothing else, and a bad change leaves her file", async () => {
+  const { withLooks, changeProblems } = await import("../src/campaign/looks.js");
+  const { wearing, owned, newWardrobe } = await import("../src/campaign/wardrobe.js");
+  const c = Object.values(authored).find((x) => !x.tie);
+  const looks = { [c.id]: { look: "Short copper hair.", "wardrobe.cloak": { name: "Travelling cloak", text: "A grey wool cloak." }, wears: "cloak" } };
+  const { roster, problems } = withLooks(authored, looks);
+  assert.deepEqual(problems, {});
+  assert.equal(roster[c.id].look, "Short copper hair.");
+  assert.equal(authored[c.id].look === "Short copper hair.", false); // the file is untouched
+  const rom = { wardrobe: newWardrobe([roster[c.id]]) };
+  assert.equal(wearing(rom, roster[c.id]), "A grey wool cloak."); // she starts in it
+  assert.ok(owned(rom, roster[c.id]).usual);
+  // Only appearance fields, and only what fits her file.
+  assert.match(changeProblems(c, { voice: "Gruff." }).join(), /voice isn't an appearance field/);
+  assert.match(changeProblems(c, { wears: "ballgown" }).join(), /doesn't own an outfit called ballgown/);
+  const bad = withLooks(authored, { [c.id]: { look: "" } });
+  assert.ok(bad.problems[c.id].length && bad.roster[c.id] === authored[c.id]);
+});
+
+test("a save picks up her live looks and file outfits when it loads, keeping what it gained in play", async () => {
+  const { withLooks } = await import("../src/campaign/looks.js");
+  const W = await import("../src/campaign/wardrobe.js");
+  const c = Object.values(authored).find((x) => !x.tie);
+  let rom = Rel.newRomance([c], pairs);
+  rom = W.addOutfit(rom, c.id, "reward", { name: "Reward", text: "A jewelled belt." });
+  const saved = JSON.parse(JSON.stringify(rom));
+  const later = withLooks(authored, { [c.id]: { outfit: "A new usual outfit." } }).roster[c.id];
+  assert.equal(W.wearing(saved, later), "A new usual outfit.");
+  assert.deepEqual(Object.keys(W.owned(saved, later)), ["usual", ...Object.keys(later.wardrobe ?? {}), "reward"]);
+  // A save from before D171 kept copies; what it gained survives.
+  const old = { wardrobe: { [c.id]: { equipped: "gift", owned: { usual: { name: "Usual outfit", text: "old" }, gift: { name: "Gift", text: "A gift." } } } } };
+  assert.equal(W.wearing(old, later), "A gift.");
+  assert.equal(W.owned(old, later).usual.text, "A new usual outfit.");
 });
