@@ -1,0 +1,18 @@
+<title>Dressing Room</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=Alegreya+SC:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* The page around the Dressing Room (src/ui/dressing.js), which brings its own scoped styles. */
+:root { --page: #eef0ee; --band: #fbfcfb; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --page: #131917; --band: #1b2321; color-scheme: dark; } }
+:root[data-theme="dark"] { --page: #131917; --band: #1b2321; color-scheme: dark; }
+body { background: var(--page); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--band); }
+#app { --dr-top: env(safe-area-inset-top, 0px); }
+</style>
+<div id="app"><p style="padding: 16px; font-family: system-ui;">Loading the Dressing Room…</p></div>
+<script type="module">
+import { mountDressingRoom } from "./src/ui/dressing.js";
+mountDressingRoom(document.getElementById("app"));
+</script>

@@ -12,7 +12,7 @@ import { rosterIn } from "../src/campaign/world.js";
 const roster = rosterIn(authored);
 import * as Rel from "../src/campaign/relationship.js";
 import * as Relationship from "../content/relationship.js";
-import { addOutfit, equip, wearing } from "../src/campaign/wardrobe.js";
+import { addOutfit, equip, wearing, owned as ownedOf, equipped as equippedOf } from "../src/campaign/wardrobe.js";
 import { resolveParty, partyProblems } from "../src/campaign/roster.js";
 import * as A from "../src/context.js";
 import { load as loadEncounter } from "../src/engine/index.js";
@@ -892,7 +892,6 @@ function campView() {
         h("select", { id, onchange: (e) => { const p = list[Number(e.target.value)]; if (p) { apply(p); saveCamp(); rerender(); } } },
           [h("option", { value: "" }, "Choose a preset…"), ...list.map((p, i) => h("option", { value: i }, p.name))]));
     const looks = h("div");
-    const owned = camp.romance.wardrobe[c.id];
     return h(
       "section",
       { class: "case" },
@@ -919,8 +918,8 @@ function campView() {
       r.absent.length ? h("p", { class: "status" }, `Someone wore her face on turn ${r.absent.join(", ")}.`) : null,
       h("p", { class: "status" }, `Configuration: ${Rel.config(camp.romance, c, members)} · gained this camp: heat ${r.gain.heat}/${Relationship.caps.perEncounter.heat}, intimacy ${r.gain.intimacy}/${Relationship.caps.perEncounter.intimacy}`),
       h("label", { class: "set" }, h("span", {}, "Wearing"),
-        h("select", { id: `camp-${c.id}-outfit`, onchange: (e) => ((camp.romance = equip(camp.romance, c.id, e.target.value)), saveCamp(), rerender()) },
-          Object.entries(owned.owned).map(([id, o]) => h("option", { value: id, selected: owned.equipped === id }, o.name)))),
+        h("select", { id: `camp-${c.id}-outfit`, onchange: (e) => ((camp.romance = equip(camp.romance, c, e.target.value)), saveCamp(), rerender()) },
+          Object.entries(ownedOf(camp.romance, c)).map(([id, o]) => h("option", { value: id, selected: equippedOf(camp.romance, c) === id }, o.name)))),
       h("button", { class: "run-btn ghost", onclick: () => describeLooks(c.id, looks) }, "Describe looks"),
       looks,
       h("p", { class: "status" }, `Ready: ${Rel.allowedBeats(camp.romance, c, members, { private: camp.with === c.id, inPerson: true }).join(", ")}`),
