@@ -32,6 +32,9 @@ const zone = obj(["id", "name", "purpose", "light"], {
   level: { type: "integer" },
   // What's underfoot, for the map (D181). Left out, it's plain floor.
   ground: { enum: ["floor", "water", "planks", "rubble"] },
+  // How its outline is drawn (D182): built walls with square corners, natural rock, or a round room. The squares in
+  // `rects` stay the truth for what joins what; this only shapes the line drawn round them.
+  shape: { enum: ["built", "cave", "round"] },
   rects: list(rect, 1),
   // Zones visible from here beyond the ones joined to it (a long straight corridor). Party perception: engine §2.
   sees: list(r("id")),

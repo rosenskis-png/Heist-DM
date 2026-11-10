@@ -193,6 +193,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
+- **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 
 ---
 
@@ -1115,3 +1116,12 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **More to draw with.** A zone can say what's underfoot (`ground`: water, planks, rubble), drawn as a texture. A room with no drawn map gets a sketch of its places in columns by distance from the party, joined by its ways, claiming no sizes.
 **Why:** The map was a small panel whose lettering was unreadable on a phone, with tokens scattered over squares they weren't on, people vanishing the moment they left sight, and nothing at all for a generated room.
 **Rules out:** Positions finer than a place, which the ledger doesn't hold. Showing where someone out of sight really is.
+
+### D182. The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms
+**Decided:** The designer's call (2026-11-10). Builds on D181.
+- **Shapes.** A zone's squares stay the truth for what joins what. `outline` (`src/game/view.js`) walks the edge of any footprint, however many rectangles it's made of, and the map draws that line three ways by the zone's `shape`: built (corners kept), round (corners swept away) or cave (the line wanders, the same way on both sides of a shared wall, and runs true where a way meets it). The encode call gives each zone a shape and a ground.
+- **Colour.** Floors take their colour from what's underfoot (stone, rock, water, planks, rubble) with a texture each, darkened by how well lit the place is, on a paper ground with a soft shadow under each place. A place out of sight is hatched. Both themes.
+- **Getting around.** One level at a time, chosen by name, with the level beneath as a dashed outline. The window drags to pan, pinches or wheels to zoom, and has buttons for in, out, all of it and the party. A drag is never taken for a tap. Tapping a name in the who's-where list goes to that level and place.
+- **Tried on:** three fixture rooms in `fixtures/maps/` (a round belfry on three levels, a sea cave, a chapel with locked doors and bars), the Cells, the goblin camp and a generated room laid out by code; `test/map.test.js` holds the outline and the fixtures.
+**Why:** Every room was a rectangle in two greys, in a fixed view too small to read.
+**Rules out:** Shapes that disagree with the squares: the outline is only ever a way of drawing them. Walls at angles, which the grid doesn't hold.

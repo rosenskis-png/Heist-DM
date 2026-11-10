@@ -86,3 +86,4 @@ The engine measures each serialized packet and warns above twice the size of the
 - A fact's `at` names the area it belongs to. In a site the party learns it on finding that area.
 The example is `content/encounters/goblin_camp.json`, and `test/site.test.js` holds it sound.
 - A zone's `ground` (water, planks, rubble) is what's underfoot, for the map (D181).
+- A zone's `shape` (built, cave, round) is how the map draws the line round its squares (D182); the squares stay the truth.

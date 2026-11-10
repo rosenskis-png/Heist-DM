@@ -221,7 +221,8 @@
      "walk_east",
      "pens"
     ],
-    "ground": "rubble"
+    "ground": "rubble",
+    "shape": "cave"
    },
    {
     "id": "camp",
@@ -240,7 +241,8 @@
      "tower_top",
      "walk_west",
      "walk_east"
-    ]
+    ],
+    "shape": "cave"
    },
    {
     "id": "tower_top",
@@ -261,7 +263,8 @@
      "pens",
      "tunnel_mouth"
     ],
-    "ground": "planks"
+    "ground": "planks",
+    "shape": "built"
    },
    {
     "id": "walk_west",
@@ -282,7 +285,8 @@
      "pens",
      "tunnel_mouth"
     ],
-    "ground": "planks"
+    "ground": "planks",
+    "shape": "built"
    },
    {
     "id": "walk_east",
@@ -303,7 +307,8 @@
      "pens",
      "tunnel_mouth"
     ],
-    "ground": "planks"
+    "ground": "planks",
+    "shape": "built"
    },
    {
     "id": "pens",
@@ -322,7 +327,8 @@
      "tower_top",
      "walk_west",
      "walk_east"
-    ]
+    ],
+    "shape": "cave"
    },
    {
     "id": "mine_drift",
@@ -336,7 +342,8 @@
       3,
       5
      ]
-    ]
+    ],
+    "shape": "cave"
    },
    {
     "id": "deep_tunnel",
@@ -350,7 +357,8 @@
       3,
       2
      ]
-    ]
+    ],
+    "shape": "cave"
    },
    {
     "id": "flooded_drift",
@@ -378,7 +386,8 @@
       4
      ]
     ],
-    "ground": "water"
+    "ground": "water",
+    "shape": "cave"
    },
    {
     "id": "outflow",
@@ -394,7 +403,8 @@
       1
      ]
     ],
-    "ground": "water"
+    "ground": "water",
+    "shape": "cave"
    }
   ],
   "connections": [

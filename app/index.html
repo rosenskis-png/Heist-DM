@@ -10,6 +10,7 @@
   --gold: #9a6b14; --rose: #a83a62; --trust: #2f7d74; --danger: #b3261e;
   --ok-bg: #dcebe6; --bad-bg: #f3dcdc; --gold-bg: #f1e5cc;
   --floor-bright: #f3ead8; --floor-dim: #ddd0d8; --floor-dark: #b9a9b6; --wall: #2a1d2c;
+  --map-paper: #e9dfcd; --map-stone: #f4eee2; --map-cave: #dcc9a8; --map-water: #8fbfc6; --map-wood: #d6b07a; --map-rubble: #cfc2b0; --map-ink: #33262d; --map-shade: #2a1d2c;
   --display: "Spectral", Georgia, serif;
   --body: "Alegreya Sans", system-ui, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
@@ -19,12 +20,14 @@
   --gold: #d8a94e; --rose: #d0658f; --trust: #6fb3a8; --danger: #ff8a80;
   --ok-bg: #1e3530; --bad-bg: #3d2224; --gold-bg: #3a2e18;
   --floor-bright: #4a3d33; --floor-dim: #352a3b; --floor-dark: #221a28; --wall: #d9c9b6; color-scheme: dark;
+  --map-paper: #15101a; --map-stone: #5b5360; --map-cave: #5e4d3c; --map-water: #2c6672; --map-wood: #7a5c38; --map-rubble: #564c46; --map-ink: #d3c3ae; --map-shade: #000;
 } }
 :root[data-theme="dark"] {
   --bg: #1b1420; --surface: #251c2b; --surface2: #30253a; --ink: #ecdfcf; --muted: #a8978f; --line: #43354b;
   --gold: #d8a94e; --rose: #d0658f; --trust: #6fb3a8; --danger: #ff8a80;
   --ok-bg: #1e3530; --bad-bg: #3d2224; --gold-bg: #3a2e18;
   --floor-bright: #4a3d33; --floor-dim: #352a3b; --floor-dark: #221a28; --wall: #d9c9b6; color-scheme: dark;
+  --map-paper: #15101a; --map-stone: #5b5360; --map-cave: #5e4d3c; --map-water: #2c6672; --map-wood: #7a5c38; --map-rubble: #564c46; --map-ink: #d3c3ae; --map-shade: #000;
 }
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -199,10 +202,20 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .lvl { display: grid; gap: 2px; }
 .lvl .cap { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: 13px; color: var(--muted); }
-.zone-label { font: 500 9px var(--body); fill: var(--ink); }
+.zone-label { font: 700 9px var(--body); fill: var(--ink); letter-spacing: .04em; text-transform: uppercase; }
 .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 3px; stroke-linejoin: round; }
 .maptabbox { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 12px; display: grid; gap: 12px; }
-.maptabbox svg { width: 100%; height: auto; display: block; touch-action: manipulation; }
+.mapwin { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); }
+.mapwin svg { width: 100%; max-height: 70vh; display: block; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.mapwin svg:active { cursor: grabbing; }
+.mapbar { display: flex; gap: 8px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+.mapctl { display: flex; gap: 6px; margin-left: auto; }
+.mapctl button { min-width: 40px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); font-weight: 700; padding: 0 10px; }
+.lvls { display: flex; gap: 6px; flex-wrap: wrap; }
+.lvls button { border: 1px solid var(--line); background: none; border-radius: 999px; padding: 5px 14px; font-size: 14px; }
+.lvls button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.lvls .here-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); margin-left: 6px; vertical-align: 1px; }
+.maptabbox .cap { font-size: 12px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
 .mapnote { font-size: 14.5px; min-height: 2.6em; border-top: 1px solid var(--line); padding-top: 8px; display: grid; gap: 4px; }
 .mapnote .here { color: var(--trust); }
 .whos { display: grid; gap: 2px; }

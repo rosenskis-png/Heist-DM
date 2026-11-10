@@ -46,6 +46,34 @@ const onSegment = ([x1, y1, x2, y2], [[ax, ay], [bx, by]]) => {
   return x1 >= lx && x2 <= hx && y1 >= ly && y2 <= hy && (ax === bx ? x1 === ax && x2 === ax : y1 === ay && y2 === ay);
 };
 
+// The outline of a place (D182): the loops of grid points round its squares, clockwise, a square at a step, so the
+// map can draw built corners, natural rock or a round room from the same footprint the engine uses.
+export function outline(rects) {
+  const cells = new Set(rects.flatMap(([x, y, w, h]) => Array.from({ length: w * h }, (_, i) => `${x + (i % w)},${y + Math.floor(i / w)}`)));
+  const next = new Map();
+  const add = (a, b) => (next.get(a.join(",")) ?? next.set(a.join(","), []).get(a.join(","))).push(b);
+  for (const key of cells) {
+    const [x, y] = key.split(",").map(Number);
+    if (!cells.has(`${x},${y - 1}`)) add([x, y], [x + 1, y]);
+    if (!cells.has(`${x + 1},${y}`)) add([x + 1, y], [x + 1, y + 1]);
+    if (!cells.has(`${x},${y + 1}`)) add([x + 1, y + 1], [x, y + 1]);
+    if (!cells.has(`${x - 1},${y}`)) add([x, y + 1], [x, y]);
+  }
+  const loops = [];
+  for (const [start, outs] of next) {
+    while (outs.length) {
+      const loop = [start.split(",").map(Number)];
+      let at = outs.pop();
+      while (at.join(",") !== start) {
+        loop.push(at);
+        at = next.get(at.join(",")).pop();
+      }
+      loops.push(loop);
+    }
+  }
+  return loops;
+}
+
 // A crowd or a squad is one entry (D130); the map draws it as a cluster.
 const GROUP = /^(about |some |a (dozen|few|pair of) |two |three |four |five |six |seven |eight |nine |ten |twenty |thirty |forty |\d+ )/i;
 
@@ -127,7 +155,10 @@ export function mapView(s) {
       const walls = edges(zs).filter((e) => !cs.some((c) => c.wall && onSegment(e.seg, c.wall)));
       return {
         level,
-        zones: zs.map((z) => ({ id: z.id, name: z.name, rects: z.rects, light: z.light ?? "dim", ground: z.ground ?? "floor", seen: seen.has(z.id) || s.party.some((p) => zoneOf(s, p.id) === z.id) })),
+        zones: zs.map((z) => ({ id: z.id, name: z.name, rects: z.rects, loops: outline(z.rects), shape: z.shape ?? "built",
+          // Where a way meets this place's wall, the line is drawn true, so the way sits on it.
+          fixed: cs.filter((c) => c.wall && c.between.includes(z.id)).flatMap((c) => { const [[x1, y1], [x2, y2]] = c.wall; const out = []; for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) out.push(`${x},${y}`); return out; }),
+          light: z.light ?? "dim", ground: z.ground ?? "floor", seen: seen.has(z.id) || s.party.some((p) => zoneOf(s, p.id) === z.id) })),
         walls,
         connections: cs.map((c) => (c.wall ? c : { ...c, dir: Math.sign(c.levels[c.between.findIndex((z) => !here.has(z))] - level), leads: c.to[c.between.find((z) => here.has(z))] })),
         tokens: tokens.filter((t) => here.has(t.zone)),

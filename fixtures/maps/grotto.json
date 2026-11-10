@@ -1,0 +1,289 @@
+{
+ "id": "grotto",
+ "name": "The smugglers' grotto",
+ "mode": "encounter",
+ "act": 1,
+ "notes": [],
+ "intent": {
+  "purpose": "A map fixture (D182): a room drawn to try the map's shapes, grounds and levels."
+ },
+ "people": [
+  {
+   "id": "hermit",
+   "name": "the old hermit",
+   "tier": "civilian",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "wary",
+   "position": "hollow"
+  },
+  {
+   "id": "smugglers",
+   "name": "four smugglers",
+   "tier": "guard",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "busy",
+   "position": "falls"
+  }
+ ],
+ "map": {
+  "zones": [
+   {
+    "id": "shore",
+    "name": "The shingle shore",
+    "purpose": "The shingle shore.",
+    "light": "dim",
+    "rects": [
+     [
+      0,
+      0,
+      6,
+      3
+     ],
+     [
+      0,
+      3,
+      3,
+      4
+     ]
+    ],
+    "shape": "cave",
+    "ground": "rubble"
+   },
+   {
+    "id": "pool",
+    "name": "The sea pool",
+    "purpose": "The sea pool.",
+    "light": "dim",
+    "rects": [
+     [
+      3,
+      3,
+      5,
+      4
+     ]
+    ],
+    "shape": "cave",
+    "ground": "water"
+   },
+   {
+    "id": "falls",
+    "name": "The falls cave",
+    "purpose": "The falls cave.",
+    "light": "dark",
+    "rects": [
+     [
+      6,
+      0,
+      4,
+      3
+     ]
+    ],
+    "shape": "cave"
+   },
+   {
+    "id": "squeeze",
+    "name": "The squeeze",
+    "purpose": "The squeeze.",
+    "light": "dark",
+    "rects": [
+     [
+      10,
+      1,
+      4,
+      1
+     ]
+    ],
+    "shape": "cave"
+   },
+   {
+    "id": "hollow",
+    "name": "The hermit's hollow",
+    "purpose": "The hermit's hollow.",
+    "light": "bright",
+    "rects": [
+     [
+      14,
+      0,
+      3,
+      3
+     ]
+    ],
+    "shape": "cave"
+   }
+  ],
+  "connections": [
+   {
+    "id": "to_pool",
+    "kind": "opening",
+    "between": [
+     "shore",
+     "pool"
+    ],
+    "wall": [
+     [
+      4,
+      3
+     ],
+     [
+      5,
+      3
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "to_falls",
+    "kind": "opening",
+    "between": [
+     "shore",
+     "falls"
+    ],
+    "wall": [
+     [
+      6,
+      1
+     ],
+     [
+      6,
+      2
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "falls_pool",
+    "kind": "opening",
+    "between": [
+     "falls",
+     "pool"
+    ],
+    "wall": [
+     [
+      6,
+      3
+     ],
+     [
+      7,
+      3
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "into_squeeze",
+    "kind": "crawl",
+    "name": "The squeeze's mouth",
+    "between": [
+     "falls",
+     "squeeze"
+    ],
+    "wall": [
+     [
+      10,
+      1
+     ],
+     [
+      10,
+      2
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "out_of_squeeze",
+    "kind": "crawl",
+    "name": "The squeeze's end",
+    "between": [
+     "squeeze",
+     "hollow"
+    ],
+    "wall": [
+     [
+      14,
+      1
+     ],
+     [
+      14,
+      2
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both"
+   }
+  ],
+  "things": [
+   {
+    "id": "boat",
+    "name": "a tarred skiff",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "shore",
+     "at": [
+      1,
+      5
+     ]
+    }
+   },
+   {
+    "id": "casks",
+    "name": "brandy casks",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "falls",
+     "at": [
+      8,
+      1
+     ]
+    }
+   },
+   {
+    "id": "lamp",
+    "name": "a storm lamp",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "hollow",
+     "at": [
+      15,
+      1
+     ]
+    }
+   }
+  ],
+  "facts": []
+ },
+ "clock": {
+  "events": []
+ },
+ "start": {
+  "tick": 0,
+  "positions": {
+   "player": "shore",
+   "companion_a": "shore",
+   "companion_b": "shore"
+  },
+  "ops": []
+ },
+ "opening": "You row into a sea cave."
+}
