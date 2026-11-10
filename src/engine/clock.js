@@ -27,11 +27,24 @@ export function beginTick(s) {
   objectives(s);
 }
 
-// One-time events fire at their tick or when their condition first holds.
+// A room with no drawn map is one scene (D174), and its timed events are a ladder (D176): they happen in order,
+// one each time a roll fails or the party waits, never because time passed while the party tried things.
+export const ladder = (s) => (s.packet.map.zones.some((z) => z.rects?.length) ? null : s.packet.clock.events.filter((e) => e.at_tick !== undefined).sort((a, b) => a.at_tick - b.at_tick));
+
+// The trouble moves on: n steps of the ladder.
+export function press(s, n = 1) {
+  if (!n || s.ended) return;
+  s.pressure = (s.pressure ?? 0) + n;
+  events(s);
+  objectives(s);
+}
+
+// One-time events fire at their tick or when their condition first holds; on a ladder, at their step.
 export function events(s) {
+  const rungs = ladder(s);
   for (const e of s.packet.clock.events) {
     if (s.fired.includes(e.id)) continue;
-    const due = e.at_tick !== undefined ? s.tick >= s.due[e.id] : test(s, e.when);
+    const due = e.at_tick !== undefined ? (rungs ? rungs.indexOf(e) < (s.pressure ?? 0) : s.tick >= s.due[e.id]) : test(s, e.when);
     if (!due) continue;
     s.fired.push(e.id);
     log(s, { event: e.id });

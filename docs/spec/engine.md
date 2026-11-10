@@ -45,6 +45,9 @@ The DM judges a band; the engine rolls a d100 against the band's number (D33). T
 
 Skill numbers are on the sheets the DM reads when it chooses a band. The engine never adds them to a roll (D68).
 
+## 4a. Trouble in a room with no map (D176)
+A room with no drawn map has no clock for its timed events. They are a ladder: in order of their `at_tick`, one happens each time a roll fails (a check, or a roll on a card when its dice are rolled) or the scene call marks `waited`. `s.pressure` counts the steps; time passing moves nothing. A drawn room's events fire at their ticks. Code: `ladder` and `press` in `src/engine/clock.js`.
+
 ## 5. What the party perceives
 Used for the map and for who the player can talk to, never as a rule (`src/engine/perceive.js`). A room with no drawn map is one scene (D174): every place in it that isn't hidden or dark is in sight and in earshot, and the DM rules on what can be made out from where. In a drawn room: Pooled across the party, since the whisper rings make sharing free. Each member sees their own zone, any zone joined to it by a `see_through` or open connection, and any zone its `sees` list names, unless it's dark (or they have `sees_in_dark`). They hear their own zone and any zone joined to theirs by a connection (with `hears_through_walls`, any zone that shares a wall with theirs). `inSight` lists what the opening must name (D136): the people in zones they see, the things in those zones and their own (even dark), unless a person carries them, and the barriers out of their own zones; never hidden ones.
 

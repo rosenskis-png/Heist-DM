@@ -187,6 +187,9 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D173** The page runs a campaign: current
 - **D174** The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene: current
 - **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
+- **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
+- **D177** The note stops predicting, and a new room is read once from the player's chair: current
+- **D178** What the party has with it goes from room to room: current
 
 ---
 
@@ -1060,3 +1063,25 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 - **The stance choices** read "She sits it out", "It's handled" and "Do it anyway".
 **Why:** To tick 7 of the shakedown's first room the party call ran 8 times in 24 calls and was 36% of all input, and its lines restated the DM, lectured, and offered no way forward when the player asked for one. The prompts asked for that: play her fantasy on every line, never check an idea, and keep her initiative out of the plan, which left the stance as the only assertive thing she could do. The player also read "Keep it" as keeping the plan; it kept her stance, and the plan stopped on it.
 **Rules out:** Companions adding terms to a plan or reopening one the player has decided (the Gravenhold failure: only the player writes and commits). Companion lines after every DM answer. Her romance register in a room; it lives at the campfire, which must then remember what happened in the rooms (`docs/roadmap.md`).
+
+### D176. A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock
+**Decided:** The designer's call (2026-11-10), from the first shakedown. Changes D127 and D130's use of the card, and D121's time, for rooms with no drawn map.
+- **Stakes first.** When the scene call rules that a try needs a check, the page holds it: the player sees who rolls, the band, the reason and what failing costs, then rolls or backs out. Backing out changes nothing in the world. Questions and party talk stay open while it waits; another try or a card doesn't (`talk`, `roll`, `backOut`, `stakes` in `src/game/turns.js`).
+- **Small tries are cheap.** The scene prompt asks for a check only where failing is interesting, says most small failures simply don't work with nothing made worse, and lets a short run of two or three steps be ruled in one exchange.
+- **Trouble moves on failure.** In a room with no drawn map the packet's timed events are a ladder: they happen in their order, one each time a roll fails (a check, or a roll on a card) or the party deliberately waits (`waited` on the scene call), and never because time passed (`ladder`, `press` in `src/engine/clock.js`). What got worse is told at the table. A drawn room keeps its clock.
+**Why:** To tick 7 of the shakedown's first room the card was priced 8 times for 2 plans run: it was the only way to ask what something would take. Checks at the table rolled before the player saw the odds, every plan moved the clock toward the room's deadline, and the player stopped trying things. A check already carries both outcomes, so showing them costs no call.
+**Rules out:** A roll the player couldn't decline. A room's danger advancing because the player looked around, asked or tried something that worked. Removing the card: fights and plans of several people at once still go on it.
+
+### D177. The note stops predicting, and a new room is read once from the player's chair
+**Decided:** The designer's call (2026-11-10). Changes D156 and D172.
+- The sketch no longer writes `outcomes`, and its notes give what a person wants from the party and could give, never the words of an offer or a moment that will happen.
+- After a room with danger in the way (an encounter or a climax) is laid out, the read call (`docs/spec/calls/read.md`) reads it once on the quick tier, given only the room sheet the player will see. It lists what a player could take hold of and what they couldn't tell. A room with fewer than four handles goes back to the sketch once, with the reader's notes, and the new room isn't read again. A read that fails holds nothing up, and no play call ever sees a reader's list.
+**Why:** The shakedown's first room scripted a bargain into the DM's notes and hung on rules the opening never gave, and the design thread judged it from the DM's side and called it good. A prompt rule against "a machine with a rule" had not stopped it. Nothing in generation had ever met a room as a player does.
+**Rules out:** Size caps on rooms, which turn into quotas. A list of approaches reaching the DM, which would be an answer key. More than one remake.
+**Not yet:** playing from the note in place of the encoded packet (`docs/roadmap.md`).
+
+### D178. What the party has with it goes from room to room
+**Decided:** The designer's call (2026-11-10). Changes D123.
+The verdict call returns `carried`: up to six lines of what the party has with it as it leaves, each an item, a follower or a thread, as the whole list (kept, dropped and new). The campaign keeps it (`roomEnded`), the next room's sketch must honour it, the engine loads it into the room's state, the DM's calls read it beside gold and relics, and the room sheet shows it to the player and the companions.
+**Why:** In the shakedown a stolen hand-bell, five freed villagers and a cultist's grudge all vanished at the door, and leaving without weapons never mattered again.
+**Rules out:** The in-room DM reading the campaign: it gets the list and nothing else. An inventory with weights or counts.

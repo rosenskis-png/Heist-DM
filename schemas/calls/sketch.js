@@ -6,7 +6,7 @@ import { r, list, obj } from "../shape.js";
 
 export const sketchSchema = withDefs({
   $id: "sketch",
-  ...obj(["premise", "shape", "things", "cut", "pressure", "outcomes", "notes", "opening"], {
+  ...obj(["premise", "shape", "things", "cut", "pressure", "notes", "opening"], {
     // The room in one sentence a player would repeat.
     premise: r("text"),
     // One picturable shape, and where the party, the danger and the ways on sit on it, in relational words.

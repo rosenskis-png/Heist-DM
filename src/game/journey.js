@@ -105,7 +105,7 @@ export function enterRoom(session, roster = authored) {
   const camp = session.camp;
   const seed = (session.start.seed * 31 + 7 * (session.past?.length ?? 0) + 1) >>> 0 || 1;
   const party = partyFor(session.player, session.companions, session.world, roster);
-  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics });
+  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics, carried: camp.carried ?? [] });
   Object.assign(session, {
     act: camp.act,
     packet,

@@ -2,7 +2,7 @@
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
 // objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
 import { person, thing, isParty, isNpc, zoneOf, sheet } from "./world.js";
-import { nextTick, objectives, log } from "./clock.js";
+import { nextTick, objectives, log, press } from "./clock.js";
 import { d100, ODDS } from "./rng.js";
 import { toughness, CONDITIONS, THREATS } from "../../content/rules.js";
 
@@ -371,5 +371,7 @@ export function scene(s, out) {
   for (const l of out.learned ?? []) log(s, { learned: l });
   if (out.threats) setThreats(s, out.threats);
   advanceTo(s, s.tick + out.ticks);
+  // A failed check, or a deliberate wait, moves the room's trouble on a step (D176).
+  press(s, checks.filter((c) => !c.success).length + (out.waited ? 1 : 0));
   return { checks };
 }

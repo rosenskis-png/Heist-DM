@@ -60,6 +60,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Campfire | `sample.json` | off | `complex` |
 | Pitch | `sample.json` | off | `complex` (D151) |
 | Sketch | `sample.json` | off | `complex` |
+| Read | `sample.json` | off | `quick` (D177) |
 | Encode | `sample.json` | off | `default` |
 | Photo | `sample.json` | off | `default` (D170; the bench only) |
 

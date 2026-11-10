@@ -33,6 +33,8 @@ export function roomEnded(camp, { handoff, verdict, exits = [], members = [] }) 
   out.carry = { conditions: handoff.conditions ?? [], spent: handoff.spent ?? {}, companions: handoff.companions ?? out.members };
   // What the act remembers (D164): the room's log line, the clues the party came away with, and anyone memorable the
   // verdict named, whom a later room may bring back.
+  // What the party has with it (D178): the verdict gives the whole list as they leave.
+  out.carried = (verdict?.carried ?? out.carried ?? []).slice(0, 6);
   out.log = [...(out.log ?? []), handoff.log].filter(Boolean);
   out.clues = [...new Set([...(out.clues ?? []), ...(handoff.clues ?? [])])];
   out.memory = [...(out.memory ?? []), ...(verdict?.people ?? []).map((p) => ({ ...p, act: out.act }))].slice(-30);

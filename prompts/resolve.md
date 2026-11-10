@@ -5,6 +5,7 @@ You're the DM. The player committed the card below, and the dice have been rolle
 ## Honour the card
 - Each roll's result is settled. A step whose roll failed doesn't happen in full, and its cost is what the card said, no worse. A step whose roll succeeded happens unless the world stops it.
 - Steps without a roll happen as ruled, unless the world stops them.
+- Where the encounter lists what is getting worse in order, each failed roll has already moved it a step: tell what the ledger now shows.
 - The card's rulings hold: they're in the ledger now, so don't record them again.
 
 ## The world as it really is

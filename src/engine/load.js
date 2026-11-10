@@ -67,7 +67,7 @@ export function bindParty(packet, party) {
 // The starting state for an encounter. `party` is the party's sheets (player first);
 // `conditions` are the ones the party carries in from the last hand-off (D130), `spent` the per-rest ability
 // uses spent since the last rest (D128), and `gold` what the party has to spend (D147).
-export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [] }) {
+export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [], carried = [] }) {
   const packet = bindParty(unbound, party);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
@@ -78,6 +78,8 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
     rng: seed >>> 0,
     tick: start.tick,
     pending: 0,
+    // How far the room's trouble has moved on (D176): one step for each failed roll or deliberate wait.
+    pressure: 0,
     at: {},
     holder: {},
     flags: {},
@@ -94,6 +96,8 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
     gold,
     // The relics the party holds, each a passive edge the DM reads as a fact (D147).
     relics: structuredClone(relics),
+    // What the party has with it from earlier rooms (D178): things, followers and loose ends.
+    carried: structuredClone(carried),
     known: { revealed: [] },
     due: Object.fromEntries(
       clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.at_tick]),

@@ -45,10 +45,11 @@ const io = {
   sample: {
     json: async (turns) => {
       const input = typeof turns === "string" ? turns : turns[0].content;
-      const call = ["Act call", "Sketch call", "Verdict call"].find((c) => input.includes(`# ${c}`))?.split(" ")[0].toLowerCase() ?? "encode";
+      const call = ["Act call", "Sketch call", "Verdict call", "Read call"].find((c) => input.includes(`# ${c}`))?.split(" ")[0].toLowerCase() ?? "encode";
       calls.push(call);
       if (call === "act") return structuredClone(plan);
       if (call === "sketch") return sketch;
+      if (call === "read") return { layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
       if (call === "verdict") return { rating: 7, why: "Clean.", reactions: [], people: [] };
       return encode(input);
     },
@@ -91,7 +92,7 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
 test("a generated world starts with its act call and a generated first room", async () => {
   calls.length = 0;
   const session = await startAdventure(io, env, { player: { name: "P", class: "rogue" }, companions: ["fern", "nadia"], world, seed: 4 });
-  assert.deepEqual(calls, ["act", "sketch", "encode"]);
+  assert.deepEqual(calls, ["act", "sketch", "encode", "read"]);
   assert.equal(session.state.packet.mode, "encounter");
   assert.equal(session.camp.plan.peak.who, "Lord Chamberlain Vesk");
   assert.equal(session.feeds.table[0].text, session.packet.opening);

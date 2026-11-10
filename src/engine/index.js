@@ -3,14 +3,14 @@
 import { clone } from "./world.js";
 import { load } from "./load.js";
 import { run } from "./ops.js";
-import { nextTick, objectives } from "./clock.js";
+import { nextTick, objectives, press } from "./clock.js";
 import { handoff } from "./handoff.js";
 import { resolve, scene, answer, rollCard } from "./ledger.js";
 
 export { load, checkPacket, bindParty, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
 export { handoff, endingOf, rest } from "./handoff.js";
-export { CAPTURED } from "./clock.js";
+export { CAPTURED, ladder } from "./clock.js";
 export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, withRulings, checkUses, usesLeft, usesText, toughnessOf, revealable, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
@@ -29,6 +29,8 @@ export function apply(state, action) {
   switch (action.type) {
     case "roll":
       s.dice = rollCard(s, action.card);
+      // Each failed roll moves the room's trouble on a step (D176), before the DM plays the card out.
+      press(s, s.dice.filter((d) => !d.success).length);
       break;
     case "resolve":
       s.resolved = resolve(s, action.card, action.dice, action.out);

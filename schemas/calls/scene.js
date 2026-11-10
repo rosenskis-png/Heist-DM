@@ -19,6 +19,8 @@ export const sceneSchema = withDefs({
     threats,
     // How long the exchange took in ticks: 0 for a question or a quick word.
     ticks: { type: "integer", minimum: 0 },
+    // The party deliberately let time go by: waited, watched, held still (D176).
+    waited: { type: "boolean" },
     // When the player describes several steps, the plan to put on the card, in their words.
     plan: r("text"),
   }),

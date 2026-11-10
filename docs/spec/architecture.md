@@ -30,7 +30,7 @@ Every AI call goes through the artifact runtime's `sample` (D2). Each call's con
    | The player | Calls |
    |---|---|
    | asks the DM | the question call only, on the cheapest tier, with the read-only slice (D133) |
-   | does something, or speaks to a person aloud | the scene call |
+   | does something, or speaks to a person aloud | the scene call; a check waits, with its stakes shown, for the player to roll or back out (D176) |
    | talks to the party over the rings | the party call only (D132) |
    | says a private word to one companion | her companion call only |
    | talks the plan over | the party call |

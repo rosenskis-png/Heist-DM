@@ -4,7 +4,7 @@ import { html, useState, useEffect, useRef } from "./h.js";
 import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
-import { question, talk, rings, askParty, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
+import { question, talk, rings, askParty, roll, backOut, stakes, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
 import { roomSheet } from "../src/context.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as authored } from "../content/companions/index.js";
@@ -21,7 +21,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "encode", "verdict"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -368,6 +368,7 @@ function RoomSheet({ sheet }) {
     ${part("Ways between places", sheet.ways.map((w) => html`<b>${w.between.join(" – ")}</b>: ${w.how}`), false)}
     ${part("Things", sheet.things.map((x) => html`<b>${cap(x.name)}</b><span className="muted"> (${x.where})</span>: ${x.what}`))}
     ${part("Who's here", sheet.people.map((x) => html`<b>${cap(x.name)}</b><span className="muted">, ${x.where}</span>`))}
+    ${part("With you, from earlier rooms", sheet.carried)}
     ${part("What anyone can tell by looking", sheet.facts)}
     ${part("What you've learned", sheet.learned)}
     ${part("Right now", sheet.now)}
@@ -419,7 +420,7 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
     const t = text.trim();
     if (!t) return;
     setText("");
-    run("table", () => (target === "dm" ? question(session, io, env.prompts, { text: t }) : ringed ? rings(session, io, env.prompts, { to: target, text: t }) : talk(session, io, env.prompts, { to: target, text: t })));
+    run("table", () => (target === "dm" ? question(session, io, env.prompts, { text: t }) : ringed ? rings(session, io, env.prompts, { to: target, text: t }) : talk(session, io, env.prompts, { to: target, text: t, ask: true })));
   };
   const who = (id) => speaker(s, id);
   const mine = (e) => (e.ch === "dm" ? "You, to the DM" : e.ch === "rings" ? "You, over the rings" : e.ch === "private" ? `You, privately to ${who(e.with)}` : e.to === "do" ? "You" : `You, to ${who(e.to)}`);
@@ -445,6 +446,16 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
       return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span>${e.rulings ? html`<span className="ruled">${e.rulings.map((r, i) => html`<span key=${i}>Holds from now on: ${r}</span>`)}</span>` : null}</div>`;
     })}
     <div ref=${end}></div>
+    ${!ended && session.pending
+      ? html`<div className="card stakes" aria-label="Before you roll">
+          <span className="small muted">Before you roll. Nothing has happened yet.</span>
+          ${stakes(session).map((c, i) => html`<div key=${i} className="risk"><span><span className="pill gold">${BAND[c.band]}</span> <b>${c.who}</b>: ${c.reason}</span><span className="fails">If it fails: ${c.fails}</span></div>`)}
+          <div className="cardfoot">
+            <button className="ghost" disabled=${!!busy} onClick=${() => (backOut(session), refresh())}>Never mind</button>
+            <button className="primary" disabled=${!!busy} onClick=${() => run("table", async () => roll(session))}>Roll</button>
+          </div>
+        </div>`
+      : null}
     ${!ended && s.packet.mode === "room" ? html`<${WaysOn} session=${session} busy=${busy} refresh=${refresh} run=${run} />` : null}
     ${ended
       ? html`<${Between} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${betweenError} refresh=${refresh} onQuit=${onQuit} />`

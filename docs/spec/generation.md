@@ -65,3 +65,9 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
 - **It holds the seed's journal page,** when it placed one, as a thing the party can carry whose reward is that page, and no reward but the seed's prize (D164, D165, D168).
+
+## The read (D177)
+After a room with danger in the way (an encounter or a climax) is laid out, the read call reads it once from the player's chair (`docs/spec/calls/read.md`). Fewer than four handles, and the room goes back to the sketch once with the reader's notes; the new room isn't read again. A read that fails holds nothing up.
+
+## What the party has with it (D178)
+The campaign's `carried` list (items, followers, threads, from the last verdict) reaches the sketch as something the room must honour, and the engine loads it into the room's state.

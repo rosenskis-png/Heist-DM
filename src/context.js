@@ -1,6 +1,6 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the game and the bench page.
-import { beatOf } from "./engine/clock.js";
+import { beatOf, ladder } from "./engine/clock.js";
 import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
@@ -246,9 +246,9 @@ function campaign(env, call, schema) {
 
 // What the party has to spend and the relics it holds (D147), for the DM's calls: each relic is a fact.
 function kit(env) {
-  const { gold = 0, relics = [] } = env.state ?? {};
-  if (!gold && !relics.length) return null;
-  return block("The party's gold and relics", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`) });
+  const { gold = 0, relics = [], carried = [] } = env.state ?? {};
+  if (!gold && !relics.length && !carried.length) return null;
+  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map((x) => `${x.kind}: ${x.what}`) } : {}) });
 }
 
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
@@ -503,10 +503,12 @@ function logLine(l) {
 // What's coming as one line per routine and event: the routine's beats are in the encounter text.
 export function aheadText(s, { ticks = 12, party = false } = {}) {
   const t = timelineFor(s, { ticks, party });
+  // On a ladder (D176) nothing is due by the clock: the encounter text says what gets worse and in what order.
+  if (ladder(s)) for (const x of t) delete x.events;
   const people = Object.keys(t[0]?.beats ?? {});
   const routine = people.map((id) => `${id}: ${t.map((x) => `${x.tick} ${x.beats[id].split(":")[0]}`).join(", ")}`);
   const events = t.filter((x) => x.events).map((x) => `${x.events.join(", ")} at tick ${x.tick}`);
-  const later = s.packet.clock.events.filter((e) => !s.fired.includes(e.id) && s.due[e.id] >= s.tick + ticks && (!party || e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id} at tick ${s.due[e.id]}`);
+  const later = ladder(s) ? [] : s.packet.clock.events.filter((e) => !s.fired.includes(e.id) && s.due[e.id] >= s.tick + ticks && (!party || e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id} at tick ${s.due[e.id]}`);
   return [...routine, ...events, ...later].join("\n") || "Nothing on a schedule.";
 }
 
@@ -551,13 +553,14 @@ export function roomSheet(state, packet = state.packet) {
     things: map.things.filter(known).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: t.properties })),
     people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
     facts: map.facts.filter(known).map((f) => f.text),
+    carried: (s.carried ?? []).map((x) => x.what),
     learned: st.facts.map((f) => f.text),
     now: [
       ...s.party.filter((p) => st.flags[p.id]).map((p) => `${p.name}: ${flagText(st.flags[p.id])}`),
       ...st.conditions.map((c) => `${label(c.who)} is hurt: ${c.text}`),
       ...st.threats.map((x) => `About to happen: ${label(x.who)}: ${x.does}`),
     ],
-    coming: clock.events.filter((e) => !s.fired.includes(e.id) && (e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id.replaceAll("_", " ")}: at tick ${s.due[e.id] ?? "when its condition holds"}`),
+    coming: clock.events.filter((e) => !s.fired.includes(e.id) && (e.known || s.known.revealed.includes(e.id))).map((e) => (ladder(s)?.includes(e) ? `${e.id.replaceAll("_", " ")}: gets closer each time a roll fails or the party waits` : `${e.id.replaceAll("_", " ")}: at tick ${s.due[e.id] ?? "when its condition holds"}`)),
   };
 }
 
@@ -572,6 +575,7 @@ export function sheetText(sheet) {
     list("Ways between them", grouped(sheet.ways, (w) => w.how).map((g) => `${g.map((w) => w.between.join(" – ")).join("; ")}: ${g[0].how}`)),
     list("Things", grouped(sheet.things, (x) => `${x.name}|${x.what}`).map((g) => (g.length > 1 ? `${g[0].name}: ${g[0].what} ${g.length} of them: ${g.map((x) => `${x.id}, ${x.where}`).join("; ")}` : `${g[0].name} (${g[0].id}; ${g[0].where}): ${g[0].what}`))),
     list("People", sheet.people.map((p) => `${p.name} (${p.id}), ${p.where}${p.routine ? `. Routine, one beat a tick: ${p.routine}${p.beat ? `; now on ${p.beat}` : ""}` : ""}`)),
+    list("With the party, from earlier rooms", sheet.carried),
     list("What anyone can tell by looking", sheet.facts),
     list("What the party has learned", sheet.learned),
     list("Right now", [`Tick ${sheet.tick}.`, ...sheet.now]),
@@ -609,7 +613,11 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     if (!sheets) return `- ${p.id} (${p.name})${routine}`;
     return `- ${p.id} (${p.name}${p.tier ? `, ${p.tier}` : ""}): wants ${p.wants} Fears ${p.fears} Knows ${p.knows} Will never ${p.will_never} Temper: ${p.temper} Under pressure: ${p.under_pressure}${p.breaks ? ` Stops fighting: ${p.breaks}` : ""}${routine}`;
   };
-  const events = clock.events.filter((e) => !party || e.known || knows(e.id)).map((e) => `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}`);
+  const rungs = ladder({ packet });
+  const what = (e) => (e.do ?? []).flatMap((d) => d.then ?? []).map((o) => o.add_canon?.text).find(Boolean) ?? e.id;
+  const events = clock.events
+    .filter((e) => !party || e.known || knows(e.id))
+    .map((e) => (rungs?.includes(e) ? `- ${e.id}: ${s.fired.includes(e.id) ? "has happened" : `step ${rungs.indexOf(e) + 1}`}. ${what(e)}` : `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}`));
   const goal = (o) => o && `${o.label}${o.id ? ` (${o.id})` : ""}`;
   const secret = [...map.zones.filter(hidden).map(zone), ...map.connections.filter(hidden).map(way), ...map.things.filter(hidden).map(thing), ...map.facts.filter(hidden).map((f) => `- ${f.id}: ${f.text}`)];
   const parts = [
@@ -620,7 +628,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     `Fixed facts:\n${map.facts.filter((f) => !hidden(f)).map((f) => `- ${f.text}`).join("\n")}`,
     `People:\n${people.map(person).join("\n")}`,
     sheets && packet.notes?.length ? `How they react:\n${packet.notes.map((n) => `- ${n}`).join("\n")}` : null,
-    events.length ? `Coming:\n${events.join("\n")}` : null,
+    events.length ? `${rungs ? "Getting worse, in this order, one step each time a roll fails or the party waits, and never because time passed" : "Coming"}:\n${events.join("\n")}` : null,
     secret.length && secrets ? `Hidden (true, but never mention or hint at them until the party finds them):\n${secret.join("\n")}` : null,
   ];
   return parts.filter(Boolean).join("\n\n");
@@ -720,6 +728,7 @@ export function verdictInput(env, c, schema) {
     exits.length ? block("The room's ways on", exits) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
+    env.state?.carried?.length ? block("What the party already had with it, coming in", env.state.carried) : null,
     "Judge how the room went.",
   ]);
 }
@@ -838,6 +847,11 @@ function designWorld(c) {
 // The sketch call (D117, D119, D161, D164): must honour the hand-off; the region and the owning faction as background;
 // the seed with its slices; the party; the premises of the act's earlier rooms (D162). No example rooms: they become
 // anchors (D161). On the bench, the designer's brief (D154).
+// The read call (D177): only what the player will be told.
+export function readInput(env, c, schema) {
+  return compose([block("Your job", env.prompts.read), block("Output format", shapeText(schema)), block("What you've been told", c.told), "Say what you make of it."]);
+}
+
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
@@ -850,6 +864,8 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
+    c.carried?.length ? block("Must honour: what the party has with it", c.carried.map((x) => `${x.kind}: ${x.what}`)) : null,
+    c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);
 }

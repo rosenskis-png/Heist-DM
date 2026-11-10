@@ -87,8 +87,9 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
   const io = {
     sample: {
       json: async (input) => {
-        const call = input.includes("# Sketch call") ? "sketch" : "encode";
+        const call = input.includes("# Sketch call") ? "sketch" : input.includes("# Read call") ? "read" : "encode";
         calls.push(call);
+        if (call === "read") return { layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
         if (call === "encode") {
           // Encode what the seed fixed: its exits.
           const block = input.split("Fixed by the seed")[1];
@@ -112,8 +113,8 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
   const stages = [];
   io.onStage = (name) => stages.push(name);
   const room = await generateRoom(io, env, { camp, world, party, handoff: { stub: "Out of the cells.", conditions: [] }, log: ["cells: escaped at tick 9"] });
-  assert.deepEqual(calls, ["sketch", "encode"]);
-  assert.deepEqual(stages, ["sketch", "encoded", "laid out"]);
+  assert.deepEqual(calls, ["sketch", "encode", "read"], "an encounter is read once from the player's chair (D177)");
+  assert.deepEqual(stages, ["sketch", "encoded", "laid out", "read"]);
   assert.equal(room.mapped, true);
   assert.equal(room.packet.intent.exits.length, room.seed.exits.length);
   const s = load({ packet: room.packet, party });
@@ -250,4 +251,33 @@ test("only the seed's prize is a reward: no invented clue, no second prize (D164
   assert.ok(encodeProblems(packet([{ relic: { name: "a charm", text: "x" } }, { gold: 3 }]), seed).some((p) => /only prize/.test(p)));
   assert.ok(encodeProblems(packet([{ clue: "engine_hungry", fixed: true }]), seed).some((p) => /clue the seed didn't place/.test(p)));
   assert.ok(encodeProblems(packet([{ gold: 3 }]), { ...seed, prize: "none: getting out is the whole of it" }).some((p) => /no prize/.test(p)));
+});
+
+test("a room with too little to take hold of goes back to the sketch once, with the reader's notes, and isn't read again (D177)", async () => {
+  const { designRoom } = await import("../src/game/generate.js");
+  const { seedRoom } = await import("../src/game/generate.js");
+  let camp = newCampaign({ seed: 11 });
+  camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
+  const { seed } = seedRoom(camp, world);
+  const calls = [];
+  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", notes: "x", opening: "x" };
+  const io = {
+    sample: {
+      json: async (input) => {
+        const call = input.includes("# Sketch call") ? "sketch" : input.includes("# Read call") ? "read" : "encode";
+        calls.push(call + (input.includes("notes on an earlier try") ? "+notes" : ""));
+        if (call === "sketch") return sketch;
+        if (call === "read") return { layout: "x", handles: [{ what: "the one lever", try: "pull it", cost: "noise" }], unclear: ["where the door is"] };
+        const block = input.split("Fixed by the seed")[1];
+        const kinds = JSON.parse(block.slice(block.indexOf("{"), block.indexOf("}") + 1)).exits;
+        const out = structuredClone(encoded);
+        out.intent.exits = kinds.map((k, i) => ({ ...encoded.intent.exits[i % 2], id: `exit_${i}`, zone: ["back_stair", "servants_passage"][i % 2], leads_to: k }));
+        out.act = 1;
+        if (!seed.prize || /^none/.test(seed.prize)) for (const x of out.map.things) delete x.reward;
+        return out;
+      },
+    },
+  };
+  await designRoom(io, { prompts, examples: { encoded } }, { seed, world, party, earlier: [] });
+  assert.deepEqual(calls, ["sketch", "encode", "read", "sketch+notes", "encode"]);
 });

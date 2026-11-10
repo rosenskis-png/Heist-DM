@@ -16,5 +16,7 @@ export const verdictSchema = withDefs({
     // Up to two people from the room worth meeting again (D164): who they are, what became of them, and how they feel
     // about the party. A later room may bring one back.
     people: { ...list(obj(["name", "fate", "feels"], { name: r("text"), fate: r("text"), feels: r("text") })), maxItems: 2 },
+    // What the party has with it as it leaves (D178): the whole list, kept, dropped and new.
+    carried: { ...list(obj(["kind", "what"], { kind: { enum: ["item", "follower", "thread"] }, what: r("text") })), maxItems: 6 },
   }),
 });
