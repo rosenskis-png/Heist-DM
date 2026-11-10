@@ -29,7 +29,10 @@ export function beginTick(s) {
 
 // A room with no drawn map is one scene (D174), and its timed events are a ladder (D176): they happen in order,
 // one each time a roll fails or the party waits, never because time passed while the party tried things.
-export const ladder = (s) => (s.packet.map.zones.some((z) => z.rects?.length) ? null : s.packet.clock.events.filter((e) => e.at_tick !== undefined).sort((a, b) => a.at_tick - b.at_tick));
+const byOf = (packet) => packet.clock.by ?? (packet.map.zones.some((z) => z.rects?.length) ? "time" : "trouble");
+// Whether a deliberate wait moves the trouble on: not where only an alarm does (D180).
+export const waitsCount = (s) => byOf(s.packet) === "trouble";
+export const ladder = (s) => (byOf(s.packet) === "time" ? null : s.packet.clock.events.filter((e) => e.at_tick !== undefined).sort((a, b) => a.at_tick - b.at_tick));
 
 // The trouble moves on: n steps of the ladder.
 export function press(s, n = 1) {

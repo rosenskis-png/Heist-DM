@@ -157,6 +157,8 @@ export const packetSchema = withDefs({
     // How people react, in plain words, for the DM to apply (D76).
     notes: { type: "array", items: r("text") },
     mode: { enum: ["encounter", "room"] },
+    // A site (D180): a place of several areas the party moves about in, discovering them as it goes.
+    site: { type: "boolean" },
     act: { type: "integer", minimum: 1 },
     intent: obj(["purpose"], {
       objective,
@@ -172,9 +174,13 @@ export const packetSchema = withDefs({
       zones: list(zone, 1),
       connections: list(connection),
       things: list(thing),
-      facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), hidden: { type: "boolean" } })),
+      // `at`: the area a fact belongs to; in a site the party learns it on finding that area (D180).
+      facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), hidden: { type: "boolean" }, at: r("id") })),
     }),
     clock: obj(["events"], {
+      // What moves the timed events (D176, D180): the clock; "trouble" (a failed roll or a wait); or "alarm" (a
+      // failed roll only). Left out, a drawn room goes by time and a room with no map by trouble.
+      by: { enum: ["time", "trouble", "alarm"] },
       events: list(event),
     }),
     start: obj(["tick", "positions"], {

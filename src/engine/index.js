@@ -5,6 +5,7 @@ import { load } from "./load.js";
 import { run } from "./ops.js";
 import { nextTick, objectives, press } from "./clock.js";
 import { handoff } from "./handoff.js";
+import { noteSeen } from "./perceive.js";
 import { resolve, scene, answer, rollCard } from "./ledger.js";
 
 export { load, checkPacket, bindParty, SLOTS } from "./load.js";
@@ -57,6 +58,7 @@ export function apply(state, action) {
     default:
       throw new Error(`unknown action ${action.type}`);
   }
+  noteSeen(s);
   if (s.ended && !s.handoff) {
     s.threats = [];
     s.handoff = handoff(s);

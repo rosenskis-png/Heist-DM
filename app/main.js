@@ -56,13 +56,13 @@ const paras = (t) => (t ?? "").split(/\n+/).filter(Boolean);
 
 async function loadAll() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-  const [packetText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
+  const [packetText, siteText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("content/encounters/goblin_camp.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
   const [sample, downloads, store, db] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore(), window.claude?.use("db") ?? null]);
   // The companions with the Dressing Room's live looks laid over them (D171), before any party is built.
   const { roster } = withLooks(authored, db ? await readLooks(db) : {});
   const all = Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]]));
   // What generation is given (D173): the prompts, and the worked example of a finished room for encode.
-  return { packet: JSON.parse(packetText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
+  return { packet: JSON.parse(packetText), site: JSON.parse(siteText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
 }
 
 // ---------- the app ----------
@@ -165,11 +165,14 @@ function Setup({ env, slot, onBack, onBegin }) {
   // Gravenhold opens in its hand-made Cells; a pitched world plans its first act and generates its first room before
   // the party wakes (D173), which takes a minute or two.
   const [making, setMaking] = useState(null);
-  const begin = async () => {
+  const begin = async (site = false) => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
     const player = { name: name.trim(), class: "rogue" };
-    if (!pitched) {
-      const session = newSession({ packet: env.packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
+    if (!pitched || site) {
+      const packet = site ? env.site : env.packet;
+      const session = newSession({ packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
+      // The test site (D180) is kept whole in the save, as a generated room is, so the save loads without the Cells.
+      if (site) session.packet = packet;
       campaignOf(session);
       return onBegin(session);
     }
@@ -204,7 +207,8 @@ function Setup({ env, slot, onBack, onBegin }) {
     ${error ? html`<p className="error">${error}</p>` : null}
     ${pitched ? html`<div className="pitch"><strong>${pitched.world.name}</strong>${paras(pitched.pitch).map((t, i) => html`<p key=${i}>${t}</p>`)}</div>` : null}
     ${making ? html`<p className="muted">${making} The first act and its first room take a minute or two.</p>` : null}
-    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
+    <button className="primary" style=${{ justifySelf: "start" }} onClick=${() => begin()} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
+    <button className="ghost" style=${{ justifySelf: "start" }} onClick=${() => begin(true)} disabled=${!env.sample || !party || problems.length > 0 || busy} title="A hand-built test of a whole place to move about in.">Try the goblin camp (test site)</button>
   </main>`;
 }
 

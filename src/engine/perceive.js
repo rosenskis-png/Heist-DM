@@ -49,6 +49,12 @@ export function partyPerceives(s) {
   return { seen, heard };
 }
 
+// The places the party has seen or stood in so far (D180), kept in `s.known.places`: a site's sheet and map show only these.
+export function noteSeen(s) {
+  const here = partyIds(s).map((id) => zoneOf(s, id)).filter(Boolean);
+  s.known.places = [...new Set([...(s.known.places ?? []), ...here, ...partyPerceives(s).seen.keys()])];
+}
+
 // What the party can make out where they stand, which the opening must name (D136): every person in a zone they
 // see; every thing in their own zones or one they see, followed up to the fixture it hangs on; and every barrier
 // out of their own zones. Their own zone counts even in the dark, since they're in it. Hidden things stay out, and

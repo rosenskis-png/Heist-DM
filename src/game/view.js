@@ -49,7 +49,8 @@ const onSegment = ([x1, y1, x2, y2], [[ax, ay], [bx, by]]) => {
 export function mapView(s) {
   const { map } = s.packet;
   if (!map.zones.every((z) => z.rects?.length)) return null;
-  const zones = map.zones.filter((z) => known(s, z));
+  // A site's map shows only the places found so far (D180).
+  const zones = map.zones.filter((z) => known(s, z) && (!s.packet.site || (s.known.places ?? []).includes(z.id)));
   const zoneIds = new Set(zones.map((z) => z.id));
   const { seen } = partyPerceives(s);
   const levelOf = (id) => map.zones.find((z) => z.id === id)?.level ?? 0;

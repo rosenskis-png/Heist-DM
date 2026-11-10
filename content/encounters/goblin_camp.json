@@ -1,0 +1,948 @@
+{
+ "id": "goblin_camp",
+ "name": "The goblin camp",
+ "mode": "encounter",
+ "act": 1,
+ "site": true,
+ "notes": [
+  "This is a place, not a single scene. The party may go anywhere in it, in any order, and come back. People stay where they are, doing what they're doing, until something they see or hear gives them a reason to move; then they act on what they want.",
+  "The party arrives unnoticed. Nobody here is expecting anyone, and nobody is on watch: the sergeant is the watch.",
+  "Names are learned by hearing them: until someone says a name in the party's hearing, tell of people by what they look like and what they're doing.",
+  "The goblins in camp want their supper, their winnings and their sleep. They look at the food, the dice and each other, and almost never up. They fear the sergeant more than anything, and none of them will wake it on purpose: bad news is carried up the tower slowly, by whoever loses the argument.",
+  "The hobgoblin spider-keeper is Gruk. He wants something to do. His attention is on the cage and the spiders, and he would welcome any excuse to see what they do to something.",
+  "The overseer is Skrit. He wants his carts filled and counted. His attention is on the gang and the tally, his back to the camp.",
+  "The prisoner is Dorna, a dwarf prospector the goblins caught surveying. She wants out, and knows that noise is what will get her fed to the spiders. She can't climb: her leg was broken when they took her.",
+  "The spiders want out and want to eat. Loose, they go for whatever is nearest and moving, goblin or not.",
+  "What the camp does as it grows alarmed is listed under what is getting worse. Between those steps, people react only to what they themselves see and hear."
+ ],
+ "intent": {
+  "purpose": "A goblin mining camp between the party and the way on. Getting through it unnoticed is not hard. What the place is about is how much of it the party chooses to disturb: the chest beside a sleeping mind flayer, the gems in the roof, the prisoner by the spider cage, and two different ways out.",
+  "objective": {
+   "id": "through",
+   "label": "The whole party into the deep tunnels",
+   "condition": {
+    "party_all_in": "deep_tunnel"
+   }
+  },
+  "alternates": [
+   {
+    "id": "by_water",
+    "label": "The whole party out by the flooded drift",
+    "condition": {
+     "party_all_in": "outflow"
+    }
+   }
+  ],
+  "optional": [
+   {
+    "id": "coin",
+    "label": "Take the coin from the sergeant's chest",
+    "condition": {
+     "holds": [
+      "party",
+      "chest_coin"
+     ]
+    }
+   },
+   {
+    "id": "circlet",
+    "label": "Take the silver circlet from the chest",
+    "condition": {
+     "holds": [
+      "party",
+      "circlet"
+     ]
+    }
+   },
+   {
+    "id": "gems",
+    "label": "Pry gems from the roof",
+    "condition": {
+     "holds": [
+      "party",
+      "gems"
+     ]
+    }
+   },
+   {
+    "id": "prisoner",
+    "label": "Bring the prospector out",
+    "condition": {
+     "any": [
+      {
+       "in_zone": [
+        "prisoner",
+        "deep_tunnel"
+       ]
+      },
+      {
+       "in_zone": [
+        "prisoner",
+        "outflow"
+       ]
+      }
+     ]
+    }
+   }
+  ],
+  "exits": [
+   {
+    "id": "deeper",
+    "zone": "deep_tunnel",
+    "leads_to": "encounter",
+    "stub": "The deep tunnels run on and down, toward the sound of more picks."
+   },
+   {
+    "id": "water",
+    "zone": "outflow",
+    "leads_to": "campfire",
+    "stub": "The flooded drift lets out into a dry, forgotten gallery where a fire could be lit."
+   }
+  ]
+ },
+ "people": [
+  {
+   "id": "sergeant",
+   "name": "The sergeant, a mind flayer",
+   "tier": "boss",
+   "wants": "Sleep, and a camp that runs without it.",
+   "fears": "Nothing here.",
+   "knows": "Every goblin's name and what each one is hiding.",
+   "will_never": "Bargain with something it could simply take apart.",
+   "temper": "Cold, patient, and curious about minds it hasn't met.",
+   "under_pressure": "Stuns with its mind from across the cavern, then has the goblins bring whoever it was up the tower.",
+   "breaks": "Doesn't. Nobody in the party could fight it awake and win.",
+   "disposition": "asleep",
+   "position": "tower_top"
+  },
+  {
+   "id": "goblins",
+   "name": "about thirty goblins",
+   "tier": "minion",
+   "wants": "Supper, winnings and sleep after a shift in the mine.",
+   "fears": "The sergeant, awake.",
+   "knows": "The camp, the drifts they work, and who owes whom at dice.",
+   "will_never": "Wake the sergeant on purpose.",
+   "temper": "Loud, quarrelsome and easily distracted.",
+   "under_pressure": "Mob anything weaker than they are, and scatter from anything stronger.",
+   "breaks": "When a few are down or something frightening is loose among them, the rest run for the mine drift.",
+   "disposition": "idle",
+   "position": "camp"
+  },
+  {
+   "id": "keeper",
+   "name": "the hobgoblin spider-keeper",
+   "tier": "guard",
+   "wants": "Something to do.",
+   "fears": "Being the one who woke the sergeant.",
+   "knows": "How to handle the spiders with a spear and a torch, and when they were last fed.",
+   "will_never": "Step inside the cage.",
+   "temper": "Bored, cruel in an idle way, and not stupid.",
+   "under_pressure": "Puts his back to the cage and uses the spear.",
+   "breaks": "Hurt, or with a spider loose, he backs out toward the camp shouting for goblins.",
+   "disposition": "bored",
+   "position": "pens"
+  },
+  {
+   "id": "spiders",
+   "name": "two crag spiders",
+   "tier": "guard",
+   "wants": "Out of the cage, and something to eat.",
+   "fears": "Fire.",
+   "knows": "Nothing but hunger.",
+   "will_never": "Tell a goblin from a stranger.",
+   "temper": "Starved and furious.",
+   "under_pressure": "Bite and drag off the nearest moving thing.",
+   "breaks": "Fire drives them back; fed, they drag their meal into the dark and stay with it.",
+   "disposition": "frantic",
+   "position": "pens"
+  },
+  {
+   "id": "prisoner",
+   "name": "the chained prisoner",
+   "tier": "civilian",
+   "wants": "Out of here alive.",
+   "fears": "The spiders' feeding time.",
+   "knows": "These drifts: she surveyed them before the goblins came, the flooded one too, and where it lets out.",
+   "will_never": "Shout for help.",
+   "temper": "Dry, stubborn and worn thin.",
+   "under_pressure": "Goes still and quiet.",
+   "breaks": "She doesn't fight.",
+   "disposition": "watchful",
+   "position": "pens"
+  },
+  {
+   "id": "overseer",
+   "name": "the goblin overseer",
+   "tier": "guard",
+   "wants": "Full carts and a clean tally.",
+   "fears": "Coming up short when the sergeant asks.",
+   "knows": "Which deep tunnels are being worked today, and by how many.",
+   "will_never": "Leave the gang unwatched for long.",
+   "temper": "Shrill and exact.",
+   "under_pressure": "Whips the gang toward the trouble and stays behind them.",
+   "breaks": "Alone, he runs for the camp.",
+   "disposition": "busy",
+   "position": "mine_drift"
+  },
+  {
+   "id": "gang",
+   "name": "six goblin miners",
+   "tier": "minion",
+   "wants": "The shift to end.",
+   "fears": "The overseer's whip.",
+   "knows": "The face they're working.",
+   "will_never": "Work faster than they must.",
+   "temper": "Sullen and tired.",
+   "under_pressure": "Drop their picks and look to the overseer.",
+   "breaks": "With the overseer down or gone, they scatter into the deep tunnels.",
+   "disposition": "busy",
+   "position": "mine_drift"
+  }
+ ],
+ "map": {
+  "zones": [
+   {
+    "id": "tunnel_mouth",
+    "name": "The ledge",
+    "purpose": "Where the party's tunnel comes out: a rock ledge 10 feet above the camp floor at the cavern's west end, in shadow, with a rubble slope down into camp, an old mining ladder up the wall to the walkways, and a crack at the foot of the wall that breathes cold air.",
+    "light": "dark",
+    "rects": [
+     [
+      0,
+      10,
+      3,
+      3
+     ]
+    ],
+    "sees": [
+     "tower_top",
+     "walk_west",
+     "walk_east",
+     "pens"
+    ]
+   },
+   {
+    "id": "camp",
+    "name": "The camp",
+    "purpose": "The cavern floor, 70 feet long from the ledge to the pens and 50 wide. Three cookfires and most of the goblins in the west half, round the foot of the watchtower at its centre; bedrolls and sleepers along the dark south wall; a lamplit lane along the north wall where miners carry ore between the drift and the fires.",
+    "light": "dim",
+    "rects": [
+     [
+      3,
+      7,
+      14,
+      10
+     ]
+    ],
+    "sees": [
+     "tower_top",
+     "walk_west",
+     "walk_east"
+    ]
+   },
+   {
+    "id": "tower_top",
+    "name": "The top of the watchtower",
+    "purpose": "A railed timber platform 10 feet square, 30 feet above the middle of the camp, on four legs of lashed pit-props. One ladder comes up its west face. The sergeant's hammock is slung across it and its chest stands beside the hammock.",
+    "light": "dim",
+    "level": 1,
+    "rects": [
+     [
+      9,
+      11,
+      2,
+      2
+     ]
+    ],
+    "sees": [
+     "camp",
+     "pens",
+     "tunnel_mouth"
+    ]
+   },
+   {
+    "id": "walk_west",
+    "name": "The west walkway",
+    "purpose": "Old mining planks three feet wide, hung on rusted chain 40 feet above the camp, running from the wall above the ledge to the tower. Two planks are missing just short of the tower. It ends 10 feet above the platform, where a knotted rope hangs down to the rail.",
+    "light": "dim",
+    "level": 1,
+    "rects": [
+     [
+      1,
+      11,
+      8,
+      1
+     ]
+    ],
+    "sees": [
+     "camp",
+     "pens",
+     "tunnel_mouth"
+    ]
+   },
+   {
+    "id": "walk_east",
+    "name": "The east walkway",
+    "purpose": "The same planks and chain, running on from above the tower to the wall above the pens, where a ladder goes down. Its middle span sags and creaks, and the roof beside it is crusted with raw gems within arm's reach.",
+    "light": "dim",
+    "level": 1,
+    "rects": [
+     [
+      11,
+      11,
+      8,
+      1
+     ]
+    ],
+    "sees": [
+     "camp",
+     "pens",
+     "tunnel_mouth"
+    ]
+   },
+   {
+    "id": "pens",
+    "name": "The spider pens",
+    "purpose": "A side cave 20 feet by 25 off the east end of the camp, where the goblins keep two crag spiders in a timber cage. A prisoner is chained to a ring in the wall beside the cage. Behind the cage, wet steps go down into black water.",
+    "light": "dim",
+    "rects": [
+     [
+      17,
+      9,
+      4,
+      5
+     ]
+    ],
+    "sees": [
+     "tower_top",
+     "walk_west",
+     "walk_east"
+    ]
+   },
+   {
+    "id": "mine_drift",
+    "name": "The mine drift",
+    "purpose": "A working tunnel 15 feet wide running north out of the camp, loud with picks, lit by lamps. A gang cuts ore at the face and loads it into a cart on rails that slope down into the camp.",
+    "light": "bright",
+    "rects": [
+     [
+      8,
+      2,
+      3,
+      5
+     ]
+    ]
+   },
+   {
+    "id": "deep_tunnel",
+    "name": "The deep tunnels",
+    "purpose": "Beyond the working face the drift runs on north and down, unlit and unworked today: the way on.",
+    "light": "dark",
+    "rects": [
+     [
+      8,
+      0,
+      3,
+      2
+     ]
+    ]
+   },
+   {
+    "id": "flooded_drift",
+    "name": "The flooded drift",
+    "purpose": "An abandoned tunnel five feet wide, flooded chest-deep with cold black water, about 150 feet from the crack under the ledge, round under the camp's south wall, to the steps behind the spider cage. Halfway along, a side passage lets the water out.",
+    "light": "dark",
+    "level": -1,
+    "rects": [
+     [
+      2,
+      12,
+      1,
+      5
+     ],
+     [
+      2,
+      17,
+      17,
+      1
+     ],
+     [
+      18,
+      13,
+      1,
+      4
+     ]
+    ]
+   },
+   {
+    "id": "outflow",
+    "name": "The outflow",
+    "purpose": "Where the flooded drift drains east through a low passage into dry rock: a second way on, away from the camp.",
+    "light": "dark",
+    "level": -1,
+    "rects": [
+     [
+      19,
+      17,
+      2,
+      1
+     ]
+    ]
+   }
+  ],
+  "connections": [
+   {
+    "id": "slope",
+    "kind": "opening",
+    "name": "The rubble slope",
+    "between": [
+     "tunnel_mouth",
+     "camp"
+    ],
+    "wall": [
+     [
+      3,
+      10
+     ],
+     [
+      3,
+      13
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "pens_mouth",
+    "kind": "opening",
+    "name": "The mouth of the pens",
+    "between": [
+     "camp",
+     "pens"
+    ],
+    "wall": [
+     [
+      17,
+      10
+     ],
+     [
+      17,
+      13
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "drift_mouth",
+    "kind": "opening",
+    "name": "The mouth of the mine drift",
+    "between": [
+     "camp",
+     "mine_drift"
+    ],
+    "wall": [
+     [
+      8,
+      7
+     ],
+     [
+      11,
+      7
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "past_the_face",
+    "kind": "opening",
+    "name": "Past the working face",
+    "between": [
+     "mine_drift",
+     "deep_tunnel"
+    ],
+    "wall": [
+     [
+      9,
+      2
+     ],
+     [
+      10,
+      2
+     ]
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "tower_ladder",
+    "kind": "stairs",
+    "name": "The tower ladder",
+    "between": [
+     "camp",
+     "tower_top"
+    ],
+    "square": [
+     9,
+     11
+    ],
+    "fits": "medium",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "ledge_ladder",
+    "kind": "stairs",
+    "name": "The old ladder up from the ledge",
+    "between": [
+     "tunnel_mouth",
+     "walk_west"
+    ],
+    "square": [
+     1,
+     11
+    ],
+    "fits": "medium",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "knotted_rope",
+    "kind": "opening",
+    "name": "The knotted rope down to the platform",
+    "between": [
+     "walk_west",
+     "tower_top"
+    ],
+    "wall": [
+     [
+      9,
+      11
+     ],
+     [
+      9,
+      12
+     ]
+    ],
+    "fits": "medium",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "over_the_tower",
+    "kind": "opening",
+    "name": "The step up from the platform rail",
+    "between": [
+     "tower_top",
+     "walk_east"
+    ],
+    "wall": [
+     [
+      11,
+      11
+     ],
+     [
+      11,
+      12
+     ]
+    ],
+    "fits": "medium",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "pens_ladder",
+    "kind": "stairs",
+    "name": "The ladder down into the pens",
+    "between": [
+     "walk_east",
+     "pens"
+    ],
+    "square": [
+     18,
+     11
+    ],
+    "fits": "medium",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "cold_crack",
+    "kind": "crawl",
+    "name": "The crack at the foot of the ledge",
+    "between": [
+     "tunnel_mouth",
+     "flooded_drift"
+    ],
+    "square": [
+     2,
+     12
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "wet_steps",
+    "kind": "stairs",
+    "name": "The wet steps behind the cage",
+    "between": [
+     "pens",
+     "flooded_drift"
+    ],
+    "square": [
+     18,
+     13
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "side_passage",
+    "kind": "opening",
+    "name": "The side passage",
+    "between": [
+     "flooded_drift",
+     "outflow"
+    ],
+    "wall": [
+     [
+      19,
+      17
+     ],
+     [
+      19,
+      18
+     ]
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   }
+  ],
+  "things": [
+   {
+    "id": "chest",
+    "name": "the sergeant's chest",
+    "properties": "Iron-bound oak, lid open, an arm's length from the hammock. Full, it takes two to lift and won't go down a ladder quietly.",
+    "size": "large",
+    "location": {
+     "zone": "tower_top",
+     "at": [
+      10,
+      12
+     ]
+    }
+   },
+   {
+    "id": "chest_coin",
+    "name": "coin and plate from the chest",
+    "properties": "Loose coin, cups and rings, a heavy double handful. It clinks.",
+    "size": "small",
+    "location": {
+     "holder": "chest"
+    },
+    "reward": {
+     "gold": 60
+    }
+   },
+   {
+    "id": "circlet",
+    "name": "a silver circlet",
+    "properties": "A plain band of old silver lying on top of the coin, cold to the touch.",
+    "size": "tiny",
+    "location": {
+     "holder": "chest"
+    },
+    "reward": {
+     "relic": {
+      "name": "The sergeant's circlet",
+      "text": "Whoever wears it can't be read or stunned by another mind."
+     }
+    }
+   },
+   {
+    "id": "gems",
+    "name": "raw gems in the roof",
+    "properties": "Rough stones crusting the rock beside the east walkway's middle span. Prying a handful loose takes a blade and a few minutes, and the chips fall on the sleepers 40 feet below.",
+    "size": "tiny",
+    "location": {
+     "zone": "walk_east",
+     "at": [
+      14,
+      11
+     ]
+    },
+    "reward": {
+     "gold": 40
+    }
+   },
+   {
+    "id": "spider_cage",
+    "name": "the spider cage",
+    "properties": "Pit-props lashed with rope, eight feet square, its door held shut by a wooden peg through a hasp. The rope is old and the spiders have been working at it.",
+    "size": "large",
+    "location": {
+     "zone": "pens",
+     "at": [
+      19,
+      10
+     ]
+    }
+   },
+   {
+    "id": "ankle_chain",
+    "name": "the prisoner's chain",
+    "properties": "Six feet of iron chain from the prisoner's ankle to a ring in the wall, closed with a padlock.",
+    "size": "small",
+    "location": {
+     "zone": "pens",
+     "at": [
+      20,
+      12
+     ]
+    }
+   },
+   {
+    "id": "chain_key",
+    "name": "the padlock key",
+    "properties": "A small iron key on a thong.",
+    "size": "tiny",
+    "location": {
+     "holder": "keeper"
+    }
+   },
+   {
+    "id": "cookfires",
+    "name": "the cookfires",
+    "properties": "Three fires in the west half of the camp with a great iron stewpot over the biggest, and most of the goblins round them.",
+    "size": "large",
+    "location": {
+     "zone": "camp",
+     "at": [
+      6,
+      12
+     ]
+    }
+   },
+   {
+    "id": "ore_cart",
+    "name": "the ore cart",
+    "properties": "An iron cart on rails, half full, held on the slope by a wooden chock under one wheel. The rails run down out of the drift and across the camp to a stop at the foot of the watchtower.",
+    "size": "large",
+    "location": {
+     "zone": "mine_drift",
+     "at": [
+      9,
+      5
+     ]
+    }
+   },
+   {
+    "id": "lamp_oil",
+    "name": "kegs of lamp oil",
+    "properties": "Four small kegs stacked just inside the mouth of the mine drift, one of them tapped.",
+    "size": "medium",
+    "location": {
+     "zone": "mine_drift",
+     "at": [
+      10,
+      6
+     ]
+    }
+   },
+   {
+    "id": "tally_slate",
+    "name": "the overseer's tally slate",
+    "properties": "A slate scratched with the day's carts and a rough plan of which deep tunnels are being worked.",
+    "size": "small",
+    "location": {
+     "holder": "overseer"
+    }
+   }
+  ],
+  "facts": [
+   {
+    "id": "heights",
+    "text": "The cavern roof is 45 feet above the camp floor. The ledge is 10 feet up, the tower platform 30, the walkways 40. A fall from the walkways onto the camp floor would cripple or kill; onto the platform it is a 10-foot drop."
+   },
+   {
+    "id": "walkway_load",
+    "text": "Each walkway bears one person at a time. Two on the same span make it groan and shed dust onto the camp."
+   },
+   {
+    "id": "nobody_looks_up",
+    "text": "The camp's light comes from its fires, so the walkways and the ledge are in shadow from below. Someone on the tower platform, awake, would see anyone on a walkway."
+   },
+   {
+    "id": "sergeant_sleep",
+    "text": "The sergeant sleeps deeply while the camp is calm. It wakes by stages as the camp grows alarmed, and at once if it is touched or its chest is dragged."
+   },
+   {
+    "id": "sergeant_awake",
+    "text": "Awake, the sergeant can stun a mind anywhere it can see in the cavern. It cannot see into the drifts or the pens from its hammock."
+   },
+   {
+    "id": "camp_ground",
+    "text": "Crossing the camp among the fires means passing within a few feet of waking goblins. The south wall is dark and thick with sleepers. The north wall's lane is lit and walked by miners with baskets, who look at their feet."
+   },
+   {
+    "id": "spiders_loose",
+    "text": "The crag spiders are the size of ponies. Loose, they attack whatever is nearest and moving, and the whole camp will know it within moments."
+   },
+   {
+    "id": "cold_water",
+    "text": "The flooded drift is pitch dark, and its water is chest-deep on a human and cold enough to numb hands and feet in a few minutes. Sound from the camp doesn't reach it, and sound in it doesn't reach the camp.",
+    "at": "flooded_drift"
+   },
+   {
+    "id": "cart_rails",
+    "text": "With the chock out, the ore cart would roll down the rails by itself, through the fires' edge, and hit the stop at the tower's foot hard.",
+    "at": "mine_drift"
+   },
+   {
+    "id": "picks",
+    "text": "The picks in the mine drift are loud enough that nobody in the drift hears anything from the camp short of a shout, and the gang's lamps make the drift the brightest place here.",
+    "at": "mine_drift"
+   }
+  ]
+ },
+ "clock": {
+  "by": "alarm",
+  "events": [
+   {
+    "id": "uneasy",
+    "known": false,
+    "at_tick": 1,
+    "do": [
+     {
+      "then": [
+       {
+        "set_flag": {
+         "entity": "goblins",
+         "key": "alert",
+         "value": "uneasy"
+        }
+       },
+       {
+        "add_canon": {
+         "kind": "ruling",
+         "text": "Something has been noticed. The sergeant rolls over in its hammock and mutters, and the goblins near the tower hush each other and glance at the shadows. Nobody has raised a cry."
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "searching",
+    "known": false,
+    "at_tick": 2,
+    "do": [
+     {
+      "then": [
+       {
+        "set_flag": {
+         "entity": "goblins",
+         "key": "alert",
+         "value": "searching"
+        }
+       },
+       {
+        "move": {
+         "entity": "keeper",
+         "to": "camp"
+        }
+       },
+       {
+        "add_canon": {
+         "kind": "ruling",
+         "text": "The camp knows something is wrong. The hobgoblin has left the pens with four goblins and torches and is working round the edges of the cavern, the ledge first and then the mouths of the drifts. The pens are unwatched."
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "stirring",
+    "known": false,
+    "at_tick": 3,
+    "do": [
+     {
+      "then": [
+       {
+        "set_flag": {
+         "entity": "goblins",
+         "key": "alert",
+         "value": "armed"
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "sergeant",
+         "key": "half_awake",
+         "value": true
+        }
+       },
+       {
+        "add_canon": {
+         "kind": "ruling",
+         "text": "The camp is up and armed, and the dice and supper are forgotten. On the tower the sergeant has sat up in its hammock with its eyes still closed, its tentacles tasting the air. One more disturbance will wake it."
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "roused",
+    "known": false,
+    "at_tick": 4,
+    "do": [
+     {
+      "then": [
+       {
+        "set_flag": {
+         "entity": "sergeant",
+         "key": "awake",
+         "value": true
+        }
+       },
+       {
+        "set_flag": {
+         "entity": "goblins",
+         "key": "alert",
+         "value": "hunting"
+        }
+       },
+       {
+        "add_canon": {
+         "kind": "ruling",
+         "text": "The sergeant is awake and standing at the rail. Every goblin in the cavern has gone silent and is looking where it looks. It is hunting whoever disturbed its camp, and it wants them brought to it alive."
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ },
+ "start": {
+  "tick": 0,
+  "positions": {
+   "player": "tunnel_mouth",
+   "companion_a": "tunnel_mouth",
+   "companion_b": "tunnel_mouth"
+  },
+  "ops": []
+ },
+ "opening": "Your tunnel ends on a ledge of rock in the dark, ten feet above the floor of a cavern as long as a barn and nearly as wide. Below you a goblin camp sprawls across it: three cookfires, a great iron pot, and thirty or so goblins eating, dicing and mending picks after a shift. More are asleep in bedrolls along the dark wall to your right. They're busy with themselves, and nobody is looking your way.\n\nIn the middle of the camp stands a timber watchtower, thirty feet tall, with one ladder up it. On its platform something with a purple, tentacled face lies asleep in a hammock: a mind flayer, the camp's sergeant, by the way the goblins lower their voices near the tower's foot. An open chest stands beside the hammock, and the firelight catches coin in it. Higher still, old mining walkways hang on chains from the roof and run from the wall just above you, over the tower, to the far end of the cavern; a ladder beside you goes up to them. A few planks are missing, and where the far walkway sags the roof beside it glitters with raw gems.\n\nAt the far end, in a side cave, a hobgoblin is jabbing a spear through the bars of a timber cage at two spiders the size of ponies, which throw themselves at the wood. Someone small is chained to the wall beside the cage, keeping very still. To your left, halfway along the cavern wall, lamplight and the ring of picks come out of a tunnel that goblins walk in and out of with baskets: the mine, and by the sound of it the way on. At the foot of your ledge, a crack in the rock breathes cold air and you can hear water moving somewhere under it."
+}

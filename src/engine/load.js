@@ -3,6 +3,7 @@ import { validate } from "../validate.js";
 import { packetSchema } from "../../schemas/index.js";
 import { geometryProblems } from "./map.js";
 import { beginTick } from "./clock.js";
+import { noteSeen } from "./perceive.js";
 import { run } from "./ops.js";
 import { toughnessOf } from "./ledger.js";
 
@@ -120,5 +121,6 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
   for (const c of map.connections) if (c.flags) s.flags[c.id] = { ...c.flags };
   run(s, start.ops);
   beginTick(s);
+  noteSeen(s);
   return s;
 }

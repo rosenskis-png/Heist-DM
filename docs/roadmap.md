@@ -25,6 +25,7 @@ Each phase's full record (findings, causes and fixes) is in git history; what it
 Not gates. Each is answered when play shows it.
 
 ### From the first shakedown (2026-11-10)
+- **The goblin camp is the test of sites (D180).** Play one leg in it. *What it has to show:* that the DM keeps the place consistent (distances, heights, who is where) across a long session; that it moves the cast when the alarm climbs and leaves them alone when it doesn't; that it pivots when a plan goes wrong, without being told what kind of scene it is; and what each call costs with a whole site in it (the DM's text of the camp is about 13 KB, twice a single room's). *If it holds,* the next step is a site generator and playing from a note, together. *If it doesn't,* the post-mortem says which of those four failed.
 The post-mortem's first fixes are in (D174, D175). What it left open, in the order recommended:
 
 - **Play from the prep note.** Stakes before the roll, trouble that moves on failure, the blind read and what the party carries are in (D176 to D178). Still open: the DM's calls read the encoded packet (a graph of zones, seven-field sheets with `will_never`), not the sketch. *Recommendation:* prove on the bench that the DM runs a room consistently from the note as written, then cut the zone graph and all but a line per person. What must stay is everything that says what is true and what the place won't allow.

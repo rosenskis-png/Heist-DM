@@ -536,6 +536,10 @@ export function roomSheet(state, packet = state.packet) {
   const st = stateFor(s, { party: true });
   const { seen, heard } = partyPerceives(s);
   const known = (x) => !x.hidden || s.known.revealed.includes(x.id);
+  // In a site (D180) the party knows only the places it has seen so far; a way into one it hasn't is named by the
+  // way itself, and where it leads is still to find.
+  const found = packet.site ? new Set(s.known.places ?? []) : null;
+  const here_ = (id) => !found || found.has(id);
   const all = [...map.zones, ...map.things, ...people, ...s.party];
   const label = (id) => all.find((x) => x.id === id)?.name ?? id;
   const flagText = (f) => Object.entries(f).map(([k, v]) => (v === true ? k : v === false ? `not ${k}` : `${k} ${v}`)).join(", ");
@@ -548,11 +552,11 @@ export function roomSheet(state, packet = state.packet) {
     name: packet.name,
     opening: packet.opening ?? null,
     tick: st.tick,
-    places: map.zones.filter(known).map((z) => ({ id: z.id, name: z.name, what: z.purpose, ...(z.light ? { light: z.light } : {}), here: here(z.id) })),
-    ways: map.connections.filter(known).map((c) => ({ id: c.id, between: c.between.map(label), how: [wayBits(c), st.flags[c.id] ? `now ${flagText(st.flags[c.id])}` : ""].filter(Boolean).join("; ") })),
-    things: map.things.filter(known).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: t.properties })),
+    places: map.zones.filter((z) => known(z) && here_(z.id)).map((z) => ({ id: z.id, name: z.name, what: z.purpose, ...(z.light ? { light: z.light } : {}), here: here(z.id) })),
+    ways: map.connections.filter((c) => known(c) && c.between.some(here_)).map((c) => ({ id: c.id, between: c.between.map((z) => (here_(z) ? label(z) : `somewhere not yet seen (by ${c.name ?? c.kind})`)), how: [wayBits(c), st.flags[c.id] ? `now ${flagText(st.flags[c.id])}` : ""].filter(Boolean).join("; ") })),
+    things: map.things.filter((t) => known(t) && (!found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: t.properties })),
     people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
-    facts: map.facts.filter(known).map((f) => f.text),
+    facts: map.facts.filter((f) => known(f) && (!f.at || here_(f.at))).map((f) => f.text),
     carried: (s.carried ?? []).map((x) => x.what),
     learned: st.facts.map((f) => f.text),
     now: [

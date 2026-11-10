@@ -21,6 +21,7 @@ On a phone the two are tabs, each with an unread marker, and the room sheet, the
 - **The party's sheet** lists each member's abilities, with what's left of the limited ones ("1 of 1 this encounter, 3 of 3 until a rest", D128), and the conditions they carry.
 - **The room sheet** (D174) is what the whole party knows of the room, in sections that fold: the opening as the DM first gave it, the places with who's in each and where each leads, the ways between them in full, the things and where they are, who's in sight or earshot, what anyone can tell by looking, what the party has with it from earlier rooms (D178), what the party has learned, and anything pressing right now. The companions' calls are sent this same sheet (`docs/spec/context.md`).
 - **Before a roll** (D176): a try that needs a check shows who rolls, how hard it is, why, and what failing costs, with "Roll" and "Never mind". Nothing has happened until the player rolls, and what gets worse in the room is told at the table when it does.
+- **In a site** (D180) the sheet and the map show only the areas found so far, and a way into one not yet seen is named by the way itself. The setup screen offers the goblin camp as a test beside the Cells.
 - **"What do you two think?"** sits by Send (D175): the companions speak when they're spoken to, and this asks them without the player saying anything first. Time doesn't move.
 - A companion's stance goes onto the draft for the player to decide: "She sits it out" (her stance stands, and she won't do that step), "It's handled", or "Do it anyway" (D175).
 

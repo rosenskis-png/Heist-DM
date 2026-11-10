@@ -191,6 +191,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D177** The note stops predicting, and a new room is read once from the player's chair: current
 - **D178** What the party has with it goes from room to room: current
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
+- **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
 
 ---
 
@@ -1094,3 +1095,13 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **The encode prompt** puts how the danger behaves in plain view as a fact, keeps hidden for things and never for how the room works, writes notes as what people want and never as what will happen, keeps `will_never` from walling off a kind of play, writes the clock as two or three steps of the same trouble, and names optional objectives only for prizes the opening shows.
 **Why:** The shakedown's rooms had strong themes and narrow play. The seed stacked a tone, a business, a shape, a centrepiece, two leanings and two motifs and never said anything about the danger, so each room spent its invention reconciling ingredients, and one of them (a game) could only be a rule system. The designer's own model of a wide room is one overwhelming danger asleep with loose things around it.
 **Rules out:** Size caps. Example rooms in the prompt (D161 stands). A danger whose behaviour has to be learned before it can be planned around.
+
+### D180. A site: one place of several areas, hand-built as the goblin camp, to test before any generator
+**Decided:** The designer's call (2026-11-10). A test, not yet the game's shape.
+- **A site** is one place the party moves about in, in any order, and can come back through: several areas, each with an exact footprint on the 5-ft grid, joined by named ways, with a cast that stays put until something gives it a reason to move. Nothing in it names a kind of scene. A heist, a chase or a stand is whatever the state makes it.
+- **The goblin camp** (`content/encounters/goblin_camp.json`) is the designer's watchtower room grown into one: the ledge, the camp floor (70 by 50 feet), the tower top, two walkways, the spider pens, the mine drift, the deep tunnels, the flooded drift and its outflow. Two ways on, four things worth having in plain sight, and three ways round that never touch the camp floor. The setup screen offers it beside the Cells.
+- **Found as you go.** A packet marked `site` shows the party only the areas it has seen or stood in (`s.known.places`, kept by the engine after every action): the sheet, the map and the companions' calls all read that. A fact can belong to an area (`at`) and is learned on finding it. The DM's calls are told the whole place, with every size in feet.
+- **An alarm, not a clock.** `clock.by` says what moves a packet's timed events: `time`, `trouble` (a failed roll or a wait, D176) or `alarm` (a failed roll only). The camp's four steps are an alarm: uneasy, searching, the sergeant stirring, the sergeant awake. Each says what the camp now does and moves who it says.
+- **No names before they're heard.** The camp's people are named by what they look like; their names are in the DM's notes.
+**Why:** A room built for one kind of scene anchors the DM on it. Rooms in a row gave no exploring, no going back, and nothing that lasted past a door. The old trouble with places like this was layouts too vague to mean anything, so this one is drawn exactly and checked by the engine, and the question the test asks is whether the DM keeps it consistent and pivots as the state changes.
+**Rules out:** Building a site generator before this has been played. Telling the DM what kind of scene it is running.
