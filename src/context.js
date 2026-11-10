@@ -776,6 +776,7 @@ const seedText = (seed, world) => ({
     kind: seed.kind,
     tone: seed.tone,
     busy_with: seed.busy,
+    ...(seed.danger ? { how_the_danger_stands: seed.danger } : {}),
     ...(seed.shape ? { shape: seed.shape } : {}),
     ...(seed.centrepiece ? { centrepiece: seed.centrepiece } : {}),
     ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),

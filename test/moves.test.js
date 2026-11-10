@@ -74,3 +74,19 @@ test("what the party has with it goes from the verdict to the campaign, the next
   const s = load({ packet: cells, party: start(cells).state.party, carried: camp.carried });
   assert.ok(sheetText(roomSheet(s)).includes("five freed villagers, weak and frightened"));
 });
+
+test("an encounter's seed fixes how its danger stands, never twice in an act, with one motif and no rule-driven business (D179)", async () => {
+  const { seedFor, DANGERS, BUSY } = await import("../src/campaign/seed.js");
+  const { worldOf } = await import("../src/campaign/world.js");
+  let camp = { ...newCampaign({ seed: 5 }), way: { ...newCampaign({ seed: 5 }).way, here: "encounter" } };
+  const seen = [];
+  for (let i = 0; i < 6; i++) {
+    const { seed, camp: next } = seedFor(camp, worldOf(), "encounter", ["encounter"]);
+    assert.ok(DANGERS.includes(seed.danger) && !seen.includes(seed.danger));
+    assert.equal(seed.motifs.length, 1);
+    seen.push(seed.danger);
+    camp = next;
+  }
+  assert.equal(seedFor(camp, worldOf(), "quiet", ["encounter"]).seed.danger, undefined);
+  assert.ok(!BUSY.some((b) => /game|contest/.test(b)));
+});

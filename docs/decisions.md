@@ -190,6 +190,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
 - **D177** The note stops predicting, and a new room is read once from the player's chair: current
 - **D178** What the party has with it goes from room to room: current
+- **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
 
 ---
 
@@ -1085,3 +1086,11 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 The verdict call returns `carried`: up to six lines of what the party has with it as it leaves, each an item, a follower or a thread, as the whole list (kept, dropped and new). The campaign keeps it (`roomEnded`), the next room's sketch must honour it, the engine loads it into the room's state, the DM's calls read it beside gold and relics, and the room sheet shows it to the player and the companions.
 **Why:** In the shakedown a stolen hand-bell, five freed villagers and a cultist's grudge all vanished at the door, and leaving without weapons never mattered again.
 **Rules out:** The in-room DM reading the campaign: it gets the list and nothing else. An inventory with weights or counts.
+
+### D179. A room is a danger in a plain state with loose things around it, and the seed fixes that state
+**Decided:** The designer's call (2026-11-10). Changes D163, D169 and D172.
+- **The seed** draws how an encounter's main danger stands as the party arrives (`DANGERS` in `src/campaign/seed.js`: asleep, feeding, quarrelling, penned, hurt and so on), never twice in an act, and fixes it. It no longer draws an x-factor or what the room is built around, and draws one motif, not up to two. A contest or a game is gone from what a place can be busy with, and a great machine and a map or model from the centrepieces.
+- **The sketch prompt** opens on what makes a room play: a danger too big to fight head-on in a plain state that can tip, a few loose things around it that nothing depends on, one space, and trouble already moving. Its closing checks are read from the opening alone: four things to take hold of, what sets the danger off, and no way so safe nobody would pick another.
+- **The encode prompt** puts how the danger behaves in plain view as a fact, keeps hidden for things and never for how the room works, writes notes as what people want and never as what will happen, keeps `will_never` from walling off a kind of play, writes the clock as two or three steps of the same trouble, and names optional objectives only for prizes the opening shows.
+**Why:** The shakedown's rooms had strong themes and narrow play. The seed stacked a tone, a business, a shape, a centrepiece, two leanings and two motifs and never said anything about the danger, so each room spent its invention reconciling ingredients, and one of them (a game) could only be a rule system. The designer's own model of a wide room is one overwhelming danger asleep with loose things around it.
+**Rules out:** Size caps. Example rooms in the prompt (D161 stands). A danger whose behaviour has to be learned before it can be planned around.

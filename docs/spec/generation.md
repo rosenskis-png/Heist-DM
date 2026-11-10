@@ -71,3 +71,6 @@ After a room with danger in the way (an encounter or a climax) is laid out, the 
 
 ## What the party has with it (D178)
 The campaign's `carried` list (items, followers, threads, from the last verdict) reaches the sketch as something the room must honour, and the engine loads it into the room's state.
+
+## What a seed fixes about the danger (D179)
+For an encounter or a climax the seed fixes how the main danger stands as the party arrives, from `DANGERS`, never twice in an act. The sketch builds a danger too big to fight head-on in that state, with a few loose things around it; the encode call puts how it behaves in plain view as a fact. A room draws one motif.

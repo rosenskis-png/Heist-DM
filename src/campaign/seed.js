@@ -10,11 +10,15 @@ export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get thro
 export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
 // What the place is busy with when the party arrives (D162). The act call writes what each kind looks like in this
 // region (D164); code draws a kind per room, never repeating within an act.
-export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship", "a punishment or execution", "trade or a market", "getting ready for a raid", "sleep or the night watch", "sickness or a plague", "ruin and decay", "beasts or monsters kept or loose", "a burial or mourning", "a contest or a game", "building or repair", "training or drill"];
+export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship", "a punishment or execution", "trade or a market", "getting ready for a raid", "sleep or the night watch", "sickness or a plague", "ruin and decay", "beasts or monsters kept or loose", "a burial or mourning", "a quarrel or a reckoning", "building or repair", "training or drill"];
 // The space's rough form, and the one thing the eye goes to (D163): fixed, from wide lists, not repeated within an act,
 // because any image the prompt itself holds becomes an anchor.
 export const SHAPES = ["a street or alley", "a long gallery or nave", "a warren of small chambers", "a garden or orchard", "a market of stalls", "a river crossing or ford", "a field of pillars or columns", "a wide stair hall", "a courtyard open to the sky", "a ship's deck or barge", "a pit or bowl", "terraces down a slope", "a tower or shaft", "a bridge or ledge over a drop", "an island in something", "a cave of natural rock", "a ruin half fallen in", "a crossroads of tunnels"];
-export const CENTREPIECES = ["a statue or idol", "a great machine", "a fire or forge", "a tree or great growth", "a throne or seat of honour", "a wreck", "a pool or spring", "a beast", "a tower or scaffold", "an altar", "a table set for many", "a gate or portcullis", "a pile of something valuable", "a cart, wagon or vessel", "a grave or tomb", "a bell, drum or horn", "a map, model or mural", "a hole in the floor"];
+export const CENTREPIECES = ["a statue or idol", "a cauldron, vat or kiln", "a fire or forge", "a tree or great growth", "a throne or seat of honour", "a wreck", "a pool or spring", "a beast", "a tower or scaffold", "an altar", "a table set for many", "a gate or portcullis", "a pile of something valuable", "a cart, wagon or vessel", "a grave or tomb", "a bell, drum or horn", "a heap of spoils or trophies", "a hole in the floor"];
+// How the room's main danger stands as the party arrives (D179): too much to fight head-on, and in a state that can
+// tip. A danger in a plain state anyone understands is what makes a room playable many ways; one that runs on a
+// rule has to be worked out first. Fixed by the seed, never repeated within an act.
+export const DANGERS = ["asleep or dozing", "eating or drinking", "busy with work it can't leave", "quarrelling among itself", "chained, caged or penned", "hurt or sick", "waiting for someone who's late", "searching for something it lost", "showing off to an audience", "drunk or celebrating", "afraid of something else here", "bored and looking for sport"];
 // What's worth having beyond the way out (D164): nothing about half the time; a clue is one more kind of reward.
 export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a journal page"];
 const PRIZE_WEIGHTS = [10, 4, 2, 4];
@@ -61,7 +65,8 @@ export function seedFor(camp, world, kind, exits = []) {
   // D169), not repeated in the act where it can be helped.
   const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
   const pool = [...fresh(fit, used, (m) => m.id)];
-  const n = Math.min(CHALLENGED.includes(kind) ? 1 + roll(rng, 2) : 1, pool.length);
+  // One motif a room (D179): two pulled a room toward two ideas joined together.
+  const n = Math.min(1, pool.length);
   seed.motifs = [];
   while (seed.motifs.length < n) seed.motifs.push(pool.splice(roll(rng, pool.length), 1)[0]);
   // A calm room's setting, from the act's: a different one from any used earlier in the act (D167).
@@ -78,8 +83,8 @@ export function seedFor(camp, world, kind, exits = []) {
   // What it's busy with: a kind, never repeated in the act; the sketch fits it to the world (D162, D169).
   const usedBusy = camp.usedBusy ?? [];
   seed.busy = pickFrom(rng, fresh(BUSY, usedBusy));
-  if (CHALLENGED.includes(kind) || kind === "oddity") seed.xFactor = pickFrom(rng, XFACTORS);
-  if (CHALLENGED.includes(kind)) seed.core = pickFrom(rng, CORES);
+  const usedDangers = camp.usedDangers ?? [];
+  if (CHALLENGED.includes(kind)) seed.danger = pickFrom(rng, fresh(DANGERS, usedDangers));
   const usedShapes = camp.usedShapes ?? [];
   const usedCentres = camp.usedCentres ?? [];
   seed.shape = pickFrom(rng, fresh(SHAPES, usedShapes));
@@ -129,6 +134,7 @@ export function seedFor(camp, world, kind, exits = []) {
       roomNo: room,
       used: [...used, ...seed.motifs.map((m) => m.id)],
       usedBusy: [...usedBusy, seed.busy],
+      usedDangers: seed.danger ? [...usedDangers, seed.danger] : usedDangers,
       usedShapes: [...usedShapes, seed.shape],
       usedCentres: [...usedCentres, seed.centrepiece],
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
