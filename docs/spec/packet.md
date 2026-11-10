@@ -85,3 +85,4 @@ The engine measures each serialized packet and warns above twice the size of the
 - `clock.by` says what moves the timed events: `time` (a drawn room's default), `trouble` (a failed roll or a wait; the default with no map) or `alarm` (a failed roll only).
 - A fact's `at` names the area it belongs to. In a site the party learns it on finding that area.
 The example is `content/encounters/goblin_camp.json`, and `test/site.test.js` holds it sound.
+- A zone's `ground` (water, planks, rubble) is what's underfoot, for the map (D181).

@@ -192,6 +192,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D178** What the party has with it goes from room to room: current
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
+- **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 
 ---
 
@@ -1105,3 +1106,12 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **No names before they're heard.** The camp's people are named by what they look like; their names are in the DM's notes.
 **Why:** A room built for one kind of scene anchors the DM on it. Rooms in a row gave no exploring, no going back, and nothing that lasted past a door. The old trouble with places like this was layouts too vague to mean anything, so this one is drawn exactly and checked by the engine, and the question the test asks is whether the DM keeps it consistent and pivots as the state changes.
 **Rules out:** Building a site generator before this has been played. Telling the DM what kind of scene it is running.
+
+### D181. The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts
+**Decided:** The designer's call (2026-11-10). Changes D71 and D72's map panel.
+- **A Map tab** beside Table and Plans. Every level is drawn on one frame across, so what's above sits over what it's above, with a scale bar. Tapping a place, a person or a thing shows what the party knows of it, and a list under the map says who is where in words.
+- **From state alone.** A token is in the place the ledger says its owner is in, gathered at the middle of that place: the map claims which place, and no more. Each token has its own mark, and a crowd is drawn as a cluster.
+- **What the party doesn't know is marked, not missing.** A way into a place not yet found is a broken line with a question mark; a ladder or steps to somewhere unexplored is dashed. A place out of sight now is faded. A person out of sight stays as a ghost where the party last had eyes on them (`s.known.last`), and moves only when seen again.
+- **More to draw with.** A zone can say what's underfoot (`ground`: water, planks, rubble), drawn as a texture. A room with no drawn map gets a sketch of its places in columns by distance from the party, joined by its ways, claiming no sizes.
+**Why:** The map was a small panel whose lettering was unreadable on a phone, with tokens scattered over squares they weren't on, people vanishing the moment they left sight, and nothing at all for a generated room.
+**Rules out:** Positions finer than a place, which the ledger doesn't hold. Showing where someone out of sight really is.

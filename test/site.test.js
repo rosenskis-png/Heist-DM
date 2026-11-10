@@ -76,3 +76,50 @@ test("a save of the camp carries the place whole and loads without it", () => {
   assert.equal(back.state.packet.id, "goblin_camp");
   assert.deepEqual(back.state.known.places, session.state.known.places);
 });
+
+test("the map draws from state: gaps for ways not yet explored, ghosts where someone was last seen, and one mark each (D181)", () => {
+  let s = start().state;
+  let m = mapView(s);
+  // Every level shares one frame across, so the tower top sits over its square of the camp.
+  assert.ok(m.width >= 21 && m.levels.length === 2);
+  const ground = m.levels.find((l) => l.level === 0);
+  assert.ok(ground.connections.find((c) => c.id === "drift_mouth").gap, "the mine drift's mouth is a gap until it's found");
+  const crack = ground.connections.find((c) => c.id === "cold_crack");
+  assert.equal(crack.leads, null);
+  assert.equal(ground.connections.find((c) => c.id === "ledge_ladder").leads, "The west walkway");
+  const tokens = m.levels.flatMap((l) => l.tokens);
+  assert.equal(new Set(tokens.map((t) => t.mark)).size, tokens.length, "no two tokens share a mark");
+  assert.ok(tokens.find((t) => t.id === "goblins").group && !tokens.find((t) => t.id === "sergeant").group);
+  assert.equal(tokens.find((t) => t.id === "keeper").zone, "pens");
+  // Down in the dark the camp is out of sight: its people stay on the map as ghosts where they were last seen.
+  s = go(s, "flooded_drift");
+  m = mapView(s);
+  const keeper = m.levels.flatMap((l) => l.tokens).find((t) => t.id === "keeper");
+  assert.ok(keeper.ghost && keeper.zone === "pens");
+  assert.ok(m.levels.find((l) => l.level === -1).zones.some((z) => z.id === "flooded_drift" && z.ground === "water"));
+  // The alarm moves the keeper while nobody is looking: the ghost stays where he was last seen, not where he is.
+  s = apply(s, { type: "scene", out: fail, rolls: [100] });
+  s = apply(s, { type: "scene", out: fail, rolls: [100] });
+  assert.equal(s.at.keeper, "camp");
+  assert.equal(mapView(s).levels.flatMap((l) => l.tokens).find((t) => t.id === "keeper").zone, "pens");
+  // Back in sight, the token is where he is.
+  s = go(s, "tunnel_mouth");
+  const seenAgain = mapView(s).levels.flatMap((l) => l.tokens).find((t) => t.id === "keeper");
+  assert.ok(!seenAgain.ghost && seenAgain.zone === "camp");
+});
+
+test("a room with no drawn map still gets a sketch of its places and ways (D181)", async () => {
+  const { sketchView } = await import("../src/game/view.js");
+  const bare = structuredClone(camp);
+  delete bare.site;
+  for (const z of bare.map.zones) delete z.rects;
+  for (const c of bare.map.connections) { delete c.wall; delete c.square; }
+  for (const t of bare.map.things) delete t.location.at;
+  const s = newSession({ packet: bare, player: { name: "Kael", class: "rogue" }, companions: ["fern", "celeste"] }).state;
+  assert.equal(mapView(s), null);
+  const k = sketchView(s);
+  assert.equal(k.nodes.length, bare.map.zones.length);
+  assert.equal(k.nodes.find((n) => n.id === "tunnel_mouth").col, 0);
+  assert.ok(k.nodes.find((n) => n.id === "outflow").col >= 2);
+  assert.ok(k.nodes.find((n) => n.id === "tunnel_mouth").tokens.some((t) => t.party));
+});

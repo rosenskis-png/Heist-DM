@@ -220,7 +220,8 @@
      "walk_west",
      "walk_east",
      "pens"
-    ]
+    ],
+    "ground": "rubble"
    },
    {
     "id": "camp",
@@ -259,7 +260,8 @@
      "camp",
      "pens",
      "tunnel_mouth"
-    ]
+    ],
+    "ground": "planks"
    },
    {
     "id": "walk_west",
@@ -279,7 +281,8 @@
      "camp",
      "pens",
      "tunnel_mouth"
-    ]
+    ],
+    "ground": "planks"
    },
    {
     "id": "walk_east",
@@ -299,7 +302,8 @@
      "camp",
      "pens",
      "tunnel_mouth"
-    ]
+    ],
+    "ground": "planks"
    },
    {
     "id": "pens",
@@ -373,7 +377,8 @@
       1,
       4
      ]
-    ]
+    ],
+    "ground": "water"
    },
    {
     "id": "outflow",
@@ -388,7 +393,8 @@
       2,
       1
      ]
-    ]
+    ],
+    "ground": "water"
    }
   ],
   "connections": [

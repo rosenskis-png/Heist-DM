@@ -30,6 +30,8 @@ const zone = obj(["id", "name", "purpose", "light"], {
   description: r("text"),
   light: { enum: ["dark", "dim", "bright"] },
   level: { type: "integer" },
+  // What's underfoot, for the map (D181). Left out, it's plain floor.
+  ground: { enum: ["floor", "water", "planks", "rubble"] },
   rects: list(rect, 1),
   // Zones visible from here beyond the ones joined to it (a long straight corridor). Party perception: engine §2.
   sees: list(r("id")),

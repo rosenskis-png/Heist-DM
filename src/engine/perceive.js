@@ -52,7 +52,11 @@ export function partyPerceives(s) {
 // The places the party has seen or stood in so far (D180), kept in `s.known.places`: a site's sheet and map show only these.
 export function noteSeen(s) {
   const here = partyIds(s).map((id) => zoneOf(s, id)).filter(Boolean);
-  s.known.places = [...new Set([...(s.known.places ?? []), ...here, ...partyPerceives(s).seen.keys()])];
+  const { seen } = partyPerceives(s);
+  s.known.places = [...new Set([...(s.known.places ?? []), ...here, ...seen.keys()])];
+  // Where each person was when the party last had eyes on them (D181): the map shows it once they're out of sight.
+  s.known.last = { ...(s.known.last ?? {}) };
+  for (const p of s.packet.people) if (s.at[p.id] != null && seen.has(s.at[p.id])) s.known.last[p.id] = s.at[p.id];
 }
 
 // What the party can make out where they stand, which the opening must name (D136): every person in a zone they

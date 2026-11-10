@@ -46,6 +46,36 @@ const onSegment = ([x1, y1, x2, y2], [[ax, ay], [bx, by]]) => {
   return x1 >= lx && x2 <= hx && y1 >= ly && y2 <= hy && (ax === bx ? x1 === ax && x2 === ax : y1 === ay && y2 === ay);
 };
 
+// A crowd or a squad is one entry (D130); the map draws it as a cluster.
+const GROUP = /^(about |some |a (dozen|few|pair of) |two |three |four |five |six |seven |eight |nine |ten |twenty |thirty |forty |\d+ )/i;
+
+// Who and what is on the map (D181), from state alone, so a token is where the ledger says its owner is: the party;
+// each person in a place the party can see right now; each person now out of sight, as a ghost where the party
+// last had eyes on them; and placed things in places the party knows.
+function tokensFor(s, zoneIds, seen) {
+  const { map } = s.packet;
+  const held = (id) => Object.keys(s.holder).filter((i) => s.holder[i] === id).map((i) => map.things.find((t) => t.id === i)?.name ?? i);
+  const tokens = [];
+  for (const p of s.party) tokens.push({ id: p.id, name: p.id === "player" ? "You" : p.name, label: p.id === "player" ? "You" : p.name.split(/[ ,]/)[0], party: true, zone: zoneOf(s, p.id), rat: s.flags[p.id]?.size === "tiny" || s.flags[p.id]?.form === "animal", down: s.flags[p.id]?.down === true });
+  for (const p of s.packet.people) {
+    const z = s.at[p.id];
+    if (z == null) continue;
+    const base = { id: p.id, name: p.name, label: short(s, p.id).split(",")[0], group: GROUP.test(p.name), down: s.flags[p.id]?.down === true };
+    if (seen.has(z) && zoneIds.has(z)) tokens.push({ ...base, zone: z });
+    else if (s.known.last?.[p.id] && zoneIds.has(s.known.last[p.id])) tokens.push({ ...base, zone: s.known.last[p.id], ghost: true });
+  }
+  for (const t of tokens) t.holds = t.ghost ? [] : held(t.id);
+  // Each token's mark on the map: a letter, made different from any other's by a number where two would match.
+  const marks = new Map();
+  for (const t of tokens) {
+    const letter = (t.party ? t.label : t.label.replace(/^((about|some|a|an|the|two|three|four|five|six|seven|eight|nine|ten|twenty|thirty|\d+) )+/i, ""))[0].toUpperCase();
+    const n = (marks.get(letter) ?? 0) + 1;
+    marks.set(letter, n);
+    t.mark = n > 1 ? `${letter}${n}` : letter;
+  }
+  return { tokens: tokens.filter((t) => t.zone && zoneIds.has(t.zone)), held };
+}
+
 export function mapView(s) {
   const { map } = s.packet;
   if (!map.zones.every((z) => z.rects?.length)) return null;
@@ -54,52 +84,81 @@ export function mapView(s) {
   const zoneIds = new Set(zones.map((z) => z.id));
   const { seen } = partyPerceives(s);
   const levelOf = (id) => map.zones.find((z) => z.id === id)?.level ?? 0;
+  const nameOfZone = (id) => map.zones.find((z) => z.id === id)?.name ?? id;
   const levels = [...new Set(zones.map((z) => z.level ?? 0))].sort((a, b) => b - a);
-  // Connections the party knows; one into a zone it doesn't know is a labelled gap.
+  // Connections the party knows. One into a place it hasn't found is a gap marked as unexplored; one between
+  // levels says where it goes.
   const conns = map.connections
-    .filter((c) => known(s, c))
+    .filter((c) => known(s, c) && c.between.some((z) => zoneIds.has(z)))
     .map((c) => ({
       id: c.id,
       kind: c.kind,
       name: c.name ?? cap(c.kind),
       wall: c.wall ?? null,
       square: c.square ?? null,
-      level: c.wall ? levelOf(c.between[0]) : Math.max(...c.between.map(levelOf)),
+      between: c.between,
+      levels: c.between.map(levelOf),
+      to: Object.fromEntries(c.between.map((z, i) => [z, zoneIds.has(c.between[1 - i]) ? nameOfZone(c.between[1 - i]) : null])),
       locked: s.flags[c.id]?.locked === true,
       open: s.flags[c.id]?.open === true || c.see_through === true,
-      gap: c.between.some((z) => !zoneIds.has(z)) ? c.between.map((z) => (zoneIds.has(z) ? null : "Unknown")).find(Boolean) : null,
+      gap: c.between.some((z) => !zoneIds.has(z)),
     }));
-  // Who and what the party can see: themselves, perceived people, and placed things in zones they see.
-  const tokens = [];
-  for (const p of s.party) tokens.push({ id: p.id, name: p.id === "player" ? "You" : p.name, party: true, zone: zoneOf(s, p.id), rat: s.flags[p.id]?.size === "tiny" || s.flags[p.id]?.form === "animal", down: s.flags[p.id]?.down === true });
-  for (const p of s.packet.people) {
-    const z = s.at[p.id];
-    if (z && seen.has(z)) tokens.push({ id: p.id, name: p.name.split(",")[0], zone: z, down: s.flags[p.id]?.down === true });
-  }
-  const held = (id) => Object.keys(s.holder).filter((i) => s.holder[i] === id).map((i) => map.things.find((t) => t.id === i)?.name ?? i);
-  for (const t of tokens) t.holds = held(t.id);
+  const { tokens, held } = tokensFor(s, zoneIds, seen);
+  // Placed things still where they were put, in places the party knows; dimmed when out of sight.
   const things = map.things
-    .filter((t) => known(s, t) && t.location.at && s.at[t.id] === t.location.zone && seen.has(s.at[t.id]))
-    .map((t) => ({ id: t.id, name: t.name, at: t.location.at, zone: s.at[t.id], holds: held(t.id) }));
-  const all = map.zones.flatMap((z) => z.rects);
-  const width = Math.max(...all.map(([x, , w]) => x + w));
-  const height = Math.max(...all.map(([, y, , h]) => y + h));
+    .filter((t) => known(s, t) && t.location.at && s.at[t.id] === t.location.zone && zoneIds.has(s.at[t.id]) && (seen.has(s.at[t.id]) || s.packet.site))
+    .map((t) => ({ id: t.id, name: t.name, at: t.location.at, zone: s.at[t.id], holds: held(t.id), seen: seen.has(s.at[t.id]) }));
+  // Every level is drawn on the same frame, so what's above sits over what it's above.
+  const all = zones.flatMap((z) => z.rects);
+  const x0 = Math.min(...all.map(([x]) => x));
+  const y0 = Math.min(...all.map(([, y]) => y));
+  const width = Math.max(...all.map(([x, , w]) => x + w)) - x0;
+  const height = Math.max(...all.map(([, y, , h]) => y + h)) - y0;
   return {
+    x0,
+    y0,
     width,
     height,
     levels: levels.map((level) => {
       const zs = zones.filter((z) => (z.level ?? 0) === level);
-      const cs = conns.filter((c) => c.level === level || (c.square && c.level === level + 1));
+      const here = new Set(zs.map((z) => z.id));
+      // A way between levels is drawn on each level it touches that the party knows.
+      const cs = conns.filter((c) => (c.wall ? c.levels[0] === level : c.between.some((z) => here.has(z))));
       const walls = edges(zs).filter((e) => !cs.some((c) => c.wall && onSegment(e.seg, c.wall)));
       return {
         level,
-        zones: zs.map((z) => ({ id: z.id, name: z.name, rects: z.rects, light: z.light ?? "dim", seen: seen.has(z.id) })),
+        zones: zs.map((z) => ({ id: z.id, name: z.name, rects: z.rects, light: z.light ?? "dim", ground: z.ground ?? "floor", seen: seen.has(z.id) || s.party.some((p) => zoneOf(s, p.id) === z.id) })),
         walls,
-        connections: cs.filter((c) => c.wall ? c.level === level : true),
-        tokens: tokens.filter((t) => zs.some((z) => z.id === t.zone)),
-        things: things.filter((t) => zs.some((z) => z.id === t.zone)),
+        connections: cs.map((c) => (c.wall ? c : { ...c, dir: Math.sign(c.levels[c.between.findIndex((z) => !here.has(z))] - level), leads: c.to[c.between.find((z) => here.has(z))] })),
+        tokens: tokens.filter((t) => here.has(t.zone)),
+        things: things.filter((t) => here.has(t.zone)),
       };
     }),
+  };
+}
+
+// A room with no drawn map still gets a picture (D181): its places as boxes, in columns by how far each is from
+// where the party stands, joined by the ways between them. It claims no sizes or directions.
+export function sketchView(s) {
+  const { map } = s.packet;
+  const zones = map.zones.filter((z) => known(s, z) && (!s.packet.site || (s.known.places ?? []).includes(z.id)));
+  const zoneIds = new Set(zones.map((z) => z.id));
+  const { seen } = partyPerceives(s);
+  const links = map.connections.filter((c) => known(s, c) && c.between.every((z) => zoneIds.has(z))).map((c) => ({ id: c.id, a: c.between[0], b: c.between[1], name: c.name ?? c.kind, locked: s.flags[c.id]?.locked === true }));
+  const start = zoneOf(s, s.party[0].id) ?? zones[0]?.id;
+  const depth = new Map([[start, 0]]);
+  for (const z of depth.keys()) for (const l of links) if (l.a === z || l.b === z) { const o = l.a === z ? l.b : l.a; if (!depth.has(o)) depth.set(o, depth.get(z) + 1); }
+  const far = Math.max(0, ...depth.values()) + 1;
+  const rows = new Map();
+  const { tokens } = tokensFor(s, zoneIds, seen);
+  return {
+    nodes: zones.map((z) => {
+      const col = depth.get(z.id) ?? far;
+      const row = rows.get(col) ?? 0;
+      rows.set(col, row + 1);
+      return { id: z.id, name: z.name, light: z.light ?? "dim", col, row, tokens: tokens.filter((t) => t.zone === z.id) };
+    }),
+    links,
   };
 }
 

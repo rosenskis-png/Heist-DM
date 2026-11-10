@@ -1,7 +1,7 @@
 // The game page (docs/spec/ui.md): the title screen and saves, setup, and the two tabs (the table and plans) around
 // the map, the clock and the party's sheet. All game logic lives in src/; this file draws it and handles input.
 import { html, useState, useEffect, useRef } from "./h.js";
-import { MapPanel, Clock } from "./map.js";
+import { MapTab, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
 import { question, talk, rings, askParty, roll, backOut, stakes, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
@@ -16,7 +16,7 @@ import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
-import { mapView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
+import { mapView, sketchView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
@@ -217,6 +217,7 @@ function Setup({ env, slot, onBack, onBegin }) {
 const TABS = [
   ["table", "Table"],
   ["plans", "Plans"],
+  ["map", "Map"],
 ];
 
 function Game({ env, slot, initial, onQuit }) {
@@ -339,18 +340,19 @@ function Game({ env, slot, initial, onQuit }) {
         : null}
       <div className="gutter"><nav className="tabs" aria-label="Interfaces">
         ${TABS.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
-        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Room, map & party</button>
+        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Room & party</button>
       </nav></div>
     </header>
     <div className="body gutter">
       <aside className=${`side${sideOpen ? "" : " closed"}`}>
-        <${MapPanel} view=${mapView(s)} clock=${clockView(s)} colors=${colors} />
+        <section className="mapbox" aria-label="Clock"><${Clock} clock=${clockView(s)} /></section>
         <${RoomSheet} sheet=${roomSheet(s)} />
         <${PartySheet} sheet=${sheetView(s)} colors=${colors} />
       </aside>
       <main className="pane">
         ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
         ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
+        ${tab === "map" ? html`<${MapTab} view=${mapView(s)} sketch=${sketchView(s)} sheet=${roomSheet(s)} colors=${colors} party=${s.party} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
       </main>
     </div>
