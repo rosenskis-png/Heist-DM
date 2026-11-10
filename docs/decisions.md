@@ -125,7 +125,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D111** The latest Camp scene is saved for the design thread: changed by D112, D113
 - **D112** The scene before the latest is kept too: changed by D113
 - **D113** One continuous Camp chat, and any number of asides: current
-- **D114** In encounters a companion is her brief plus the special cases she acts on: current
+- **D114** In encounters a companion is her brief plus the special cases she acts on: changed by D175
 - **D115** Phases 4 and 5 close, and the generator is next, without hand-authoring Act 1: current
 - **D116** Generated packets are written for ruled mode: current
 - **D117** The generator designs the whole encounter first, then encodes it in stages: current
@@ -138,17 +138,17 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D124** No open spaces: current
 - **D125** The DM rules: the engine's pipeline is retired: current
 - **D126** The player chooses both companions, and a packet places them by slot: current
-- **D127** The table: one talk tab, the rings for all party talk, and code decides which calls run: changed by D130
+- **D127** The table: one talk tab, the rings for all party talk, and code decides which calls run: changed by D130, D175
 - **D128** The engine counts ability uses, and rest refills them: current
 - **D129** A packet runs seven operations, and its moves don't route: current
 - **D130** A fight is a plan: current
 - **D131** The party always moves on, and how it went is how they feel: changed by D146
-- **D132** The huddle keeps one shared companion call: current
+- **D132** The huddle keeps one shared companion call: changed by D174, D175
 - **D133** A question to the DM is its own cheap call, and what the answer settles is fact: current
 - **D134** The plan is a list of actions, and it stays as written: current
 - **D135** A save keeps the replay log and the last call outputs, for a post-mortem: current
 - **D136** The opening names everything in sight, without measuring it: changed by D155
-- **D137** A companion says one thing, and answers what she's asked: current
+- **D137** A companion says one thing, and answers what she's asked: changed by D175
 - **D138** Fixes from the table playtest: current
 - **D139** The Cells, the heist and the cavern stop being the model, and encounter design is rethought first: changed by D152
 - **D140** The campaign is acts of one-way legs, drawn as the party goes: changed by D144
@@ -185,6 +185,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D171** Live looks: companions' appearance changes without a republish, from a dev panel in the game: current
 - **D172** The generator as it stands, in one entry, and frozen until play: current
 - **D173** The page runs a campaign: current
+- **D174** The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene: current
+- **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
 
 ---
 
@@ -1044,3 +1046,17 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-08), roadmap item 3 of Phase 7. The game page plays one room after another (`src/game/journey.js`). Gravenhold opens in the Cells; a pitched world runs its act call and generates its first room before the party wakes. When a room ends, the page runs the verdict, the campaign moves on by the exit taken (`roomEnded`), the act call runs if the act has no plan, and the next room is generated while the player reads the verdict; "Go on" walks them in, with what they carry (hurts, spent uses, gold, relics), a fresh table and a fresh replay log. A calm room ends when the player picks one of its ways on; the sanctuary ends the act once the player picks the relics the climax allows, and the next act begins; after Act 5 the adventure ends. The menu can end any room as it stands, so play is never stuck. The campaign, the current generated room, the room waiting to be entered and a record of rooms passed (name, rating, why) live in the session, so a save taken between rooms resumes there and a generated room travels whole in the save. The companions' relationship state is kept by the campaign and read by every call. Not yet: the campfire conversation (a campfire is a generated calm room for now), separations, and post-game acts.
 **Why:** The phase's exit is Act 1 played end to end from a new game, and only play can say which of D172's machinery earns its place. Everything the runner needed existed (`seedRoom`, `designRoom`, the act and verdict calls, `roomEnded`, `endAct`); what was missing was the loop.
 **Rules out:** Generating a room while the player is still in the last one (the verdict decides the next room's kind and the leg's strain); a dead end when a room won't finish on its own.
+
+### D174. The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene
+**Decided:** The designer's call (2026-11-10), from the first shakedown's post-mortem. `roomSheet` (`src/context.js`) builds one account of what the party knows of the room: the opening as the DM gave it, the places and who is in them, the ways between, the things, the people in sight or earshot, the packet's facts that aren't hidden, what the party has learned, and how things stand. The page shows it to the player (the room sheet, beside the map), and both companion calls are sent it as text (`sheetText`) in place of their view of the encounter and the ledger. The opening rides in the sheet, so the calls' latest narrations go without it, and the companion call's budget rises to 22 KB. A room with no drawn map is one scene: every place in it that isn't hidden or dark is in sight and in earshot (`src/engine/perceive.js`). `test/sheet.test.js` holds the sheet to this.
+**Why:** In the shakedown the companions' calls held every place, connection, name and plain-sight fact of the room as a tidy list, while the player had three paragraphs of prose. Celeste said a fact from that list word for word that the player had never been told, and the player asked how to reach a bell-ringer whose stair was on the list. The companions seemed to know a room the player couldn't see, because they did. Generated packets also carry no sight lines, so the engine believed the party saw only the place it stood in: the picker hid two people in plain view, and the companions' ledger hid where they stood.
+**Rules out:** A companion call reading any account of the room that the page doesn't show the player. Taking the plain-sight facts away from the companions instead: the player needed them as much. Modelling sight lines in a room that has no map.
+
+### D175. In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire
+**Decided:** The designer's call (2026-11-10), from the same post-mortem. Changes D114, D127, D132 and D137.
+- **How they talk.** The party and companion prompts are rewritten around one picture: a friend playing this character at a table, working it out with the player in plain speech. A line answers what was just said with something concrete, adds one new thing and why, and says nothing twice. Whole ideas are welcome, including ones that use her own abilities. The plan stays the player's: they offer, the player decides, and a decided plan isn't argued again. A stance is for a line she holds, said once, and never for tactics.
+- **What she's sent.** Her brief in a room no longer carries `pursuit`. How she pursues the player is for the campfire, and what isn't sent can't be performed.
+- **When they speak.** The party call no longer follows every scene exchange. It runs when the player talks to the party, talks a plan over, or asks what the two of them think (`askParty` in `src/game/turns.js`).
+- **The stance choices** read "She sits it out", "It's handled" and "Do it anyway".
+**Why:** To tick 7 of the shakedown's first room the party call ran 8 times in 24 calls and was 36% of all input, and its lines restated the DM, lectured, and offered no way forward when the player asked for one. The prompts asked for that: play her fantasy on every line, never check an idea, and keep her initiative out of the plan, which left the stance as the only assertive thing she could do. The player also read "Keep it" as keeping the plan; it kept her stance, and the plan stopped on it.
+**Rules out:** Companions adding terms to a plan or reopening one the player has decided (the Gravenhold failure: only the player writes and commits). Companion lines after every DM answer. Her romance register in a room; it lives at the campfire, which must then remember what happened in the rooms (`docs/roadmap.md`).

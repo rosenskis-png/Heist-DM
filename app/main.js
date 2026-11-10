@@ -4,7 +4,8 @@ import { html, useState, useEffect, useRef } from "./h.js";
 import { MapPanel, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
-import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
+import { question, talk, rings, askParty, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
+import { roomSheet } from "../src/context.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
@@ -334,12 +335,13 @@ function Game({ env, slot, initial, onQuit }) {
         : null}
       <div className="gutter"><nav className="tabs" aria-label="Interfaces">
         ${TABS.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
-        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Map & party</button>
+        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Room, map & party</button>
       </nav></div>
     </header>
     <div className="body gutter">
       <aside className=${`side${sideOpen ? "" : " closed"}`}>
         <${MapPanel} view=${mapView(s)} clock=${clockView(s)} colors=${colors} />
+        <${RoomSheet} sheet=${roomSheet(s)} />
         <${PartySheet} sheet=${sheetView(s)} colors=${colors} />
       </aside>
       <main className="pane">
@@ -352,6 +354,26 @@ function Game({ env, slot, initial, onQuit }) {
 }
 
 // The party's abilities and what's left of them (D128), and what each is carrying until a rest.
+// The room sheet (D174): what the whole party knows of the room. The companions' calls are sent this same sheet
+// as text, so they know nothing of the room the player can't read here.
+function RoomSheet({ sheet }) {
+  const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : x);
+  // On a place's line, where it leads and by what; the full account of each way is in its own section.
+  const leads = (name) => sheet.ways.filter((w) => w.between.includes(name)).map((w) => `${w.between.find((b) => b !== name) ?? name} (${w.how.split(",")[0]})`);
+  const part = (title, items, open = true) => (items.length ? html`<details open=${open}><summary>${title}<span className="left">${items.length}</span></summary><ul>${items.map((x, i) => html`<li key=${i}>${x}</li>`)}</ul></details>` : null);
+  return html`<section className="partysheet roomsheet" aria-label="The room">
+    <div className="head"><b>${sheet.name ?? "The room"}</b><span className="left">what the whole party knows</span></div>
+    ${sheet.opening ? html`<details><summary>As the DM first described it</summary><p className="first">${sheet.opening}</p></details>` : null}
+    ${part("Places", sheet.places.map((p) => html`<b>${cap(p.name)}</b>${p.light ? html`<span className="muted"> (${p.light})</span>` : null}: ${p.what}${p.here.length ? html`<span className="here"> Here: ${p.here.join(", ")}.</span>` : null}${leads(p.name).length ? html`<span className="muted"> Leads to ${leads(p.name).join("; ")}.</span>` : null}`))}
+    ${part("Ways between places", sheet.ways.map((w) => html`<b>${w.between.join(" – ")}</b>: ${w.how}`), false)}
+    ${part("Things", sheet.things.map((x) => html`<b>${cap(x.name)}</b><span className="muted"> (${x.where})</span>: ${x.what}`))}
+    ${part("Who's here", sheet.people.map((x) => html`<b>${cap(x.name)}</b><span className="muted">, ${x.where}</span>`))}
+    ${part("What anyone can tell by looking", sheet.facts)}
+    ${part("What you've learned", sheet.learned)}
+    ${part("Right now", sheet.now)}
+  </section>`;
+}
+
 function PartySheet({ sheet, colors }) {
   return html`<section className="partysheet" aria-label="The party">
     ${sheet.map((p) => html`<div key=${p.id} className="member" style=${{ "--cc": colors[p.id] }}>
@@ -439,7 +461,10 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
             onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
             placeholder=${PLACEHOLDER[target] ?? (ringed ? "Just between us…" : "What do you say?")}></textarea>
           ${error ? html`<p className="error">${error}</p>` : null}
-          <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
+          <div className="row"><span className="status">${busy ?? ""}</span><span className="row">
+            <button className="ghost" disabled=${!!busy} title="Ask your companions what they make of it. Time doesn't move." onClick=${() => run("table", () => askParty(session, io, env.prompts))}>What do you two think?</button>
+            <button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button>
+          </span></div>
         </div>`}
   </section>`;
 }
@@ -517,9 +542,9 @@ function Stances({ session, touch }) {
       <span><b>${nameOf(s, st.companion)} ${st.kind === "refuse" ? "refuses" : st.kind === "insist" ? "insists" : "has a condition"}:</b> ${st.text}</span>
       <div className="choices">
         ${[
-          ["keep", "Keep it", "It stands: if it trips, she won't do that step."],
+          ["keep", "She sits it out", "Her stance stands: if the plan comes to it, she won't do that step."],
           ["resolved", "It's handled", "The plan already deals with it."],
-          ["override", "Override", "Go ahead anyway. She'll remember."],
+          ["override", "Do it anyway", "The plan runs as written and she goes along. She'll remember."],
         ].map(([d, label, note]) => html`<button key=${d} title=${note} aria-pressed=${st.decision === d} onClick=${() => ((st.decision = d), touch())}>${label}</button>`)}
         <button className="link" onClick=${() => (session.draft.stances.splice(i, 1), touch())}>Drop</button>
       </div>

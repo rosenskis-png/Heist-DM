@@ -18,6 +18,12 @@ export function memberPerceives(s, id, here = zoneOf(s, id)) {
   const seen = [];
   const heard = [];
   if (!here) return { seen, heard };
+  // A room with no drawn map (D153) is one scene (D174): sight lines aren't modelled, so every place in it that
+  // isn't hidden or dark is in view and in earshot, and the DM rules on what can be made out from where.
+  if (!s.packet.map.zones.some((z) => z.rects?.length)) {
+    const all = s.packet.map.zones.filter((z) => known(s, z)).map((z) => z.id);
+    return { seen: all.filter((z) => z === here || visible(s, z, id)), heard: all };
+  }
   const look = [here];
   for (const c of s.packet.map.connections)
     if (c.between.includes(here) && open(s, c) && known(s, c)) look.push(other(c, here));

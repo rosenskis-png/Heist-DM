@@ -43,8 +43,9 @@ const playSheet = (p, s) => ({ id: p.id, name: p.name, role: p.role, skills: p.s
 // what she has learned, all written at camp. Never her secrets, history or romance arc: those stay at the campfire.
 export const standingOf = (env, id) => env.standing?.[id] ?? { mood: "steady", learned: [] };
 
-// A companion in an encounter (D79): how she talks, thinks and acts, what she can do, and her standing. The rest
-// of her profile (look, fantasy, backstory, secrets) is for the campfire.
+// A companion in an encounter (D79, D175): how she talks and thinks, what she holds to, what she can do, and her
+// standing. The rest of her profile (look, fantasy, how she pursues the player, backstory, secrets) is for the
+// campfire: in a room she is a friend at the table, and what isn't sent can't be performed.
 export function briefProfile(c, standing, s) {
   const { mood, why, learned } = standing;
   return {
@@ -55,7 +56,6 @@ export function briefProfile(c, standing, s) {
     voice: c.voice,
     beliefs: c.beliefs,
     rules: c.rules,
-    pursuit: c.pursuit,
     planning: { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch },
     skills: c.skills,
     abilities: abilitiesFor(c.abilities, s, c.id),
@@ -255,8 +255,8 @@ function kit(env) {
 const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p, env.state) : { ...playSheet(p, env.state), voice: p.voice, mood: standingOf(env, p.id).mood }));
 
 // A companion in the huddle or a private channel, in an encounter: her brief, not her full profile (D79), with the
-// special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The encounter and
-// what the party can see come as plain lines (D76); the opening reaches her through the DM's narration.
+// special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The room
+// comes as the sheet the player reads (D174), opening included, so she knows nothing of it the player can't see.
 export function companionInput(env, c, self, others, huddle, schema) {
   const [me, ...rest] = resolveParty([self, ...others], env.world);
   const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
@@ -269,9 +269,8 @@ export function companionInput(env, c, self, others, huddle, schema) {
     block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
     form ? block("You, right now", { form }) : null,
     block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
-    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
-    c.now ? block("What the party can see right now", c.now) : null,
-    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
+    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
     pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block(privately ? "Just you and the player, through your ring (the other companion can't hear this)" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
@@ -279,6 +278,11 @@ export function companionInput(env, c, self, others, huddle, schema) {
     privately ? `The player is talking to you alone. It's your turn, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
   ]);
 }
+
+// The room reaches the companions as the sheet the player reads (D174), and the DM's latest narrations without
+// the opening, which the sheet already holds.
+const SHEET = "The room sheet";
+const told = (env, c) => (c.recent ?? []).filter((x) => x !== env.packet?.opening);
 
 // Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
 // companionInput gives them, and the table as both of them see it.
@@ -300,9 +304,8 @@ export function partyInput(env, c, companions, huddle, schema) {
     ...campaign(env, "party", schema),
     block("The companions you play", members.map(entry)),
     block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
-    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
-    c.now ? block("What the party can see right now", c.now) : null,
-    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
+    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
     pair ? block("The two of them", { dynamic: pair.dynamic }) : null,
     block("The table so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
@@ -515,6 +518,67 @@ const GAP = {
   drain: "a drain opening about three inches across",
 };
 
+const open = (c) => GAP[c.kind] ?? (c.fits ? `about ${SPAN[c.fits]}` : "");
+const wayBits = (c) => [c.kind, open(c), c.fits_unlocked ? `${SPAN[c.fits_unlocked]} once unlocked` : "", c.flags?.locked ? "starts locked" : "", c.key ? `key: ${c.key}` : "", c.see_through ? "see-through" : "", c.operated_from && c.operated_from !== "both" ? `worked from ${c.operated_from}${c.reachable_from_other_side ? " or the other side" : ""}` : "", c.ticks ? `+${c.ticks} ticks` : ""].filter(Boolean).join(", ");
+
+// ---- The room sheet (D174) ----
+
+// What the party knows of the room, as one structure: the opening as the DM gave it, the places and who's in them,
+// the ways between, the things, the people in sight or earshot, what anyone can tell by looking, what the party has
+// learned, and how things stand. The page shows it to the player (`RoomSheet` in app/main.js) and the companions'
+// calls get it as text (`sheetText`), so nobody at the table knows more of the room than the player can read.
+// Hidden things stay off it until found; the packet's fixed facts that aren't hidden are on it, for everyone.
+export function roomSheet(state, packet = state.packet) {
+  const s = state.packet ? state : { ...state, packet };
+  const { map, people, clock } = packet;
+  const st = stateFor(s, { party: true });
+  const { seen, heard } = partyPerceives(s);
+  const known = (x) => !x.hidden || s.known.revealed.includes(x.id);
+  const all = [...map.zones, ...map.things, ...people, ...s.party];
+  const label = (id) => all.find((x) => x.id === id)?.name ?? id;
+  const flagText = (f) => Object.entries(f).map(([k, v]) => (v === true ? k : v === false ? `not ${k}` : `${k} ${v}`)).join(", ");
+  const where = (id) => (st.held[id] ? `held by ${label(st.held[id])}` : st.positions[id] ? `in ${label(st.positions[id])}` : s.at[id] == null && !s.holder[id] ? "gone" : "out of sight");
+  const who = new Set([...people, ...s.party].map((p) => p.id));
+  const here = (zone) => Object.entries(st.positions).filter(([id, z]) => z === zone && who.has(id)).map(([id]) => label(id));
+  const routine = (p) => (p.schedule && (p.schedule.known || s.known.revealed.includes(p.schedule.id)) ? p.schedule.beats.map((b) => `${b.label}, in ${label(b.position)}`).join("; ") : null);
+  const perceived = people.filter((p) => s.at[p.id] != null && (seen.has(s.at[p.id]) || heard.has(s.at[p.id])));
+  return {
+    name: packet.name,
+    opening: packet.opening ?? null,
+    tick: st.tick,
+    places: map.zones.filter(known).map((z) => ({ id: z.id, name: z.name, what: z.purpose, ...(z.light ? { light: z.light } : {}), here: here(z.id) })),
+    ways: map.connections.filter(known).map((c) => ({ id: c.id, between: c.between.map(label), how: [wayBits(c), st.flags[c.id] ? `now ${flagText(st.flags[c.id])}` : ""].filter(Boolean).join("; ") })),
+    things: map.things.filter(known).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: t.properties })),
+    people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
+    facts: map.facts.filter(known).map((f) => f.text),
+    learned: st.facts.map((f) => f.text),
+    now: [
+      ...s.party.filter((p) => st.flags[p.id]).map((p) => `${p.name}: ${flagText(st.flags[p.id])}`),
+      ...st.conditions.map((c) => `${label(c.who)} is hurt: ${c.text}`),
+      ...st.threats.map((x) => `About to happen: ${label(x.who)}: ${x.does}`),
+    ],
+    coming: clock.events.filter((e) => !s.fired.includes(e.id) && (e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id.replaceAll("_", " ")}: at tick ${s.due[e.id] ?? "when its condition holds"}`),
+  };
+}
+
+// The sheet as plain lines, for the companions' calls. Ids ride along so a stance's condition can name them, and
+// things alike (four cell doors, three buckets) share one line.
+const grouped = (items, key) => [...Map.groupBy(items, key).values()];
+export function sheetText(sheet) {
+  const list = (title, items) => (items.length ? `${title}:\n${items.map((x) => `- ${x}`).join("\n")}` : null);
+  return [
+    sheet.opening ? `How the DM first described it:\n${sheet.opening}` : null,
+    list("Places", sheet.places.map((p) => `${p.name} (${p.id}${p.light ? `; ${p.light}` : ""}): ${p.what}${p.here.length ? ` Here now: ${p.here.join(", ")}.` : ""}`)),
+    list("Ways between them", grouped(sheet.ways, (w) => w.how).map((g) => `${g.map((w) => w.between.join(" – ")).join("; ")}: ${g[0].how}`)),
+    list("Things", grouped(sheet.things, (x) => `${x.name}|${x.what}`).map((g) => (g.length > 1 ? `${g[0].name}: ${g[0].what} ${g.length} of them: ${g.map((x) => `${x.id}, ${x.where}`).join("; ")}` : `${g[0].name} (${g[0].id}; ${g[0].where}): ${g[0].what}`))),
+    list("People", sheet.people.map((p) => `${p.name} (${p.id}), ${p.where}${p.routine ? `. Routine, one beat a tick: ${p.routine}${p.beat ? `; now on ${p.beat}` : ""}` : ""}`)),
+    list("What anyone can tell by looking", sheet.facts),
+    list("What the party has learned", sheet.learned),
+    list("Right now", [`Tick ${sheet.tick}.`, ...sheet.now]),
+    list("Coming, as far as the party knows", sheet.coming),
+  ].filter(Boolean).join("\n\n");
+}
+
 // The encounter as the DM reads it (D76): plain lines instead of the packet's JSON, about half the size. No
 // size categories (openings in rough real dimensions), no coordinates (D9), and no engine rules: the
 // packet's prose `notes` say how people react, and the DM applies them. With `party`, routines and events the
@@ -531,9 +595,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     const [x1, y1] = [Math.max(...z.rects.map(([x, , w]) => x + w)), Math.max(...z.rects.map(([, y, , h]) => y + h))];
     return `${(x1 - x0) * 5}×${(y1 - y0) * 5} ft`;
   };
-  const open = (c) => GAP[c.kind] ?? (c.fits ? `about ${SPAN[c.fits]}` : "");
   const zone = (z) => `- ${z.id} (${z.name}; ${feet(z)}, ${z.light}${z.level ? `, level ${z.level}` : ""}): ${z.purpose}${z.sees?.length ? ` Sees into ${z.sees.join(", ")}.` : ""}`;
-  const wayBits = (c) => [c.kind, open(c), c.fits_unlocked ? `${SPAN[c.fits_unlocked]} once unlocked` : "", c.flags?.locked ? "starts locked" : "", c.key ? `key: ${c.key}` : "", c.see_through ? "see-through" : "", c.operated_from && c.operated_from !== "both" ? `worked from ${c.operated_from}${c.reachable_from_other_side ? " or the other side" : ""}` : "", c.ticks ? `+${c.ticks} ticks` : ""].filter(Boolean).join(", ");
   const way = (c) => `- ${c.id}${c.name ? ` (${c.name})` : ""}: ${c.between.join(" – ")}; ${wayBits(c)}`;
   // Where things are now, from the ledger, so the encounter never contradicts it.
   const where = (t) => (s.holder[t.id] ? `held by ${s.holder[t.id]}` : s.at[t.id] ? `in ${s.at[t.id]}` : "gone");

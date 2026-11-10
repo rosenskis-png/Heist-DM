@@ -164,6 +164,17 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .partysheet .left { font: 12px var(--mono); color: var(--muted); text-align: right; }
 .partysheet .cond { color: var(--danger); font-size: 13px; }
 
+/* The room sheet (D174) */
+.roomsheet { gap: 6px; }
+.roomsheet .head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.roomsheet summary { cursor: pointer; display: flex; justify-content: space-between; gap: 8px; font: 500 12px var(--body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); list-style: none; }
+.roomsheet summary::-webkit-details-marker { display: none; }
+.roomsheet details:not([open]) > summary::after { content: "show"; text-transform: none; letter-spacing: 0; text-decoration: underline; }
+.roomsheet details:not([open]) > summary .left { display: none; }
+.roomsheet ul { margin: 4px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+.roomsheet .here { color: var(--trust); }
+.roomsheet .first { white-space: pre-line; color: var(--muted); margin: 4px 0 0; }
+
 /* The card */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px; display: grid; gap: 12px; }
 .card h3 { font-family: var(--display); font-weight: 500; font-size: 22px; margin: 0; }

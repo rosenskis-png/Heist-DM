@@ -5,8 +5,9 @@
 // | The player                        | Calls                                          | Here       |
 // |-----------------------------------|------------------------------------------------|------------|
 // | asks the DM                       | the question call, cheap, on the slice (D133)  | `question` |
-// | speaks to a person, or does a thing | the scene call, then the party call          | `talk`     |
+// | speaks to a person, or does a thing | the scene call                               | `talk`     |
 // | talks to the party, over the rings | the party call (D132)                         | `rings`    |
+// | asks what the party makes of it    | the party call (D175)                         | `askParty` |
 // | says a private word to one        | her companion call                             | `rings`    |
 // | talks the plan over               | the party call                                 | `talkOver` |
 // | asks for the card, runs it        | adjudicate, then resolve                       | `makeCard`, `commit` |
@@ -140,11 +141,7 @@ export async function talk(session, io, prompts, { to = "do", text, rolls }) {
   if (out.plan) post(session, "table", { ch: "scene", who: "dm", to, kind: "redirect", text: out.plan });
   if (out.ticks) post(session, "table", { ch: "scene", who: "dm", to, kind: "time", text: `${out.ticks} tick${out.ticks > 1 ? "s" : ""} pass.` });
   markOut(session);
-  if (s.ended) {
-    session.ended = s.handoff;
-    return out;
-  }
-  await voices(session, io, prompts);
+  if (s.ended) session.ended = s.handoff;
   return out;
 }
 
@@ -159,7 +156,6 @@ const companionContext = (session, channel) => {
   const s = session.state;
   return {
     channel,
-    now: ledgerText(s, { party: true, history: false }),
     recent: narrated(session, 2),
     draft: draftView(session),
     card: session.card ? cardView(s, session.card.card) : null,
@@ -180,6 +176,14 @@ async function voices(session, io, prompts, asked = null) {
     if (l.stance) takeStance(session, l.from, l.stance);
   }
   for (const { from, ...r } of out.reactions) session.reactions.push({ companion: from, tick: s.tick, ...r });
+}
+
+// The companions speak when they're spoken to (D175). The player can also just ask what the two of them make of
+// things, without saying anything first: the same call, with no line of the player's to answer.
+export async function askParty(session, io, prompts) {
+  live(session);
+  exchange(session);
+  return voices(session, io, prompts);
 }
 
 // The player talks over the rings: to the party (both companions, one call), or privately to one companion (her
