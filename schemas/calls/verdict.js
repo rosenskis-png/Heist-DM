@@ -16,5 +16,9 @@ export const verdictSchema = withDefs({
     // Up to two people from the room worth meeting again (D164): who they are, what became of them, and how they feel
     // about the party. A later room may bring one back.
     people: { ...list(obj(["name", "fate", "feels"], { name: r("text"), fate: r("text"), feels: r("text") })), maxItems: 2 },
+    // What the party has with it as it leaves (D178): the whole list, kept, dropped and new.
+    // A follower also has a record that stays the same from room to room (D185): their name, their pronouns, and what
+    // anyone would know them by.
+    carried: { ...list(obj(["kind", "what"], { kind: { enum: ["item", "follower", "thread"] }, what: r("text"), name: r("text"), pronouns: r("text"), looks: r("text") })), maxItems: 6 },
   }),
 });

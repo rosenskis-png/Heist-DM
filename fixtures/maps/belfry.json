@@ -1,0 +1,296 @@
+{
+ "id": "belfry",
+ "name": "The drowned belfry",
+ "mode": "encounter",
+ "act": 1,
+ "notes": [],
+ "intent": {
+  "purpose": "A map fixture (D182): a room drawn to try the map's shapes, grounds and levels."
+ },
+ "people": [
+  {
+   "id": "sexton",
+   "name": "the sexton",
+   "tier": "civilian",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "busy",
+   "position": "rotunda"
+  },
+  {
+   "id": "ghouls",
+   "name": "three ghouls",
+   "tier": "guard",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "hungry",
+   "position": "crypt"
+  }
+ ],
+ "map": {
+  "zones": [
+   {
+    "id": "rotunda",
+    "name": "The rotunda",
+    "purpose": "The rotunda.",
+    "light": "dim",
+    "rects": [
+     [
+      0,
+      0,
+      7,
+      7
+     ]
+    ],
+    "shape": "round"
+   },
+   {
+    "id": "turret",
+    "name": "The stair turret",
+    "purpose": "The stair turret.",
+    "light": "dark",
+    "rects": [
+     [
+      7,
+      2,
+      3,
+      3
+     ]
+    ],
+    "shape": "round"
+   },
+   {
+    "id": "porch",
+    "name": "The porch",
+    "purpose": "The porch.",
+    "light": "bright",
+    "rects": [
+     [
+      2,
+      7,
+      3,
+      2
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "loft",
+    "name": "The bell loft",
+    "purpose": "The bell loft.",
+    "light": "dim",
+    "rects": [
+     [
+      0,
+      0,
+      7,
+      7
+     ]
+    ],
+    "shape": "round",
+    "ground": "planks",
+    "level": 1
+   },
+   {
+    "id": "turret_top",
+    "name": "The turret head",
+    "purpose": "The turret head.",
+    "light": "dim",
+    "rects": [
+     [
+      7,
+      2,
+      3,
+      3
+     ]
+    ],
+    "shape": "round",
+    "ground": "planks",
+    "level": 1
+   },
+   {
+    "id": "crypt",
+    "name": "The flooded crypt",
+    "purpose": "The flooded crypt.",
+    "light": "dark",
+    "rects": [
+     [
+      1,
+      1,
+      5,
+      5
+     ]
+    ],
+    "shape": "round",
+    "ground": "water",
+    "level": -1
+   }
+  ],
+  "connections": [
+   {
+    "id": "turret_door",
+    "kind": "door",
+    "name": "The turret door",
+    "between": [
+     "rotunda",
+     "turret"
+    ],
+    "wall": [
+     [
+      7,
+      3
+     ],
+     [
+      7,
+      4
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "west_door",
+    "kind": "door",
+    "name": "The west door",
+    "between": [
+     "porch",
+     "rotunda"
+    ],
+    "wall": [
+     [
+      3,
+      7
+     ],
+     [
+      4,
+      7
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both",
+    "flags": {
+     "locked": true
+    }
+   },
+   {
+    "id": "loft_arch",
+    "kind": "opening",
+    "name": "The loft arch",
+    "between": [
+     "turret_top",
+     "loft"
+    ],
+    "wall": [
+     [
+      7,
+      3
+     ],
+     [
+      7,
+      4
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "turret_stair",
+    "kind": "stairs",
+    "name": "The turret stair",
+    "between": [
+     "turret",
+     "turret_top"
+    ],
+    "square": [
+     8,
+     3
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   },
+   {
+    "id": "well",
+    "kind": "drain",
+    "name": "The well in the floor",
+    "between": [
+     "rotunda",
+     "crypt"
+    ],
+    "square": [
+     3,
+     3
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   }
+  ],
+  "things": [
+   {
+    "id": "bell",
+    "name": "the great bell",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "loft",
+     "at": [
+      3,
+      3
+     ]
+    }
+   },
+   {
+    "id": "rope",
+    "name": "the bell rope",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "rotunda",
+     "at": [
+      3,
+      1
+     ]
+    }
+   },
+   {
+    "id": "coffer",
+    "name": "a lead coffer",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "crypt",
+     "at": [
+      3,
+      2
+     ]
+    }
+   }
+  ],
+  "facts": []
+ },
+ "clock": {
+  "events": []
+ },
+ "start": {
+  "tick": 0,
+  "positions": {
+   "player": "porch",
+   "companion_a": "porch",
+   "companion_b": "porch"
+  },
+  "ops": []
+ },
+ "opening": "You stand in the porch of a round belfry."
+}

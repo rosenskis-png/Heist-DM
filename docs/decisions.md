@@ -125,7 +125,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D111** The latest Camp scene is saved for the design thread: changed by D112, D113
 - **D112** The scene before the latest is kept too: changed by D113
 - **D113** One continuous Camp chat, and any number of asides: current
-- **D114** In encounters a companion is her brief plus the special cases she acts on: current
+- **D114** In encounters a companion is her brief plus the special cases she acts on: changed by D175
 - **D115** Phases 4 and 5 close, and the generator is next, without hand-authoring Act 1: current
 - **D116** Generated packets are written for ruled mode: current
 - **D117** The generator designs the whole encounter first, then encodes it in stages: current
@@ -138,17 +138,17 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D124** No open spaces: current
 - **D125** The DM rules: the engine's pipeline is retired: current
 - **D126** The player chooses both companions, and a packet places them by slot: current
-- **D127** The table: one talk tab, the rings for all party talk, and code decides which calls run: changed by D130
+- **D127** The table: one talk tab, the rings for all party talk, and code decides which calls run: changed by D130, D175
 - **D128** The engine counts ability uses, and rest refills them: current
 - **D129** A packet runs seven operations, and its moves don't route: current
 - **D130** A fight is a plan: current
 - **D131** The party always moves on, and how it went is how they feel: changed by D146
-- **D132** The huddle keeps one shared companion call: current
+- **D132** The huddle keeps one shared companion call: changed by D174, D175
 - **D133** A question to the DM is its own cheap call, and what the answer settles is fact: current
 - **D134** The plan is a list of actions, and it stays as written: current
 - **D135** A save keeps the replay log and the last call outputs, for a post-mortem: current
 - **D136** The opening names everything in sight, without measuring it: changed by D155
-- **D137** A companion says one thing, and answers what she's asked: current
+- **D137** A companion says one thing, and answers what she's asked: changed by D175
 - **D138** Fixes from the table playtest: current
 - **D139** The Cells, the heist and the cavern stop being the model, and encounter design is rethought first: changed by D152
 - **D140** The campaign is acts of one-way legs, drawn as the party goes: changed by D144
@@ -185,6 +185,20 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D171** Live looks: companions' appearance changes without a republish, from a dev panel in the game: current
 - **D172** The generator as it stands, in one entry, and frozen until play: current
 - **D173** The page runs a campaign: current
+- **D174** The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene: current
+- **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
+- **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
+- **D177** The note stops predicting, and a new room is read once from the player's chair: current
+- **D178** What the party has with it goes from room to room: current
+- **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
+- **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
+- **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
+- **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
+- **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
+- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
+- **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
+- **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
+- **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 
 ---
 
@@ -1044,3 +1058,122 @@ Supersedes D127's "acts in a fight round" row: a fight runs as plans. Gravenhold
 **Decided:** The designer's call (2026-11-08), roadmap item 3 of Phase 7. The game page plays one room after another (`src/game/journey.js`). Gravenhold opens in the Cells; a pitched world runs its act call and generates its first room before the party wakes. When a room ends, the page runs the verdict, the campaign moves on by the exit taken (`roomEnded`), the act call runs if the act has no plan, and the next room is generated while the player reads the verdict; "Go on" walks them in, with what they carry (hurts, spent uses, gold, relics), a fresh table and a fresh replay log. A calm room ends when the player picks one of its ways on; the sanctuary ends the act once the player picks the relics the climax allows, and the next act begins; after Act 5 the adventure ends. The menu can end any room as it stands, so play is never stuck. The campaign, the current generated room, the room waiting to be entered and a record of rooms passed (name, rating, why) live in the session, so a save taken between rooms resumes there and a generated room travels whole in the save. The companions' relationship state is kept by the campaign and read by every call. Not yet: the campfire conversation (a campfire is a generated calm room for now), separations, and post-game acts.
 **Why:** The phase's exit is Act 1 played end to end from a new game, and only play can say which of D172's machinery earns its place. Everything the runner needed existed (`seedRoom`, `designRoom`, the act and verdict calls, `roomEnded`, `endAct`); what was missing was the loop.
 **Rules out:** Generating a room while the player is still in the last one (the verdict decides the next room's kind and the leg's strain); a dead end when a room won't finish on its own.
+
+### D174. The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene
+**Decided:** The designer's call (2026-11-10), from the first shakedown's post-mortem. `roomSheet` (`src/context.js`) builds one account of what the party knows of the room: the opening as the DM gave it, the places and who is in them, the ways between, the things, the people in sight or earshot, the packet's facts that aren't hidden, what the party has learned, and how things stand. The page shows it to the player (the room sheet, beside the map), and both companion calls are sent it as text (`sheetText`) in place of their view of the encounter and the ledger. The opening rides in the sheet, so the calls' latest narrations go without it, and the companion call's budget rises to 22 KB. A room with no drawn map is one scene: every place in it that isn't hidden or dark is in sight and in earshot (`src/engine/perceive.js`). `test/sheet.test.js` holds the sheet to this.
+**Why:** In the shakedown the companions' calls held every place, connection, name and plain-sight fact of the room as a tidy list, while the player had three paragraphs of prose. Celeste said a fact from that list word for word that the player had never been told, and the player asked how to reach a bell-ringer whose stair was on the list. The companions seemed to know a room the player couldn't see, because they did. Generated packets also carry no sight lines, so the engine believed the party saw only the place it stood in: the picker hid two people in plain view, and the companions' ledger hid where they stood.
+**Rules out:** A companion call reading any account of the room that the page doesn't show the player. Taking the plain-sight facts away from the companions instead: the player needed them as much. Modelling sight lines in a room that has no map.
+
+### D175. In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire
+**Decided:** The designer's call (2026-11-10), from the same post-mortem. Changes D114, D127, D132 and D137.
+- **How they talk.** The party and companion prompts are rewritten around one picture: a friend playing this character at a table, working it out with the player in plain speech. A line answers what was just said with something concrete, adds one new thing and why, and says nothing twice. Whole ideas are welcome, including ones that use her own abilities. The plan stays the player's: they offer, the player decides, and a decided plan isn't argued again. A stance is for a line she holds, said once, and never for tactics.
+- **What she's sent.** Her brief in a room no longer carries `pursuit`. How she pursues the player is for the campfire, and what isn't sent can't be performed.
+- **When they speak.** The party call no longer follows every scene exchange. It runs when the player talks to the party, talks a plan over, or asks what the two of them think (`askParty` in `src/game/turns.js`).
+- **The stance choices** read "She sits it out", "It's handled" and "Do it anyway".
+**Why:** To tick 7 of the shakedown's first room the party call ran 8 times in 24 calls and was 36% of all input, and its lines restated the DM, lectured, and offered no way forward when the player asked for one. The prompts asked for that: play her fantasy on every line, never check an idea, and keep her initiative out of the plan, which left the stance as the only assertive thing she could do. The player also read "Keep it" as keeping the plan; it kept her stance, and the plan stopped on it.
+**Rules out:** Companions adding terms to a plan or reopening one the player has decided (the Gravenhold failure: only the player writes and commits). Companion lines after every DM answer. Her romance register in a room; it lives at the campfire, which must then remember what happened in the rooms (`docs/roadmap.md`).
+
+### D176. A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock
+**Decided:** The designer's call (2026-11-10), from the first shakedown. Changes D127 and D130's use of the card, and D121's time, for rooms with no drawn map.
+- **Stakes first.** When the scene call rules that a try needs a check, the page holds it: the player sees who rolls, the band, the reason and what failing costs, then rolls or backs out. Backing out changes nothing in the world. Questions and party talk stay open while it waits; another try or a card doesn't (`talk`, `roll`, `backOut`, `stakes` in `src/game/turns.js`).
+- **Small tries are cheap.** The scene prompt asks for a check only where failing is interesting, says most small failures simply don't work with nothing made worse, and lets a short run of two or three steps be ruled in one exchange.
+- **Trouble moves on failure.** In a room with no drawn map the packet's timed events are a ladder: they happen in their order, one each time a roll fails (a check, or a roll on a card) or the party deliberately waits (`waited` on the scene call), and never because time passed (`ladder`, `press` in `src/engine/clock.js`). What got worse is told at the table. A drawn room keeps its clock.
+**Why:** To tick 7 of the shakedown's first room the card was priced 8 times for 2 plans run: it was the only way to ask what something would take. Checks at the table rolled before the player saw the odds, every plan moved the clock toward the room's deadline, and the player stopped trying things. A check already carries both outcomes, so showing them costs no call.
+**Rules out:** A roll the player couldn't decline. A room's danger advancing because the player looked around, asked or tried something that worked. Removing the card: fights and plans of several people at once still go on it.
+
+### D177. The note stops predicting, and a new room is read once from the player's chair
+**Decided:** The designer's call (2026-11-10). Changes D156 and D172.
+- The sketch no longer writes `outcomes`, and its notes give what a person wants from the party and could give, never the words of an offer or a moment that will happen.
+- After a room with danger in the way (an encounter or a climax) is laid out, the read call (`docs/spec/calls/read.md`) reads it once on the quick tier, given only the room sheet the player will see. It lists what a player could take hold of and what they couldn't tell. A room with fewer than four handles goes back to the sketch once, with the reader's notes, and the new room isn't read again. A read that fails holds nothing up, and no play call ever sees a reader's list.
+**Why:** The shakedown's first room scripted a bargain into the DM's notes and hung on rules the opening never gave, and the design thread judged it from the DM's side and called it good. A prompt rule against "a machine with a rule" had not stopped it. Nothing in generation had ever met a room as a player does.
+**Rules out:** Size caps on rooms, which turn into quotas. A list of approaches reaching the DM, which would be an answer key. More than one remake.
+**Not yet:** playing from the note in place of the encoded packet (`docs/roadmap.md`).
+
+### D178. What the party has with it goes from room to room
+**Decided:** The designer's call (2026-11-10). Changes D123.
+The verdict call returns `carried`: up to six lines of what the party has with it as it leaves, each an item, a follower or a thread, as the whole list (kept, dropped and new). The campaign keeps it (`roomEnded`), the next room's sketch must honour it, the engine loads it into the room's state, the DM's calls read it beside gold and relics, and the room sheet shows it to the player and the companions.
+**Why:** In the shakedown a stolen hand-bell, five freed villagers and a cultist's grudge all vanished at the door, and leaving without weapons never mattered again.
+**Rules out:** The in-room DM reading the campaign: it gets the list and nothing else. An inventory with weights or counts.
+
+### D179. A room is a danger in a plain state with loose things around it, and the seed fixes that state
+**Decided:** The designer's call (2026-11-10). Changes D163, D169 and D172.
+- **The seed** draws how an encounter's main danger stands as the party arrives (`DANGERS` in `src/campaign/seed.js`: asleep, feeding, quarrelling, penned, hurt and so on), never twice in an act, and fixes it. It no longer draws an x-factor or what the room is built around, and draws one motif, not up to two. A contest or a game is gone from what a place can be busy with, and a great machine and a map or model from the centrepieces.
+- **The sketch prompt** opens on what makes a room play: a danger too big to fight head-on in a plain state that can tip, a few loose things around it that nothing depends on, one space, and trouble already moving. Its closing checks are read from the opening alone: four things to take hold of, what sets the danger off, and no way so safe nobody would pick another.
+- **The encode prompt** puts how the danger behaves in plain view as a fact, keeps hidden for things and never for how the room works, writes notes as what people want and never as what will happen, keeps `will_never` from walling off a kind of play, writes the clock as two or three steps of the same trouble, and names optional objectives only for prizes the opening shows.
+**Why:** The shakedown's rooms had strong themes and narrow play. The seed stacked a tone, a business, a shape, a centrepiece, two leanings and two motifs and never said anything about the danger, so each room spent its invention reconciling ingredients, and one of them (a game) could only be a rule system. The designer's own model of a wide room is one overwhelming danger asleep with loose things around it.
+**Rules out:** Size caps. Example rooms in the prompt (D161 stands). A danger whose behaviour has to be learned before it can be planned around.
+
+### D180. A site: one place of several areas, hand-built as the goblin camp, to test before any generator
+**Decided:** The designer's call (2026-11-10). A test, not yet the game's shape.
+- **A site** is one place the party moves about in, in any order, and can come back through: several areas, each with an exact footprint on the 5-ft grid, joined by named ways, with a cast that stays put until something gives it a reason to move. Nothing in it names a kind of scene. A heist, a chase or a stand is whatever the state makes it.
+- **The goblin camp** (`content/encounters/goblin_camp.json`) is the designer's watchtower room grown into one: the ledge, the camp floor (70 by 50 feet), the tower top, two walkways, the spider pens, the mine drift, the deep tunnels, the flooded drift and its outflow. Two ways on, four things worth having in plain sight, and three ways round that never touch the camp floor. The setup screen offers it beside the Cells.
+- **Found as you go.** A packet marked `site` shows the party only the areas it has seen or stood in (`s.known.places`, kept by the engine after every action): the sheet, the map and the companions' calls all read that. A fact can belong to an area (`at`) and is learned on finding it. The DM's calls are told the whole place, with every size in feet.
+- **An alarm, not a clock.** `clock.by` says what moves a packet's timed events: `time`, `trouble` (a failed roll or a wait, D176) or `alarm` (a failed roll only). The camp's four steps are an alarm: uneasy, searching, the sergeant stirring, the sergeant awake. Each says what the camp now does and moves who it says.
+- **No names before they're heard.** The camp's people are named by what they look like; their names are in the DM's notes.
+**Why:** A room built for one kind of scene anchors the DM on it. Rooms in a row gave no exploring, no going back, and nothing that lasted past a door. The old trouble with places like this was layouts too vague to mean anything, so this one is drawn exactly and checked by the engine, and the question the test asks is whether the DM keeps it consistent and pivots as the state changes.
+**Rules out:** Building a site generator before this has been played. Telling the DM what kind of scene it is running.
+
+### D181. The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts
+**Decided:** The designer's call (2026-11-10). Changes D71 and D72's map panel.
+- **A Map tab** beside Table and Plans. Every level is drawn on one frame across, so what's above sits over what it's above, with a scale bar. Tapping a place, a person or a thing shows what the party knows of it, and a list under the map says who is where in words.
+- **From state alone.** A token is in the place the ledger says its owner is in, gathered at the middle of that place: the map claims which place, and no more. Each token has its own mark, and a crowd is drawn as a cluster.
+- **What the party doesn't know is marked, not missing.** A way into a place not yet found is a broken line with a question mark; a ladder or steps to somewhere unexplored is dashed. A place out of sight now is faded. A person out of sight stays as a ghost where the party last had eyes on them (`s.known.last`), and moves only when seen again.
+- **More to draw with.** A zone can say what's underfoot (`ground`: water, planks, rubble), drawn as a texture. A room with no drawn map gets a sketch of its places in columns by distance from the party, joined by its ways, claiming no sizes.
+**Why:** The map was a small panel whose lettering was unreadable on a phone, with tokens scattered over squares they weren't on, people vanishing the moment they left sight, and nothing at all for a generated room.
+**Rules out:** Positions finer than a place, which the ledger doesn't hold. Showing where someone out of sight really is.
+
+### D182. The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms
+**Decided:** The designer's call (2026-11-10). Builds on D181.
+- **Shapes.** A zone's squares stay the truth for what joins what. `outline` (`src/game/view.js`) walks the edge of any footprint, however many rectangles it's made of, and the map draws that line three ways by the zone's `shape`: built (corners kept), round (corners swept away) or cave (the line wanders, the same way on both sides of a shared wall, and runs true where a way meets it). The encode call gives each zone a shape and a ground.
+- **Colour.** Floors take their colour from what's underfoot (stone, rock, water, planks, rubble) with a texture each, darkened by how well lit the place is, on a paper ground with a soft shadow under each place. A place out of sight is hatched. Both themes.
+- **Getting around.** One level at a time, chosen by name, with the level beneath as a dashed outline. The window drags to pan, pinches or wheels to zoom, and has buttons for in, out, all of it and the party. A drag is never taken for a tap. Tapping a name in the who's-where list goes to that level and place.
+- **Tried on:** three fixture rooms in `fixtures/maps/` (a round belfry on three levels, a sea cave, a chapel with locked doors and bars), the Cells, the goblin camp and a generated room laid out by code; `test/map.test.js` holds the outline and the fixtures.
+**Why:** Every room was a rectangle in two greys, in a fixed view too small to read.
+**Rules out:** Shapes that disagree with the squares: the outline is only ever a way of drawing them. Walls at angles, which the grid doesn't hold.
+
+### D183. The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square
+**Decided:** The designer's call (2026-11-11). Changes D153's layout and D9's fallback.
+- **Placement.** Each zone goes against the zone it's reached from, in the spot that also puts it against the most other placed zones it joins. A zone nothing reaches still gets a footprint.
+- **Arms.** Two zones that should join and don't are joined by growing a narrow arm, a square at a time through free squares, from the smaller of the two: on one level until it stands beside the other; between levels, from either or both until one square stands over the other. The arm is part of the zone's footprint, so the map stays true.
+- **Again if need be.** If a zone is walled in by its neighbours, the room is laid out again with zones set further round each other, up to 24 times, and last of all with every zone set apart in a row and joined by arms.
+- **Things** get a square of their own in their zone, toward the walls, so a generated room's map shows them. A zone the party can leave by is marked "a way on". The encode call is asked for levels where a place is reached by going up or down.
+- **Held by** a test that lays out 500 made-up rooms (loops, levels, zones nothing reaches) and checks every one is drawn and sound; 20,000 were run once by hand with none undrawn.
+**Why:** The old layout placed zones as a tree and gave up on the whole map when a loop wouldn't close or two levels didn't overlap, which is how the shakedown's rooms came to have no map, and it never placed a thing.
+**Rules out:** A map that disagrees with what joins what. The sketch as anything but the last resort: it stays for a room that still can't be drawn and for saves made before this.
+
+### D184. The pack: what the party carries out goes on as what it is, with what was learned of it
+**Decided:** The designer's call (2026-11-11). Changes D123, D147 and D178.
+- **One rule for everything carried out.** When a room ends, each thing a party member holds is settled by what it is. Worth gold: the gold is added. A relic: it joins the relics. A clue: it joins the clues. An outfit (a new kind of reward): it goes to the companion who carried it, or waits in `gifts` if the player did. Anything else is an item in the pack.
+- **An item keeps what it is.** It goes on with its name, what it is, who holds it, and up to three things the party has learned of it (the known facts about it). In the next room it is a thing like any other, in the same hands, and every call that reads the room reads it and what's known of it; the party's sheet lists what each member carries. Left, lost or used up, it's gone, because it isn't in the next hand-off. The pack holds ten things and empties at an act's end (`content/setting.js`).
+- **The telling can make a thing real.** The DM's record has `items`: a thing already shown that someone picks up or is handed becomes a thing of the room, held by them. At most eight a room, and never one that's already there.
+- **The verdict's carried list** keeps followers, loose ends and lacks. Things are the game's to keep.
+- **Wiring:** `handoff` (`items`, `outfits`), `roomEnded` and `endAct` (`camp.items`, `camp.gifts`, the wardrobe), `load` and `withPack` (the pack into the room), `withMade` and `s.made`, `session.pack` (a save puts it back), the sketch (what's in the pack), `sheetView` (carrying). `test/pack.test.js` holds it.
+**Why:** In the shakedown a stolen hand-bell that stilled the dead was gone at the next door. Relics and gold had a path and nothing else did, and the verdict's list could only keep a line of prose about a thing, not the thing.
+**Rules out:** Weights and counts. Items kept as prose the DM has to remember. A reward counted twice by being carried on as a thing as well.
+**Not yet:** a place to give a waiting outfit (the campfire), and anything to buy with a full pack but more gold.
+
+### D185. Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record
+**Decided:** The designer's call (2026-11-11), from the post-mortem of the Grub Pits act.
+- **A plan finishes before its room ends.** Every step the DM played out is recorded, then the room's ending is checked. Before, reaching the way out at step 4 dropped step 5, and Ruby's journal page was lost while the telling had her take it.
+- **Slips are tidied, not retried.** Every call's output has fields its schema doesn't have, and stray nulls, dropped before it's checked (`tidy` in `src/validate.js`). A verdict reaction with no strength is a small one. A card's steps are put in order from now (`inOrder`). What a fact is about is only a pointer: ids that name nothing are dropped. Retiring a fact that isn't there is nothing. `items` naming a thing already here is picking it up. Hidden-text checks match whole words, and a hidden fact's id (a label like "breath") never counts. A way from a place to itself is dropped. A failed encode gets a second, fresh go with the same sketch, and "Try again" starts from the same seed and sketch rather than designing the room again. 14 of 66 calls in the shakedown were retries of this kind.
+- **A follower keeps their record.** The verdict gives each follower a name, pronouns and looks; once set, later rooms keep them whatever a verdict writes, and every call that reads what the party has with it reads them. The sketch is told that what the party has with it is true as written.
+- **Calm rooms are judged on what happened.** Passing through untouched is an ordinary outcome, an optional thing left undone costs nothing, and a companion reacts to what the party did, never to what it didn't.
+- **Small things:** a place called "The ledge" is "the ledge", never "the the ledge"; a blank name is Wren, never the class; nobody says a skill's number aloud; pet names stay at the campfire in the DM's telling too; leaving by a way on takes the whole party there; a place with no shape from the encoder is drawn from what it is (caves and tunnels as rock, towers and wells round); Fern can change back from an animal.
+**Why:** The play was more fun; the faults were the game's records drifting from its own story and calls wasted on retries.
+**Rules out:** Repairing a call's meaning in code: only its form is tidied, and anything that changes what happened still goes back to the model.
+
+### D186. The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on
+**Decided:** The designer's call (2026-11-11), from the designer's shakedown notes.
+- **The DM reads the map.** Each place in the DM's account of a drawn room lists its ways and which way each lies (north, southeast, up, down), from the footprints (`bearing` in `src/engine/map.js`), so its directions match what the player sees.
+- **North is up, and the party comes in from the south.** A laid-out room is turned top to bottom if the party's starting place would sit in its top half. The map has a north arrow.
+- **Rings close.** Placing a place, the layout prefers spots near places already down that share a neighbour still to come, so a ring of four closes as a square. A hole the party moves around is a place of its own, joined to each rim (the encode prompt).
+- **Calm rooms aren't judged.** No verdict call for a quiet room, oddity, merchant or campfire: no rating, nothing moved, and what the party has with it goes on unchanged. The sanctuary is still judged.
+- **Two ways on.** An encounter before a campfire, the climax or the sanctuary has two exits to it, from different places, instead of one.
+- **The header wraps** on a phone, and a room whose trouble moves on failure shows the next thing to go wrong with no tick count.
+**Why:** The designer's notes: a header too wide for the phone, directions that didn't match the map, a ring drawn as a line, rooms judged for being quiet, and too many encounters with one way out.
+
+### D187. Calm rooms still get the companions' reactions; the header scrolls away on a phone
+**Decided:** The designer's call (2026-11-11). Changes D186.
+- **Calm rooms.** The verdict call runs again after a quiet room, oddity, merchant or campfire, told the room isn't rated. Its reactions, people and what the party has with it are kept; its rating is set aside, so the room moves no regard and no strain, and the page shows it as not rated.
+- **The header** is no longer pinned on a phone: it scrolls away with the page, so it never covers the story. On a wide screen it stays pinned beside the side column.
+**Why:** The designer wanted the companions to keep reacting in calm rooms, and the pinned header took a third of a phone's screen.

@@ -41,7 +41,7 @@ What the seed fixes:
 - **The prize,** for an encounter, an oddity or a quiet room (D164, D168): none about half the time, gold, a relic or a journal page. A page is one the campaign hasn't placed, from the act's live mysteries; the sketch is told only who wrote it, never its words, which the party reads at camp.
 - **At most one extra** (D164), never in two rooms running: **someone from before**, from the verdicts' memory, only in an encounter or an oddity, at most once an act each; or **a sign of the act's peak**, from its hints, at most one a leg.
 
-Its leanings (D163, D169): **one or two motifs** for an encounter or the climax, one for any other room, each a situation's shape with no examples (D168); for an encounter or the climax, **what it's built around** and the **x-factor** (an oddity gets an x-factor too). **Worn out:** every seed lists the props rooms must never build on (`content/stale.js`: hanging cages, ledgers and counting), and a sketch that uses one goes back once (D169). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
+Its leanings (D163, D169): **one motif** a room, a situation's shape with no examples (D168, D179). **Worn out:** every seed lists the props rooms must never build on (`content/stale.js`: hanging cages, ledgers and counting), and a sketch that uses one goes back once (D169). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
 
 The campaign records what the act has used (motifs, busy-withs, shapes, centrepieces, premises, signs, people brought back) and resets them when an act ends; the clues placed and the memory last the campaign.
 
@@ -65,3 +65,15 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
 - **It holds the seed's journal page,** when it placed one, as a thing the party can carry whose reward is that page, and no reward but the seed's prize (D164, D165, D168).
+
+## The read (D177)
+After a room with danger in the way (an encounter or a climax) is laid out, the read call reads it once from the player's chair (`docs/spec/calls/read.md`). Fewer than four handles, and the room goes back to the sketch once with the reader's notes; the new room isn't read again. A read that fails holds nothing up.
+
+## What the party has with it (D178)
+The campaign's `carried` list (items, followers, threads, from the last verdict) reaches the sketch as something the room must honour, and the engine loads it into the room's state.
+
+## What a seed fixes about the danger (D179)
+For an encounter or a climax the seed fixes how the main danger stands as the party arrives, from `DANGERS`, never twice in an act. The sketch builds a danger too big to fight head-on in that state, with a few loose things around it; the encode call puts how it behaves in plain view as a fact. A room draws one motif.
+
+## The layout (D183)
+`layout` (`src/engine/layout.js`) sets each zone against the zone it's reached from, where it also meets the most other zones it joins; joins any two that still don't meet by growing an arm from the smaller; lays the room out again, differently, if a zone is walled in; and gives each thing a square. A room ships without a map only if all of that fails.

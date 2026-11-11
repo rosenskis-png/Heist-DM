@@ -9,5 +9,7 @@ export const verdictCall = (io, env, c) =>
     call: "verdict",
     schema: verdictSchema,
     input: verdictInput(env, c, verdictSchema),
+    // A reaction with no strength is a small one (D185).
+    fix: (out) => ({ ...out, reactions: (out.reactions ?? []).map((r) => ({ intensity: 1, ...r })) }),
     check: (out) => speakerProblems({ reactions: out.reactions }, env.party.slice(1).map((p) => p.id)),
   });

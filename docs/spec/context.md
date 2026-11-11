@@ -25,15 +25,15 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 | Scene | Characters; the party's gold and relics; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
 | Question | The read-only slice (D127, D133): the party and its abilities, with what's left of them; its gold and relics; the encounter without the objective, sheets or reaction notes, with only the routines and events the party knows; the opening; the ledger without its event log; the DM's recent answers; the question |
 | Verdict | The record of a room that has ended (D146): the player; each companion's values (beliefs, rules, pursuit, mood, what she admires, despises, wants and can't stand); the whole encounter with its ways on; the ledger and the log at the end; how it ended, from the hand-off |
-| Party | Both companions' briefs, each exactly as her companion call has it (D132); the party's view of the encounter and the ledger, as for the companion call; the DM's last two narrations; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
-| Companion | Her brief and the special cases she acts on (D79, D114); the party's view of the encounter (no sheets, nothing hidden); the party's view of the ledger without log or texture; the DM's last two narrations; the draft and the card as shown (D40); her private channel |
+| Party | Both companions' briefs, each exactly as her companion call has it (D132); the room sheet, as for the companion call; the DM's last two narrations, without the opening; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
+| Companion | Her brief and the special cases she acts on (D79, D114, D175); the room sheet (D174); the DM's last two narrations, without the opening; the draft and the card as shown (D40); her private channel |
 | Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
 | Pitch | Its job and the format; the two companions' names, roles and blurbs; the features their stories need, with Gravenhold's version of each; Gravenhold as the worked example; pitches the player turned down; the vibe (D151) |
 
 - **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks; a limited one says what's left of it instead (D128).
 - **Coordinates never go to any call** (D9). Zones come with their size in feet, and openings in rough real dimensions. Code: `src/context.js`.
 - **Hidden things** go only to the resolve and scene calls, marked hidden. The card names nothing the party doesn't know.
-- **Companions** see only what the party knows, plus their own data.
+- **Companions** see only what the party knows, plus their own data. What they see of the room is the room sheet (D174; `roomSheet` and `sheetText` in `src/context.js`): the opening, the places and who's in them, the ways between, the things, the people in sight or earshot, the facts that aren't hidden, what the party has learned and how things stand. The page shows the player the same sheet (`docs/spec/ui.md`), so no call at the table knows more of the room than the player can read.
 - **Budgets** (D76): every call has an input budget (`BUDGET` in `src/ask.js`). One that crosses it still runs, but the page records a warning in the save and shows it in the developer view. `test/budget.test.js` holds every DM and companion call under its budget with the ledger at its limits, mid-fight (D130).
 - Generation's calls (sketch, encode) see what `docs/spec/generation.md` lists, and no play call sees their output except the packet.
 
@@ -60,6 +60,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Campfire | `sample.json` | off | `complex` |
 | Pitch | `sample.json` | off | `complex` (D151) |
 | Sketch | `sample.json` | off | `complex` |
+| Read | `sample.json` | off | `quick` (D177) |
 | Encode | `sample.json` | off | `default` |
 | Photo | `sample.json` | off | `default` (D170; the bench only) |
 
@@ -67,4 +68,5 @@ An invariant or worked example can carry an act gate: the first act it applies i
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, answer questions on the cheap tier from the slice, voice both companions in one call, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
 - **Tiers are a player setting** (D48). The table gives the middle position, Balanced; Faster moves every call one tier down and Smarter one tier up (D71). Code: `src/ask.js`.
+- **Tidying** (D185): before an output is checked, fields its schema doesn't have and stray nulls are dropped, and each call may repair its own form (a verdict reaction's strength, a card's step order). Meaning is never repaired in code.
 - **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`. Each call has one module in `src/calls/`.

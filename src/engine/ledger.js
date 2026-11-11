@@ -1,8 +1,8 @@
 // The ledger (D75): the DM rules and the engine keeps the books. The engine checks that a ruling names real
 // things, records it, rolls the dice the DM asked for, runs the clock (routines, events) and checks the
 // objective. It doesn't judge whether anything is possible. Semantics: docs/spec/engine.md §2.
-import { person, thing, isParty, isNpc, zoneOf, sheet } from "./world.js";
-import { nextTick, objectives, log } from "./clock.js";
+import { person, thing, isParty, isNpc, zoneOf, sheet, hiddenWords, names } from "./world.js";
+import { nextTick, objectives, log, press, waitsCount } from "./clock.js";
 import { d100, ODDS } from "./rng.js";
 import { toughness, CONDITIONS, THREATS } from "../../content/rules.js";
 
@@ -17,6 +17,9 @@ export const revealable = (s) =>
     ...s.packet.people.filter((p) => p.schedule).map((p) => p.schedule.id),
     ...s.packet.clock.events.map((e) => e.id),
   ]);
+
+// A room's things with those its telling made real (D184).
+export const withMade = (packet, made = []) => (made.length ? { ...packet, map: { ...packet.map, things: [...packet.map.things, ...made.filter((m) => !packet.map.things.some((t) => t.id === m.id)).map((m) => ({ ...m, location: { holder: "party" }, made: true }))] } } : packet);
 
 const ids = (s, ...kinds) =>
   new Set(
@@ -86,15 +89,20 @@ export function checkChanges(s, ch = {}, at = "changes") {
     if (!movable.has(m.who)) bad("who", m.who);
     if (!zones.has(m.to)) bad("zone", m.to);
   }
+  for (const it of ch.items ?? []) {
+    if (ids(s, "things").has(it.id)) continue; // a thing already here, picked up: a hold, not a new thing
+    if (known.has(it.id)) errors.push(`${at}: ${it.id} is already the id of something else here; give the new thing an id of its own`);
+    if (!ids(s, "people", "party").has(it.by)) bad("holder", it.by);
+    if ((s.made ?? []).length + (ch.items ?? []).length > MADE) errors.push(`${at}: at most ${MADE} things can be made real in one room`);
+  }
+  const made = new Set((ch.items ?? []).map((it) => it.id));
   for (const h of ch.holds ?? []) {
-    if (!ids(s, "things").has(h.item)) bad("item", h.item);
+    if (!ids(s, "things").has(h.item) && !made.has(h.item)) bad("item", h.item);
     if (h.by !== null && !holders.has(h.by)) bad("holder", h.by);
     if (h.by === h.item) errors.push(`${at}: ${h.item} can't hold itself`);
   }
   for (const f of ch.flags ?? []) if (!anything.has(f.on)) bad("thing", f.on);
-  for (const f of ch.facts ?? []) for (const id of f.about ?? []) if (!known.has(id)) bad("subject", id);
   const facts = new Set([...s.facts.map((f) => f.id), ...(ch.facts ?? []).map((f) => f.id)]);
-  for (const id of ch.retire ?? []) if (!facts.has(id)) errors.push(`${at}: there's no fact ${id} to retire`);
   for (const w of ch.wounds ?? []) if (!isNpc(s, w.who)) errors.push(`${at}: wounds are for people in the encounter, not ${w.who}; harm to the party is a condition or \`down\``);
   for (const c of ch.conditions ?? []) if (!isParty(s, c.who)) errors.push(`${at}: conditions are for the party, not ${c.who}`);
   const conditions = new Set([...s.conditions.map((c) => c.id), ...(ch.conditions ?? []).map((c) => c.id)]);
@@ -161,7 +169,21 @@ const setThreats = (s, threats) => {
 };
 
 // Records a ruling. Moving an NPC who has a routine takes them off it until a ruling puts them back.
+// How many things one room's telling can make real (D184).
+const MADE = 8;
+
 export function applyChanges(s, ch = {}) {
+  // A thing made real joins the room's things; the state remembers it, so a save or a replay makes it again.
+  for (const { by, ...it } of ch.items ?? []) {
+    if (s.packet.map.things.some((t) => t.id === it.id)) {
+      delete s.at[it.id];
+      s.holder[it.id] = by;
+      continue;
+    }
+    s.made = [...(s.made ?? []), it];
+    s.packet = withMade(s.packet, [it]);
+    s.holder[it.id] = by;
+  }
   for (const m of ch.moves ?? []) {
     delete s.holder[m.who];
     s.at[m.who] = m.to;
@@ -179,7 +201,9 @@ export function applyChanges(s, ch = {}) {
   }
   for (const f of ch.flags ?? []) (s.flags[f.on] ??= {})[f.key] = f.value;
   for (const f of ch.facts ?? []) {
-    const fact = { id: f.id, text: f.text, about: f.about ?? [], known: f.known ?? true, since: s.tick };
+    // What a fact is about is a pointer only: ids that name nothing here are dropped, never an error (D185).
+    const here = ids(s, "people", "party", "things", "zones", "connections");
+    const fact = { id: f.id, text: f.text, about: (f.about ?? []).filter((id) => here.has(id)), known: f.known ?? true, since: s.tick };
     const i = s.facts.findIndex((x) => x.id === f.id);
     if (i >= 0) s.facts[i] = fact;
     else s.facts.push(fact);
@@ -223,9 +247,7 @@ export function hiddenTerms(s) {
   const { map } = s.packet;
   return [...map.zones, ...map.connections, ...map.things, ...map.facts]
     .filter((x) => x.hidden && !s.known.revealed.includes(x.id))
-    .flatMap((x) => [x.id, x.name])
-    .filter(Boolean)
-    .map((t) => t.toLowerCase());
+    .flatMap(hiddenWords);
 }
 
 export function checkCard(s, out) {
@@ -241,7 +263,7 @@ export function checkCard(s, out) {
   if (out.ends_at < last) errors.push(`ends_at (${out.ends_at}) is before the last step's tick (${last})`);
   const terms = hiddenTerms(s);
   const shown = [...out.steps.flatMap((st) => [st.summary, st.roll?.reason, st.roll?.fails]), ...out.rulings.map((r) => r.text), ...(out.notes ?? [])].filter(Boolean).join(" \n ").toLowerCase();
-  for (const t of terms) if (shown.includes(t)) errors.push(`the card names "${t}", which the party doesn't know about`);
+  for (const t of terms) if (names(shown, t)) errors.push(`the card names "${t}", which the party doesn't know about`);
   for (const r of out.rulings) errors.push(...checkChanges(s, { facts: [r] }, `ruling ${r.id}`));
   return errors;
 }
@@ -301,14 +323,18 @@ export function withRulings(s, card) {
 export function resolve(s, card, rolls, out) {
   applyChanges(s, { facts: card.rulings });
   const stop = out.stopped?.at;
+  // Every step the DM played out is recorded before the room may end: reaching the way out at step 4 doesn't undo
+  // what step 5 did (D185).
+  s.holdEnd = true;
   for (const st of out.steps.filter((x) => stop === undefined || x.n <= stop)) {
     const c = card.steps.find((x) => x.n === st.n);
     if (st.happened !== "no") advanceTo(s, c.at);
-    if (s.ended) break;
     applyChanges(s, st.changes);
     // What happened is history: it goes in the log, which every call sees the end of, not in the facts.
     log(s, { step: st.n, [st.happened === "yes" ? "did" : st.happened === "partly" ? "partly" : "didnt"]: st.what });
   }
+  delete s.holdEnd;
+  objectives(s);
   if (!s.ended) advanceTo(s, out.ends_at);
   if (!s.ended) applyChanges(s, out.after);
   // The account leaves the fight where it stands: what each person still fighting is about to do, or nothing.
@@ -325,7 +351,7 @@ export function checkAnswer(s, out) {
   const ch = { facts: (out.rulings ?? []).map((f) => ({ ...f, known: true })), retire: out.retire ?? [] };
   const errors = [...checkChanges(s, ch, "rulings"), ...checkFactBudget(s, [ch])];
   const said = [out.reply, ...(out.rulings ?? []).map((f) => f.text)].join(" \n ").toLowerCase();
-  for (const t of hiddenTerms(s)) if (said.includes(t)) errors.push(`the party hasn't found "${t}", so the answer can't name it`);
+  for (const t of hiddenTerms(s)) if (names(said, t)) errors.push(`the party hasn't found "${t}", so the answer can't name it`);
   return errors;
 }
 
@@ -371,5 +397,7 @@ export function scene(s, out) {
   for (const l of out.learned ?? []) log(s, { learned: l });
   if (out.threats) setThreats(s, out.threats);
   advanceTo(s, s.tick + out.ticks);
+  // A failed check, or a deliberate wait, moves the room's trouble on a step (D176).
+  press(s, checks.filter((c) => !c.success).length + (out.waited && waitsCount(s) ? 1 : 0));
   return { checks };
 }

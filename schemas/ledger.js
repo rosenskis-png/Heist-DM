@@ -11,6 +11,9 @@ export const changes = obj([], {
   moves: list(obj(["who", "to"], { who: r("id"), to: r("id") })),
   // An item is now held by someone or something; `by: null` puts it down where it is.
   holds: list(obj(["item", "by"], { item: r("id"), by: { oneOf: [r("id"), { type: "null" }] } })),
+  // A thing the story has already shown that someone has just picked up or been handed (D184): it becomes a thing
+  // of the room, held by them, and goes on with the party like any other.
+  items: { ...list(obj(["id", "name", "properties", "by"], { id: r("id"), name: { type: "string", minLength: 1, maxLength: 60 }, properties: { type: "string", minLength: 1, maxLength: 200 }, by: r("id") })), maxItems: 3 },
   // A flag on a person, thing or connection, any key. Doors use `locked`; a person out of the fight is `down`.
   flags: list(obj(["on", "key", "value"], { on: r("id"), key: r("id"), value: { type: ["string", "number", "boolean"] } })),
   // A fact, added or (same id) replaced: one short line about how things are now, not what happened (that's the

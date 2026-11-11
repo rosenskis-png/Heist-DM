@@ -5,8 +5,9 @@
 // | The player                        | Calls                                          | Here       |
 // |-----------------------------------|------------------------------------------------|------------|
 // | asks the DM                       | the question call, cheap, on the slice (D133)  | `question` |
-// | speaks to a person, or does a thing | the scene call, then the party call          | `talk`     |
+// | speaks to a person, or does a thing | the scene call                               | `talk`     |
 // | talks to the party, over the rings | the party call (D132)                         | `rings`    |
+// | asks what the party makes of it    | the party call (D175)                         | `askParty` |
 // | says a private word to one        | her companion call                             | `rings`    |
 // | talks the plan over               | the party call                                 | `talkOver` |
 // | asks for the card, runs it        | adjudicate, then resolve                       | `makeCard`, `commit` |
@@ -64,6 +65,19 @@ const said = (e) => e.text && !e.failed;
 const live = (session) => {
   if (session.state.ended) throw new Error("The encounter is over.");
 };
+// A try whose stakes are on the table waits for the player to roll or back out (D176).
+const free = (session) => {
+  live(session);
+  if (session.pending) throw new Error("Roll for it or back out first.");
+};
+// What got worse when the room's trouble moved on (D176), told at the table so nobody misses it.
+function worsened(session, before) {
+  const s = session.state;
+  for (const e of s.packet.clock.events.filter((x) => s.fired.includes(x.id) && !before.includes(x.id))) {
+    const text = (e.do ?? []).flatMap((d) => d.then ?? []).map((o) => o.add_canon?.text).find(Boolean);
+    if (text) post(session, "table", { ch: "narration", who: "dm", text });
+  }
+}
 
 // ---- What each call reads of the table ----
 
@@ -116,8 +130,8 @@ export async function question(session, io, prompts, { text }) {
 // ---- Talking to someone, or doing something ----
 
 // One exchange the DM rules (`to` is a person, or "do"), then the companions react over the rings.
-export async function talk(session, io, prompts, { to = "do", text, rolls }) {
-  live(session);
+export async function talk(session, io, prompts, { to = "do", text, rolls, ask = false }) {
+  free(session);
   const env = envFor(session, prompts);
   let s = session.state;
   const asked = post(session, "table", { ch: "scene", who: "player", to, text });
@@ -131,21 +145,47 @@ export async function talk(session, io, prompts, { to = "do", text, rolls }) {
     conversation: conversation(session, to),
   };
   const out = await tried(asked, () => sceneCall(io, env, s, c));
-  s = act(session, { type: "scene", out, rolls });
   post(session, "table", { ch: "scene", who: to === "do" ? "dm" : to, to, kind: "reply", text: out.reply });
+  // Anything uncertain waits, with its stakes shown, for the player to roll or back out (D176). Nothing has
+  // happened yet: backing out costs nothing in the world.
+  if (ask && out.checks?.length) {
+    session.pending = { to, out };
+    return out;
+  }
+  return played(session, to, out, rolls);
+}
+
+// The exchange happens: the engine rolls its checks and keeps the books.
+function played(session, to, out, rolls) {
+  const before = [...session.state.fired];
+  const s = act(session, { type: "scene", out, rolls });
   (out.checks ?? []).forEach((ch, i) => {
     const { success } = s.scene.checks[i];
     post(session, "table", { ch: "scene", who: "dm", to, kind: "check", actor: ch.who, difficulty: ch.band, success, text: (success ? ch.success : ch.failure).text });
   });
   if (out.plan) post(session, "table", { ch: "scene", who: "dm", to, kind: "redirect", text: out.plan });
   if (out.ticks) post(session, "table", { ch: "scene", who: "dm", to, kind: "time", text: `${out.ticks} tick${out.ticks > 1 ? "s" : ""} pass.` });
+  worsened(session, before);
   markOut(session);
-  if (s.ended) {
-    session.ended = s.handoff;
-    return out;
-  }
-  await voices(session, io, prompts);
+  if (s.ended) session.ended = s.handoff;
   return out;
+}
+
+// What the waiting try would take, as the player sees it before rolling: who, how hard, why, and what failing costs.
+export const stakes = (session) =>
+  !session.pending ? null : session.pending.out.checks.map((c) => ({ who: nameOf(session.state, c.who), band: c.band, reason: c.reason, fails: c.failure.text }));
+export function roll(session, { rolls } = {}) {
+  live(session);
+  if (!session.pending) throw new Error("Nothing is waiting on a roll.");
+  const { to, out } = session.pending;
+  session.pending = null;
+  return played(session, to, out, rolls);
+}
+export function backOut(session) {
+  if (!session.pending) throw new Error("Nothing is waiting on a roll.");
+  const { to } = session.pending;
+  session.pending = null;
+  post(session, "table", { ch: "scene", who: "dm", to, kind: "time", text: "You think better of it. Nothing has changed." });
 }
 
 // ---- The companions ----
@@ -159,7 +199,6 @@ const companionContext = (session, channel) => {
   const s = session.state;
   return {
     channel,
-    now: ledgerText(s, { party: true, history: false }),
     recent: narrated(session, 2),
     draft: draftView(session),
     card: session.card ? cardView(s, session.card.card) : null,
@@ -180,6 +219,14 @@ async function voices(session, io, prompts, asked = null) {
     if (l.stance) takeStance(session, l.from, l.stance);
   }
   for (const { from, ...r } of out.reactions) session.reactions.push({ companion: from, tick: s.tick, ...r });
+}
+
+// The companions speak when they're spoken to (D175). The player can also just ask what the two of them make of
+// things, without saying anything first: the same call, with no line of the player's to answer.
+export async function askParty(session, io, prompts) {
+  live(session);
+  exchange(session);
+  return voices(session, io, prompts);
 }
 
 // The player talks over the rings: to the party (both companions, one call), or privately to one companion (her
@@ -230,7 +277,7 @@ const stancesOf = (session) => session.draft.stances.map(({ companion, kind, tex
 
 // The DM rules on the draft and makes the card. Time doesn't pass.
 export async function makeCard(session, io, prompts) {
-  live(session);
+  free(session);
   const env = envFor(session, prompts);
   const s = session.state;
   const undecided = session.draft.stances.filter((st) => !st.decision);
@@ -266,6 +313,7 @@ function outcomeOf(card, dice, out) {
 // card, so a call that fails and is tried again can't reroll them. The draft stays as written (D134).
 export async function commit(session, io, prompts, { checkpoints = [], rolls } = {}) {
   if (!session.card) throw new Error("There's no card to run.");
+  if (session.pending) throw new Error("Roll for it or back out first.");
   if (cardStale(session) && !session.card.dice) throw new Error("The plan changed since this card was made. Remake the card first.");
   const env = envFor(session, prompts);
   const full = session.card.card;

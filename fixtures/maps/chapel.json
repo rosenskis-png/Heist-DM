@@ -1,0 +1,348 @@
+{
+ "id": "chapel",
+ "name": "The chapel of the bound saint",
+ "mode": "encounter",
+ "act": 1,
+ "notes": [],
+ "intent": {
+  "purpose": "A map fixture (D182): a room drawn to try the map's shapes, grounds and levels."
+ },
+ "people": [
+  {
+   "id": "priest",
+   "name": "the priest",
+   "tier": "civilian",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "busy",
+   "position": "apse"
+  },
+  {
+   "id": "wardens",
+   "name": "two wardens",
+   "tier": "guard",
+   "wants": "To get on with it.",
+   "fears": "Being caught out.",
+   "knows": "This place.",
+   "will_never": "Leave it unguarded for nothing.",
+   "temper": "Plain.",
+   "under_pressure": "Holds their ground.",
+   "disposition": "busy",
+   "position": "nave"
+  }
+ ],
+ "map": {
+  "zones": [
+   {
+    "id": "nave",
+    "name": "The nave",
+    "purpose": "The nave.",
+    "light": "bright",
+    "rects": [
+     [
+      2,
+      0,
+      4,
+      8
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "north_aisle",
+    "name": "The north aisle",
+    "purpose": "The north aisle.",
+    "light": "dim",
+    "rects": [
+     [
+      0,
+      0,
+      2,
+      8
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "south_aisle",
+    "name": "The south aisle",
+    "purpose": "The south aisle.",
+    "light": "dim",
+    "rects": [
+     [
+      6,
+      0,
+      2,
+      8
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "apse",
+    "name": "The apse",
+    "purpose": "The apse.",
+    "light": "bright",
+    "rects": [
+     [
+      2,
+      8,
+      4,
+      3
+     ]
+    ],
+    "shape": "round"
+   },
+   {
+    "id": "vestry",
+    "name": "The vestry",
+    "purpose": "The vestry.",
+    "light": "dark",
+    "rects": [
+     [
+      8,
+      3,
+      3,
+      3
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "reliquary",
+    "name": "The reliquary",
+    "purpose": "The reliquary.",
+    "light": "dark",
+    "rects": [
+     [
+      0,
+      8,
+      2,
+      2
+     ]
+    ],
+    "shape": "built"
+   },
+   {
+    "id": "gallery",
+    "name": "The singers' gallery",
+    "purpose": "The singers' gallery.",
+    "light": "dim",
+    "rects": [
+     [
+      2,
+      0,
+      4,
+      2
+     ]
+    ],
+    "shape": "built",
+    "ground": "planks",
+    "level": 1
+   }
+  ],
+  "connections": [
+   {
+    "id": "n_arcade",
+    "kind": "opening",
+    "between": [
+     "north_aisle",
+     "nave"
+    ],
+    "wall": [
+     [
+      2,
+      2
+     ],
+     [
+      2,
+      6
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "s_arcade",
+    "kind": "opening",
+    "between": [
+     "nave",
+     "south_aisle"
+    ],
+    "wall": [
+     [
+      6,
+      2
+     ],
+     [
+      6,
+      6
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "chancel",
+    "kind": "opening",
+    "between": [
+     "nave",
+     "apse"
+    ],
+    "wall": [
+     [
+      3,
+      8
+     ],
+     [
+      5,
+      8
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both"
+   },
+   {
+    "id": "vestry_door",
+    "kind": "door",
+    "name": "The vestry door",
+    "between": [
+     "south_aisle",
+     "vestry"
+    ],
+    "wall": [
+     [
+      8,
+      4
+     ],
+     [
+      8,
+      5
+     ]
+    ],
+    "fits": "large",
+    "see_through": false,
+    "operated_from": "both",
+    "flags": {
+     "locked": true
+    }
+   },
+   {
+    "id": "reliquary_grille",
+    "kind": "bars",
+    "name": "The reliquary grille",
+    "between": [
+     "north_aisle",
+     "reliquary"
+    ],
+    "wall": [
+     [
+      0,
+      8
+     ],
+     [
+      2,
+      8
+     ]
+    ],
+    "fits": "large",
+    "see_through": true,
+    "operated_from": "both",
+    "flags": {
+     "locked": true
+    }
+   },
+   {
+    "id": "gallery_stair",
+    "kind": "stairs",
+    "name": "The gallery stair",
+    "between": [
+     "nave",
+     "gallery"
+    ],
+    "square": [
+     2,
+     0
+    ],
+    "fits": "medium",
+    "see_through": false,
+    "operated_from": "both"
+   }
+  ],
+  "things": [
+   {
+    "id": "altar",
+    "name": "the altar",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "apse",
+     "at": [
+      3,
+      9
+     ]
+    }
+   },
+   {
+    "id": "font",
+    "name": "the font",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "nave",
+     "at": [
+      4,
+      1
+     ]
+    }
+   },
+   {
+    "id": "reliquary_box",
+    "name": "the saint's hand",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "reliquary",
+     "at": [
+      0,
+      9
+     ]
+    }
+   },
+   {
+    "id": "chest",
+    "name": "the vestment chest",
+    "properties": "As it looks.",
+    "size": "medium",
+    "location": {
+     "zone": "vestry",
+     "at": [
+      9,
+      4
+     ]
+    }
+   }
+  ],
+  "facts": []
+ },
+ "clock": {
+  "events": []
+ },
+ "start": {
+  "tick": 0,
+  "positions": {
+   "player": "nave",
+   "companion_a": "nave",
+   "companion_b": "nave"
+  },
+  "ops": []
+ },
+ "opening": "You slip into the chapel."
+}

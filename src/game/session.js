@@ -1,6 +1,6 @@
 // A game in progress: campaign values, the engine's encounter state, and what the table has said (D11, D74).
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
-import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
+import { load, apply, bindParty, toughnessOf, withPack, withMade } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
 import { companions as authored } from "../../content/companions/index.js";
 import { inWorld, worldOf } from "../campaign/world.js";
@@ -9,7 +9,8 @@ import { emptyDraft, draftFrom } from "./draft.js";
 // The player's sheet: their name, their class's skills and abilities.
 export function playerSheet(player) {
   const cls = classes[player.class];
-  return { id: "player", name: player.name || cls.name, role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
+  // A player who leaves the name blank is called Wren, never by their class (D185).
+  return { id: "player", name: player.name?.trim() || "Wren", role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
 }
 
 // The party: the player, then the two companions the player chose, which the packet places by slot (D8).
@@ -126,7 +127,7 @@ export function restore(json, cells, roster = authored) {
   // A save from before ability uses were counted (D128).
   state.used ??= {};
   state.spent ??= {};
-  return { ...tableFrom(saved), world, actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: bindParty(packet, party), party } };
+  return { ...tableFrom(saved), world, actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: withMade(withPack(bindParty(packet, party), party, saved.pack ?? []), state.made ?? []), party } };
 }
 
 // A save from before the table (D127): its Plan, Moment and Companions feeds merge into one table, in the order

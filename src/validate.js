@@ -78,3 +78,25 @@ function check(schema, v, path, root, errors) {
     }
   }
 }
+
+// Tidies a call's output before it's checked (D185): drops fields the schema doesn't have, and nulls where a field is
+// optional and can't be null, so a slip that changes nothing never costs a second call. Returns a new value.
+export function tidy(schema, value, root = schema) {
+  schema = resolve(schema, root);
+  if (schema.oneOf || schema.anyOf) return value;
+  if (Array.isArray(value)) return value.map((x, i) => (schema.prefixItems?.[i] ?? schema.items ? tidy(schema.prefixItems?.[i] ?? schema.items, x, root) : x));
+  if (typeOf(value) !== "object" || !schema.properties) return value;
+  const out = {};
+  for (const [k, v] of Object.entries(value)) {
+    const p = schema.properties[k];
+    if (!p) {
+      if (schema.additionalProperties === false) continue;
+      out[k] = v;
+      continue;
+    }
+    const nullable = [].concat(resolve(p, root).type ?? []).includes("null") || (resolve(p, root).oneOf ?? resolve(p, root).anyOf ?? []).some((b) => [].concat(resolve(b, root).type ?? []).includes("null"));
+    if (v === null && !nullable && !(schema.required ?? []).includes(k)) continue;
+    out[k] = tidy(p, v, root);
+  }
+  return out;
+}

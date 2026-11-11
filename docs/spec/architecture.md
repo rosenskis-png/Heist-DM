@@ -30,10 +30,11 @@ Every AI call goes through the artifact runtime's `sample` (D2). Each call's con
    | The player | Calls |
    |---|---|
    | asks the DM | the question call only, on the cheapest tier, with the read-only slice (D133) |
-   | does something, or speaks to a person aloud | the scene call, then the party call |
+   | does something, or speaks to a person aloud | the scene call; a check waits, with its stakes shown, for the player to roll or back out (D176) |
    | talks to the party over the rings | the party call only (D132) |
    | says a private word to one companion | her companion call only |
    | talks the plan over | the party call |
+   | asks what the party makes of it | the party call (D175) |
 
    A question changes nothing in the world, and what its answer settles becomes fact. The scene call (`docs/spec/calls/scene.md`) rules on what the player tries, rolls a check where failure is possible and interesting, and says how long it took. Talk takes no time; only physical work does (D77). Anything that's really a plan of several steps goes to the draft, and so does a fight: once anyone is fighting the party, the scene call only answers and talks (D130). Party talk is over the rings, with time paused. The companions' stances go onto the draft as pending.
 2. **Commit.** On the Plans tab the player builds the plan as a list of actions, with any timing and conditions (D35, D134), and decides each pending stance (keep / resolved / override). Only the player writes plan content.

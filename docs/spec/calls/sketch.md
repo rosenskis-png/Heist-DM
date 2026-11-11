@@ -11,7 +11,6 @@ In the order it's written:
 - **things:** a line each for what matters: what it is, what state it's in, where it is next to the others; for a person, what they're busy with and where their eyes are. Never what it's for. A crowd is one line. Nothing placed or blocked for one party member's ability (D159).
 - **cut:** the weakest thing, left out of everything else, or "nothing".
 - **pressure:** what's already moving and what a player sees as it worsens; never a deadline; "none" for a calm room.
-- **outcomes:** three to five end states, never how the party got there (D156).
 - **notes:** what each person wants and fears and what pulls their attention away, what the place won't allow (never how anyone's senses work, or a rule a player must learn), anything worth having, and the ways on, one per kind drawn.
 - **opening:** two or three short paragraphs in motion, with a small event that shows what's dangerous (`docs/spec/packet.md` §5, D155, D159).
 

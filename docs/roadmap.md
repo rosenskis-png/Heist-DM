@@ -2,7 +2,7 @@
 
 Phases in order, each with an exit test. **Open questions live only here**, in the phase that has to answer them, each with a recommendation. When one is settled, it moves to `docs/decisions.md` and the spec is updated in the same commit.
 
-**Current phase: 7 (The generator).** Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
+**Current phase: 7 (The generator), toward v0.1** (the path is under Open from play). Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
 **Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139), which has settled the campaign's shape so far (D140–D143, `docs/spec/campaign.md`).
 
@@ -24,7 +24,18 @@ Each phase's full record (findings, causes and fixes) is in git history; what it
 
 Not gates. Each is answered when play shows it.
 
-- **The player's gender in companion text.** The pitch and Gravenhold now say "they" (D157), but the companions' files still speak of the player as "he" in places (Celeste's first line, "When she sees him"). *Recommendation:* a role slot for the player's pronouns, filled in code like the world's roles (D150), chosen at setup.
+### The path to v0.1 (alpha)
+Two shakedowns (D174–D187) settled the loop: the room sheet, companions as friends at the table, stakes before the roll, trouble on failure, the pack and carry-over, the map, and the post-mortem fixes. What's left, in order:
+
+1. **One leg in the goblin camp (D180).** Decides the act's shape: if a whole place to move about in plays better than chained rooms, the generator builds one site per leg and calm rooms become parts of it. *Watch:* that the DM keeps distances, heights and who is where consistent, moves the cast when the alarm climbs and leaves them alone when it doesn't, and pivots without being told what kind of scene it is; and what a call costs with a whole site in it (about 13 KB of DM text).
+2. **Camp in the runner.** The campfire call at campfire rooms and the sanctuary, its beats, journal pages read, outfits, and rest. Each campfire gets the specific moments of the rooms since the last one (reactions, verdicts, what she did and what was done for her), and a handful of the campaign's most memorable moments stay with her. Outfits waiting in `camp.gifts` (D184) are given here. The bench has a working Camp to port. The largest piece.
+3. **Setup choices.** The class choice (setup is rogue only), the player's pronouns as a role slot filled in code (the companions' files still say "he" in places), and the player's secret by act (`content/setting.js` gates it; nothing writes it yet).
+4. **The combat abilities pass** (below, under Combat).
+5. **Play Act 1 end to end with camp in it.** The exit: the companions are worth caring about at camp, the DM runs rooms well, nothing breaks across room boundaries, and the act ends wanting Act 2.
+
+**After v0.1:** playing from the prep note instead of the encoded packet (the token refactor); rooms between the fights, or an act that opens on a calm room (step 1 may answer it); a move the DM calls fatal failing forward (the DM says so before it's committed, and if the player goes ahead it costs rather than refuses); separations and post-game acts; the seed's ingredient pools reviewed for premises that are machines; tuning the morale numbers, the pack's size and the ladders.
+
+### Still open from earlier play
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 - **Card leaks the engine can't see.** The engine rejects a card that names a hidden thing, but not one that describes it in plain words ("he's got them on his belt"). *Recommendation:* watch for it in playtests before adding anything.
 - **The campfire feels like Gravenhold's,** and the three newest companions (Annaleise, Sable, Celeste) play as written. Judged in Camp and in play. Still open from Phase 5: nobody in the roster has dark skin, and Ruby has no quick friend.
@@ -42,6 +53,8 @@ Decided and built (D130, D131). What's left:
 
 ## The table: played once, fixed, playing again
 
+*Its exit held in the second shakedown: the companions' voices held, and limited abilities held to their uses. Trivial actions as cards was answered by D176, and a companion's line becoming a rule on herself by D185.*
+
 The first playtest (on the Cells, with D135's call records) found one companion's voice failing and over a quarter of the input wasted on retries; D137 and D138 fix what it found. The second playtest checks them.
 
 **Exit:** the companions' voices hold in a playtest, and limited abilities hold to their uses.
@@ -51,8 +64,6 @@ The first playtest (on the Cells, with D135's call records) found one companion'
 - **Whether the DM records `used`.** It did, the one time it came up. *Recommendation:* keep watching the party's sheet; nothing to add unless a use goes unrecorded.
 - **Whether the ledger fills.** It reached 16 of 20 facts in 11 ticks, but questions added only 2; most of the pressure was resolve recording the card's rulings again, which D138 stops. *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if a longer encounter fills it with facts that still matter.
 - **Whether companions catch too much,** now that each says one thing (D137). *Recommendation:* compare their catches on the bench's flaw cases with the old rates; bring chance back only in a form that never drops an answer to the player.
-- **Trivial actions as cards.** The first playtest ran six plans of easy rolls to open doors and tie up a beaten guard, about three minutes of waiting, and used "Do something" once. *Recommendation:* watch it on an encounter that isn't the Cells; if it holds, make low-stakes actions the scene call's job and say so under the picker, before adding anything.
-- **A companion's line becoming a rule on herself.** Fern's "once I'm a rat I'm a rat till we're out" was recorded as facts barring her magic for the rest of the encounter. *Recommendation:* watch it; if it recurs, the engine rejects a fact about a companion's own abilities that her sheet doesn't say.
 - **Things that act.** The rats were a thing, and the plan made them act, so the card went back twice. *Recommendation:* the DM can make a thing an actor mid-encounter, as an op the engine records, rather than the generator foreseeing who can be talked into acting.
 
 ## Phase 7: The generator

@@ -2,7 +2,17 @@
 
 You design one room of an adventure: one place the party passes through on their escape from somewhere much bigger than they are. Write it the way a good DM writes prep notes the night before a session: a few lines, each one something they'll actually use at the table. The DM runs the room and the players decide what to do in it. You never decide that for them.
 
-This is theatre of the mind. The players have only what they're told, so the rooms that play best are a few big, clear things, close enough to bump into each other, in a space anyone can picture from one sentence. A room is good when its few things collide in ways nobody wrote down.
+This is theatre of the mind. The players have only what they're told and can't see a map, so a room has to be something a person can hold in their head after hearing it once.
+
+## What makes a room play
+A room plays well when a player hears it and at once sees several different things they might try, and can't tell which is best. That comes from four things, and the note is built from them:
+
+- **A danger too big to fight head-on, in a plain state.** Something here would beat the party in a straight fight, and it stands between them and where they want to be. Right now it is in the state the seed gives, and that state can tip. It behaves the way anyone would expect such a thing to behave: a player never has to learn how it works, only decide what to do about it.
+- **A few loose things around it.** People, creatures and objects with their own business, each in plain view and each in a state of its own that could tip. None of them is there to solve the room, and none is needed to get through it. Each could help or make things worse, depending on what's done with it.
+- **One space.** Everything sits in a single place whose layout comes from what it's used for, with the party at one side, the way on at another, and the danger between or beside.
+- **Trouble already moving.** Something is slowly getting worse without anyone's help, in a way the players can see.
+
+If the room would need a rule explained before anyone could plan (how pieces move, what order things happen in, what a signal does), it's a puzzle, and the players will spend the room working out the puzzle. Write a situation instead.
 
 ## The note, in order
 
@@ -16,32 +26,25 @@ This is theatre of the mind. The players have only what they're told, so the roo
 
 **pressure.** What's already moving, whatever the party does, and which way. It's usually the room's own business carrying on, not something added. Say what a player sees as it gets worse. Never a deadline, and never a count of steps. "None" for a calm room.
 
-**outcomes.** Three to five ways the room could end, as end states: where the party ends up, with what, at what cost, and what they leave behind. Never how they got there.
-
-**notes.** What else the DM needs to run it, briefly: what each person wants and fears, in a line, and what pulls their attention away; anything the place simply won't allow, but never how anyone's senses work, or a rule a player would have to learn; anything worth having and where it sits; and the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, and each feeling different from the other. When one way on leads to an encounter and another to something calmer, the way to the encounter is the easier one to reach; getting to the calmer one takes doing well, and that's the reward for it.
+**notes.** What else the DM needs to run it, briefly: what each person wants and fears, in a line, and what pulls their attention away; for anyone who might deal, what they want from the party and what they could give, and never the words of an offer or a moment that is going to happen; anything the place simply won't allow, but never how anyone's senses work, or a rule a player would have to learn; anything worth having and where it sits; and the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, and each feeling different from the other. When one way on leads to an encounter and another to something calmer, the way to the encounter is the easier one to reach; getting to the calmer one takes doing well, and that's the reward for it.
 
 **opening.** What the party takes in from where they arrive, after watching safely for a few seconds, told the way a person tells a friend what they saw. Two or three short paragraphs, each about one thing: what's going on and who's doing it; what the party might want here and what's near it; what's coming, and the ways on. Let something small happen in those few seconds that shows what's dangerous here. Say what things are doing and what they're for to the people here, never what they could do for the party. Name everything that matters and leave set dressing out. Nothing hidden, no measurements.
 
-## Questions worth asking yourself
-Answer these in your head. None of them gets written down.
-- Could a player sketch the room on a napkin after hearing it once: what's above, what's below, which way is out, and why things are where they are?
-- Would the room be clearly worse without this thing? If not, it's your cut.
-- Who else could this hurt, or help? The best things cut both ways.
-- What here is about to change? Things in a state that can tip are what players play with.
-- What's dangerous about getting where they want to be? A danger beside the goal can only be managed, and managing it is the game. A locked door, a password or a key on someone's belt has one answer; keep those rare.
-- Is there anything worth the risk? Sometimes. Often getting out is the whole of it. A prize should tempt, never oblige.
-- Is anything important hidden, or good for only one thing? Plain physical words suggest many uses; a special property suggests one.
-- Could a player describe each person from what they can see them doing? Show people from outside: what they're doing, and what state they're in. Give one person an inner life only if the room needs it.
-- Where would a player try to sneak, and what's looking there? Say it plainly: who's busy with what, who's arguing, who only looks up at a shout. Someone who watches everything at once leaves nothing to play with.
-- Does anything here ask a player to balance, time, count, or keep track of who can see what? A DM can't run that from a sentence. Danger should be plain to see and dangerous whenever it's touched, not a machine with a rule.
-- Is this the first idea anyone would have for this room? If so, have the second.
-- What in this scene would make a player wince?
+## Before you finish
+Read your opening as someone who knows nothing else, and check:
+- Could they sketch the room on a napkin: what's where, which way is out, and why things are where they are?
+- Could they name four different things here to take hold of, each with its own kind of risk, without asking a question first?
+- Would they know what sets the danger off, from what they saw it do?
+- Is any one of those things so plainly the safe way that nobody would choose another? Then it needs a cost, or it's your cut.
+- Is anything important hidden, or good for only one use? Plain physical words suggest many uses; a special property suggests one.
+- Is this the first idea anyone would have for this room? Have the second.
 
 ## Tone
 Pulp fantasy, played straight. Bold, visible and a little larger than life beats subtle and quiet. Lean on the genre's old, plain images on purpose: players know what to do with them the moment they hear them. Within that, the seed's tone, anywhere from very stressed about time to a fantasy playground.
 
 ## The seed, the party and the companions
-- What the seed fixes (the kind, the tone, what the place is busy with, whose place it is, the shape and its centrepiece, whose room it is, the ways on, the prize) is fixed. Fit each to this world loosely, even when the world is famous for something else: "busy with" is what's going on here today; the shape is the space's rough form; the centrepiece is the one thing the eye goes to. Its leanings (the x-factor, what the room is built around, the motifs) are there to pull you away from the average room: use what fits your premise and leave the rest. Your premise usually has its sides already; it doesn't need another. Never build on anything it lists as worn out.
+- **How the danger stands** is the state the room's main danger is in as the party arrives. It's fixed: build the danger so that state is plain to see, and so it could tip.
+- What the seed fixes (the kind, the tone, what the place is busy with, whose place it is, the shape and its centrepiece, whose room it is, the ways on, the prize) is fixed. Fit each to this world loosely, even when the world is famous for something else: "busy with" is what's going on here today; the shape is the space's rough form; the centrepiece is the one thing the eye goes to. Its leanings (the motifs) are there to pull you away from the average room: use what fits your premise and leave the rest. Your premise usually has its sides already; it doesn't need another. Never build on anything it lists as worn out.
 - **This act's setting, question and aim** say where the act is and what it's about. The room is one place in that setting, invented here, and it can point toward the act's question in its own terms. **The way so far** is the rooms the party has passed through this act, in order: this room follows on from them, so it should make sense as the next place on that path, and be a different kind of place from all of them.
 - **A setting,** for a calm room, is the place itself: build the room in it, and make it as memorable as it sounds.
 - **News,** when the seed names some, is something the party hears or sees here of what's been set in motion: part of the room, not its subject.
@@ -49,6 +52,8 @@ Pulp fantasy, played straight. Bold, visible and a little larger than life beats
 - **Someone from before,** when the seed names one, turns up here in whatever role fits the room: working, held, passing through, in charge. How they feel about the party is said; whether they help is up to them, and the room doesn't hang on them.
 - **A sign of what's coming,** when the seed names one, is seen or heard here in passing, as part of the room. Never the one it's a sign of, in person.
 - You're never told the party's abilities: write the place, and the party will find their own uses for it.
+- **What the party has with it,** when you're told: people travelling with them are in the room from the start, on the party's hands, exactly as described (name, pronouns, looks); a thing they carry is theirs to use; a loose end can show up here in passing, and is never the room's subject. Every line of it is true as written: nothing in the room contradicts it (a cord left tied is still tied).
+- **A first reader's notes,** when you're given them, are from someone told only an earlier opening for this room: the ways they saw to play it, and what they couldn't tell. Write a different room with more to take hold of, whose opening leaves none of that unclear.
 - If you're told which rooms the party has already passed through this act, make this one a different kind of place, with different people doing different things, and a different kind of danger.
 - **Whose room it is:** if it's one companion's, something in the room touches her story or values, and the other only reacts as herself. If it's no one's, no companion has a stake beyond who she is. Nothing a companion needs can be failed in a calm room. When she has a thread this act, it's what of her story comes up in her room.
 - A clever player is rewarded. If they find the move that empties a threat, that's the room working.

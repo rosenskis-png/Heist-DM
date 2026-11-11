@@ -34,7 +34,8 @@ test("an answer's rulings become facts the party knows, and the card is ruled wi
 test("an answer can't name what the party hasn't found, or a thing that isn't there", () => {
   const s = start();
   assert.match(checkAnswer(s, { reply: "There's a cistern below.", rulings: [] }).join("\n"), /cistern/);
-  assert.ok(checkAnswer(s, { reply: "x", rulings: [{ id: "f", text: "y", about: ["tower"] }] }).length);
+  // A ruling about something that isn't here is still a fact; its pointer to nothing is dropped (D185).
+  assert.deepEqual(checkAnswer(s, { reply: "x", rulings: [{ id: "f", text: "y", about: ["tower"] }] }), []);
   assert.ok(validate(questionSchema, { reply: "x", rulings: [], changes: { moves: [{ who: "snag", to: "corridor" }] } }).length);
 });
 

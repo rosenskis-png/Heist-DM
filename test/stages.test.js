@@ -32,7 +32,7 @@ const plan = {
   hints: ["black invitations nailed to doors", "a skeletal herald calling names", "candles lit for guests who never come"],
 };
 
-test("the act's holders own its rooms; busy-ness is a generic kind, never repeating; the room before a campfire has one way on (D164, D169)", async () => {
+test("the act's holders own its rooms; busy-ness is a generic kind, never repeating; the room before a campfire leads only there (D164, D169, D186)", async () => {
   let camp = { ...newCampaign({ seed: 5, act: 2 }), plan };
   const kinds = [];
   for (let i = 0; i < 4; i++) {
@@ -46,7 +46,7 @@ test("the act's holders own its rooms; busy-ness is a generic kind, never repeat
   const { seedRoom } = await import("../src/game/generate.js");
   let c = newCampaign({ seed: 2 });
   c = { ...c, way: { ...c.way, left: 0, here: "encounter" } };
-  assert.equal(seedRoom(c, world).seed.exits.length, 1, "one way on, to the campfire");
+  assert.deepEqual([...new Set(seedRoom(c, world).seed.exits)], ["campfire"], "its ways on all lead to the campfire (D186)");
 });
 
 test("a journal page is a prize, placed once in a campaign, by its writer, never its words; at most one extra a room, never two rooms running (D164, D168)", () => {

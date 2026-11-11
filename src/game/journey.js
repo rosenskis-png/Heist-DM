@@ -46,6 +46,9 @@ export async function startAdventure(io, env, { player, companions, world, seed,
 // with the exit it was left by. At the sanctuary, which has no way on, this is resting and ending the act.
 export function leaveBy(session, exitId = null) {
   if (session.ended) return;
+  // Leaving by a way on, everyone goes: the party ends the room together where it leaves from (D185).
+  const exit = exitId ? (session.state.packet.intent.exits ?? []).find((e) => e.id === exitId) : null;
+  if (exit) act(session, { type: "ops", source: "leave", ops: session.state.party.map((p) => ({ move: { entity: p.id, to: exit.zone } })) });
   act(session, { type: "end", outcome: exitId ? "left" : session.state.packet.mode === "room" ? "rested" : "left" });
   session.ended = { ...session.state.handoff, way_on: exitId ?? session.state.handoff.way_on };
 }
@@ -59,7 +62,11 @@ export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
   const handoff = session.ended;
   const members = session.state.party.slice(1);
-  const verdict = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state) });
+  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, who's worth meeting
+  // again and what the party has with it, but its rating is set aside, so it moves no regard and no strain.
+  const calm = session.state.packet.mode === "room" && camp.way.here !== "sanctuary";
+  const judged = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state), calm });
+  const verdict = calm ? { ...judged, rating: null, why: null } : judged;
   session.past = [...session.past, summaryOf(session, verdict)].slice(-PAST);
   if (camp.way.here === "sanctuary") {
     const next = structuredClone(camp);
@@ -91,9 +98,17 @@ export async function nextRoom(session, io, env, roster = authored) {
   if (!camp.plan) camp = session.camp = await beginAct(io, env, { camp, world: session.world, party });
   const b = session.between ?? {};
   const handoff = b.exit?.stub || b.forced ? { stub: b.exit?.stub ?? "the party was carried on", conditions: camp.carry.conditions } : null;
-  const room = await generateRoom(io, env, { camp, world: session.world, party, handoff, log: (camp.log ?? []).slice(-3) });
+  let room;
+  try {
+    room = await generateRoom(io, env, { camp, world: session.world, party, handoff, log: (camp.log ?? []).slice(-3), resume: b.resume ?? null });
+  } catch (e) {
+    // Kept for "Try again", which starts from the same seed and sketch (D185).
+    if (e.resume) session.between = { ...b, resume: e.resume };
+    throw e;
+  }
   session.camp = room.camp;
-  session.between = { ...b, packet: room.packet };
+  const { resume, ...rest } = b;
+  session.between = { ...rest, packet: room.packet };
   return room.packet;
 }
 
@@ -105,8 +120,10 @@ export function enterRoom(session, roster = authored) {
   const camp = session.camp;
   const seed = (session.start.seed * 31 + 7 * (session.past?.length ?? 0) + 1) >>> 0 || 1;
   const party = partyFor(session.player, session.companions, session.world, roster);
-  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics });
+  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics, carried: camp.carried ?? [], items: camp.items ?? [] });
   Object.assign(session, {
+    // What was in the pack coming into this room (D184), so a save can put it back.
+    pack: camp.items ?? [],
     act: camp.act,
     packet,
     start: { packet: packet.id, seed: session.start.seed, room: seed },

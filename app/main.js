@@ -1,10 +1,11 @@
 // The game page (docs/spec/ui.md): the title screen and saves, setup, and the two tabs (the table and plans) around
 // the map, the clock and the party's sheet. All game logic lives in src/; this file draws it and handles input.
 import { html, useState, useEffect, useRef } from "./h.js";
-import { MapPanel, Clock } from "./map.js";
+import { MapTab, Clock } from "./map.js";
 import { openStore, prefs, SLOTS } from "./store.js";
 import { newSession, serialize, restore, partyFor, recordCall } from "../src/game/session.js";
-import { question, talk, rings, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
+import { question, talk, rings, askParty, roll, backOut, stakes, talkOver, addToPlan, makeCard, commit, shown, cardStale, speaker, resend, drop } from "../src/game/turns.js";
+import { roomSheet } from "../src/context.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game/draft.js";
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
@@ -15,12 +16,12 @@ import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
 const roster = rosterIn(authored);
 import { partyProblems } from "../src/campaign/roster.js";
-import { mapView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
+import { mapView, sketchView, clockView, partyView, sheetView, BAND } from "../src/game/view.js";
 import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "encode", "verdict"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -55,13 +56,13 @@ const paras = (t) => (t ?? "").split(/\n+/).filter(Boolean);
 
 async function loadAll() {
   const text = (p) => fetch(url(p)).then((r) => (r.ok ? r.text() : Promise.reject(new Error(`${p}: ${r.status}`))));
-  const [packetText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
+  const [packetText, siteText, encodedText, ...prompts] = await Promise.all([text("content/encounters/cells.json"), text("content/encounters/goblin_camp.json"), text("fixtures/generator/encoded.json"), ...PROMPTS.map((n) => text(`prompts/${n}.md`))]);
   const [sample, downloads, store, db] = await Promise.all([window.claude?.use("sample") ?? null, window.claude?.use("downloads") ?? null, openStore(), window.claude?.use("db") ?? null]);
   // The companions with the Dressing Room's live looks laid over them (D171), before any party is built.
   const { roster } = withLooks(authored, db ? await readLooks(db) : {});
   const all = Object.fromEntries(PROMPTS.map((n, i) => [n, prompts[i]]));
   // What generation is given (D173): the prompts, and the worked example of a finished room for encode.
-  return { packet: JSON.parse(packetText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
+  return { packet: JSON.parse(packetText), site: JSON.parse(siteText), prompts: all, roster, db, gen: { prompts: all, examples: { encoded: JSON.parse(encodedText) } }, sample, downloads, store };
 }
 
 // ---------- the app ----------
@@ -164,11 +165,14 @@ function Setup({ env, slot, onBack, onBegin }) {
   // Gravenhold opens in its hand-made Cells; a pitched world plans its first act and generates its first room before
   // the party wakes (D173), which takes a minute or two.
   const [making, setMaking] = useState(null);
-  const begin = async () => {
+  const begin = async (site = false) => {
     const seed = crypto.getRandomValues(new Uint32Array(1))[0] || 1;
     const player = { name: name.trim(), class: "rogue" };
-    if (!pitched) {
-      const session = newSession({ packet: env.packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
+    if (!pitched || site) {
+      const packet = site ? env.site : env.packet;
+      const session = newSession({ packet, player, companions: chosen, seed, world: worldOf(), roster: env.roster });
+      // The test site (D180) is kept whole in the save, as a generated room is, so the save loads without the Cells.
+      if (site) session.packet = packet;
       campaignOf(session);
       return onBegin(session);
     }
@@ -203,7 +207,8 @@ function Setup({ env, slot, onBack, onBegin }) {
     ${error ? html`<p className="error">${error}</p>` : null}
     ${pitched ? html`<div className="pitch"><strong>${pitched.world.name}</strong>${paras(pitched.pitch).map((t, i) => html`<p key=${i}>${t}</p>`)}</div>` : null}
     ${making ? html`<p className="muted">${making} The first act and its first room take a minute or two.</p>` : null}
-    <button className="primary" style=${{ justifySelf: "start" }} onClick=${begin} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
+    <button className="primary" style=${{ justifySelf: "start" }} onClick=${() => begin()} disabled=${!env.sample || !party || problems.length > 0 || busy}>${pitched ? `Wake up in ${pitched.world.name}` : "Wake up in the cells"}</button>
+    <button className="ghost" style=${{ justifySelf: "start" }} onClick=${() => begin(true)} disabled=${!env.sample || !party || problems.length > 0 || busy} title="A hand-built test of a whole place to move about in.">Try the goblin camp (test site)</button>
   </main>`;
 }
 
@@ -212,6 +217,7 @@ function Setup({ env, slot, onBack, onBegin }) {
 const TABS = [
   ["table", "Table"],
   ["plans", "Plans"],
+  ["map", "Map"],
 ];
 
 function Game({ env, slot, initial, onQuit }) {
@@ -334,17 +340,19 @@ function Game({ env, slot, initial, onQuit }) {
         : null}
       <div className="gutter"><nav className="tabs" aria-label="Interfaces">
         ${TABS.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
-        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Map & party</button>
+        <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Room & party</button>
       </nav></div>
     </header>
     <div className="body gutter">
       <aside className=${`side${sideOpen ? "" : " closed"}`}>
-        <${MapPanel} view=${mapView(s)} clock=${clockView(s)} colors=${colors} />
+        <section className="mapbox" aria-label="Clock"><${Clock} clock=${clockView(s)} /></section>
+        <${RoomSheet} sheet=${roomSheet(s)} />
         <${PartySheet} sheet=${sheetView(s)} colors=${colors} />
       </aside>
       <main className="pane">
         ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
         ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
+        ${tab === "map" ? html`<${MapTab} view=${mapView(s)} sketch=${sketchView(s)} sheet=${roomSheet(s)} colors=${colors} party=${s.party} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
       </main>
     </div>
@@ -352,12 +360,35 @@ function Game({ env, slot, initial, onQuit }) {
 }
 
 // The party's abilities and what's left of them (D128), and what each is carrying until a rest.
+// The room sheet (D174): what the whole party knows of the room. The companions' calls are sent this same sheet
+// as text, so they know nothing of the room the player can't read here.
+function RoomSheet({ sheet }) {
+  const cap = (x) => (x ? x[0].toUpperCase() + x.slice(1) : x);
+  // On a place's line, where it leads and by what; the full account of each way is in its own section.
+  const leads = (name) => sheet.ways.filter((w) => w.between.includes(name)).map((w) => `${w.between.find((b) => b !== name) ?? name} (${w.how.split(",")[0]})`);
+  const part = (title, items, open = true) => (items.length ? html`<details open=${open}><summary>${title}<span className="left">${items.length}</span></summary><ul>${items.map((x, i) => html`<li key=${i}>${x}</li>`)}</ul></details>` : null);
+  return html`<section className="partysheet roomsheet" aria-label="The room">
+    <div className="head"><b>${sheet.name ?? "The room"}</b><span className="left">what the whole party knows</span></div>
+    ${sheet.opening ? html`<details><summary>As the DM first described it</summary><p className="first">${sheet.opening}</p></details>` : null}
+    ${part("Places", sheet.places.map((p) => html`<b>${cap(p.name)}</b>${p.light ? html`<span className="muted"> (${p.light})</span>` : null}: ${p.what}${p.here.length ? html`<span className="here"> Here: ${p.here.join(", ")}.</span>` : null}${leads(p.name).length ? html`<span className="muted"> Leads to ${leads(p.name).join("; ")}.</span>` : null}`))}
+    ${part("Ways between places", sheet.ways.map((w) => html`<b>${w.between.join(" – ")}</b>: ${w.how}`), false)}
+    ${part("Things", sheet.things.map((x) => html`<b>${cap(x.name)}</b><span className="muted"> (${x.where})</span>: ${x.what}`))}
+    ${part("Who's here", sheet.people.map((x) => html`<b>${cap(x.name)}</b><span className="muted">, ${x.where}</span>`))}
+    ${part("With you, from earlier rooms", sheet.carried)}
+    ${part("What anyone can tell by looking", sheet.facts)}
+    ${part("What you've learned", sheet.learned)}
+    ${part("Right now", sheet.now)}
+  </section>`;
+}
+
 function PartySheet({ sheet, colors }) {
   return html`<section className="partysheet" aria-label="The party">
     ${sheet.map((p) => html`<div key=${p.id} className="member" style=${{ "--cc": colors[p.id] }}>
       <b>${p.id === "player" ? `${p.name} (you)` : p.name}</b>
       ${p.abilities.map((a) => html`<details key=${a.id} className="ab"><summary><span>${a.name}</span><span className="left">${a.left}</span></summary><span className="muted">${a.effect}</span></details>`)}
       ${p.conditions.length ? html`<span className="cond">${p.conditions.join(" · ")}</span>` : null}
+      ${p.carrying.length ? html`<span className="small muted">Carrying</span>` : null}
+      ${p.carrying.map((c) => html`<details key=${c.id} className="ab"><summary><span>${c.name}</span><span className="left">${c.worth ?? ""}</span></summary><span className="muted">${c.what}</span></details>`)}
     </div>`)}
   </section>`;
 }
@@ -397,7 +428,7 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
     const t = text.trim();
     if (!t) return;
     setText("");
-    run("table", () => (target === "dm" ? question(session, io, env.prompts, { text: t }) : ringed ? rings(session, io, env.prompts, { to: target, text: t }) : talk(session, io, env.prompts, { to: target, text: t })));
+    run("table", () => (target === "dm" ? question(session, io, env.prompts, { text: t }) : ringed ? rings(session, io, env.prompts, { to: target, text: t }) : talk(session, io, env.prompts, { to: target, text: t, ask: true })));
   };
   const who = (id) => speaker(s, id);
   const mine = (e) => (e.ch === "dm" ? "You, to the DM" : e.ch === "rings" ? "You, over the rings" : e.ch === "private" ? `You, privately to ${who(e.with)}` : e.to === "do" ? "You" : `You, to ${who(e.to)}`);
@@ -423,6 +454,16 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
       return html`<div key=${e.at} className="say"><span className="from">${who(e.who)}</span><span className="text">${e.text}</span>${e.rulings ? html`<span className="ruled">${e.rulings.map((r, i) => html`<span key=${i}>Holds from now on: ${r}</span>`)}</span>` : null}</div>`;
     })}
     <div ref=${end}></div>
+    ${!ended && session.pending
+      ? html`<div className="card stakes" aria-label="Before you roll">
+          <span className="small muted">Before you roll. Nothing has happened yet.</span>
+          ${stakes(session).map((c, i) => html`<div key=${i} className="risk"><span><span className="pill gold">${BAND[c.band]}</span> <b>${c.who}</b>: ${c.reason}</span><span className="fails">If it fails: ${c.fails}</span></div>`)}
+          <div className="cardfoot">
+            <button className="ghost" disabled=${!!busy} onClick=${() => (backOut(session), refresh())}>Never mind</button>
+            <button className="primary" disabled=${!!busy} onClick=${() => run("table", async () => roll(session))}>Roll</button>
+          </div>
+        </div>`
+      : null}
     ${!ended && s.packet.mode === "room" ? html`<${WaysOn} session=${session} busy=${busy} refresh=${refresh} run=${run} />` : null}
     ${ended
       ? html`<${Between} session=${session} env=${env} io=${io} run=${run} busy=${busy} error=${betweenError} refresh=${refresh} onQuit=${onQuit} />`
@@ -439,7 +480,10 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
             onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
             placeholder=${PLACEHOLDER[target] ?? (ringed ? "Just between us…" : "What do you say?")}></textarea>
           ${error ? html`<p className="error">${error}</p>` : null}
-          <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
+          <div className="row"><span className="status">${busy ?? ""}</span><span className="row">
+            <button className="ghost" disabled=${!!busy} title="Ask your companions what they make of it. Time doesn't move." onClick=${() => run("table", () => askParty(session, io, env.prompts))}>What do you two think?</button>
+            <button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button>
+          </span></div>
         </div>`}
   </section>`;
 }
@@ -517,9 +561,9 @@ function Stances({ session, touch }) {
       <span><b>${nameOf(s, st.companion)} ${st.kind === "refuse" ? "refuses" : st.kind === "insist" ? "insists" : "has a condition"}:</b> ${st.text}</span>
       <div className="choices">
         ${[
-          ["keep", "Keep it", "It stands: if it trips, she won't do that step."],
+          ["keep", "She sits it out", "Her stance stands: if the plan comes to it, she won't do that step."],
           ["resolved", "It's handled", "The plan already deals with it."],
-          ["override", "Override", "Go ahead anyway. She'll remember."],
+          ["override", "Do it anyway", "The plan runs as written and she goes along. She'll remember."],
         ].map(([d, label, note]) => html`<button key=${d} title=${note} aria-pressed=${st.decision === d} onClick=${() => ((st.decision = d), touch())}>${label}</button>`)}
         <button className="link" onClick=${() => (session.draft.stances.splice(i, 1), touch())}>Drop</button>
       </div>
@@ -664,7 +708,7 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < allowed ? [...k, id] : k));
   return html`<section className="ending">
     <h2>${label}</h2>
-    ${b?.verdict ? html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>` : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
+    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
     ${b?.exit?.stub ? html`<p className="muted">${b.forced ? "You're carried on. " : ""}${b.exit.stub}</p>` : null}
     ${step === "relics" && b.last
       ? html`<p>You're out. That's the end of the adventure, for now.</p><button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>`

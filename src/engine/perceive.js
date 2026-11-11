@@ -18,6 +18,12 @@ export function memberPerceives(s, id, here = zoneOf(s, id)) {
   const seen = [];
   const heard = [];
   if (!here) return { seen, heard };
+  // A room with no drawn map (D153) is one scene (D174): sight lines aren't modelled, so every place in it that
+  // isn't hidden or dark is in view and in earshot, and the DM rules on what can be made out from where.
+  if (!s.packet.map.zones.some((z) => z.rects?.length)) {
+    const all = s.packet.map.zones.filter((z) => known(s, z)).map((z) => z.id);
+    return { seen: all.filter((z) => z === here || visible(s, z, id)), heard: all };
+  }
   const look = [here];
   for (const c of s.packet.map.connections)
     if (c.between.includes(here) && open(s, c) && known(s, c)) look.push(other(c, here));
@@ -41,6 +47,16 @@ export function partyPerceives(s) {
     p.heard.forEach((z) => add(heard, z, id));
   }
   return { seen, heard };
+}
+
+// The places the party has seen or stood in so far (D180), kept in `s.known.places`: a site's sheet and map show only these.
+export function noteSeen(s) {
+  const here = partyIds(s).map((id) => zoneOf(s, id)).filter(Boolean);
+  const { seen } = partyPerceives(s);
+  s.known.places = [...new Set([...(s.known.places ?? []), ...here, ...seen.keys()])];
+  // Where each person was when the party last had eyes on them (D181): the map shows it once they're out of sight.
+  s.known.last = { ...(s.known.last ?? {}) };
+  for (const p of s.packet.people) if (s.at[p.id] != null && seen.has(s.at[p.id])) s.known.last[p.id] = s.at[p.id];
 }
 
 // What the party can make out where they stand, which the opening must name (D136): every person in a zone they

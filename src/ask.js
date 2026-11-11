@@ -1,19 +1,19 @@
 // One AI call through the runtime's `sample.json` (D2, D13): the output is checked against its schema and the
 // engine's own checks, and a failure gets one retry with the errors listed. The runtime policy per call is
 // docs/spec/context.md §4.
-import { validate } from "./validate.js";
+import { validate, tidy } from "./validate.js";
 
 export const TIERS = ["quick", "default", "complex"];
 
 // The middle position of the speed and quality setting (D58). The other two move every call one tier (D70).
-export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", encode: "default", photo: "default" };
+export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", read: "quick", encode: "default", photo: "default" };
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 
 // How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
 // runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
 // `test/budget.test.js` holds every DM call under its budget at the ledger's limits, mid-fight (D130).
-export const BUDGET = { adjudicate: 28672, resolve: 28672, scene: 28672, question: 21504, verdict: 25600, pitch: 24576, act: 20480, sketch: 32768, encode: 28672, companion: 21504, party: 24576 };
+export const BUDGET = { adjudicate: 29696, resolve: 30720, scene: 30720, question: 22528, verdict: 27648, pitch: 24576, act: 20480, sketch: 32768, read: 8192, encode: 28672, companion: 22528, party: 26624 };
 
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
 const REPLAY = new Set(["adjudicate"]);
@@ -37,7 +37,7 @@ const pause = (ms, signal) =>
 // `io` is the runtime: `sample`, the `speed` setting, an abort `signal`, `onStart` (which call is running, for
 // the page's status line), `onOver` (a call's input crossed its budget) and `onCall`, which gets every call's
 // input and raw output for the developer view (held in memory only, D10).
-export async function ask(io, { call, input, schema, check = () => [] }) {
+export async function ask(io, { call, input, schema, check = () => [], fix = (x) => x }) {
   const tier = tierFor(call, io.speed);
   const record = { call, tier, at: Date.now(), input, size: new TextEncoder().encode(input).length };
   if (BUDGET[call] && record.size > BUDGET[call]) {
@@ -67,16 +67,19 @@ export async function ask(io, { call, input, schema, check = () => [] }) {
   const t0 = Date.now();
   io.onStart?.(call);
   try {
-    let out = await send(input);
+    // Every output is tidied (unknown fields and stray nulls dropped) and given the call's own repairs before it's
+    // checked (D185).
+    const mend = (x) => (x && typeof x === "object" ? fix(tidy(schema, x)) : x);
+    let out = mend(await send(input));
     let errors = errorsOf(out);
     record.first = out;
     if (errors.length) {
       record.firstErrors = errors;
-      out = await send([
+      out = mend(await send([
         { role: "user", content: input },
         { role: "assistant", content: JSON.stringify(out) },
         { role: "user", content: `That has problems:\n${errors.slice(0, 20).join("\n")}\nReturn the corrected JSON object only.` },
-      ]);
+      ]));
       errors = errorsOf(out);
     }
     Object.assign(record, { out, errors, ms: Date.now() - t0 });

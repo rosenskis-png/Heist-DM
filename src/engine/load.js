@@ -1,8 +1,10 @@
 // Loading a packet: the consistency checks (docs/spec/packet.md, Validation) and the starting state.
 import { validate } from "../validate.js";
+import { hiddenWords, names } from "./world.js";
 import { packetSchema } from "../../schemas/index.js";
 import { geometryProblems } from "./map.js";
 import { beginTick } from "./clock.js";
+import { noteSeen } from "./perceive.js";
 import { run } from "./ops.js";
 import { toughnessOf } from "./ledger.js";
 
@@ -43,9 +45,9 @@ export function checkPacket(packet, party = []) {
   problems.push(...geometryProblems(packet));
   // No visible text names a hidden thing.
   const all = [...map.zones, ...map.connections, ...map.things, ...map.facts];
-  const terms = all.filter((x) => x.hidden).flatMap((x) => [x.id, ...(x.name ? [x.name] : [])]).map((t) => t.toLowerCase());
-  const visible = [...all.filter((x) => !x.hidden).map((x) => JSON.stringify(x)), packet.opening].map((t) => t.toLowerCase());
-  for (const text of visible) for (const t of terms) if (text.includes(t)) problems.push(`visible text names hidden "${t}"`);
+  const terms = [...new Set(all.filter((x) => x.hidden).flatMap(hiddenWords))];
+  const visible = [...all.filter((x) => !x.hidden).map((x) => [x.name, x.purpose, x.properties, x.text].filter(Boolean).join(" ")), packet.opening];
+  for (const t of terms) if (visible.some((text) => names(text, t))) problems.push(`visible text names hidden "${t}"`);
   return problems;
 }
 
@@ -64,11 +66,26 @@ export function bindParty(packet, party) {
   return bind(packet);
 }
 
+// The pack (D184): the things the party carried out of earlier rooms are things in this one, held by whoever held
+// them (the player, if that companion isn't here), under an id of their own so they can't clash with the room's.
+export function withPack(packet, party, items = []) {
+  if (!items.length) return packet;
+  const taken = new Set([...packet.map.zones, ...packet.map.connections, ...packet.map.things, ...packet.map.facts, ...packet.people, ...packet.clock.events].map((x) => x.id));
+  const things = items.map((it) => {
+    let id = it.id;
+    while (taken.has(id)) id = `pack_${id}`;
+    taken.add(id);
+    const holder = party.some((p) => p.id === it.holder) ? it.holder : party[0].id;
+    return { id, name: it.name, properties: it.properties, ...(it.size ? { size: it.size } : {}), location: { holder }, carried: true, ...(it.notes?.length ? { notes: it.notes } : {}) };
+  });
+  return { ...packet, map: { ...packet.map, things: [...packet.map.things, ...things] } };
+}
+
 // The starting state for an encounter. `party` is the party's sheets (player first);
 // `conditions` are the ones the party carries in from the last hand-off (D130), `spent` the per-rest ability
 // uses spent since the last rest (D128), and `gold` what the party has to spend (D147).
-export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [] }) {
-  const packet = bindParty(unbound, party);
+export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [], carried = [], items = [] }) {
+  const packet = withPack(bindParty(unbound, party), party, items);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
   const { map, people, clock, start } = packet;
@@ -78,6 +95,8 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
     rng: seed >>> 0,
     tick: start.tick,
     pending: 0,
+    // How far the room's trouble has moved on (D176): one step for each failed roll or deliberate wait.
+    pressure: 0,
     at: {},
     holder: {},
     flags: {},
@@ -94,6 +113,8 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
     gold,
     // The relics the party holds, each a passive edge the DM reads as a fact (D147).
     relics: structuredClone(relics),
+    // What the party has with it from earlier rooms (D178): things, followers and loose ends.
+    carried: structuredClone(carried),
     known: { revealed: [] },
     due: Object.fromEntries(
       clock.events.filter((e) => e.at_tick !== undefined).map((e) => [e.id, e.at_tick]),
@@ -116,5 +137,6 @@ export function load({ packet: unbound, party, seed = 1, conditions = [], spent 
   for (const c of map.connections) if (c.flags) s.flags[c.id] = { ...c.flags };
   run(s, start.ops);
   beginTick(s);
+  noteSeen(s);
   return s;
 }

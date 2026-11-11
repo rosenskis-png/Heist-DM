@@ -20,3 +20,5 @@ Nothing inside the room depends on it: it runs after the room is over.
 
 ## Validated by the engine
 Every reaction is from one of the party's companions. Failures go back for one retry.
+
+- **carried** (D178): what the party has with it as it leaves, the whole list: up to six lines, each an item, a follower or a thread. The call is told what they came in with.

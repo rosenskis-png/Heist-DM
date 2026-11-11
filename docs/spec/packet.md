@@ -79,3 +79,12 @@ Written from the map after the map is final. Stored word for word and sent with 
 
 ### Size
 The engine measures each serialized packet and warns above twice the size of the Cells (D26). An encounter that big is split at a doorway, and each piece hands its state to the next.
+
+## Sites, alarms and facts with a place (D180)
+- `site: true` marks a packet as one place of several areas the party finds as it goes. The engine keeps the areas seen so far in `s.known.places`; the sheet and the map show only those.
+- `clock.by` says what moves the timed events: `time` (a drawn room's default), `trouble` (a failed roll or a wait; the default with no map) or `alarm` (a failed roll only).
+- A fact's `at` names the area it belongs to. In a site the party learns it on finding that area.
+The example is `content/encounters/goblin_camp.json`, and `test/site.test.js` holds it sound.
+- A zone's `ground` (water, planks, rubble) is what's underfoot, for the map (D181).
+- A zone's `shape` (built, cave, round) is how the map draws the line round its squares (D182); the squares stay the truth.
+- A thing's `reward` may be an `outfit` (id, name, text), which goes to whoever carries it out (D184). Things marked `carried` or `made` are added by the game, never written in a packet.

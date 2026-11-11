@@ -3,7 +3,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newSession, serialize, restore, post, recordCall, act, CALL_RECORDS, SAVE_ROOM } from "../src/game/session.js";
-import { makeCard, commit, talk, shown, question, rings, talkOver, cardStale, resend, drop } from "../src/game/turns.js";
+import { makeCard, commit, talk, shown, question, rings, talkOver, cardStale, resend, drop, askParty } from "../src/game/turns.js";
 import { addItem, editItem, moveItem, removeItem, clearDraft, planText } from "../src/game/draft.js";
 import { mapView, clockView } from "../src/game/view.js";
 import { ask, tierFor, CallFailed } from "../src/ask.js";
@@ -164,12 +164,14 @@ test("a question to the DM is one cheap call, and what it settles is fact when t
   assert.ok(sample.seen[1].input.includes("gutter_fits_rat: A rat fits along the gutter under every cell."));
 });
 
-test("doing something is the scene call, then one party call; a line's stance goes on the draft", async () => {
+test("doing something is the scene call alone; asking the party is one party call, and a line's stance goes on the draft (D175)", async () => {
   const out = { reply: "You rattle the door. It holds.", ticks: 0 };
   const stance = { kind: "insist", text: "Not so loud", traced_to: { field: "rules", item: "x" } };
   const sample = ruledSample({ scene: [out], party: [said([{ from: PARTY[0], message: "Quieter!", stance }, { from: PARTY[1], message: "She's right." }])] });
   const session = newSession({ packet, player: { name: "Kael", class: "rogue" }, companions: PARTY });
   await talk(session, { sample }, prompts, { to: "do", text: "I rattle the cell door." });
+  assert.deepEqual(calls(sample), ["scene"]);
+  await askParty(session, { sample }, prompts);
   assert.deepEqual(calls(sample), ["scene", "party"]);
   assert.ok(sample.seen[1].input.includes("You rattle the door. It holds."));
   assert.deepEqual(session.feeds.table.filter((e) => e.ch === "rings").map((e) => e.who), PARTY);

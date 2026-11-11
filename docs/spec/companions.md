@@ -10,7 +10,7 @@ Companions act like fellow players: opinions, reasoning, disagreement, in-charac
 
 - **Over the rings:** time is paused. Both companions share one call (`docs/spec/calls/party.md`, D132), after the DM rules on what the player did, when the player talks to the party, and when the plan is talked over; each is free to pass. They see what the player sees, including the draft and the DM's card. Each thinks about a plan through her own `planning` bias (D38), and they say one thing between them, which answers the player when he's said something to them (D137).
 - **Private channel:** only the addressed companion is called. The whisper rings make this possible in the fiction (`content/setting.js`).
-- **Stances:** refuse, insist, or conditional, with conditional triggers written in the condition language. They're traced to her profile (beliefs, despises, rules). Only the player writes plan content.
+- **Stances:** refuse, insist, or conditional, with conditional triggers written in the condition language. They're traced to her profile (beliefs, despises, rules). A stance is for a line she holds, said once; disagreeing about tactics is just talk (D175). Only the player writes plan content.
 - **Campfire:** between encounters, with the full relationship picture: talk and action together, one on one or with both, one call per companion (D45; `docs/spec/calls/campfire.md`).
 
 ## 2. What a companion file holds
@@ -42,7 +42,7 @@ Text inside profiles may mention other companions by name (Fern's rule about Lis
 Gravenhold revealed parts of a profile as the relationship grew. Keep that, as engine-side gating: like an act gate, a field that isn't unlocked yet is absent from context, not forbidden by a rule.
 
 Each channel sends an allowlist of fields (D59).
-- **In encounters** (the huddle, private channels, and the DM's calls that voice her), a companion is her brief (D79): name, race, role, `voice`, `beliefs`, `rules`, `pursuit`, `planning.hunch` and `reaches_for`, skills and abilities (effect text only), and her standing: a mood from warm, glad, steady, wary, grumpy, jealous, with why, and what she has learned. With it go the special cases she acts on in the scene (D114): what she has on, her second voice, her shape, and her tie without its secret. Code: `briefProfile` and `encounterCases` in `src/context.js`.
+- **In encounters** (the huddle, private channels, and the DM's calls that voice her), a companion is her brief (D79): name, race, role, `voice`, `beliefs`, `rules`, `planning.hunch` and `reaches_for`, skills and abilities (effect text only), and her standing: a mood from warm, glad, steady, wary, grumpy, jealous, with why, and what she has learned. With it go the special cases she acts on in the scene (D114): what she has on, her second voice, her shape, and her tie without its secret. Her `pursuit` stays at the campfire: in a room she's a friend at the table, talking the problem over in plain speech (D175). Code: `briefProfile` and `encounterCases` in `src/context.js`.
 - **At the campfire** she gets her full profile: identity, fantasy, look, voice, depth, rules, skills and abilities, gated as below, plus her special cases as resolved for the party and scene (§6). The campfire writes her standing and what she learned. Code: `ownProfile` in `src/context.js`.
 
 Fields on no list, such as `color`, `rate`, `leanFromHeat`, `photo` (only the photo call reads it), and any special-case data the engine hasn't resolved, are never sent.

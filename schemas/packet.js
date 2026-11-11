@@ -30,6 +30,11 @@ const zone = obj(["id", "name", "purpose", "light"], {
   description: r("text"),
   light: { enum: ["dark", "dim", "bright"] },
   level: { type: "integer" },
+  // What's underfoot, for the map (D181). Left out, it's plain floor.
+  ground: { enum: ["floor", "water", "planks", "rubble"] },
+  // How its outline is drawn (D182): built walls with square corners, natural rock, or a round room. The squares in
+  // `rects` stay the truth for what joins what; this only shapes the line drawn round them.
+  shape: { enum: ["built", "cave", "round"] },
   rects: list(rect, 1),
   // Zones visible from here beyond the ones joined to it (a long straight corridor). Party perception: engine §2.
   sees: list(r("id")),
@@ -72,10 +77,17 @@ const thing = obj(["id", "name", "properties", "location"], {
       obj(["gold"], { gold: { type: "integer", minimum: 1 } }),
       obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) }),
       obj(["clue"], { clue: r("id"), fixed: { type: "boolean" } }),
+      // An outfit (D184): it goes to the companion who carries it out, or waits to be given if the player does.
+      obj(["outfit"], { outfit: obj(["id", "name", "text"], { id: r("id"), name: r("text"), text: r("text") }) }),
     ],
   },
   // What it costs, at a merchant: the party pays when one of them takes it (D147).
   price: { type: "integer", minimum: 1 },
+  // Brought in from an earlier room in the party's pack (D184).
+  carried: { type: "boolean" },
+  made: { type: "boolean" },
+  // What the party had learned about it before this room (D184).
+  notes: { type: "array", items: r("text") },
 });
 
 const senses = obj(["sees", "hears"], { sees: list(r("id")), hears: r("hearing") });
@@ -157,6 +169,8 @@ export const packetSchema = withDefs({
     // How people react, in plain words, for the DM to apply (D76).
     notes: { type: "array", items: r("text") },
     mode: { enum: ["encounter", "room"] },
+    // A site (D180): a place of several areas the party moves about in, discovering them as it goes.
+    site: { type: "boolean" },
     act: { type: "integer", minimum: 1 },
     intent: obj(["purpose"], {
       objective,
@@ -172,9 +186,13 @@ export const packetSchema = withDefs({
       zones: list(zone, 1),
       connections: list(connection),
       things: list(thing),
-      facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), hidden: { type: "boolean" } })),
+      // `at`: the area a fact belongs to; in a site the party learns it on finding that area (D180).
+      facts: list(obj(["id", "text"], { id: r("id"), text: r("text"), hidden: { type: "boolean" }, at: r("id") })),
     }),
     clock: obj(["events"], {
+      // What moves the timed events (D176, D180): the clock; "trouble" (a failed roll or a wait); or "alarm" (a
+      // failed roll only). Left out, a drawn room goes by time and a room with no map by trouble.
+      by: { enum: ["time", "trouble", "alarm"] },
       events: list(event),
     }),
     start: obj(["tick", "positions"], {

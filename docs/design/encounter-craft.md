@@ -116,7 +116,7 @@ Define observers by their senses where it matters. Different senses make disguis
 ## 14. The generator's order
 
 1. **Seed** (code): what it fixes (the kind, the tone, whose room it is, the exits' kinds) and its leanings (the x-factor, a shape, what the room is built around, whether there's a prize, one or two motifs, the factions), which the sketch uses or leaves (D160).
-2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the cut, the pressure, the outcomes, notes, the opening (§16, `docs/spec/calls/sketch.md`).
+2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the cut, the pressure, notes, the opening (§16, `docs/spec/calls/sketch.md`).
 3. **Encode** turns the note into the packet, adding nothing (D156, D160).
 
 Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.

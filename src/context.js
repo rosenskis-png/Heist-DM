@@ -1,6 +1,7 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the game and the bench page.
-import { beatOf } from "./engine/clock.js";
+import { beatOf, ladder } from "./engine/clock.js";
+import { bearing } from "./engine/map.js";
 import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
@@ -43,8 +44,9 @@ const playSheet = (p, s) => ({ id: p.id, name: p.name, role: p.role, skills: p.s
 // what she has learned, all written at camp. Never her secrets, history or romance arc: those stay at the campfire.
 export const standingOf = (env, id) => env.standing?.[id] ?? { mood: "steady", learned: [] };
 
-// A companion in an encounter (D79): how she talks, thinks and acts, what she can do, and her standing. The rest
-// of her profile (look, fantasy, backstory, secrets) is for the campfire.
+// A companion in an encounter (D79, D175): how she talks and thinks, what she holds to, what she can do, and her
+// standing. The rest of her profile (look, fantasy, how she pursues the player, backstory, secrets) is for the
+// campfire: in a room she is a friend at the table, and what isn't sent can't be performed.
 export function briefProfile(c, standing, s) {
   const { mood, why, learned } = standing;
   return {
@@ -55,7 +57,6 @@ export function briefProfile(c, standing, s) {
     voice: c.voice,
     beliefs: c.beliefs,
     rules: c.rules,
-    pursuit: c.pursuit,
     planning: { reaches_for: c.planning.reaches_for, hunch: c.planning.hunch },
     skills: c.skills,
     abilities: abilitiesFor(c.abilities, s, c.id),
@@ -244,19 +245,22 @@ function campaign(env, call, schema) {
   ];
 }
 
+// One line of what the party has with it (D178, D185): a follower with their fixed record first.
+export const carriedLine = (x) => `${x.kind}: ${x.name ? `${x.name} (${[x.pronouns, x.looks].filter(Boolean).join("; ")}). ` : ""}${x.what}`;
+
 // What the party has to spend and the relics it holds (D147), for the DM's calls: each relic is a fact.
 function kit(env) {
-  const { gold = 0, relics = [] } = env.state ?? {};
-  if (!gold && !relics.length) return null;
-  return block("The party's gold and relics", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`) });
+  const { gold = 0, relics = [], carried = [] } = env.state ?? {};
+  if (!gold && !relics.length && !carried.length) return null;
+  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map(carriedLine) } : {}) });
 }
 
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
 const sheets = (env) => env.party.map((p, i) => (i === 0 ? playSheet(p, env.state) : { ...playSheet(p, env.state), voice: p.voice, mood: standingOf(env, p.id).mood }));
 
 // A companion in the huddle or a private channel, in an encounter: her brief, not her full profile (D79), with the
-// special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The encounter and
-// what the party can see come as plain lines (D76); the opening reaches her through the DM's narration.
+// special cases she acts on (D114), from the party as resolved for ties (D8), and any form an ability put her in. The room
+// comes as the sheet the player reads (D174), opening included, so she knows nothing of it the player can't see.
 export function companionInput(env, c, self, others, huddle, schema) {
   const [me, ...rest] = resolveParty([self, ...others], env.world);
   const pair = rest.length ? pairEntry(env.pairs ?? pairs, me.id, rest[0].id) : null;
@@ -269,9 +273,8 @@ export function companionInput(env, c, self, others, huddle, schema) {
     block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
     form ? block("You, right now", { form }) : null,
     block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
-    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
-    c.now ? block("What the party can see right now", c.now) : null,
-    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
+    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
     pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block(privately ? "Just you and the player, through your ring (the other companion can't hear this)" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
@@ -279,6 +282,11 @@ export function companionInput(env, c, self, others, huddle, schema) {
     privately ? `The player is talking to you alone. It's your turn, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
   ]);
 }
+
+// The room reaches the companions as the sheet the player reads (D174), and the DM's latest narrations without
+// the opening, which the sheet already holds.
+const SHEET = "The room sheet";
+const told = (env, c) => (c.recent ?? []).filter((x) => x !== env.packet?.opening);
 
 // Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
 // companionInput gives them, and the table as both of them see it.
@@ -300,9 +308,8 @@ export function partyInput(env, c, companions, huddle, schema) {
     ...campaign(env, "party", schema),
     block("The companions you play", members.map(entry)),
     block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
-    block("What the party knows", encounterText(env.packet, env.state, { party: true, intent: false, sheets: false, secrets: false })),
-    c.now ? block("What the party can see right now", c.now) : null,
-    c.recent?.length ? block("What has happened, as the DM told it", c.recent) : null,
+    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
+    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
     pair ? block("The two of them", { dynamic: pair.dynamic }) : null,
     block("The table so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
@@ -500,10 +507,12 @@ function logLine(l) {
 // What's coming as one line per routine and event: the routine's beats are in the encounter text.
 export function aheadText(s, { ticks = 12, party = false } = {}) {
   const t = timelineFor(s, { ticks, party });
+  // On a ladder (D176) nothing is due by the clock: the encounter text says what gets worse and in what order.
+  if (ladder(s)) for (const x of t) delete x.events;
   const people = Object.keys(t[0]?.beats ?? {});
   const routine = people.map((id) => `${id}: ${t.map((x) => `${x.tick} ${x.beats[id].split(":")[0]}`).join(", ")}`);
   const events = t.filter((x) => x.events).map((x) => `${x.events.join(", ")} at tick ${x.tick}`);
-  const later = s.packet.clock.events.filter((e) => !s.fired.includes(e.id) && s.due[e.id] >= s.tick + ticks && (!party || e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id} at tick ${s.due[e.id]}`);
+  const later = ladder(s) ? [] : s.packet.clock.events.filter((e) => !s.fired.includes(e.id) && s.due[e.id] >= s.tick + ticks && (!party || e.known || s.known.revealed.includes(e.id))).map((e) => `${e.id} at tick ${s.due[e.id]}`);
   return [...routine, ...events, ...later].join("\n") || "Nothing on a schedule.";
 }
 
@@ -514,6 +523,74 @@ const GAP = {
   grate: "an iron grate with gaps about three inches across",
   drain: "a drain opening about three inches across",
 };
+
+const open = (c) => GAP[c.kind] ?? (c.fits ? `about ${SPAN[c.fits]}` : "");
+const wayBits = (c) => [c.kind, open(c), c.fits_unlocked ? `${SPAN[c.fits_unlocked]} once unlocked` : "", c.flags?.locked ? "starts locked" : "", c.key ? `key: ${c.key}` : "", c.see_through ? "see-through" : "", c.operated_from && c.operated_from !== "both" ? `worked from ${c.operated_from}${c.reachable_from_other_side ? " or the other side" : ""}` : "", c.ticks ? `+${c.ticks} ticks` : ""].filter(Boolean).join(", ");
+
+// ---- The room sheet (D174) ----
+
+// What the party knows of the room, as one structure: the opening as the DM gave it, the places and who's in them,
+// the ways between, the things, the people in sight or earshot, what anyone can tell by looking, what the party has
+// learned, and how things stand. The page shows it to the player (`RoomSheet` in app/main.js) and the companions'
+// calls get it as text (`sheetText`), so nobody at the table knows more of the room than the player can read.
+// Hidden things stay off it until found; the packet's fixed facts that aren't hidden are on it, for everyone.
+export function roomSheet(state, packet = state.packet) {
+  const s = state.packet ? state : { ...state, packet };
+  const { map, people, clock } = packet;
+  const st = stateFor(s, { party: true });
+  const { seen, heard } = partyPerceives(s);
+  const known = (x) => !x.hidden || s.known.revealed.includes(x.id);
+  // In a site (D180) the party knows only the places it has seen so far; a way into one it hasn't is named by the
+  // way itself, and where it leads is still to find.
+  const found = packet.site ? new Set(s.known.places ?? []) : null;
+  const here_ = (id) => !found || found.has(id);
+  const partyHas = (t) => s.party.some((p) => p.id === s.holder[t.id]);
+  const all = [...map.zones, ...map.things, ...people, ...s.party];
+  const label = (id) => all.find((x) => x.id === id)?.name ?? id;
+  const flagText = (f) => Object.entries(f).map(([k, v]) => (v === true ? k : v === false ? `not ${k}` : `${k} ${v}`)).join(", ");
+  const where = (id) => (st.held[id] ? `held by ${label(st.held[id])}` : st.positions[id] ? `in ${label(st.positions[id])}` : s.at[id] == null && !s.holder[id] ? "gone" : "out of sight");
+  const who = new Set([...people, ...s.party].map((p) => p.id));
+  const here = (zone) => Object.entries(st.positions).filter(([id, z]) => z === zone && who.has(id)).map(([id]) => label(id));
+  const routine = (p) => (p.schedule && (p.schedule.known || s.known.revealed.includes(p.schedule.id)) ? p.schedule.beats.map((b) => `${b.label}, in ${label(b.position)}`).join("; ") : null);
+  const perceived = people.filter((p) => s.at[p.id] != null && (seen.has(s.at[p.id]) || heard.has(s.at[p.id])));
+  return {
+    name: packet.name,
+    opening: packet.opening ?? null,
+    tick: st.tick,
+    places: map.zones.filter((z) => known(z) && here_(z.id)).map((z) => ({ id: z.id, name: z.name, what: z.purpose, ...(z.light ? { light: z.light } : {}), here: here(z.id) })),
+    ways: map.connections.filter((c) => known(c) && c.between.some(here_)).map((c) => ({ id: c.id, between: c.between.map((z) => (here_(z) ? label(z) : `somewhere not yet seen (by ${c.name ?? c.kind})`)), how: [wayBits(c), st.flags[c.id] ? `now ${flagText(st.flags[c.id])}` : ""].filter(Boolean).join("; ") })),
+    things: map.things.filter((t) => known(t) && (partyHas(t) || !found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: `${t.properties}${t.notes?.length ? ` ${t.notes.join(" ")}` : ""}` })),
+    people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
+    facts: map.facts.filter((f) => known(f) && (!f.at || here_(f.at))).map((f) => f.text),
+    carried: (s.carried ?? []).map((x) => (x.name ? `${x.name}${x.pronouns ? ` (${x.pronouns})` : ""}: ${x.what}` : x.what)),
+    learned: st.facts.map((f) => f.text),
+    now: [
+      ...s.party.filter((p) => st.flags[p.id]).map((p) => `${p.name}: ${flagText(st.flags[p.id])}`),
+      ...st.conditions.map((c) => `${label(c.who)} is hurt: ${c.text}`),
+      ...st.threats.map((x) => `About to happen: ${label(x.who)}: ${x.does}`),
+    ],
+    coming: clock.events.filter((e) => !s.fired.includes(e.id) && (e.known || s.known.revealed.includes(e.id))).map((e) => (ladder(s)?.includes(e) ? `${e.id.replaceAll("_", " ")}: gets closer each time a roll fails or the party waits` : `${e.id.replaceAll("_", " ")}: at tick ${s.due[e.id] ?? "when its condition holds"}`)),
+  };
+}
+
+// The sheet as plain lines, for the companions' calls. Ids ride along so a stance's condition can name them, and
+// things alike (four cell doors, three buckets) share one line.
+const grouped = (items, key) => [...Map.groupBy(items, key).values()];
+export function sheetText(sheet) {
+  const list = (title, items) => (items.length ? `${title}:\n${items.map((x) => `- ${x}`).join("\n")}` : null);
+  return [
+    sheet.opening ? `How the DM first described it:\n${sheet.opening}` : null,
+    list("Places", sheet.places.map((p) => `${p.name} (${p.id}${p.light ? `; ${p.light}` : ""}): ${p.what}${p.here.length ? ` Here now: ${p.here.join(", ")}.` : ""}`)),
+    list("Ways between them", grouped(sheet.ways, (w) => w.how).map((g) => `${g.map((w) => w.between.join(" – ")).join("; ")}: ${g[0].how}`)),
+    list("Things", grouped(sheet.things, (x) => `${x.name}|${x.what}`).map((g) => (g.length > 1 ? `${g[0].name}: ${g[0].what} ${g.length} of them: ${g.map((x) => `${x.id}, ${x.where}`).join("; ")}` : `${g[0].name} (${g[0].id}; ${g[0].where}): ${g[0].what}`))),
+    list("People", sheet.people.map((p) => `${p.name} (${p.id}), ${p.where}${p.routine ? `. Routine, one beat a tick: ${p.routine}${p.beat ? `; now on ${p.beat}` : ""}` : ""}`)),
+    list("With the party, from earlier rooms", sheet.carried),
+    list("What anyone can tell by looking", sheet.facts),
+    list("What the party has learned", sheet.learned),
+    list("Right now", [`Tick ${sheet.tick}.`, ...sheet.now]),
+    list("Coming, as far as the party knows", sheet.coming),
+  ].filter(Boolean).join("\n\n");
+}
 
 // The encounter as the DM reads it (D76): plain lines instead of the packet's JSON, about half the size. No
 // size categories (openings in rough real dimensions), no coordinates (D9), and no engine rules: the
@@ -531,13 +608,13 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     const [x1, y1] = [Math.max(...z.rects.map(([x, , w]) => x + w)), Math.max(...z.rects.map(([, y, , h]) => y + h))];
     return `${(x1 - x0) * 5}×${(y1 - y0) * 5} ft`;
   };
-  const open = (c) => GAP[c.kind] ?? (c.fits ? `about ${SPAN[c.fits]}` : "");
-  const zone = (z) => `- ${z.id} (${z.name}; ${feet(z)}, ${z.light}${z.level ? `, level ${z.level}` : ""}): ${z.purpose}${z.sees?.length ? ` Sees into ${z.sees.join(", ")}.` : ""}`;
-  const wayBits = (c) => [c.kind, open(c), c.fits_unlocked ? `${SPAN[c.fits_unlocked]} once unlocked` : "", c.flags?.locked ? "starts locked" : "", c.key ? `key: ${c.key}` : "", c.see_through ? "see-through" : "", c.operated_from && c.operated_from !== "both" ? `worked from ${c.operated_from}${c.reachable_from_other_side ? " or the other side" : ""}` : "", c.ticks ? `+${c.ticks} ticks` : ""].filter(Boolean).join(", ");
+  // Where each way from a place leads, and which way it lies on the map (D186), so the DM's directions match it.
+  const lies = (z) => map.connections.filter((c) => c.between.includes(z.id) && !hidden(c)).map((c) => { const o = map.zones.find((x) => x.id === c.between.find((y) => y !== z.id)); if (!o || hidden(o)) return null; const lv = (o.level ?? 0) - (z.level ?? 0); const b = lv ? (lv > 0 ? "up" : "down") : bearing(z, o); return `${o.id}${b ? ` (${b})` : ""}`; }).filter(Boolean);
+  const zone = (z) => `- ${z.id} (${z.name}; ${feet(z)}, ${z.light}${z.level ? `, level ${z.level}` : ""}): ${z.purpose}${z.sees?.length ? ` Sees into ${z.sees.join(", ")}.` : ""}${lies(z).length ? ` Ways to: ${lies(z).join(", ")}.` : ""}`;
   const way = (c) => `- ${c.id}${c.name ? ` (${c.name})` : ""}: ${c.between.join(" – ")}; ${wayBits(c)}`;
   // Where things are now, from the ledger, so the encounter never contradicts it.
   const where = (t) => (s.holder[t.id] ? `held by ${s.holder[t.id]}` : s.at[t.id] ? `in ${s.at[t.id]}` : "gone");
-  const thing = (t) => `- ${t.id} (${t.name}, ${where(t)}): ${t.properties}`;
+  const thing = (t) => `- ${t.id} (${t.name}, ${where(t)}): ${t.properties}${t.notes?.length ? ` The party brought it with them and knows this of it: ${t.notes.join(" ")}` : t.carried ? " The party brought it with them." : ""}`;
   // Things alike (four cell doors, three buckets) share one line: the description once, then each one's place.
   const ways = (list) => [...Map.groupBy(list, wayBits).values()].map((g) => (g.length > 1 ? `- ${g.map((c) => `${c.id} (${c.between.join(" – ")})`).join("; ")}: ${wayBits(g[0])}` : way(g[0])));
   const things = (list) => [...Map.groupBy(list, (t) => `${t.name}|${t.properties}`).values()].map((g) => (g.length > 1 ? `- ${g.map((t) => `${t.id} (${where(t)})`).join("; ")}: ${g[0].name}. ${g[0].properties}` : thing(g[0])));
@@ -547,7 +624,11 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     if (!sheets) return `- ${p.id} (${p.name})${routine}`;
     return `- ${p.id} (${p.name}${p.tier ? `, ${p.tier}` : ""}): wants ${p.wants} Fears ${p.fears} Knows ${p.knows} Will never ${p.will_never} Temper: ${p.temper} Under pressure: ${p.under_pressure}${p.breaks ? ` Stops fighting: ${p.breaks}` : ""}${routine}`;
   };
-  const events = clock.events.filter((e) => !party || e.known || knows(e.id)).map((e) => `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}`);
+  const rungs = ladder({ packet });
+  const what = (e) => (e.do ?? []).flatMap((d) => d.then ?? []).map((o) => o.add_canon?.text).find(Boolean) ?? e.id;
+  const events = clock.events
+    .filter((e) => !party || e.known || knows(e.id))
+    .map((e) => (rungs?.includes(e) ? `- ${e.id}: ${s.fired.includes(e.id) ? "has happened" : `step ${rungs.indexOf(e) + 1}`}. ${what(e)}` : `- ${e.id}: at tick ${s.due[e.id] ?? "when its condition holds"}`));
   const goal = (o) => o && `${o.label}${o.id ? ` (${o.id})` : ""}`;
   const secret = [...map.zones.filter(hidden).map(zone), ...map.connections.filter(hidden).map(way), ...map.things.filter(hidden).map(thing), ...map.facts.filter(hidden).map((f) => `- ${f.id}: ${f.text}`)];
   const parts = [
@@ -558,7 +639,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     `Fixed facts:\n${map.facts.filter((f) => !hidden(f)).map((f) => `- ${f.text}`).join("\n")}`,
     `People:\n${people.map(person).join("\n")}`,
     sheets && packet.notes?.length ? `How they react:\n${packet.notes.map((n) => `- ${n}`).join("\n")}` : null,
-    events.length ? `Coming:\n${events.join("\n")}` : null,
+    events.length ? `${rungs ? "Getting worse, in this order, one step each time a roll fails or the party waits, and never because time passed" : "Coming"}:\n${events.join("\n")}` : null,
     secret.length && secrets ? `Hidden (true, but never mention or hint at them until the party finds them):\n${secret.join("\n")}` : null,
   ];
   return parts.filter(Boolean).join("\n\n");
@@ -658,6 +739,8 @@ export function verdictInput(env, c, schema) {
     exits.length ? block("The room's ways on", exits) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
+    c.calm ? "This was a calm room: it isn't rated (give any rating; it's set aside). What matters here is how each companion felt about what the party did, and what it has with it." : null,
+    env.state?.carried?.length ? block("What the party already had with it, coming in (a follower's name, pronouns and looks never change)", env.state.carried.map(carriedLine)) : null,
     "Judge how the room went.",
   ]);
 }
@@ -705,6 +788,7 @@ const seedText = (seed, world) => ({
     kind: seed.kind,
     tone: seed.tone,
     busy_with: seed.busy,
+    ...(seed.danger ? { how_the_danger_stands: seed.danger } : {}),
     ...(seed.shape ? { shape: seed.shape } : {}),
     ...(seed.centrepiece ? { centrepiece: seed.centrepiece } : {}),
     ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),
@@ -776,6 +860,11 @@ function designWorld(c) {
 // The sketch call (D117, D119, D161, D164): must honour the hand-off; the region and the owning faction as background;
 // the seed with its slices; the party; the premises of the act's earlier rooms (D162). No example rooms: they become
 // anchors (D161). On the bench, the designer's brief (D154).
+// The read call (D177): only what the player will be told.
+export function readInput(env, c, schema) {
+  return compose([block("Your job", env.prompts.read), block("Output format", shapeText(schema)), block("What you've been told", c.told), "Say what you make of it."]);
+}
+
 export function sketchInput(env, c, schema) {
   const h = c.handoff;
   return compose([
@@ -788,6 +877,8 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
+    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map(carriedLine), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
+    c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);
 }

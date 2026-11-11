@@ -90,7 +90,8 @@ test("placed events run: Uzga arrives at 32 and takes the companion in the middl
 test("rulings name real things, and anything can be a fact", () => {
   const s = load(start);
   assert.deepEqual(checkChanges(s, { facts: [{ id: "snag_drunk", text: "Snag is drunk.", about: ["snag"] }], flags: [{ on: "snag", key: "drunk", value: true }] }), []);
-  assert.ok(checkChanges(s, { retire: ["nothing"] }).length);
+  // Retiring a fact that isn't there changes nothing, and isn't an error (D185).
+  assert.deepEqual(checkChanges(s, { retire: ["nothing"] }), []);
   assert.ok(checkChanges(s, { routine: [{ npc: "brannoc", follows: false }] }).length);
 });
 
