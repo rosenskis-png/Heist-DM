@@ -197,7 +197,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
 - **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
 - **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
-- **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: current
+- **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
+- **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 
 ---
 
@@ -1170,3 +1171,9 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **Two ways on.** An encounter before a campfire, the climax or the sanctuary has two exits to it, from different places, instead of one.
 - **The header wraps** on a phone, and a room whose trouble moves on failure shows the next thing to go wrong with no tick count.
 **Why:** The designer's notes: a header too wide for the phone, directions that didn't match the map, a ring drawn as a line, rooms judged for being quiet, and too many encounters with one way out.
+
+### D187. Calm rooms still get the companions' reactions; the header scrolls away on a phone
+**Decided:** The designer's call (2026-11-11). Changes D186.
+- **Calm rooms.** The verdict call runs again after a quiet room, oddity, merchant or campfire, told the room isn't rated. Its reactions, people and what the party has with it are kept; its rating is set aside, so the room moves no regard and no strain, and the page shows it as not rated.
+- **The header** is no longer pinned on a phone: it scrolls away with the page, so it never covers the story. On a wide screen it stays pinned beside the side column.
+**Why:** The designer wanted the companions to keep reacting in calm rooms, and the pinned header took a third of a phone's screen.

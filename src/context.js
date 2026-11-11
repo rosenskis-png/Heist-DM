@@ -739,6 +739,7 @@ export function verdictInput(env, c, schema) {
     exits.length ? block("The room's ways on", exits) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
+    c.calm ? "This was a calm room: it isn't rated (give any rating; it's set aside). What matters here is how each companion felt about what the party did, and what it has with it." : null,
     env.state?.carried?.length ? block("What the party already had with it, coming in (a follower's name, pronouns and looks never change)", env.state.carried.map(carriedLine)) : null,
     "Judge how the room went.",
   ]);

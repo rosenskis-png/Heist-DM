@@ -62,11 +62,11 @@ export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
   const handoff = session.ended;
   const members = session.state.party.slice(1);
-  // A calm room isn't judged (D186): no call, no rating, nothing moved; what the party has with it goes on as it was.
+  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, who's worth meeting
+  // again and what the party has with it, but its rating is set aside, so it moves no regard and no strain.
   const calm = session.state.packet.mode === "room" && camp.way.here !== "sanctuary";
-  const verdict = calm
-    ? { rating: null, why: null, reactions: [], people: [], carried: camp.carried ?? [] }
-    : await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state) });
+  const judged = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state), calm });
+  const verdict = calm ? { ...judged, rating: null, why: null } : judged;
   session.past = [...session.past, summaryOf(session, verdict)].slice(-PAST);
   if (camp.way.here === "sanctuary") {
     const next = structuredClone(camp);

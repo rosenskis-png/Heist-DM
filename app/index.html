@@ -74,6 +74,8 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 /* The game */
 .game { min-height: 100%; display: grid; grid-template-rows: auto 1fr; }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
+/* On a phone the header scrolls away with the page, so it never covers the story (D187). */
+@media (max-width: 919px) { .top { position: static; } }
 .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-block: 8px; max-width: 1240px; margin: 0 auto; }
 .where { flex: 1 1 auto; min-width: 0; font-family: var(--display); font-size: 19px; font-weight: 500; overflow-wrap: anywhere; }
 .topbar .iconbtn { margin-left: auto; }

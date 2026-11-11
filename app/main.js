@@ -708,7 +708,7 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < allowed ? [...k, id] : k));
   return html`<section className="ending">
     <h2>${label}</h2>
-    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: nothing to judge.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
+    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
     ${b?.exit?.stub ? html`<p className="muted">${b.forced ? "You're carried on. " : ""}${b.exit.stub}</p>` : null}
     ${step === "relics" && b.last
       ? html`<p>You're out. That's the end of the adventure, for now.</p><button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>`

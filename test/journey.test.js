@@ -66,7 +66,7 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
     leaveBy(session, exits[0]?.id ?? null);
     const calm = session.state.packet.mode === "room" && session.camp.way.here !== "sanctuary";
     const b = await judgeRoom(session, io, prompts);
-    // A calm room isn't judged (D186).
+    // A calm room isn't rated, though its verdict still runs for the companions (D187).
     assert.equal(b.verdict.rating, calm ? null : 7);
     if (b.actOver) {
       assert.ok(!b.last);
