@@ -194,6 +194,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
+- **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
 
 ---
 
@@ -1125,3 +1126,13 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **Tried on:** three fixture rooms in `fixtures/maps/` (a round belfry on three levels, a sea cave, a chapel with locked doors and bars), the Cells, the goblin camp and a generated room laid out by code; `test/map.test.js` holds the outline and the fixtures.
 **Why:** Every room was a rectangle in two greys, in a fixed view too small to read.
 **Rules out:** Shapes that disagree with the squares: the outline is only ever a way of drawing them. Walls at angles, which the grid doesn't hold.
+
+### D183. The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square
+**Decided:** The designer's call (2026-11-11). Changes D153's layout and D9's fallback.
+- **Placement.** Each zone goes against the zone it's reached from, in the spot that also puts it against the most other placed zones it joins. A zone nothing reaches still gets a footprint.
+- **Arms.** Two zones that should join and don't are joined by growing a narrow arm, a square at a time through free squares, from the smaller of the two: on one level until it stands beside the other; between levels, from either or both until one square stands over the other. The arm is part of the zone's footprint, so the map stays true.
+- **Again if need be.** If a zone is walled in by its neighbours, the room is laid out again with zones set further round each other, up to 24 times, and last of all with every zone set apart in a row and joined by arms.
+- **Things** get a square of their own in their zone, toward the walls, so a generated room's map shows them. A zone the party can leave by is marked "a way on". The encode call is asked for levels where a place is reached by going up or down.
+- **Held by** a test that lays out 500 made-up rooms (loops, levels, zones nothing reaches) and checks every one is drawn and sound; 20,000 were run once by hand with none undrawn.
+**Why:** The old layout placed zones as a tree and gave up on the whole map when a loop wouldn't close or two levels didn't overlap, which is how the shakedown's rooms came to have no map, and it never placed a thing.
+**Rules out:** A map that disagrees with what joins what. The sketch as anything but the last resort: it stays for a room that still can't be drawn and for saves made before this.

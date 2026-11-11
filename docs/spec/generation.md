@@ -74,3 +74,6 @@ The campaign's `carried` list (items, followers, threads, from the last verdict)
 
 ## What a seed fixes about the danger (D179)
 For an encounter or a climax the seed fixes how the main danger stands as the party arrives, from `DANGERS`, never twice in an act. The sketch builds a danger too big to fight head-on in that state, with a few loose things around it; the encode call puts how it behaves in plain view as a fact. A room draws one motif.
+
+## The layout (D183)
+`layout` (`src/engine/layout.js`) sets each zone against the zone it's reached from, where it also meets the most other zones it joins; joins any two that still don't meet by growing an arm from the smaller; lays the room out again, differently, if a zone is walled in; and gives each thing a square. A room ships without a map only if all of that fails.

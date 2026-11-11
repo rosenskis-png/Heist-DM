@@ -51,3 +51,28 @@ test("a generated room, laid out by code, draws too, with the shapes its zones w
   const m = mapView(start(packet));
   assert.equal(m.levels.flatMap((l) => l.zones).find((z) => z.id === encoded.map.zones[0].id).shape, "cave");
 });
+
+test("the layout draws every room it's given: loops, rooms on other levels, and rooms nothing reaches (D183)", async () => {
+  const { geometryProblems } = await import("../src/engine/map.js");
+  // A steady source of made-up rooms: 2 to 9 zones of any size, a tree of ways plus extra ones that close loops,
+  // some zones on other levels, sometimes one that nothing joins, and a few things in each.
+  let seed = 7;
+  const rnd = (n) => ((seed = (Math.imul(seed, 1103515245) + 12345) >>> 0), (seed >>> 8) % n);
+  let arms = 0;
+  for (let run = 0; run < 500; run++) {
+    const n = 2 + rnd(8);
+    const zones = Array.from({ length: n }, (_, i) => ({ id: `z${i}`, name: `Z${i}`, purpose: "x", light: "dim", size: [1 + rnd(8), 1 + rnd(8)], ...(rnd(4) === 0 ? { level: rnd(3) - 1 } : {}) }));
+    const connections = [];
+    const link = (a, b) => a !== b && !connections.some((c) => c.between.includes(`z${a}`) && c.between.includes(`z${b}`)) && connections.push({ id: `c${connections.length}`, kind: "opening", between: [`z${a}`, `z${b}`], fits: "large", operated_from: "both" });
+    const lonely = rnd(6) === 0 ? n - 1 : -1;
+    for (let i = 1; i < n; i++) if (i !== lonely) link(i, rnd(i));
+    for (let k = rnd(4); k > 0; k--) link(rnd(n), rnd(n));
+    const things = Array.from({ length: rnd(7) }, (_, i) => ({ id: `t${i}`, name: `T${i}`, properties: "x", location: { zone: `z${rnd(n)}` } }));
+    const { packet, mapped } = layout({ map: { zones, connections, things, facts: [] }, start: { positions: { player: "z0" } } });
+    assert.ok(mapped, `room ${run} got no map`);
+    assert.deepEqual(geometryProblems(packet), [], `room ${run}`);
+    assert.ok(packet.map.things.every((t) => Array.isArray(t.location.at)), `room ${run}: a thing with no square`);
+    arms += packet.map.zones.filter((z) => z.rects.length > 1).length;
+  }
+  assert.ok(arms > 0, "some of them needed an arm grown to close a loop");
+});

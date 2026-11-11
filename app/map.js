@@ -226,7 +226,7 @@ function Level({ view, level, under, colors, picked, onPick, k }) {
       const [x, y, w] = largest(z.rects);
       // A place too small to hold its name is named when it's tapped.
       if (w * S < z.name.length * 5.4 * k) return null;
-      return html`<text key=${"l" + z.id} className="zone-label halo" x=${(x + w / 2) * S} y=${y * S + 12 * k} textAnchor="middle" pointerEvents="none" style=${{ fontSize: `${9.5 * k}px` }}>${z.name}</text>`;
+      return html`<text key=${"l" + z.id} className="zone-label halo" x=${(x + w / 2) * S} y=${y * S + 12 * k} textAnchor="middle" pointerEvents="none" style=${{ fontSize: `${9.5 * k}px` }}>${z.name}${z.exit ? html`<tspan x=${(x + w / 2) * S} dy=${10.5 * k} style=${{ fontSize: `${7.5 * k}px` }} fill="var(--gold)">a way on</tspan>` : null}</text>`;
     })}
     ${level.things.map((t, i) => {
       const [cx, cy] = [(t.at[0] + 0.5) * S, (t.at[1] + 0.5) * S];

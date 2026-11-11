@@ -158,7 +158,9 @@ export function mapView(s) {
         zones: zs.map((z) => ({ id: z.id, name: z.name, rects: z.rects, loops: outline(z.rects), shape: z.shape ?? "built",
           // Where a way meets this place's wall, the line is drawn true, so the way sits on it.
           fixed: cs.filter((c) => c.wall && c.between.includes(z.id)).flatMap((c) => { const [[x1, y1], [x2, y2]] = c.wall; const out = []; for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) out.push(`${x},${y}`); return out; }),
-          light: z.light ?? "dim", ground: z.ground ?? "floor", seen: seen.has(z.id) || s.party.some((p) => zoneOf(s, p.id) === z.id) })),
+          light: z.light ?? "dim", ground: z.ground ?? "floor",
+          // A place the party can leave by (D183).
+          exit: (s.packet.intent.exits ?? []).some((e) => e.zone === z.id), seen: seen.has(z.id) || s.party.some((p) => zoneOf(s, p.id) === z.id) })),
         walls,
         connections: cs.map((c) => (c.wall ? c : { ...c, dir: Math.sign(c.levels[c.between.findIndex((z) => !here.has(z))] - level), leads: c.to[c.between.find((z) => here.has(z))] })),
         tokens: tokens.filter((t) => here.has(t.zone)),
