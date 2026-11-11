@@ -61,7 +61,8 @@ export const CAPTURED = { id: "captured", label: "The whole party is down: captu
 // The objective, alternates and fail-forward ending, checked after every change and tick, and the whole party
 // down, which ends any encounter.
 export function objectives(s) {
-  if (s.ended) return;
+  // While a played-out plan is being recorded, the room can't end mid-plan: it's checked once the plan is down (D185).
+  if (s.ended || s.holdEnd) return;
   if (partyIds(s).every((id) => s.flags[id]?.down)) {
     s.ended = { outcome: CAPTURED.id, tick: s.tick };
     log(s, { ended: CAPTURED.id });

@@ -47,7 +47,19 @@ export function seedRoom(camp, world) {
 export async function designRoom(io, env, c) {
   const stage = (name, value) => (io.onStage?.(name, value), value);
   const sketch = c.sketch ?? stage("sketch", await sketchCall(io, env, c));
-  const encoded = await encodeCall(io, env, { ...c, sketch });
+  // A good design isn't thrown away because encoding it slipped (D185): encoding gets a second, fresh go with the
+  // same sketch, and if that fails too the error carries the sketch, so trying again starts from it.
+  let encoded;
+  try {
+    encoded = await encodeCall(io, env, { ...c, sketch });
+  } catch (e) {
+    try {
+      encoded = await encodeCall(io, env, { ...c, sketch });
+    } catch (e2) {
+      e2.sketch = sketch;
+      throw e2;
+    }
+  }
   const edges = edgesFor(c.world, c.seed);
   const withEdges = edges.length ? { ...encoded, map: { ...encoded.map, facts: [...encoded.map.facts, ...edges] } } : encoded;
   stage("encoded", withEdges);
@@ -76,9 +88,17 @@ function toldOf(packet, party) {
 // sheets as they are in the world; `handoff` the last room's, with `stub` the line its exit carried; `log` the last
 // rooms' log lines. `env` has the prompts and `examples.encoded`. Returns the packet, whether it has a map, the seed,
 // and the campaign with its random positions and used motifs moved on.
-export async function generateRoom(io, env, { camp, world, party, handoff = null, log = [] }) {
-  const { seed, camp: next } = seedRoom(camp, world);
-  const { packet, mapped, sketch } = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [] });
+export async function generateRoom(io, env, { camp, world, party, handoff = null, log = [], resume = null }) {
+  // Trying again after a failure keeps the seed and the sketch already written (D185).
+  const { seed, camp: next } = resume?.seed ? { seed: resume.seed, camp: resume.camp } : seedRoom(camp, world);
+  let designed;
+  try {
+    designed = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [], ...(resume?.sketch ? { sketch: resume.sketch } : {}) });
+  } catch (e) {
+    e.resume = { seed, camp: next, sketch: e.sketch ?? null };
+    throw e;
+  }
+  const { packet, mapped, sketch } = designed;
   // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162).
   return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`] } };
 }

@@ -68,4 +68,5 @@ An invariant or worked example can carry an act gate: the first act it applies i
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, answer questions on the cheap tier from the slice, voice both companions in one call, and call only the addressed companion on a private channel.
 - **Input limit:** 256 KiB of text per call. The engine measures each assembled prompt and fails loudly if it goes over.
 - **Tiers are a player setting** (D48). The table gives the middle position, Balanced; Faster moves every call one tier down and Smarter one tier up (D71). Code: `src/ask.js`.
+- **Tidying** (D185): before an output is checked, fields its schema doesn't have and stray nulls are dropped, and each call may repair its own form (a verdict reaction's strength, a card's step order). Meaning is never repaired in code.
 - **Retries:** one, with the validation errors listed (D13). Never loop on `rate_limited` or `invalid_json`. Each call has one module in `src/calls/`.

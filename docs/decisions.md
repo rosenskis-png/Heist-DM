@@ -196,6 +196,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
 - **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
+- **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
 
 ---
 
@@ -1148,3 +1149,13 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 **Why:** In the shakedown a stolen hand-bell that stilled the dead was gone at the next door. Relics and gold had a path and nothing else did, and the verdict's list could only keep a line of prose about a thing, not the thing.
 **Rules out:** Weights and counts. Items kept as prose the DM has to remember. A reward counted twice by being carried on as a thing as well.
 **Not yet:** a place to give a waiting outfit (the campfire), and anything to buy with a full pack but more gold.
+
+### D185. Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record
+**Decided:** The designer's call (2026-11-11), from the post-mortem of the Grub Pits act.
+- **A plan finishes before its room ends.** Every step the DM played out is recorded, then the room's ending is checked. Before, reaching the way out at step 4 dropped step 5, and Ruby's journal page was lost while the telling had her take it.
+- **Slips are tidied, not retried.** Every call's output has fields its schema doesn't have, and stray nulls, dropped before it's checked (`tidy` in `src/validate.js`). A verdict reaction with no strength is a small one. A card's steps are put in order from now (`inOrder`). What a fact is about is only a pointer: ids that name nothing are dropped. Retiring a fact that isn't there is nothing. `items` naming a thing already here is picking it up. Hidden-text checks match whole words, and a hidden fact's id (a label like "breath") never counts. A way from a place to itself is dropped. A failed encode gets a second, fresh go with the same sketch, and "Try again" starts from the same seed and sketch rather than designing the room again. 14 of 66 calls in the shakedown were retries of this kind.
+- **A follower keeps their record.** The verdict gives each follower a name, pronouns and looks; once set, later rooms keep them whatever a verdict writes, and every call that reads what the party has with it reads them. The sketch is told that what the party has with it is true as written.
+- **Calm rooms are judged on what happened.** Passing through untouched is an ordinary outcome, an optional thing left undone costs nothing, and a companion reacts to what the party did, never to what it didn't.
+- **Small things:** a place called "The ledge" is "the ledge", never "the the ledge"; a blank name is Wren, never the class; nobody says a skill's number aloud; pet names stay at the campfire in the DM's telling too; leaving by a way on takes the whole party there; a place with no shape from the encoder is drawn from what it is (caves and tunnels as rock, towers and wells round); Fern can change back from an animal.
+**Why:** The play was more fun; the faults were the game's records drifting from its own story and calls wasted on retries.
+**Rules out:** Repairing a call's meaning in code: only its form is tidied, and anything that changes what happened still goes back to the model.

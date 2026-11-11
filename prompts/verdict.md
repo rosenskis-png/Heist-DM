@@ -21,9 +21,12 @@ Name up to two people from the room the party might plausibly run into later: so
 
 Return only JSON that matches the schema you're given.
 
+## Calm rooms, and what didn't happen
+Judge only what happened. A calm room (a quiet place, an oddity, a campfire) has nothing the party must do: passing through it untouched is a fine, ordinary outcome, never a poor one, and leaving something optional undone costs nothing. A companion's reaction answers something the party did or said, never something they didn't do or a room that was too quiet for her taste.
+
 ## What they have with them
 `carried` is what the party has with it as it walks on, the whole list: what it already had and still has, and what this room added. At most six, one plain line each, and only what a later room could turn on.
 - **item:** only a lack that matters ("unarmed: their gear was left behind"). The things they hold are kept by the game itself, with gold and relics, and never go here.
-- **follower:** people or creatures now travelling with them, and what state they're in.
+- **follower:** people or creatures now travelling with them, and what state they're in. Give each a `name`, their `pronouns`, and `looks`: what anyone would know them by, in a few words. Copy these exactly from what they had coming in; only `what` changes.
 - **thread:** something left open that could come back: a promise made, a bargain broken, someone who now owes them or wants them found.
 Take only from the record. Drop what is used up, delivered or settled.

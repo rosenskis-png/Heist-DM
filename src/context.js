@@ -244,11 +244,14 @@ function campaign(env, call, schema) {
   ];
 }
 
+// One line of what the party has with it (D178, D185): a follower with their fixed record first.
+export const carriedLine = (x) => `${x.kind}: ${x.name ? `${x.name} (${[x.pronouns, x.looks].filter(Boolean).join("; ")}). ` : ""}${x.what}`;
+
 // What the party has to spend and the relics it holds (D147), for the DM's calls: each relic is a fact.
 function kit(env) {
   const { gold = 0, relics = [], carried = [] } = env.state ?? {};
   if (!gold && !relics.length && !carried.length) return null;
-  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map((x) => `${x.kind}: ${x.what}`) } : {}) });
+  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map(carriedLine) } : {}) });
 }
 
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
@@ -558,7 +561,7 @@ export function roomSheet(state, packet = state.packet) {
     things: map.things.filter((t) => known(t) && (partyHas(t) || !found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: `${t.properties}${t.notes?.length ? ` ${t.notes.join(" ")}` : ""}` })),
     people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
     facts: map.facts.filter((f) => known(f) && (!f.at || here_(f.at))).map((f) => f.text),
-    carried: (s.carried ?? []).map((x) => x.what),
+    carried: (s.carried ?? []).map((x) => (x.name ? `${x.name}${x.pronouns ? ` (${x.pronouns})` : ""}: ${x.what}` : x.what)),
     learned: st.facts.map((f) => f.text),
     now: [
       ...s.party.filter((p) => st.flags[p.id]).map((p) => `${p.name}: ${flagText(st.flags[p.id])}`),
@@ -733,7 +736,7 @@ export function verdictInput(env, c, schema) {
     exits.length ? block("The room's ways on", exits) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
-    env.state?.carried?.length ? block("What the party already had with it, coming in", env.state.carried) : null,
+    env.state?.carried?.length ? block("What the party already had with it, coming in (a follower's name, pronouns and looks never change)", env.state.carried.map(carriedLine)) : null,
     "Judge how the room went.",
   ]);
 }
@@ -870,7 +873,7 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map((x) => `${x.kind}: ${x.what}`), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
+    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map(carriedLine), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
     c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);

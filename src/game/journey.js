@@ -46,6 +46,9 @@ export async function startAdventure(io, env, { player, companions, world, seed,
 // with the exit it was left by. At the sanctuary, which has no way on, this is resting and ending the act.
 export function leaveBy(session, exitId = null) {
   if (session.ended) return;
+  // Leaving by a way on, everyone goes: the party ends the room together where it leaves from (D185).
+  const exit = exitId ? (session.state.packet.intent.exits ?? []).find((e) => e.id === exitId) : null;
+  if (exit) act(session, { type: "ops", source: "leave", ops: session.state.party.map((p) => ({ move: { entity: p.id, to: exit.zone } })) });
   act(session, { type: "end", outcome: exitId ? "left" : session.state.packet.mode === "room" ? "rested" : "left" });
   session.ended = { ...session.state.handoff, way_on: exitId ?? session.state.handoff.way_on };
 }
@@ -91,9 +94,17 @@ export async function nextRoom(session, io, env, roster = authored) {
   if (!camp.plan) camp = session.camp = await beginAct(io, env, { camp, world: session.world, party });
   const b = session.between ?? {};
   const handoff = b.exit?.stub || b.forced ? { stub: b.exit?.stub ?? "the party was carried on", conditions: camp.carry.conditions } : null;
-  const room = await generateRoom(io, env, { camp, world: session.world, party, handoff, log: (camp.log ?? []).slice(-3) });
+  let room;
+  try {
+    room = await generateRoom(io, env, { camp, world: session.world, party, handoff, log: (camp.log ?? []).slice(-3), resume: b.resume ?? null });
+  } catch (e) {
+    // Kept for "Try again", which starts from the same seed and sketch (D185).
+    if (e.resume) session.between = { ...b, resume: e.resume };
+    throw e;
+  }
   session.camp = room.camp;
-  session.between = { ...b, packet: room.packet };
+  const { resume, ...rest } = b;
+  session.between = { ...rest, packet: room.packet };
   return room.packet;
 }
 

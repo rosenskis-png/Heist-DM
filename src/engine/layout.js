@@ -140,8 +140,16 @@ export function layout(input) {
   return arrange(input, -1);
 }
 
+// How a place is drawn when the encoder didn't say (D185): from what it is.
+const CAVE = /\b(cave|cavern|grotto|tunnel|crack|crevice|hollow|burrow|den|pit|shaft|chasm|ledge|shelf|slope|scree|pool|spring|lake|shore|warren|drift|mine|rock|terrace)s?\b/i;
+const ROUND = /(tower|turret|stairwell|rotunda|apse|dome|silo|cistern)s?\b|\b(well|round|ring|circle|arena)s?\b/i;
+export const shapeFor = (z) => z.shape ?? (ROUND.test(`${z.name} ${z.purpose ?? ""}`) ? "round" : CAVE.test(`${z.name} ${z.purpose ?? ""}`) ? "cave" : "built");
+
 function arrange(input, attempt) {
   const packet = structuredClone(input);
+  // A way from a place to itself joins nothing: it's dropped (D185).
+  packet.map.connections = packet.map.connections.filter((c) => c.between[0] !== c.between[1]);
+  for (const z of packet.map.zones) z.shape = shapeFor(z);
   const { zones, connections } = packet.map;
   const sizeOf = (z) => (z.size ?? [3, 3]).map((n) => Math.max(1, Math.min(20, Math.round(n))));
   const levelOf = (z) => z.level ?? 0;

@@ -1,5 +1,6 @@
 // Loading a packet: the consistency checks (docs/spec/packet.md, Validation) and the starting state.
 import { validate } from "../validate.js";
+import { hiddenWords, names } from "./world.js";
 import { packetSchema } from "../../schemas/index.js";
 import { geometryProblems } from "./map.js";
 import { beginTick } from "./clock.js";
@@ -44,9 +45,9 @@ export function checkPacket(packet, party = []) {
   problems.push(...geometryProblems(packet));
   // No visible text names a hidden thing.
   const all = [...map.zones, ...map.connections, ...map.things, ...map.facts];
-  const terms = all.filter((x) => x.hidden).flatMap((x) => [x.id, ...(x.name ? [x.name] : [])]).map((t) => t.toLowerCase());
-  const visible = [...all.filter((x) => !x.hidden).map((x) => JSON.stringify(x)), packet.opening].map((t) => t.toLowerCase());
-  for (const text of visible) for (const t of terms) if (text.includes(t)) problems.push(`visible text names hidden "${t}"`);
+  const terms = [...new Set(all.filter((x) => x.hidden).flatMap(hiddenWords))];
+  const visible = [...all.filter((x) => !x.hidden).map((x) => [x.name, x.purpose, x.properties, x.text].filter(Boolean).join(" ")), packet.opening];
+  for (const t of terms) if (visible.some((text) => names(text, t))) problems.push(`visible text names hidden "${t}"`);
   return problems;
 }
 

@@ -23,7 +23,15 @@ export const bind = (v, ctx = {}) => (v === "@self" ? ctx.self : v);
 export const clone = (x) => structuredClone(x);
 
 // A readable name for engine-written text: "the key ring", "Snag".
+// Whether text names a hidden term (D36, D185): a hidden place's, way's or thing's name or id, as whole words. A
+// hidden fact's id is only a label nobody says ("breath", "view"), so it never counts.
+export const hiddenWords = (x) => [x.name, x.text === undefined ? x.id?.replaceAll("_", " ") : null, x.text === undefined ? x.id : null].filter(Boolean).map((t) => t.toLowerCase());
+export const names = (text, term) => new RegExp(`(^|[^a-z0-9_])${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}($|[^a-z0-9_])`, "i").test(text);
+
 export function nameOf(s, id) {
   const n = person(s, id)?.name?.split(",")[0] ?? sheet(s, id)?.name ?? thing(s, id)?.name ?? zone(s, id)?.name ?? conn(s, id)?.name ?? id;
-  return person(s, id) || sheet(s, id) ? n : `the ${n[0].toLowerCase()}${n.slice(1)}`;
+  if (person(s, id) || sheet(s, id)) return n;
+  // A place already called "The ledge" is "the ledge", never "the the ledge".
+  const low = `${n[0].toLowerCase()}${n.slice(1)}`;
+  return /^(the|a|an) /.test(low) ? low : `the ${low}`;
 }

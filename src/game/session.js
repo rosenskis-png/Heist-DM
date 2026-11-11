@@ -9,7 +9,8 @@ import { emptyDraft, draftFrom } from "./draft.js";
 // The player's sheet: their name, their class's skills and abilities.
 export function playerSheet(player) {
   const cls = classes[player.class];
-  return { id: "player", name: player.name || cls.name, role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
+  // A player who leaves the name blank is called Wren, never by their class (D185).
+  return { id: "player", name: player.name?.trim() || "Wren", role: `The player, a ${cls.name.toLowerCase()}`, blurb: cls.blurb, skills: cls.mods, abilities: cls.abilities };
 }
 
 // The party: the player, then the two companions the player chose, which the packet places by slot (D8).

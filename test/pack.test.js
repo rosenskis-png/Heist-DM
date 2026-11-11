@@ -81,12 +81,14 @@ test("the telling can make a thing real: it is held, it travels, and a save brin
   assert.deepEqual(leave(back.state).items.map((i) => i.name), ["Snag's bone dice"]);
 });
 
-test("the DM's record may make a thing, never one that's already here; and a save puts the pack back", async () => {
+test("the DM's record may make a thing, and naming one already here picks it up; a save puts the pack back", async () => {
   const { checkScene } = await import("../src/engine/index.js");
   const session = newSession({ packet: cells, player: { name: "Kael", class: "rogue" }, companions: ["fern", "celeste"] });
   const out = (id) => ({ reply: "x", ticks: 0, changes: { items: [{ id, name: "a thing", properties: "A thing.", by: "player" }] } });
   assert.deepEqual(checkScene(session.state, out("bone_dice")), []);
-  assert.match(checkScene(session.state, out("keyring")).join(" "), /already something here/);
+  assert.deepEqual(checkScene(session.state, out("keyring")), []);
+  assert.equal(apply(session.state, { type: "scene", out: out("keyring") }).holder.keyring, "player");
+  assert.match(checkScene(session.state, out("snag")).join(" "), /already the id of something else/);
   const items = [{ id: "hand_bell", name: "a cracked hand-bell", properties: "Iron.", holder: "celeste", notes: ["It stills the dead."] }];
   session.state = load({ packet: cells, party: session.state.party, items });
   session.pack = items;

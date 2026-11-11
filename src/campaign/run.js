@@ -42,7 +42,15 @@ export function roomEnded(camp, { handoff, verdict, exits = [], members = [] }) 
   // What the act remembers (D164): the room's log line, the clues the party came away with, and anyone memorable the
   // verdict named, whom a later room may bring back.
   // What the party has with it (D178): the verdict gives the whole list as they leave.
-  out.carried = (verdict?.carried ?? out.carried ?? []).slice(0, 6);
+  // A follower's record doesn't drift (D185): once a follower has a name, pronouns and looks, later rooms keep them
+  // whatever a verdict writes; only what they're doing and how they are can change.
+  const before = (out.carried ?? []).filter((x) => x.kind === "follower" && x.name);
+  const key = (n) => String(n ?? "").toLowerCase().split(/[ ,]/)[0];
+  out.carried = (verdict?.carried ?? out.carried ?? []).slice(0, 6).map((x) => {
+    if (x.kind !== "follower") return x;
+    const was = before.find((b) => key(b.name) === key(x.name) || (!x.name && key(x.what).length > 1 && key(b.name) === key(x.what)));
+    return was ? { ...x, name: was.name, pronouns: was.pronouns ?? x.pronouns, looks: was.looks ?? x.looks } : x;
+  });
   out.log = [...(out.log ?? []), handoff.log].filter(Boolean);
   out.clues = [...new Set([...(out.clues ?? []), ...(handoff.clues ?? [])])];
   out.memory = [...(out.memory ?? []), ...(verdict?.people ?? []).map((p) => ({ ...p, act: out.act }))].slice(-30);
