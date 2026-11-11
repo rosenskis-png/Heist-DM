@@ -8,11 +8,11 @@ import { handoff } from "./handoff.js";
 import { noteSeen } from "./perceive.js";
 import { resolve, scene, answer, rollCard } from "./ledger.js";
 
-export { load, checkPacket, bindParty, SLOTS } from "./load.js";
+export { load, checkPacket, bindParty, withPack, SLOTS } from "./load.js";
 export { partyPerceives, memberPerceives } from "./perceive.js";
 export { handoff, endingOf, rest } from "./handoff.js";
 export { CAPTURED, ladder } from "./clock.js";
-export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, withRulings, checkUses, usesLeft, usesText, toughnessOf, revealable, LEDGER } from "./ledger.js";
+export { checkChanges, checkCard, rollCard, checkResolve, checkScene, checkAnswer, hiddenTerms, checkFactBudget, checkConditionBudget, checkThreats, withRulings, checkUses, usesLeft, usesText, toughnessOf, revealable, withMade, LEDGER } from "./ledger.js";
 export { ODDS } from "./rng.js";
 
 // Actions (the DM rules and the engine keeps the books, D75):

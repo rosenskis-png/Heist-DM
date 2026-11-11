@@ -195,6 +195,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
+- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
 
 ---
 
@@ -1136,3 +1137,14 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **Held by** a test that lays out 500 made-up rooms (loops, levels, zones nothing reaches) and checks every one is drawn and sound; 20,000 were run once by hand with none undrawn.
 **Why:** The old layout placed zones as a tree and gave up on the whole map when a loop wouldn't close or two levels didn't overlap, which is how the shakedown's rooms came to have no map, and it never placed a thing.
 **Rules out:** A map that disagrees with what joins what. The sketch as anything but the last resort: it stays for a room that still can't be drawn and for saves made before this.
+
+### D184. The pack: what the party carries out goes on as what it is, with what was learned of it
+**Decided:** The designer's call (2026-11-11). Changes D123, D147 and D178.
+- **One rule for everything carried out.** When a room ends, each thing a party member holds is settled by what it is. Worth gold: the gold is added. A relic: it joins the relics. A clue: it joins the clues. An outfit (a new kind of reward): it goes to the companion who carried it, or waits in `gifts` if the player did. Anything else is an item in the pack.
+- **An item keeps what it is.** It goes on with its name, what it is, who holds it, and up to three things the party has learned of it (the known facts about it). In the next room it is a thing like any other, in the same hands, and every call that reads the room reads it and what's known of it; the party's sheet lists what each member carries. Left, lost or used up, it's gone, because it isn't in the next hand-off. The pack holds ten things and empties at an act's end (`content/setting.js`).
+- **The telling can make a thing real.** The DM's record has `items`: a thing already shown that someone picks up or is handed becomes a thing of the room, held by them. At most eight a room, and never one that's already there.
+- **The verdict's carried list** keeps followers, loose ends and lacks. Things are the game's to keep.
+- **Wiring:** `handoff` (`items`, `outfits`), `roomEnded` and `endAct` (`camp.items`, `camp.gifts`, the wardrobe), `load` and `withPack` (the pack into the room), `withMade` and `s.made`, `session.pack` (a save puts it back), the sketch (what's in the pack), `sheetView` (carrying). `test/pack.test.js` holds it.
+**Why:** In the shakedown a stolen hand-bell that stilled the dead was gone at the next door. Relics and gold had a path and nothing else did, and the verdict's list could only keep a line of prose about a thing, not the thing.
+**Rules out:** Weights and counts. Items kept as prose the DM has to remember. A reward counted twice by being carried on as a thing as well.
+**Not yet:** a place to give a waiting outfit (the campfire), and anything to buy with a full pack but more gold.

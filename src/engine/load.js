@@ -65,11 +65,26 @@ export function bindParty(packet, party) {
   return bind(packet);
 }
 
+// The pack (D184): the things the party carried out of earlier rooms are things in this one, held by whoever held
+// them (the player, if that companion isn't here), under an id of their own so they can't clash with the room's.
+export function withPack(packet, party, items = []) {
+  if (!items.length) return packet;
+  const taken = new Set([...packet.map.zones, ...packet.map.connections, ...packet.map.things, ...packet.map.facts, ...packet.people, ...packet.clock.events].map((x) => x.id));
+  const things = items.map((it) => {
+    let id = it.id;
+    while (taken.has(id)) id = `pack_${id}`;
+    taken.add(id);
+    const holder = party.some((p) => p.id === it.holder) ? it.holder : party[0].id;
+    return { id, name: it.name, properties: it.properties, ...(it.size ? { size: it.size } : {}), location: { holder }, carried: true, ...(it.notes?.length ? { notes: it.notes } : {}) };
+  });
+  return { ...packet, map: { ...packet.map, things: [...packet.map.things, ...things] } };
+}
+
 // The starting state for an encounter. `party` is the party's sheets (player first);
 // `conditions` are the ones the party carries in from the last hand-off (D130), `spent` the per-rest ability
 // uses spent since the last rest (D128), and `gold` what the party has to spend (D147).
-export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [], carried = [] }) {
-  const packet = bindParty(unbound, party);
+export function load({ packet: unbound, party, seed = 1, conditions = [], spent = {}, gold = 0, relics = [], carried = [], items = [] }) {
+  const packet = withPack(bindParty(unbound, party), party, items);
   const problems = checkPacket(packet, party);
   if (problems.length) throw new Error(`packet ${packet.id} rejected:\n${problems.join("\n")}`);
   const { map, people, clock, start } = packet;

@@ -1,6 +1,6 @@
 // A game in progress: campaign values, the engine's encounter state, and what the table has said (D11, D74).
 // Plain data, so a save is a JSON snapshot. Starting one and restoring one never calls an AI.
-import { load, apply, bindParty, toughnessOf } from "../engine/index.js";
+import { load, apply, bindParty, toughnessOf, withPack, withMade } from "../engine/index.js";
 import { classes } from "../../content/classes.js";
 import { companions as authored } from "../../content/companions/index.js";
 import { inWorld, worldOf } from "../campaign/world.js";
@@ -126,7 +126,7 @@ export function restore(json, cells, roster = authored) {
   // A save from before ability uses were counted (D128).
   state.used ??= {};
   state.spent ??= {};
-  return { ...tableFrom(saved), world, actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: bindParty(packet, party), party } };
+  return { ...tableFrom(saved), world, actions: saved.actions ?? [], calls: saved.calls ?? [], state: { ...state, packet: withMade(withPack(bindParty(packet, party), party, saved.pack ?? []), state.made ?? []), party } };
 }
 
 // A save from before the table (D127): its Plan, Moment and Companions feeds merge into one table, in the order

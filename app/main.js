@@ -387,6 +387,8 @@ function PartySheet({ sheet, colors }) {
       <b>${p.id === "player" ? `${p.name} (you)` : p.name}</b>
       ${p.abilities.map((a) => html`<details key=${a.id} className="ab"><summary><span>${a.name}</span><span className="left">${a.left}</span></summary><span className="muted">${a.effect}</span></details>`)}
       ${p.conditions.length ? html`<span className="cond">${p.conditions.join(" · ")}</span>` : null}
+      ${p.carrying.length ? html`<span className="small muted">Carrying</span>` : null}
+      ${p.carrying.map((c) => html`<details key=${c.id} className="ab"><summary><span>${c.name}</span><span className="left">${c.worth ?? ""}</span></summary><span className="muted">${c.what}</span></details>`)}
     </div>`)}
   </section>`;
 }

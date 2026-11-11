@@ -540,6 +540,7 @@ export function roomSheet(state, packet = state.packet) {
   // way itself, and where it leads is still to find.
   const found = packet.site ? new Set(s.known.places ?? []) : null;
   const here_ = (id) => !found || found.has(id);
+  const partyHas = (t) => s.party.some((p) => p.id === s.holder[t.id]);
   const all = [...map.zones, ...map.things, ...people, ...s.party];
   const label = (id) => all.find((x) => x.id === id)?.name ?? id;
   const flagText = (f) => Object.entries(f).map(([k, v]) => (v === true ? k : v === false ? `not ${k}` : `${k} ${v}`)).join(", ");
@@ -554,7 +555,7 @@ export function roomSheet(state, packet = state.packet) {
     tick: st.tick,
     places: map.zones.filter((z) => known(z) && here_(z.id)).map((z) => ({ id: z.id, name: z.name, what: z.purpose, ...(z.light ? { light: z.light } : {}), here: here(z.id) })),
     ways: map.connections.filter((c) => known(c) && c.between.some(here_)).map((c) => ({ id: c.id, between: c.between.map((z) => (here_(z) ? label(z) : `somewhere not yet seen (by ${c.name ?? c.kind})`)), how: [wayBits(c), st.flags[c.id] ? `now ${flagText(st.flags[c.id])}` : ""].filter(Boolean).join("; ") })),
-    things: map.things.filter((t) => known(t) && (!found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: t.properties })),
+    things: map.things.filter((t) => known(t) && (partyHas(t) || !found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: `${t.properties}${t.notes?.length ? ` ${t.notes.join(" ")}` : ""}` })),
     people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
     facts: map.facts.filter((f) => known(f) && (!f.at || here_(f.at))).map((f) => f.text),
     carried: (s.carried ?? []).map((x) => x.what),
@@ -607,7 +608,7 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
   const way = (c) => `- ${c.id}${c.name ? ` (${c.name})` : ""}: ${c.between.join(" – ")}; ${wayBits(c)}`;
   // Where things are now, from the ledger, so the encounter never contradicts it.
   const where = (t) => (s.holder[t.id] ? `held by ${s.holder[t.id]}` : s.at[t.id] ? `in ${s.at[t.id]}` : "gone");
-  const thing = (t) => `- ${t.id} (${t.name}, ${where(t)}): ${t.properties}`;
+  const thing = (t) => `- ${t.id} (${t.name}, ${where(t)}): ${t.properties}${t.notes?.length ? ` The party brought it with them and knows this of it: ${t.notes.join(" ")}` : t.carried ? " The party brought it with them." : ""}`;
   // Things alike (four cell doors, three buckets) share one line: the description once, then each one's place.
   const ways = (list) => [...Map.groupBy(list, wayBits).values()].map((g) => (g.length > 1 ? `- ${g.map((c) => `${c.id} (${c.between.join(" – ")})`).join("; ")}: ${wayBits(g[0])}` : way(g[0])));
   const things = (list) => [...Map.groupBy(list, (t) => `${t.name}|${t.properties}`).values()].map((g) => (g.length > 1 ? `- ${g.map((t) => `${t.id} (${where(t)})`).join("; ")}: ${g[0].name}. ${g[0].properties}` : thing(g[0])));
@@ -869,7 +870,7 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    c.carried?.length ? block("Must honour: what the party has with it", c.carried.map((x) => `${x.kind}: ${x.what}`)) : null,
+    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map((x) => `${x.kind}: ${x.what}`), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
     c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);

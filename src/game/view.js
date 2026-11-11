@@ -242,4 +242,6 @@ export const sheetView = (s) =>
     name: p.name,
     abilities: [p.abilities?.combat, p.abilities?.noncombat].filter(Boolean).map((a) => ({ id: a.id, name: a.name, effect: a.effect, left: usesText(s, p.id, a.id) ?? a.uses ?? "at will" })),
     conditions: s.conditions.filter((c) => c.who === p.id).map((c) => c.text),
+    // What they're carrying (D184): each thing, what it is, and what the party has learned of it.
+    carrying: s.packet.map.things.filter((t) => s.holder[t.id] === p.id).map((t) => ({ id: t.id, name: t.name, what: [t.properties, ...(t.notes ?? []), ...s.facts.filter((f) => f.known && (f.about ?? []).includes(t.id)).map((f) => f.text)].join(" "), worth: t.reward?.gold ? `worth ${t.reward.gold} gold` : t.reward?.relic ? "a relic" : t.reward?.outfit ? "an outfit" : t.reward?.clue ? "a page to read at camp" : null })),
   }));

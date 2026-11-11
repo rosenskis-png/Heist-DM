@@ -23,7 +23,7 @@ Return only JSON that matches the schema you're given.
 
 ## What they have with them
 `carried` is what the party has with it as it walks on, the whole list: what it already had and still has, and what this room added. At most six, one plain line each, and only what a later room could turn on.
-- **item:** a thing they took or were given that could be used again (a stolen hand-bell, a guard's cloak). Gold and relics are counted elsewhere. Things they lost or left are off the list: say so in the line only if being without it matters ("unarmed: their gear was left behind").
+- **item:** only a lack that matters ("unarmed: their gear was left behind"). The things they hold are kept by the game itself, with gold and relics, and never go here.
 - **follower:** people or creatures now travelling with them, and what state they're in.
 - **thread:** something left open that could come back: a promise made, a bargain broken, someone who now owes them or wants them found.
 Take only from the record. Drop what is used up, delivered or settled.

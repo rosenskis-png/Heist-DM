@@ -78,7 +78,7 @@ function toldOf(packet, party) {
 // and the campaign with its random positions and used motifs moved on.
 export async function generateRoom(io, env, { camp, world, party, handoff = null, log = [] }) {
   const { seed, camp: next } = seedRoom(camp, world);
-  const { packet, mapped, sketch } = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [] });
+  const { packet, mapped, sketch } = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [] });
   // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162).
   return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`] } };
 }

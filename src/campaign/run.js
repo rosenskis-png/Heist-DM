@@ -4,6 +4,7 @@
 import { setting } from "../../content/setting.js";
 import { startAct, exitKinds, enter, wayOn } from "./way.js";
 import { endEncounter } from "./relationship.js";
+import { addOutfit } from "./wardrobe.js";
 import { rest } from "../engine/handoff.js";
 
 // A new campaign at the start of `act`. `members` are the two companions' profiles; `romance` their relationship state.
@@ -30,6 +31,13 @@ export function roomEnded(camp, { handoff, verdict, exits = [], members = [] }) 
   out.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
   out.gold = handoff.gold ?? out.gold;
   out.relics = [...out.relics, ...(handoff.relics ?? [])].slice(0, setting.relics.max);
+  // The pack (D184): what the party carried out of the room, whole. A thing left, lost or used up is simply not in
+  // the hand-off. An outfit a companion carried out is hers; one the player carried out waits to be given.
+  out.items = (handoff.items ?? out.items ?? []).slice(0, setting.items.max);
+  for (const { holder, ...fit } of handoff.outfits ?? []) {
+    if (out.romance?.wardrobe?.[holder]) out.romance = addOutfit(out.romance, holder, fit.id, { name: fit.name, text: fit.text });
+    else out.gifts = [...(out.gifts ?? []).filter((g) => g.id !== fit.id), fit];
+  }
   out.carry = { conditions: handoff.conditions ?? [], spent: handoff.spent ?? {}, companions: handoff.companions ?? out.members };
   // What the act remembers (D164): the room's log line, the clues the party came away with, and anyone memorable the
   // verdict named, whom a later room may bring back.
@@ -57,7 +65,7 @@ export function endAct(camp, chosen = [], seed = 1) {
   const act = camp.act + 1;
   // The act's facts go into its history, for the next act call; what the act alone used starts again.
   const done = { act: camp.act, question: camp.plan?.question ?? null, peak: camp.plan?.peak?.who ?? null, state: camp.plan?.state ?? null, rooms: camp.premises ?? [], log: camp.log ?? [] };
-  return { ...structuredClone(camp), act, way: startAct(act, seed), relics: kept, keep: null, history: [...(camp.history ?? []), done], used: [], usedBusy: [], usedShapes: [], usedCentres: [], premises: [], log: [], calledBack: [], hintsUsed: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, lastExtra: null, hintLeg: null };
+  return { ...structuredClone(camp), act, way: startAct(act, seed), items: setting.items.keptAcrossActs ? camp.items ?? [] : [], relics: kept, keep: null, history: [...(camp.history ?? []), done], used: [], usedBusy: [], usedShapes: [], usedCentres: [], premises: [], log: [], calledBack: [], hintsUsed: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, lastExtra: null, hintLeg: null };
 }
 
 // An act has begun (D164): its plan, from the act call, holds the region, its busy-ness and holders, and its peak, which

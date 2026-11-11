@@ -26,6 +26,9 @@ export const setting = {
   // Relics (D147, D148). Starting values: the party holds at most `max` in an act, and the climax's verdict rating
   // decides how many it keeps into the next, `keptByRating[rating - 1]`.
   relics: { max: 6, keptByRating: [0, 0, 0, 1, 1, 1, 2, 2, 3, 3] },
+  // The pack (D184): how many things the party can carry from room to room, how many things learned about each
+  // go with it, and whether the pack lasts past an act's end.
+  items: { max: 10, notes: 3, keptAcrossActs: false },
   playerSecretReveal: {
     1: "Never hint yet.",
     2: "Only faint hints (dreams, wards reacting oddly). Do not reveal.",

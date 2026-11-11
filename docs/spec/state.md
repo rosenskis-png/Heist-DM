@@ -71,3 +71,6 @@ The engine is `apply(state, action) → state`, and state includes the random ge
 
 ## Moves and what's carried (D176, D178)
 The encounter's state holds `pressure`, how many steps its trouble has moved, and `carried`, what the party has with it from earlier rooms. A try waiting on the player's roll is the session's `pending` (the scene call's output and who it was to); it is saved with the session and changes no state until rolled. The campaign keeps `carried` between rooms.
+
+## The pack (D184)
+The campaign keeps `items` (what the party carried out of the last room: id, name, properties, holder, notes) and `gifts` (outfits waiting to be given). `load` puts the items into the next room as things marked `carried`, held as they were held; the session's `pack` is what came in, so a save can put it back. The state's `made` is the things this room's telling made real. Code: `src/engine/handoff.js`, `src/engine/load.js`, `src/campaign/run.js`.

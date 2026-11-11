@@ -18,6 +18,9 @@ export const revealable = (s) =>
     ...s.packet.clock.events.map((e) => e.id),
   ]);
 
+// A room's things with those its telling made real (D184).
+export const withMade = (packet, made = []) => (made.length ? { ...packet, map: { ...packet.map, things: [...packet.map.things, ...made.filter((m) => !packet.map.things.some((t) => t.id === m.id)).map((m) => ({ ...m, location: { holder: "party" }, made: true }))] } } : packet);
+
 const ids = (s, ...kinds) =>
   new Set(
     kinds.flatMap((k) =>
@@ -86,8 +89,14 @@ export function checkChanges(s, ch = {}, at = "changes") {
     if (!movable.has(m.who)) bad("who", m.who);
     if (!zones.has(m.to)) bad("zone", m.to);
   }
+  for (const it of ch.items ?? []) {
+    if (known.has(it.id) || ids(s, "things").has(it.id)) errors.push(`${at}: ${it.id} is already something here; give the new thing an id of its own`);
+    if (!ids(s, "people", "party").has(it.by)) bad("holder", it.by);
+    if ((s.made ?? []).length + (ch.items ?? []).length > MADE) errors.push(`${at}: at most ${MADE} things can be made real in one room`);
+  }
+  const made = new Set((ch.items ?? []).map((it) => it.id));
   for (const h of ch.holds ?? []) {
-    if (!ids(s, "things").has(h.item)) bad("item", h.item);
+    if (!ids(s, "things").has(h.item) && !made.has(h.item)) bad("item", h.item);
     if (h.by !== null && !holders.has(h.by)) bad("holder", h.by);
     if (h.by === h.item) errors.push(`${at}: ${h.item} can't hold itself`);
   }
@@ -161,7 +170,17 @@ const setThreats = (s, threats) => {
 };
 
 // Records a ruling. Moving an NPC who has a routine takes them off it until a ruling puts them back.
+// How many things one room's telling can make real (D184).
+const MADE = 8;
+
 export function applyChanges(s, ch = {}) {
+  // A thing made real joins the room's things; the state remembers it, so a save or a replay makes it again.
+  for (const { by, ...it } of ch.items ?? []) {
+    if (s.packet.map.things.some((t) => t.id === it.id)) continue;
+    s.made = [...(s.made ?? []), it];
+    s.packet = withMade(s.packet, [it]);
+    s.holder[it.id] = by;
+  }
   for (const m of ch.moves ?? []) {
     delete s.holder[m.who];
     s.at[m.who] = m.to;

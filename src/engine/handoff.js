@@ -36,6 +36,19 @@ export function handoff(s) {
     const r = s.packet.map.things.find((t) => t.id === id)?.reward?.relic;
     return r ? [{ id, name: r.name, text: r.text }] : [];
   });
+  // The pack (D184): every plain thing the party carries out goes on with whoever holds it, as what it is, with what
+  // the party has learned about it. A thing worth gold, a relic, a clue or an outfit is cashed in above and below,
+  // and isn't carried as a thing as well.
+  const thingOf = (id) => s.packet.map.things.find((t) => t.id === id);
+  const items = gear
+    .filter((id) => thingOf(id) && !thingOf(id).reward)
+    .map((id) => {
+      const t = thingOf(id);
+      const notes = s.facts.filter((f) => f.known && (f.about ?? []).includes(id)).map((f) => f.text);
+      return { id, name: t.name, properties: t.properties, ...(t.size ? { size: t.size } : {}), holder: s.holder[id], notes: [...new Set([...(t.notes ?? []), ...notes])].slice(-3) };
+    });
+  // Outfits carried out (D184): each with who carried it.
+  const outfits = gear.flatMap((id) => (thingOf(id)?.reward?.outfit ? [{ ...thingOf(id).reward.outfit, holder: s.holder[id] }] : []));
   // Clues the party came away with (D164): one they hold, or one that can't be carried and stood in plain sight.
   const clues = s.packet.map.things.filter((t) => t.reward?.clue && (gear.includes(t.id) || (t.reward.fixed && !t.hidden))).map((t) => t.reward.clue);
   const exit = [...new Set(party.map((id) => zoneOf(s, id)))];
@@ -59,6 +72,8 @@ export function handoff(s) {
     gear,
     gold,
     relics,
+    items,
+    outfits,
     clues,
     // What the party carries to the campfire: hurts and hindrances, until they rest (D130).
     conditions: s.conditions.map((c) => ({ ...c })),

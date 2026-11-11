@@ -105,8 +105,10 @@ export function enterRoom(session, roster = authored) {
   const camp = session.camp;
   const seed = (session.start.seed * 31 + 7 * (session.past?.length ?? 0) + 1) >>> 0 || 1;
   const party = partyFor(session.player, session.companions, session.world, roster);
-  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics, carried: camp.carried ?? [] });
+  session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics, carried: camp.carried ?? [], items: camp.items ?? [] });
   Object.assign(session, {
+    // What was in the pack coming into this room (D184), so a save can put it back.
+    pack: camp.items ?? [],
     act: camp.act,
     packet,
     start: { packet: packet.id, seed: session.start.seed, room: seed },

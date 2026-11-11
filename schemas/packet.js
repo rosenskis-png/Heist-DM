@@ -77,10 +77,17 @@ const thing = obj(["id", "name", "properties", "location"], {
       obj(["gold"], { gold: { type: "integer", minimum: 1 } }),
       obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) }),
       obj(["clue"], { clue: r("id"), fixed: { type: "boolean" } }),
+      // An outfit (D184): it goes to the companion who carries it out, or waits to be given if the player does.
+      obj(["outfit"], { outfit: obj(["id", "name", "text"], { id: r("id"), name: r("text"), text: r("text") }) }),
     ],
   },
   // What it costs, at a merchant: the party pays when one of them takes it (D147).
   price: { type: "integer", minimum: 1 },
+  // Brought in from an earlier room in the party's pack (D184).
+  carried: { type: "boolean" },
+  made: { type: "boolean" },
+  // What the party had learned about it before this room (D184).
+  notes: { type: "array", items: r("text") },
 });
 
 const senses = obj(["sees", "hears"], { sees: list(r("id")), hears: r("hearing") });
