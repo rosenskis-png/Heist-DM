@@ -62,7 +62,11 @@ export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
   const handoff = session.ended;
   const members = session.state.party.slice(1);
-  const verdict = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state) });
+  // A calm room isn't judged (D186): no call, no rating, nothing moved; what the party has with it goes on as it was.
+  const calm = session.state.packet.mode === "room" && camp.way.here !== "sanctuary";
+  const verdict = calm
+    ? { rating: null, why: null, reactions: [], people: [], carried: camp.carried ?? [] }
+    : await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state) });
   session.past = [...session.past, summaryOf(session, verdict)].slice(-PAST);
   if (camp.way.here === "sanctuary") {
     const next = structuredClone(camp);

@@ -292,6 +292,7 @@ export function MapTab({ view, sketch, sheet, colors, party }) {
       ${DEFS}
       <rect x=${frame.x - frame.w * 2} y=${frame.y - frame.h * 2} width=${frame.w * 5} height=${frame.h * 5} fill="var(--map-paper)" onClick=${() => setPick(null)} />
       ${view ? html`<${Level} view=${view} level=${level} under=${under} colors=${colors} picked=${pick?.zone} onPick=${setPick} k=${k} />` : html`<${Sketch} sketch=${sketch} colors=${colors} picked=${pick?.zone} onPick=${setPick} />`}
+      ${view ? html`<g pointerEvents="none" transform=${`translate(${frame.x + 16 * k} ${frame.y + 14 * k}) scale(${k})`}><path d="M0 -9L4 3L0 0L-4 3Z" fill="var(--map-ink)" /><text className="thing-label" x="0" y="13" textAnchor="middle" style=${{ fontWeight: 700 }}>N</text></g>` : null}
       ${view ? html`<g pointerEvents="none"><line x1=${frame.x + 8} y1=${frame.y + frame.h - 10} x2=${frame.x + 8 + 2 * S} y2=${frame.y + frame.h - 10} stroke="var(--map-ink)" strokeWidth=${1.6 * k} strokeLinecap="round" /><text className="thing-label" x=${frame.x + 14 + 2 * S} y=${frame.y + frame.h - 7} style=${{ fontSize: `${8.5 * k}px` }}>10 ft</text></g>` : null}
     <//>
     ${view ? null : html`<span className="cap">A sketch: the places here and how they join, not to scale</span>`}
@@ -315,11 +316,11 @@ export function MapTab({ view, sketch, sheet, colors, party }) {
 
 export function Clock({ clock, compact = false }) {
   if (compact)
-    return html`<div className="clock"><span>Tick <b>${clock.tick}</b></span>${clock.beats.map((b) => html`<span key=${b.who}>${b.who}: <b>${b.beat}</b></span>`)}${clock.coming.map((e) => html`<span key=${e.what} className=${e.in <= 3 ? "soon" : ""}>${e.what} in ${e.in}</span>`)}${clock.threats.length ? html`<span className="soon" title=${clock.threats.map((x) => `${x.who}: ${x.does}`).join("\n")}>${clock.threats.length} coming at you</span>` : null}</div>`;
+    return html`<div className="clock"><span>Tick <b>${clock.tick}</b></span>${clock.beats.map((b) => html`<span key=${b.who}>${b.who}: <b>${b.beat}</b></span>`)}${clock.coming.map((e) => html`<span key=${e.what} className=${e.in === null || e.in <= 3 ? "soon" : ""}>${e.in === null ? e.what : `${e.what} in ${e.in}`}</span>`)}${clock.threats.length ? html`<span className="soon" title=${clock.threats.map((x) => `${x.who}: ${x.does}`).join("\n")}>${clock.threats.length} coming at you</span>` : null}</div>`;
   return html`<div className="beatbox">
     <div><b>Tick ${clock.tick}</b>${clock.pending ? html`<span className="muted"> (${clock.pending} more passing)</span>` : null}</div>
     ${clock.beats.map((b) => html`<div key=${b.who}><b>${b.who}: ${b.beat}.</b> ${b.does}. <span className="cue">${b.cue}</span></div>`)}
-    ${clock.coming.map((e) => html`<div key=${e.what} className=${e.in <= 3 ? "system" : ""}>${e.what} at tick ${e.at} (in ${e.in}).</div>`)}
+    ${clock.coming.map((e) => html`<div key=${e.what} className="system">${e.in === null ? `${e.what}.` : `${e.what} at tick ${e.at} (in ${e.in}).`}</div>`)}
     ${clock.threats.map((x) => html`<div key=${x.who} className="system"><b>${x.who}:</b> ${x.does}</div>`)}
   </div>`;
 }

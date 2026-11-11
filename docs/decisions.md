@@ -197,6 +197,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
 - **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
 - **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
+- **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: current
 
 ---
 
@@ -1159,3 +1160,13 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **Small things:** a place called "The ledge" is "the ledge", never "the the ledge"; a blank name is Wren, never the class; nobody says a skill's number aloud; pet names stay at the campfire in the DM's telling too; leaving by a way on takes the whole party there; a place with no shape from the encoder is drawn from what it is (caves and tunnels as rock, towers and wells round); Fern can change back from an animal.
 **Why:** The play was more fun; the faults were the game's records drifting from its own story and calls wasted on retries.
 **Rules out:** Repairing a call's meaning in code: only its form is tidied, and anything that changes what happened still goes back to the model.
+
+### D186. The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on
+**Decided:** The designer's call (2026-11-11), from the designer's shakedown notes.
+- **The DM reads the map.** Each place in the DM's account of a drawn room lists its ways and which way each lies (north, southeast, up, down), from the footprints (`bearing` in `src/engine/map.js`), so its directions match what the player sees.
+- **North is up, and the party comes in from the south.** A laid-out room is turned top to bottom if the party's starting place would sit in its top half. The map has a north arrow.
+- **Rings close.** Placing a place, the layout prefers spots near places already down that share a neighbour still to come, so a ring of four closes as a square. A hole the party moves around is a place of its own, joined to each rim (the encode prompt).
+- **Calm rooms aren't judged.** No verdict call for a quiet room, oddity, merchant or campfire: no rating, nothing moved, and what the party has with it goes on unchanged. The sanctuary is still judged.
+- **Two ways on.** An encounter before a campfire, the climax or the sanctuary has two exits to it, from different places, instead of one.
+- **The header wraps** on a phone, and a room whose trouble moves on failure shows the next thing to go wrong with no tick count.
+**Why:** The designer's notes: a header too wide for the phone, directions that didn't match the map, a ring drawn as a line, rooms judged for being quiet, and too many encounters with one way out.

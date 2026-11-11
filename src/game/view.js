@@ -1,7 +1,7 @@
 // What the player sees, derived from state: the card (docs/spec/ui.md), the map (D9, D71) and the clock.
 // Pure functions; the page draws them. Nothing here shows what the party doesn't know.
 import { nameOf, zoneOf, person } from "../engine/world.js";
-import { beatOf } from "../engine/clock.js";
+import { beatOf, ladder } from "../engine/clock.js";
 import { partyPerceives } from "../engine/perceive.js";
 import { usesText } from "../engine/ledger.js";
 
@@ -223,9 +223,13 @@ export function clockView(s) {
       return b && { who: short(s, p.id), beat: cap(b.id), does: b.label, cue: b.cue };
     })
     .filter(Boolean);
-  const coming = s.packet.clock.events
-    .filter((e) => (e.known || s.known.revealed.includes(e.id)) && !s.fired.includes(e.id) && s.due[e.id] !== undefined)
-    .map((e) => ({ what: cap(e.id.replace(/_/g, " ")), at: s.due[e.id], in: s.due[e.id] - s.tick }));
+  // Where trouble moves on a failed roll rather than the clock (D176), only the next step shows, and with no count.
+  const rungs = ladder(s);
+  const coming = rungs
+    ? rungs.filter((e) => (e.known || s.known.revealed.includes(e.id)) && !s.fired.includes(e.id)).slice(0, 1).map((e) => ({ what: `Next if things go wrong: ${e.id.replace(/_/g, " ")}`, at: null, in: null }))
+    : s.packet.clock.events
+        .filter((e) => (e.known || s.known.revealed.includes(e.id)) && !s.fired.includes(e.id) && s.due[e.id] !== undefined)
+        .map((e) => ({ what: cap(e.id.replace(/_/g, " ")), at: s.due[e.id], in: s.due[e.id] - s.tick }));
   // What anyone fighting the party is visibly about to do (D130).
   const threats = s.threats.map((t) => ({ who: short(s, t.who), does: t.does }));
   return { tick: s.tick, pending: s.pending, beats, coming, threats };

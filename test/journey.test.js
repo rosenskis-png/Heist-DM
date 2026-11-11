@@ -64,8 +64,10 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
   for (let i = 0; i < 30 && session.camp.act === 1; i++) {
     const exits = session.state.packet.intent.exits ?? [];
     leaveBy(session, exits[0]?.id ?? null);
+    const calm = session.state.packet.mode === "room" && session.camp.way.here !== "sanctuary";
     const b = await judgeRoom(session, io, prompts);
-    assert.equal(b.verdict.rating, 7);
+    // A calm room isn't judged (D186).
+    assert.equal(b.verdict.rating, calm ? null : 7);
     if (b.actOver) {
       assert.ok(!b.last);
       endTheAct(session, session.camp.relics.slice(0, session.camp.keep ?? 0).map((r) => r.id));

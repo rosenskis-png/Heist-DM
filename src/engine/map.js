@@ -79,3 +79,21 @@ export function geometryProblems(packet) {
   }
   return problems;
 }
+
+// Which way one place lies from another, from their footprints (D186): north is up the map. Null when there's no map
+// or they sit on top of each other.
+export function bearing(a, b) {
+  if (!a?.rects?.length || !b?.rects?.length) return null;
+  const c = (z) => {
+    const n = z.rects.reduce((t, [, , w, h]) => t + w * h, 0);
+    return [z.rects.reduce((t, [x, , w, h]) => t + (x + w / 2) * w * h, 0) / n, z.rects.reduce((t, [, y, w, h]) => t + (y + h / 2) * w * h, 0) / n];
+  };
+  const [[ax, ay], [bx, by]] = [c(a), c(b)];
+  const [dx, dy] = [bx - ax, by - ay];
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return null;
+  const ns = dy < 0 ? "north" : "south";
+  const ew = dx > 0 ? "east" : "west";
+  if (Math.abs(dy) > 2 * Math.abs(dx)) return ns;
+  if (Math.abs(dx) > 2 * Math.abs(dy)) return ew;
+  return `${ns}${ew}`;
+}

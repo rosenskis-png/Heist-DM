@@ -36,8 +36,10 @@ export const EXITS = { encounter: 2, climax: 1, quiet: 1, oddity: 2, merchant: 1
 export function seedRoom(camp, world) {
   const kind = camp.way.here;
   const drawn = drawExits(camp, EXITS[kind] ?? 1);
-  // The room before a campfire, the climax or the sanctuary has one way on, to it (D169).
-  const kinds = drawn.kinds.every((k) => ["campfire", "climax", "sanctuary"].includes(k)) ? drawn.kinds.slice(0, 1) : drawn.kinds;
+  // The room before a campfire, the climax or the sanctuary leads only there (D169), but an encounter still has two ways
+  // to get there, two different exits to the same place (D186).
+  const only = drawn.kinds.length > 0 && drawn.kinds.every((k) => ["campfire", "climax", "sanctuary"].includes(k));
+  const kinds = only ? Array((EXITS[kind] ?? 1) > 1 ? 2 : 1).fill(drawn.kinds[0]) : drawn.kinds;
   return seedFor(drawn.camp, world, kind, kinds);
 }
 

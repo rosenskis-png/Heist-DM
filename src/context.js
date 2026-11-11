@@ -1,6 +1,7 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the game and the bench page.
 import { beatOf, ladder } from "./engine/clock.js";
+import { bearing } from "./engine/map.js";
 import { toughnessOf } from "./engine/ledger.js";
 import { partyPerceives } from "./engine/perceive.js";
 import { usesText } from "./engine/ledger.js";
@@ -607,7 +608,9 @@ export function encounterText(packet, s, { intent = true, party = false, sheets 
     const [x1, y1] = [Math.max(...z.rects.map(([x, , w]) => x + w)), Math.max(...z.rects.map(([, y, , h]) => y + h))];
     return `${(x1 - x0) * 5}×${(y1 - y0) * 5} ft`;
   };
-  const zone = (z) => `- ${z.id} (${z.name}; ${feet(z)}, ${z.light}${z.level ? `, level ${z.level}` : ""}): ${z.purpose}${z.sees?.length ? ` Sees into ${z.sees.join(", ")}.` : ""}`;
+  // Where each way from a place leads, and which way it lies on the map (D186), so the DM's directions match it.
+  const lies = (z) => map.connections.filter((c) => c.between.includes(z.id) && !hidden(c)).map((c) => { const o = map.zones.find((x) => x.id === c.between.find((y) => y !== z.id)); if (!o || hidden(o)) return null; const lv = (o.level ?? 0) - (z.level ?? 0); const b = lv ? (lv > 0 ? "up" : "down") : bearing(z, o); return `${o.id}${b ? ` (${b})` : ""}`; }).filter(Boolean);
+  const zone = (z) => `- ${z.id} (${z.name}; ${feet(z)}, ${z.light}${z.level ? `, level ${z.level}` : ""}): ${z.purpose}${z.sees?.length ? ` Sees into ${z.sees.join(", ")}.` : ""}${lies(z).length ? ` Ways to: ${lies(z).join(", ")}.` : ""}`;
   const way = (c) => `- ${c.id}${c.name ? ` (${c.name})` : ""}: ${c.between.join(" – ")}; ${wayBits(c)}`;
   // Where things are now, from the ledger, so the encounter never contradicts it.
   const where = (t) => (s.holder[t.id] ? `held by ${s.holder[t.id]}` : s.at[t.id] ? `in ${s.at[t.id]}` : "gone");

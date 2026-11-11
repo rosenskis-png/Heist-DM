@@ -166,12 +166,21 @@ function arrange(input, attempt) {
     const open = spots(parent.r, w, h, level, level === parent.level).filter(free);
     const turn = open.length ? (attempt * 5) % open.length : 0;
     const tries = [...open.slice(turn), ...open.slice(0, turn)].slice(0, attempt ? 12 : 80);
+    // Zones already down that share a neighbour with this one not yet placed: this one goes near them, so a ring of
+    // four closes as a square rather than a line with a long way round (D186).
+    const mine = new Set(connections.filter((c) => c.between.includes(zone.id)).map((c) => c.between.find((x) => x !== zone.id)));
+    const kin = [...at.keys()].filter((id) => id !== zone.id && connections.some((c) => c.between.includes(id) && mine.has(c.between.find((x) => x !== id)) && !at.has(c.between.find((x) => x !== id))));
+    // How far apart two rectangles are, in squares; one square apart is as good as touching, so an aligned spot isn't
+    // traded for one shifted a square to touch a corner.
+    const gap = (a, b) => Math.max(0, Math.max(a.x, b.x) - Math.min(a.x + a.w, b.x + b.w) - 1) + Math.max(0, Math.max(a.y, b.y) - Math.min(a.y + a.h, b.y + b.h) - 1);
     let pick = null;
-    let most = -1;
+    let best = -Infinity;
     for (const r of tries) {
       const z = { r, arm: [], level };
       const n = neighbours(zone.id).filter((id) => joined(z, at.get(id))).length;
-      if (n > most) [pick, most] = [z, n];
+      const far = kin.reduce((t, id) => t + gap(r, at.get(id).r), 0);
+      const score = n * 1000 - far;
+      if (score > best) [pick, best] = [z, score];
     }
     return pick;
   };
@@ -241,5 +250,18 @@ function arrange(input, attempt) {
     if (c.square) c.square = [c.square[0] - dx, c.square[1] - dy];
   }
   for (const t of packet.map.things) if (t.location?.at) t.location.at = [t.location.at[0] - dx, t.location.at[1] - dy];
+  // North is up and the party comes in from the south (D186): if the zone the party starts in sits in the top half of
+  // the room, the room is turned top to bottom so it sits at the bottom.
+  const H = Math.max(...zones.flatMap((z) => z.rects.map(([, y, , h]) => y + h)));
+  const first = zones.find((z) => z.id === startId) ?? zones[0];
+  const mid = first.rects.reduce((t, [, y, , h]) => t + y + h / 2, 0) / first.rects.length;
+  if (mid < H / 2) {
+    for (const z of zones) z.rects = z.rects.map(([x, y, w, h]) => [x, H - y - h, w, h]);
+    for (const c of connections) {
+      if (c.wall) c.wall = c.wall.map(([x, y]) => [x, H - y]);
+      if (c.square) c.square = [c.square[0], H - 1 - c.square[1]];
+    }
+    for (const t of packet.map.things) if (t.location?.at) t.location.at = [t.location.at[0], H - 1 - t.location.at[1]];
+  }
   return { packet, mapped: true };
 }
