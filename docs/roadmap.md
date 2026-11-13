@@ -27,13 +27,13 @@ Not gates. Each is answered when play shows it.
 ### The path to v0.1 (alpha)
 Two shakedowns (D174–D187) settled the loop: the room sheet, companions as friends at the table, stakes before the roll, trouble on failure, the pack and carry-over, the map, and the post-mortem fixes. What's left, in order:
 
-1. **One leg in the goblin camp (D180).** Decides the act's shape: if a whole place to move about in plays better than chained rooms, the generator builds one site per leg and calm rooms become parts of it. *Watch:* that the DM keeps distances, heights and who is where consistent, moves the cast when the alarm climbs and leaves them alone when it doesn't, and pivots without being told what kind of scene it is; and what a call costs with a whole site in it (about 13 KB of DM text).
+1. ~~One leg in the goblin camp~~: played; the act stays a chain of rooms (D188).
 2. **Camp in the runner.** The campfire call at campfire rooms and the sanctuary, its beats, journal pages read, outfits, and rest. Each campfire gets the specific moments of the rooms since the last one (reactions, verdicts, what she did and what was done for her), and a handful of the campaign's most memorable moments stay with her. Outfits waiting in `camp.gifts` (D184) are given here. The bench has a working Camp to port. The largest piece.
 3. **Setup choices.** The class choice (setup is rogue only), the player's pronouns as a role slot filled in code (the companions' files still say "he" in places), and the player's secret by act (`content/setting.js` gates it; nothing writes it yet).
 4. **The combat abilities pass** (below, under Combat).
 5. **Play Act 1 end to end with camp in it.** The exit: the companions are worth caring about at camp, the DM runs rooms well, nothing breaks across room boundaries, and the act ends wanting Act 2.
 
-**After v0.1:** playing from the prep note instead of the encoded packet (the token refactor); rooms between the fights, or an act that opens on a calm room (step 1 may answer it); a move the DM calls fatal failing forward (the DM says so before it's committed, and if the player goes ahead it costs rather than refuses); separations and post-game acts; the seed's ingredient pools reviewed for premises that are machines; tuning the morale numbers, the pack's size and the ladders.
+**After v0.1:** playing from the prep note instead of the encoded packet (the token refactor); rooms between the fights, or an act that opens on a calm room; a move the DM calls fatal failing forward (the DM says so before it's committed, and if the player goes ahead it costs rather than refuses); separations and post-game acts; the seed's ingredient pools reviewed for premises that are machines; tuning the morale numbers, the pack's size and the ladders.
 
 ### Still open from earlier play
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.

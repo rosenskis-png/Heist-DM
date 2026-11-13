@@ -9,7 +9,7 @@ import { roomSheet, sheetText, encounterText } from "../src/context.js";
 import { mapView } from "../src/game/view.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
-const camp = JSON.parse(file("content/encounters/goblin_camp.json"));
+const camp = JSON.parse(file("fixtures/sites/goblin_camp.json"));
 const cells = JSON.parse(file("content/encounters/cells.json"));
 const start = () => newSession({ packet: camp, player: { name: "Kael", class: "rogue" }, companions: ["fern", "celeste"] });
 const fail = { reply: "x", ticks: 0, checks: [{ who: "player", band: "medium", reason: "r", success: { text: "a", changes: {} }, failure: { text: "b", changes: {} } }] };

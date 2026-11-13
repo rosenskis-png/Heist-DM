@@ -191,7 +191,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D177** The note stops predicting, and a new room is read once from the player's chair: current
 - **D178** What the party has with it goes from room to room: current
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
-- **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: current
+- **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: changed by D188
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
@@ -199,6 +199,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
 - **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
+- **D188** The act stays a chain of rooms; the site test is closed: current
 
 ---
 
@@ -1177,3 +1178,9 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 - **Calm rooms.** The verdict call runs again after a quiet room, oddity, merchant or campfire, told the room isn't rated. Its reactions, people and what the party has with it are kept; its rating is set aside, so the room moves no regard and no strain, and the page shows it as not rated.
 - **The header** is no longer pinned on a phone: it scrolls away with the page, so it never covers the story. On a wide screen it stays pinned beside the side column.
 **Why:** The designer wanted the companions to keep reacting in calm rooms, and the pinned header took a third of a phone's screen.
+
+### D188. The act stays a chain of rooms; the site test is closed
+**Decided:** The designer's call (2026-11-13), after playing part of a leg in the goblin camp (D180). Changes D180.
+The act stays a chain of single rooms, one leg of them between campfires (D140). No site generator. The goblin camp leaves the setup screen and becomes a test fixture (`fixtures/sites/goblin_camp.json`). What the test built that serves rooms stays: places found as the party goes (`site`), a clock moved by an alarm (`clock.by`), facts that belong to a place, names unknown until heard, and the Map tab's handling of what's unexplored.
+**Why:** A whole place was too large for the DM to keep consistent. A room is small enough that every call holds all of it (principle 4).
+**Rules out:** One generated place per leg; calm rooms as parts of a larger place.
