@@ -21,6 +21,8 @@ Ask for a roll only where failure is both possible and interesting. Walking past
 - **Very hard:** it works only with luck.
 - **Near impossible:** worth trying only if nothing else is left.
 
+What failure costs is something that can actually happen: a hurt, a lost thing, being seen, losing time, being driven back. A forty-foot drop costs a bad fall and a hurt leg, not death; the party is a little larger than life.
+
 Judge from the situation, the people and the character doing it. Their skills and abilities count; so do what the people they're dealing with want and fear. An ability used as its sheet says, with what it needs in place, does what it says with no roll. A limited ability says what's left of it; one with none left can't be used, so say so in `notes`.
 
 ## Fights

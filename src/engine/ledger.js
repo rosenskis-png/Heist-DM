@@ -320,6 +320,16 @@ export function withRulings(s, card) {
 
 // Runs a played-out card: the card's rulings become facts, each step's changes land on its tick, then the
 // people respond, and the clock stops where the plan ended. Steps listed after a stop are dropped.
+// Changes with any harm to the party taken out: no new hurts on them, and none of them knocked down (D189).
+function unharmed(s, ch = {}) {
+  const party = new Set(s.party.map((p) => p.id));
+  return {
+    ...ch,
+    conditions: (ch.conditions ?? []).filter((c) => !party.has(c.who)),
+    flags: (ch.flags ?? []).filter((f) => !(party.has(f.on) && f.key === "down" && f.value)),
+  };
+}
+
 export function resolve(s, card, rolls, out) {
   applyChanges(s, { facts: card.rulings });
   const stop = out.stopped?.at;
@@ -329,7 +339,10 @@ export function resolve(s, card, rolls, out) {
   for (const st of out.steps.filter((x) => stop === undefined || x.n <= stop)) {
     const c = card.steps.find((x) => x.n === st.n);
     if (st.happened !== "no") advanceTo(s, c.at);
-    applyChanges(s, st.changes);
+    // A step whose roll was made does no harm to the party, whatever the account says (D189): a made roll is never
+    // answered with a cost. Harm comes only from a failed roll, a threat left standing, or a placed event.
+    const made = rolls?.find((r) => r.n === st.n)?.success === true;
+    applyChanges(s, made ? unharmed(s, st.changes) : st.changes);
     // What happened is history: it goes in the log, which every call sees the end of, not in the facts.
     log(s, { step: st.n, [st.happened === "yes" ? "did" : st.happened === "partly" ? "partly" : "didnt"]: st.what });
   }
@@ -389,7 +402,7 @@ export function scene(s, out) {
     const odds = ODDS[c.band];
     const roll = d100(s);
     const success = roll <= odds;
-    applyChanges(s, (success ? c.success : c.failure).changes);
+    applyChanges(s, success ? unharmed(s, c.success.changes) : c.failure.changes);
     log(s, { check: c.who, success });
     return { odds, roll, success };
   });

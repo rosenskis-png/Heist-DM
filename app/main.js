@@ -214,6 +214,7 @@ const TABS = [
   ["table", "Table"],
   ["plans", "Plans"],
   ["map", "Map"],
+  ["pack", "Pack"],
 ];
 
 function Game({ env, slot, initial, onQuit }) {
@@ -348,6 +349,7 @@ function Game({ env, slot, initial, onQuit }) {
       <main className="pane">
         ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
         ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
+        ${tab === "pack" ? html`<${PackTab} session=${session} colors=${colors} />` : null}
         ${tab === "map" ? html`<${MapTab} view=${mapView(s)} sketch=${sketchView(s)} sheet=${roomSheet(s)} colors=${colors} party=${s.party} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
       </main>
@@ -374,6 +376,28 @@ function RoomSheet({ sheet }) {
     ${part("What anyone can tell by looking", sheet.facts)}
     ${part("What you've learned", sheet.learned)}
     ${part("Right now", sheet.now)}
+  </section>`;
+}
+
+// The pack (D184, D189): everything the party has, in one place. What each of them is carrying now, with what's
+// known of each thing; the gold and relics; the journal pages to read at camp; and outfits waiting to be given.
+function PackTab({ session, colors }) {
+  const s = session.state;
+  const camp = session.camp ?? {};
+  const members = sheetView(s);
+  const pages = camp.clues?.length ?? 0;
+  const gifts = camp.gifts ?? [];
+  const nothing = !members.some((m) => m.carrying.length) && !s.gold && !s.relics?.length && !pages && !gifts.length;
+  return html`<section className="partysheet pack" aria-label="The pack">
+    <div className="head"><b>The pack</b><span className="left">${s.gold ?? 0} gold</span></div>
+    ${nothing ? html`<p className="muted small">Nothing yet. Anything you pick up, take or are handed shows up here, with what you've learned about it, and goes on with you to the next room.</p>` : null}
+    ${members.map((m) => (m.carrying.length ? html`<div key=${m.id} className="member" style=${{ "--cc": colors[m.id] }}>
+      <b>${m.id === "player" ? `${m.name} (you)` : m.name}</b>
+      ${m.carrying.map((c) => html`<details key=${c.id} className="ab" open><summary><span>${c.name}</span><span className="left">${c.worth ?? ""}</span></summary><span className="muted">${c.what}</span></details>`)}
+    </div>` : null))}
+    ${s.relics?.length ? html`<div className="member"><b>Relics</b>${s.relics.map((r) => html`<details key=${r.id} className="ab"><summary><span>${r.name}</span></summary><span className="muted">${r.text}</span></details>`)}</div>` : null}
+    ${pages ? html`<div className="member"><b>Journal pages</b><span className="muted small">${pages} ${pages === 1 ? "page" : "pages"} to read at camp.</span></div>` : null}
+    ${gifts.length ? html`<div className="member"><b>Outfits to give</b>${gifts.map((g) => html`<details key=${g.id} className="ab"><summary><span>${g.name}</span></summary><span className="muted">${g.text}</span></details>`)}</div>` : null}
   </section>`;
 }
 

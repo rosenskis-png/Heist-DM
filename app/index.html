@@ -75,7 +75,16 @@ textarea { width: 100%; resize: vertical; line-height: 1.45; }
 .game { min-height: 100%; display: grid; grid-template-rows: auto 1fr; }
 .top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
 /* On a phone the header scrolls away with the page, so it never covers the story (D187). */
-@media (max-width: 919px) { .top { position: static; } }
+@media (max-width: 919px) {
+  .top { position: static; }
+  /* The tabs stay at the bottom of a phone's screen, so they're never a scroll away (D189). */
+  .tabs { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; max-width: none; margin: 0; flex-wrap: nowrap; justify-content: space-between; gap: 2px;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 6px max(10px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px)); }
+  .tabs button { padding: 8px 10px; }
+  .tabs .maptab { margin-left: 0; }
+  .game { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
+}
 .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding-block: 8px; max-width: 1240px; margin: 0 auto; }
 .where { flex: 1 1 auto; min-width: 0; font-family: var(--display); font-size: 19px; font-weight: 500; overflow-wrap: anywhere; }
 .topbar .iconbtn { margin-left: auto; }

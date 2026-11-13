@@ -200,6 +200,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 - **D188** The act stays a chain of rooms; the site test is closed: current
+- **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
 
 ---
 
@@ -1184,3 +1185,12 @@ The verdict call returns `carried`: up to six lines of what the party has with i
 The act stays a chain of single rooms, one leg of them between campfires (D140). No site generator. The goblin camp leaves the setup screen and becomes a test fixture (`fixtures/sites/goblin_camp.json`). What the test built that serves rooms stays: places found as the party goes (`site`), a clock moved by an alarm (`clock.by`), facts that belong to a place, names unknown until heard, and the Map tab's handling of what's unexplored.
 **Why:** A whole place was too large for the DM to keep consistent. A room is small enough that every call holds all of it (principle 4).
 **Rules out:** One generated place per leg; calm rooms as parts of a larger place.
+
+### D189. A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach
+**Decided:** The designer's call (2026-11-13), from playtest notes.
+- **A made roll costs nothing.** The engine drops any harm to the party (a new hurt, anyone down) from a card step or a scene check whose roll was made, whatever the DM's account says; the prompts say a made roll is never answered with a cost. Harm comes only from a failed roll, a threat left standing, or a placed event.
+- **Heroes are a little larger than life.** A fall, a burn, a blow or a bad landing hurts and never kills or cripples, so it can always happen; the DM never steers a player off a risky move by calling it deadly, and a card's failure costs are things that can actually happen (style guide, adjudicate).
+- **Finding things.** The scene and resolve prompts say anything the party picks up, takes or is handed is recorded at once, as `holds` or `items`, or the party doesn't have it.
+- **The Pack tab** shows everything the party has: what each member carries with what's known of it, gold, relics, journal pages to read at camp, and outfits waiting to be given.
+- **The tabs stay in reach.** On a phone they sit in a bar fixed to the bottom of the screen.
+**Why:** A forty-foot drop called near-deadly was never allowed to happen, so failure fell back on alarms; a mind flayer stunned the player after a made roll; the inventory couldn't be seen; and reaching the tabs meant scrolling to the top.

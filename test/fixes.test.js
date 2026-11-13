@@ -94,3 +94,19 @@ test("leaving by a way on takes the whole party there", () => {
   leaveBy(session, "up");
   assert.deepEqual(session.ended.exit, ["stair_top"]);
 });
+
+test("a made roll does no harm to the party, whatever the account says; a failed one does (D189)", () => {
+  const s0 = load({ packet: cells, party: party() });
+  const card = { plan: "x", steps: [{ n: 1, summary: "sneak", who: ["player"], at: 1, roll: { band: "medium", reason: "r", fails: "f", stops: false } }], ends_at: 1, rulings: [] };
+  const out = { steps: [{ n: 1, happened: "yes", what: "x", changes: { conditions: [{ id: "stunned", who: "player", text: "Stunned." }], flags: [{ on: "player", key: "down", value: true }, { on: "snag", key: "suspicious", value: true }] } }], ends_at: 1, narration: { text: "x", texture: [] } };
+  const run = (roll) => {
+    const r = apply(s0, { type: "roll", card, rolls: [roll] });
+    return apply(r, { type: "resolve", card, dice: r.dice, out });
+  };
+  const made = run(1);
+  assert.deepEqual(made.conditions, []);
+  assert.ok(!made.flags.player?.down && made.flags.snag.suspicious, "harm to the party is dropped; the rest stands");
+  const failed = run(100);
+  assert.equal(failed.conditions.length, 1);
+  assert.ok(failed.flags.player.down);
+});
