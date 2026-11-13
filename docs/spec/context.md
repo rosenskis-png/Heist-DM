@@ -27,7 +27,7 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 | Verdict | The record of a room that has ended (D146): the player; each companion's values (beliefs, rules, pursuit, mood, what she admires, despises, wants and can't stand); the whole encounter with its ways on; the ledger and the log at the end; how it ended, from the hand-off |
 | Party | Both companions' briefs, each exactly as her companion call has it (D132); the room sheet, as for the companion call; the DM's last two narrations, without the opening; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
 | Companion | Her brief and the special cases she acts on (D79, D114, D175); the room sheet (D174); the DM's last two narrations, without the opening; the draft and the card as shown (D40); her private channel |
-| Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
+| Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far, the rooms since the last campfire and the moments that stayed with her (D190) |
 | Pitch | Its job and the format; the two companions' names, roles and blurbs; the features their stories need, with Gravenhold's version of each; Gravenhold as the worked example; pitches the player turned down; the vibe (D151) |
 
 - **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks; a limited one says what's left of it instead (D128).

@@ -26,6 +26,9 @@ On a phone the two are tabs, each with an unread marker, with a third tab for th
 - **In a site** (D180) the sheet and the map show only the areas found so far, and a way into one not yet seen is named by the way itself. - **"What do you two think?"** sits by Send (D175): the companions speak when they're spoken to, and this asks them without the player saying anything first. Time doesn't move.
 - A companion's stance goes onto the draft for the player to decide: "She sits it out" (her stance stands, and she won't do that step), "It's handled", or "Do it anyway" (D175).
 
+## Camp (D190)
+At a campfire or the sanctuary a Camp tab comes first, and the page goes to it on arriving. The player sits with both companions or one alone, says it aloud or whispers it to one over the rings, and each companion present answers in turn. What passes between the two companions alone shows only as a look exchanged; a shapeshifter in another's place shows by the face she wears. Outfits waiting in the pack can be given to whoever is sitting with the player. The room's ways on sit under it, and taking one ends the night.
+
 ## Between rooms (D173)
 When a room ends, the table and Plans show how it ended, the DM's verdict (rating and why) as soon as it's in, the way on taken, and a status line while the next room is made (a minute or two); then "Go on". At the sanctuary, the player picks the relics the climax lets them keep, then begins the next act. A failed step offers "Try again". A calm room shows its ways on above the composer, and the sanctuary "Rest here, and end the act". The header names the act, the kind of room, and the party's gold and relics. The menu's "Leave this room…" ends a room as it stands, after a second tap.
 

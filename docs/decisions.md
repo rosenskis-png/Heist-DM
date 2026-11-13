@@ -201,6 +201,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 - **D188** The act stays a chain of rooms; the site test is closed: current
 - **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
+- **D190** Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her: current
 
 ---
 
@@ -1194,3 +1195,13 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - **The Pack tab** shows everything the party has: what each member carries with what's known of it, gold, relics, journal pages to read at camp, and outfits waiting to be given.
 - **The tabs stay in reach.** On a phone they sit in a bar fixed to the bottom of the screen.
 **Why:** A forty-foot drop called near-deadly was never allowed to happen, so failure fell back on alarms; a mind flayer stunned the player after a made roll; the inventory couldn't be seen; and reaching the tabs meant scrolling to the top.
+
+### D190. Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her
+**Decided:** Item 2 of the path to v0.1 (`docs/roadmap.md`), first part. Builds D45, D85, D113, D142, D175 and D184.
+- **Where.** At a campfire room or the sanctuary the page opens a Camp tab and goes to it. The player sits with both companions or one alone, speaks aloud or whispers to one over the rings, and the campfire call runs for each companion present, in turn, as on the bench (`src/game/camp.js`, `src/calls/campfire.js`). One scene a fire (D113), kept in the save as `fire`, gone when the party walks on. Leaving is the room's ways on, as in any calm room; the rest the fire gives is unchanged (D142).
+- **The road goes with her.** When a room ends, the campaign keeps a line of it (`since`, `noteRoom` in `src/campaign/run.js`): its name, the hand-off's log of what happened, the verdict's reason if it was rated, and each companion's own reactions with why. Her campfire call reads the rooms since the last fire with only her own reactions. When a campfire or the sanctuary ends, the leg's moments are spent, and her strong reactions (intensity 2) stay with her for the rest of the game, the latest six (`kept`, `fireOut`).
+- **Gifts.** An outfit waiting in the pack (D184) is given at the fire to a companion sitting with the player: it's hers, and she answers the gift in the scene.
+- **Where she stands.** A campfire answer's `standing` and `learned` become what the rooms ahead read of her (D79).
+- **Not yet:** a shapeshifter forced into the other's place (the bench's testing switch), reading answers aloud in the game, and the developer view's look at her `inner`.
+**Why:** D175 took her romance register out of the rooms on the promise that the campfire would remember them. The verdict already says what moved each companion and why; that is the specific moment, in her own terms, and it costs nothing more to keep. Only her own reactions, because the other companion's are the other's inner life (D45). The strong ones are the ones worth a callback acts later; the rest would crowd the call.
+**Rules out:** A campfire that knows only the act's log lines; one companion's call reading the other's reactions; a summarizing call for the road (principle: record at the moment, never compress).

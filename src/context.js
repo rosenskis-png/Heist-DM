@@ -367,7 +367,8 @@ export function campfireInput(env, c, self, others, schema) {
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),
     c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
-    c.events ? block("The last encounter", c.events) : null,
+    c.since?.length ? block("Since the last campfire (the rooms you came through with him, and how you felt about what happened)", c.since) : null,
+    c.kept?.length ? block("Moments from earlier that stayed with you", c.kept) : null,
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
