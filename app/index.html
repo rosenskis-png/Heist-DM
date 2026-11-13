@@ -252,6 +252,10 @@ html, body { overflow-x: hidden; }
 .dev summary { cursor: pointer; display: flex; gap: 8px; flex-wrap: wrap; }
 .dev pre { font: 12px/1.4 var(--mono); white-space: pre-wrap; word-break: break-word; max-height: 50vh; overflow: auto; margin: 6px 0 0; }
 .counts { display: flex; gap: 14px; flex-wrap: wrap; font-variant-numeric: tabular-nums; }
+.hearts { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.heart { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--cc, var(--rose)); border-radius: 12px; padding: 8px 12px; display: grid; gap: 4px; }
+.heart ul { margin: 0; padding-left: 18px; }
+.truth { display: grid; gap: 2px; border-top: 1px dashed var(--line); margin-top: 4px; padding-top: 4px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 

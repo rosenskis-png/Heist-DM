@@ -11,6 +11,7 @@
 //
 // No DOM, so `node --test` can play it with recorded outputs.
 import * as Rel from "../campaign/relationship.js";
+import * as Relationship from "../../content/relationship.js";
 import { addOutfit } from "../campaign/wardrobe.js";
 import { resolveParty } from "../campaign/roster.js";
 import { clueTexts } from "../campaign/world.js";
@@ -75,8 +76,10 @@ export function sceneFor(session, viewer) {
 }
 
 // The scene as the player sees it: everything but what passed between the two companions alone, which shows only as
-// a look exchanged, and with a disguised companion shown by the face she wears. Her `inner` is the developer view's.
-export function fireView(session) {
+// a look exchanged, and with a disguised companion shown by the face she wears. With `reveal` (the developer's view,
+// as on the bench), what passed between them is shown in full, and each answer carries what she really thought, her
+// agenda, what it moved, whether a hidden action was caught, and whose face a shapeshifter wore.
+export function fireView(session, { reveal = false } = {}) {
   const fire = fireOf(session);
   return fire.transcript.map((t) => {
     if (t.from === "player") return { from: "player", text: t.text, to: t.to ?? null, gift: t.gift ?? null };
@@ -84,13 +87,75 @@ export function fireView(session) {
     const shownAs = t.as ?? t.from;
     const other = session.state.party.slice(1).find((p) => p.id !== t.from);
     const c = session.state.party.find((p) => p.id === t.from);
+    const o = t.out;
     return {
       from: shownAs,
-      segments: t.out.segments.map((g) =>
-        g.aside === "to_other"
+      segments: o.segments.map((g) =>
+        g.aside === "to_other" && !reveal
           ? { kind: "look", text: `${nameOf(session, shownAs)} and ${other?.name ?? "the other"} exchange a look; something passes between them over the rings.` }
-          : { kind: g.speaker === "narrator" ? "narration" : "line", who: g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : g.speaker === "self" ? nameOf(session, shownAs) : null, text: g.text, aside: g.aside },
+          : { kind: g.speaker === "narrator" ? "narration" : "line", who: g.speaker === "second_voice" ? c.secondVoice?.name ?? "second voice" : g.speaker === "self" ? nameOf(session, shownAs) : null, text: g.text, aside: g.aside === "to_other" ? `to ${other?.name ?? "the other"}, over the rings` : g.aside },
       ),
+      ...(reveal
+        ? {
+            truth: {
+              ...(t.as ? { disguise: `${c.name} wearing ${nameOf(session, t.as)}'s face` } : {}),
+              inner: o.inner ?? null,
+              agenda: o.agenda ?? null,
+              caught: t.caught ? `${other?.name ?? "The other"} caught the hidden action` : null,
+              moved: [
+                ...o.changes.map((x) => `${x.track} ${x.by > 0 ? "+" : ""}${x.by} (${x.reason})`),
+                o.beats.length ? `beats: ${o.beats.join(", ")}` : null,
+                o.believes ? `now believes: ${o.believes.current ? "involved now" : o.believes.past ? "involved once" : "nothing"}` : null,
+                o.storm != null ? `storm: ${o.storm}` : null,
+                o.risk ? `aside risk: ${o.risk}` : null,
+                o.form ? `new form: ${o.form}` : null,
+                o.outfit ? `changes into: ${o.outfit}` : null,
+                o.advances ? `moves: ${o.advances}` : null,
+                o.standing ? `mood: ${o.standing.mood} (${o.standing.why})` : null,
+              ].filter(Boolean),
+            },
+          }
+        : {}),
+    };
+  });
+}
+
+// How each companion feels, for the developer's view (as on the bench's Camp): her stage, how she feels about the
+// player in words and numbers, how she feels about the other and how she thinks the other feels about her, what she
+// believes, her storm, her mood for the rooms ahead, and her private agenda. Never sent to any call.
+export function heartsView(session) {
+  const members = membersOf(session);
+  const rom = session.camp.romance;
+  return members.map((c) => {
+    const r = rom.rel[c.id];
+    const other = members.find((m) => m.id !== c.id);
+    const word = (bands, v) => {
+      let out = bands[0][1];
+      for (const [at, text] of bands) if (v >= at) out = text;
+      return out;
+    };
+    const S = Relationship.stances;
+    return {
+      id: c.id,
+      name: c.name,
+      stage: Rel.stage(r, c),
+      toward_you: ["heat", "intimacy", "regard"].map((k) => ({ k, v: Math.round(r[k]), words: word(S[k], r[k]) })).concat([{ k: "lean", v: Math.round(r.lean), words: null }]),
+      payoff_at: c.payoff.at,
+      happened: ["payoff", "involved", "vuln", "deep", "bond", "hurt", "manifest"].filter((k) => r[k]),
+      ...(other
+        ? {
+            other: other.name,
+            toward_other: Relationship.axes.map((k) => ({ k, v: Math.round(r.toward[k]), read: Math.round(r.read[k]) })),
+            believes: r.believes.current ? `you and ${other.name} are involved now` : r.believes.past ? `you and ${other.name} were involved once` : "nothing between you and her",
+          }
+        : {}),
+      ...(c.escalation ? { storm: `${r.storm} of ${c.escalation.tiers.length}` } : {}),
+      ...(r.form ? { form: r.form } : {}),
+      mood: session.standing?.[c.id] ?? null,
+      agenda: r.agenda ?? null,
+      memories: r.memories.slice(-5),
+      commitments: r.commitments.slice(-5),
+      config: Rel.config(rom, c, members),
     };
   });
 }

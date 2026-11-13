@@ -119,3 +119,17 @@ test("leaving a campfire spends the leg's moments; leaving any other room adds o
   const fire = { ...a, way: { ...a.way, here: "campfire" } };
   assert.equal(roomEnded(fire, { handoff: {}, verdict: { rating: null, reactions: [], people: [] } }).camp.since.length, 0);
 });
+
+test("the developer's view shows whispers between them, what she thinks, and how each feels (D191)", async () => {
+  const { heartsView } = await import("../src/game/camp.js");
+  const s = atCamp();
+  const { io } = scripted([answer({ segments: [{ speaker: "self", text: "Psst, to her.", aside: "to_other" }], inner: "She's hiding something." }), answer()]);
+  await campTalk(s, io, prompts, { text: "Evening." });
+  const hidden = fireView(s).find((t) => t.segments?.some((g) => g.kind === "look"));
+  assert.ok(hidden && !hidden.truth, "the player's view hides it");
+  const shown = fireView(s, { reveal: true }).find((t) => t.segments?.some((g) => g.text === "Psst, to her."));
+  assert.ok(shown.truth.inner.includes("hiding"));
+  const hearts = heartsView(s);
+  assert.equal(hearts.length, 2);
+  assert.ok(hearts[0].toward_you.some((x) => x.k === "heat") && hearts[0].toward_other.length === 3);
+});

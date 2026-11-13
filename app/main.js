@@ -11,7 +11,7 @@ import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
 import { campaignOf, startAdventure, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
-import { atFire, fireOf, fireView, campTalk, sitWith, speakTo, giveOutfit } from "../src/game/camp.js";
+import { atFire, fireOf, fireView, heartsView, campTalk, sitWith, speakTo, giveOutfit } from "../src/game/camp.js";
 import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
 import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
@@ -540,9 +540,15 @@ function CampTab({ session, env, io, run, busy, error, refresh, colors }) {
   const here = fire.with === "both" ? comps : comps.filter((c) => c.id === fire.with);
   const gifts = session.camp.gifts ?? [];
   const chip = (on, label, click) => html`<button key=${label} aria-pressed=${on} disabled=${!!busy} onClick=${click}>${label}</button>`;
+  // The developer's view, as on the bench's Camp: how each feels, whispers between them, and what they really think.
+  const reveal = !!fire.reveal;
+  const disguise = reveal && fire.disguise ? `${name(fire.disguise.actor)} is wearing ${name(fire.disguise.as)}'s face` : null;
   return html`<section className="feed" aria-label="Camp">
     <p className="small muted">The fire's lit. Nothing is on a clock here: talk, wander, rest. Morning comes when you move on.</p>
-    ${fireView(session).map((t, i) => {
+    <label className="small muted"><input type="checkbox" id="camp-reveal" checked=${reveal} onChange=${(e) => ((fire.reveal = e.target.checked), refresh())} /> Show what's really going on (feelings, whispers between them, thoughts, disguises)</label>
+    ${reveal ? html`<${Hearts} session=${session} colors=${colors} />` : null}
+    ${disguise ? html`<p className="small"><span className="pill gold">disguise</span> ${disguise}</p>` : null}
+    ${fireView(session, { reveal }).map((t, i) => {
       if (t.from === "player")
         return html`<div key=${i} className="say player"><span className="from">${t.to ? `You, whispering to ${name(t.to)}` : t.gift ? "You give a gift" : "You"}</span><span className="text">${t.text}</span></div>`;
       if (t.error) return html`<p key=${i} className="error">${name(t.from)} didn't answer: ${t.error}</p>`;
@@ -550,8 +556,17 @@ function CampTab({ session, env, io, run, busy, error, refresh, colors }) {
         ${t.segments.map((g, j) =>
           g.kind === "look"
             ? html`<span key=${j} className="small muted">${g.text}</span>`
-            : html`<span key=${j} className=${`text${g.kind === "narration" ? " muted" : ""}`}>${g.aside === "ring" ? html`<span className="pill">over the rings</span> ` : g.aside === "action" ? html`<span className="pill">out of sight</span> ` : null}${g.who ? html`<b>${g.who}: </b>` : null}${g.text}</span>`,
+            : html`<span key=${j} className=${`text${g.kind === "narration" ? " muted" : ""}`}>${g.aside === "ring" ? html`<span className="pill">over the rings</span> ` : g.aside === "action" ? html`<span className="pill">out of sight</span> ` : g.aside && g.aside !== "no" ? html`<span className="pill gold">${g.aside}</span> ` : null}${g.who ? html`<b>${g.who}: </b>` : null}${g.text}</span>`,
         )}
+        ${t.truth
+          ? html`<div className="truth small">
+              ${t.truth.disguise ? html`<div><span className="pill gold">disguise</span> ${t.truth.disguise}</div>` : null}
+              ${t.truth.caught ? html`<div><span className="pill bad">caught</span> ${t.truth.caught}</div>` : null}
+              ${t.truth.inner ? html`<div><i>Inside:</i> ${t.truth.inner}</div>` : null}
+              ${t.truth.agenda ? html`<div><i>New agenda:</i> ${t.truth.agenda}</div>` : null}
+              ${t.truth.moved.length ? html`<div className="muted">${t.truth.moved.join(" · ")}</div>` : null}
+            </div>`
+          : null}
       </div>`;
     })}
     <div ref=${end}></div>
@@ -580,6 +595,28 @@ function CampTab({ session, env, io, run, busy, error, refresh, colors }) {
     </div>
     <${WaysOn} session=${session} busy=${busy} refresh=${refresh} run=${run} />
   </section>`;
+}
+
+// How each companion feels right now, for the developer's view: toward the player in words and numbers, toward the
+// other companion and how she thinks the other feels about her, what she believes, and her private agenda.
+function Hearts({ session, colors }) {
+  return html`<div className="hearts">
+    ${heartsView(session).map((c) => html`<div key=${c.id} className="heart" style=${{ "--cc": colors[c.id] }}>
+      <div><b>${c.name}</b> <span className="pill">${c.stage}</span>${c.mood ? html` <span className="muted small">mood: ${c.mood.mood}${c.mood.why ? ` (${c.mood.why})` : ""}</span>` : null}</div>
+      <div className="small"><span className="muted">Toward you</span> · ${c.toward_you.map((x) => `${x.k} ${x.v}${x.k === "heat" ? `/${c.payoff_at}` : ""}`).join(" · ")}</div>
+      <ul className="small">${c.toward_you.filter((x) => x.words).map((x) => html`<li key=${x.k}>${x.words}</li>`)}</ul>
+      ${c.other
+        ? html`<div className="small"><span className="muted">Toward ${c.other} (feels · thinks ${c.other} feels)</span> · ${c.toward_other.map((x) => `${x.k} ${x.v} · ${x.read}`).join("; ")}</div>
+            <div className="small muted">Believes: ${c.believes} · ${c.config}</div>`
+        : null}
+      ${c.happened.length ? html`<div className="small muted">So far: ${c.happened.join(", ")}</div>` : null}
+      ${c.storm ? html`<div className="small">Storm: ${c.storm}</div>` : null}
+      ${c.form ? html`<div className="small">Current form: ${c.form}</div>` : null}
+      ${c.agenda ? html`<div className="small"><i>Agenda:</i> ${c.agenda}</div>` : null}
+      ${c.memories.length ? html`<details className="small"><summary>Memories (${c.memories.length})</summary><ul>${c.memories.map((m, i) => html`<li key=${i}>${m}</li>`)}</ul></details>` : null}
+      ${c.commitments.length ? html`<details className="small"><summary>Commitments (${c.commitments.length})</summary><ul>${c.commitments.map((m, i) => html`<li key=${i}>${m}</li>`)}</ul></details>` : null}
+    </div>`)}
+  </div>`;
 }
 
 // ---------- Plans ----------

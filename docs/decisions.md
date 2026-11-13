@@ -202,6 +202,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D188** The act stays a chain of rooms; the site test is closed: current
 - **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
 - **D190** Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her: current
+- **D191** Camp in the game has the bench's look behind the scene: current
 
 ---
 
@@ -1205,3 +1206,9 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - **Not yet:** a shapeshifter forced into the other's place (the bench's testing switch), reading answers aloud in the game, and the developer view's look at her `inner`.
 **Why:** D175 took her romance register out of the rooms on the promise that the campfire would remember them. The verdict already says what moved each companion and why; that is the specific moment, in her own terms, and it costs nothing more to keep. Only her own reactions, because the other companion's are the other's inner life (D45). The strong ones are the ones worth a callback acts later; the rest would crowd the call.
 **Rules out:** A campfire that knows only the act's log lines; one companion's call reading the other's reactions; a summarizing call for the road (principle: record at the moment, never compress).
+
+### D191. Camp in the game has the bench's look behind the scene
+**Decided:** The designer's call (2026-11-13). Builds D190. A checkbox in the Camp tab, "Show what's really going on", kept in the save with the fire, shows what the bench's Camp shows: each companion's stage, how she feels about the player (heat, intimacy, regard and lean, in numbers and in the words her call reads), how she feels about the other on each axis and how she thinks the other feels about her, what she believes, her storm, form, mood and private agenda, her latest memories and commitments; and in the scene, words between the two companions in full, each answer's `inner`, a new agenda, what it moved, a caught hidden action, and whose face a shapeshifter wears (`fireView` with `reveal`, `heartsView` in `src/game/camp.js`). Off, the player sees only what they would.
+**Why:** The designer plays the game as its tester; without it, nothing at a campfire shows whether the relationship model moved the way the scene read.
+**Rules out:** Any of it reaching a call: it's the page's alone.
+
