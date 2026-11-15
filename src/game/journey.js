@@ -9,6 +9,8 @@ import { pairs } from "../../content/pairs.js";
 import { setting } from "../../content/setting.js";
 import { beginAct, generateRoom } from "./generate.js";
 import { verdictCall } from "../calls/verdict.js";
+import { stockCall } from "../calls/stock.js";
+import { openStock, applyStock, settleStock } from "../campaign/stock.js";
 import { ledgerText } from "../context.js";
 import { load, bindParty } from "../engine/index.js";
 import { act, envFor, post, partyFor, newSession } from "./session.js";
@@ -53,6 +55,27 @@ export function leaveBy(session, exitId = null) {
   session.ended = { ...session.state.handoff, way_on: exitId ?? session.state.handoff.way_on };
 }
 
+// Taking stock when a room ends (D190), before the verdict: the stock call opens it, and each thing the player says
+// to the DM goes through it again, with the talk so far and the lists as they stand. Stored in `session.stock`, so a
+// reload picks up the talk where it stopped.
+export async function takeStock(session, io, prompts, said = null) {
+  const camp = campaignOf(session);
+  const stock = session.stock ?? openStock(camp, session.ended);
+  const told = session.feeds.table.filter((e) => e.who === "dm" && e.text).map((e) => e.text);
+  const lists = stock.talk.length ? { granted: stock.found.map(({ id, ...f }) => f), followers: stock.followers, notes: stock.notes } : null;
+  const out = await stockCall(io, envFor(session, prompts), { now: ledgerText(session.state), told, items: stock.items, arrived: stock.arrived, lists, talk: stock.talk, said });
+  session.stock = applyStock(stock, out, camp, { said });
+  return session.stock;
+}
+
+// The player's choices when taking stock: the things to keep, by id, and the follower who goes on, by name, or none.
+export function settle(session, choices = {}) {
+  const camp = campaignOf(session);
+  const stock = session.stock ?? openStock(camp, session.ended);
+  session.stock = { ...stock, settled: settleStock(stock, choices, camp), choices };
+  return session.stock;
+}
+
 // What the room was, for the record of rooms passed through.
 const summaryOf = (session, verdict) => ({ name: session.state.packet.name ?? session.state.packet.id, log: session.ended.log, rating: verdict?.rating ?? null, why: verdict?.why ?? null });
 
@@ -60,10 +83,15 @@ const summaryOf = (session, verdict) => ({ name: session.state.packet.name ?? se
 // act is over instead, and waits for the relics to be chosen (`endTheAct`). Stores what happens next in `session.between`.
 export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
-  const handoff = session.ended;
+  // What the player kept when taking stock (D190). A room ended without it (an old save) keeps the pack as it came
+  // out, up to its limit, and whatever the party had with it.
+  const settled = session.stock?.settled ?? null;
+  const handoff = settled
+    ? { ...session.ended, items: settled.items, kept: settled.items.map((i) => i.name), follower: settled.carried.find((x) => x.kind === "follower")?.name ?? null }
+    : session.ended;
   const members = session.state.party.slice(1);
-  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, who's worth meeting
-  // again and what the party has with it, but its rating is set aside, so it moves no regard and no strain.
+  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, and who's worth meeting
+  // again, but its rating is set aside, so it moves no regard and no strain.
   const calm = session.state.packet.mode === "room" && camp.way.here !== "sanctuary";
   const judged = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state), calm });
   const verdict = calm ? { ...judged, rating: null, why: null } : judged;
@@ -72,11 +100,12 @@ export async function judgeRoom(session, io, prompts) {
     const next = structuredClone(camp);
     next.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
     next.gold = handoff.gold ?? next.gold;
+    if (settled) Object.assign(next, { items: settled.items, carried: settled.carried });
     session.camp = next;
     session.between = { verdict, actOver: true, last: camp.act >= setting.arc.length };
     return session.between;
   }
-  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, exits: session.state.packet.intent.exits ?? [], members });
+  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, carried: settled?.carried ?? null, exits: session.state.packet.intent.exits ?? [], members });
   session.camp = moved;
   session.between = { verdict, kind, forced, exit: exit ? { id: exit.id, stub: exit.stub ?? null } : null };
   return session.between;
@@ -134,6 +163,7 @@ export function enterRoom(session, roster = authored) {
     counts: { exchanges: 0, edits: 0, out: null },
     ended: null,
     between: null,
+    stock: null,
   });
   post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;

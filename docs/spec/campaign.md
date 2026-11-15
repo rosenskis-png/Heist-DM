@@ -40,7 +40,7 @@ No map of the act is built in advance.
 - **A relic** is a name and one sentence: a passive edge the DM reads as a fact ("beasts hesitate before attacking whoever wears it"). Every DM call sees the party's gold and relics. The party holds at most six in an act (`content/setting.js`, `relics`). How many carry into the next act is the climax's to decide (§5).
 - **A room offers them as things:** a thing can carry a reward, gold or a relic, which the party gets if one of them holds it when the room ends (`docs/spec/packet.md` §3). Rewards are one lever among several, placed where they fit; no room is required to have one.
 - **A merchant's things have a price.** The party pays when one of them takes it, and the engine refuses a change that spends more gold than the party has.
-- There's no inventory beyond these.
+- Beyond these, the party has its pack and at most one follower, settled when each room ends (§10).
 
 ## 5. The climax
 
@@ -60,6 +60,8 @@ No map of the act is built in advance.
 |---|---|
 | Hurts (conditions, D130), per-rest ability uses (D128), and the leg's momentum | Until the next campfire |
 | Relics | The act, then as many as the climax allows (§5) |
+| The pack | Room to room, as kept when taking stock (§10), until the act ends |
+| A follower and the loose ends | Room to room, as settled when taking stock, until the follower reaches their goal (§10) |
 | Gold, how the companions feel about the player and about each other, memories, commitments, companion goals, outfits, and the world's memory (D123) | The whole game |
 
 ## 8. No campaign clocks
@@ -83,3 +85,12 @@ Every adventure is set in a world (`content/worlds/`, D150). The rules every wor
 
 Gravenhold is the default world and the worked example a generated world is written to match. A player who types a vibe at setup gets a world from the pitch call instead (`docs/spec/calls/pitch.md`, D151), in the same shape (`schemas/world.js`), holding every feature the two chosen companions need; the session keeps it whole and saves it, and it's never generated again. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
 
+## 10. Taking stock (D190)
+
+When a room ends, before its verdict, the player and the DM take stock out of character: nothing happens in the world, and the player talks it over for as long as they like (`docs/spec/calls/stock.md`). Code: `src/campaign/stock.js`, `takeStock` and `settle` in `src/game/journey.js`.
+
+- **The pack:** what the hand-off has the party holding, plus anything the DM grants that the game missed. The player keeps up to `content/setting.js` `items.max` (six). Gold, relics, outfits and journal pages don't count. Whatever isn't kept stays behind.
+- **A follower:** the DM lists who could come along, and the player picks one or no one. A follower has a name, pronouns, looks, how they are, a **goal** (a real place, person or thing a later room could be), a hidden **motive** (why they want it, good or bad) and what they know. Their record, goal and motive never change. Only how they are and what they know can. The motive reaches the DM's calls and the sketch, never the player, the room sheet or the question call.
+- **Loose ends:** up to four lines, each a lack that matters or a thread left open.
+- **Where a follower is going:** while one travels with the party, the seed may make an encounter, an oddity or a quiet room their goal. It's never the room right after they join. After that the chance is one in three, then one in two from their third room, and certain from their fifth (`DESTINATION_KINDS` in `src/campaign/seed.js`). That room has no other extra. Their story comes to a head there, and they part ways when it ends, whatever is settled.
+- The campaign keeps the result as `items` and `carried`. A room ended without taking stock keeps the pack as it came out, up to the limit, and what the party already had with it.

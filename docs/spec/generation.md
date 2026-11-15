@@ -69,8 +69,11 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 ## The read (D177)
 After a room with danger in the way (an encounter or a climax) is laid out, the read call reads it once from the player's chair (`docs/spec/calls/read.md`). Fewer than four handles, and the room goes back to the sketch once with the reader's notes; the new room isn't read again. A read that fails holds nothing up.
 
-## What the party has with it (D178)
-The campaign's `carried` list (items, followers, threads, from the last verdict) reaches the sketch as something the room must honour, and the engine loads it into the room's state.
+## What the party has with it (D178, D190)
+The campaign's `carried` list (a follower with their goal and motive, and loose ends, from taking stock) and its pack reach the sketch as something the room must honour, and the engine loads them into the room's state.
+
+## Where a follower is going (D190)
+While a follower travels with the party, the seed may make the room their goal (`docs/spec/campaign.md` §10). The sketch is told who, the place, and why they really want it: the room is that place, their story comes to a head, and they part ways by its end. It is the room's premise, so the room has no other extra.
 
 ## What a seed fixes about the danger (D179)
 For an encounter or a climax the seed fixes how the main danger stands as the party arrives, from `DANGERS`, never twice in an act. The sketch builds a danger too big to fight head-on in that state, with a few loose things around it; the encode call puts how it behaves in plain view as a fact. A room draws one motif.

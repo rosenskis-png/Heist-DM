@@ -189,18 +189,19 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
 - **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
 - **D177** The note stops predicting, and a new room is read once from the player's chair: current
-- **D178** What the party has with it goes from room to room: current
+- **D178** What the party has with it goes from room to room: changed by D190
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: changed by D188
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
-- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: current
+- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: changed by D190
 - **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
 - **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 - **D188** The act stays a chain of rooms; the site test is closed: current
 - **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
+- **D190** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: current
 
 ---
 
@@ -1194,3 +1195,14 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - **The Pack tab** shows everything the party has: what each member carries with what's known of it, gold, relics, journal pages to read at camp, and outfits waiting to be given.
 - **The tabs stay in reach.** On a phone they sit in a bar fixed to the bottom of the screen.
 **Why:** A forty-foot drop called near-deadly was never allowed to happen, so failure fell back on alarms; a mind flayer stunned the player after a made roll; the inventory couldn't be seen; and reaching the tabs meant scrolling to the top.
+
+### D190. Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room
+**Decided:** The designer's call (2026-11-15). Changes D178 and D184.
+- **Taking stock.** When a room ends, before the verdict, the player and the DM take stock out of character, through a new call, `stock` (`docs/spec/calls/stock.md`). Nothing happens in the world. The player talks with the DM for as long as they like. There's no limit on claims and no rule against appeals: the player is co-authoring in good faith, and the DM leans towards yes wherever the record and the narration allow it.
+- **The pack.** The screen shows what the game has the party holding, plus anything the DM grants ("wait, I thought I took the wine bottle?"). The player keeps up to six (`content/setting.js`, `items.max`, down from ten). Gold, relics, outfits and journal pages don't count. What isn't kept stays behind.
+- **One follower, or none.** The DM lists everyone who could come along. Each has a name, pronouns, looks, how they are, a **goal** (a real place, person or thing a later room could be) and a hidden **motive** (why they really want it, good or bad), plus up to three lines of what they know. The player picks at most one. Name, pronouns, looks, goal and motive never change once set. The player can argue what a follower knows or saw, but never what they want or why. The motive reaches the DM's calls and the sketch, never the player, the room sheet or the question call.
+- **The goal becomes a room.** While a follower travels with the party, the seed may make an encounter, an oddity or a quiet room the place they're after: never the room right after they join, then one chance in three, one in two from their third room on, and certainly from their fifth. That room has no other extra. There the follower's story comes to a head, motive and all, and they part ways when it ends.
+- **The verdict** no longer writes `carried`. It sees what was kept and who came along. Loose ends and lacks that matter are kept by the stock call instead, at most four.
+
+**Why:** The verdict summarized what the party had from the record alone, without the narration, so things the DM described and the player took were lost, and it ran alongside the engine's exact pack. Followers had a purpose ("Frank wants to reach the White Lodge") and no way to get there. A room's end, out of character, is where the player can see what carried and say so. That's the deliberation Gravenhold put in the world, now moved out of it. A single follower keeps the context small and D123's worry in check: a follower can't guide the party forever, because their goal finishes their story.
+**Rules out:** The verdict deciding what carries. More than one follower at a time. The player editing a follower's goal or motive. A cap on how many claims the player can make.

@@ -63,16 +63,18 @@ test("a try with a check waits with its stakes shown; backing out changes nothin
   assert.ok(told.includes("It doesn't budge.") && told.includes("The first thing happens."), "the failure and what got worse are both told");
 });
 
-test("what the party has with it goes from the verdict to the campaign, the next room and the sheet (D178)", () => {
-  const carried = [{ kind: "item", what: "a cracked iron hand-bell" }, { kind: "follower", what: "five freed villagers, weak and frightened" }];
+test("what the party has with it goes from taking stock to the campaign, the next room and the sheet (D178, D190)", () => {
+  const carried = [{ kind: "item", what: "unarmed: their weapons were left behind" }, { kind: "follower", name: "Ama", pronouns: "she/her", looks: "a freed villager", what: "weak and frightened", goal: "the mill at Harrow Ford", motive: "her son is there" }];
   let camp = newCampaign({ seed: 3 });
-  camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [], carried }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
+  camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, carried, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
   assert.deepEqual(camp.carried, carried);
-  // A verdict that says nothing keeps what they had.
+  // A room ended without taking stock keeps what they had.
   camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
   assert.deepEqual(camp.carried, carried);
   const s = load({ packet: cells, party: start(cells).state.party, carried: camp.carried });
-  assert.ok(sheetText(roomSheet(s)).includes("five freed villagers, weak and frightened"));
+  const sheet = sheetText(roomSheet(s));
+  assert.ok(sheet.includes("weak and frightened") && sheet.includes("the mill at Harrow Ford"));
+  assert.ok(!sheet.includes("her son"), "why a follower really wants it never reaches the sheet");
 });
 
 test("an encounter's seed fixes how its danger stands, never twice in an act, with one motif and no rule-driven business (D179)", async () => {

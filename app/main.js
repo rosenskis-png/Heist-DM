@@ -10,7 +10,9 @@ import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
-import { campaignOf, startAdventure, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { packOf } from "../src/campaign/stock.js";
+import { setting } from "../content/setting.js";
 import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
 import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
@@ -21,7 +23,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict", "stock"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -41,6 +43,7 @@ const STATUS = {
   sketch: "The DM sketches the next room…",
   encode: "The DM sets out the room…",
   verdict: "The DM weighs how that went…",
+  stock: "The DM looks over what you've got…",
 };
 
 const SPEED = [
@@ -708,8 +711,53 @@ function WaysOn({ session, busy, refresh, run }) {
   </div>`;
 }
 
-// Between rooms (D173): how the room ended, then, without being asked, the DM's verdict and the next room, generated
-// while the player reads; at the sanctuary, the relics to keep before the next act. Each step is saved as it lands, so a
+// Taking stock (D190): out of character, before the verdict. The pack with what the DM has granted, to keep up to its
+// limit; who could come along, one or no one; the loose ends; and the talk with the DM, as long as the player likes.
+function TakingStock({ session, env, io, run, busy }) {
+  const stock = session.stock;
+  const pack = packOf(stock);
+  const max = setting.items.max;
+  const came = (session.camp?.carried ?? []).find((x) => x.kind === "follower")?.name ?? null;
+  const [keep, setKeep] = useState(() => pack.slice(0, max).map((i) => i.id));
+  const [follower, setFollower] = useState(() => (stock.followers.some((f) => f.name === came) ? came : null));
+  const [text, setText] = useState("");
+  const seen = useRef(new Set(pack.map((i) => i.id)));
+  // Something newly granted goes in the pack if there's room.
+  useEffect(() => {
+    const fresh = pack.filter((i) => !seen.current.has(i.id)).map((i) => i.id);
+    fresh.forEach((id) => seen.current.add(id));
+    if (fresh.length) setKeep((k) => [...k, ...fresh].slice(0, Math.max(k.length, max)));
+  }, [stock.found.length]);
+  const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < max ? [...k, id] : k));
+  const say = () => {
+    const said = text.trim();
+    if (!said) return;
+    setText("");
+    run("between", () => takeStock(session, io, env.prompts, said));
+  };
+  const holder = (id) => session.state.party.find((p) => p.id === id)?.name ?? id;
+  return html`<div className="stock">
+    <h3>Taking stock</h3>
+    <p className="muted small">Out of character: nothing happens in the world. Talk it over with the DM as long as you like, then walk on.</p>
+    <div className="member"><b>The pack</b> <span className="muted small">${keep.length} of ${max}</span>
+      ${pack.length ? pack.map((i) => html`<label key=${i.id} className="relic"><input type="checkbox" checked=${keep.includes(i.id)} disabled=${!keep.includes(i.id) && keep.length >= max} onChange=${() => toggle(i.id)} /> <b>${i.name}</b> <span className="muted">${holder(i.holder)}${stock.found.some((f) => f.id === i.id) ? ", granted" : ""}. ${i.properties}</span></label>`) : html`<span className="muted small">Nothing carried out.</span>`}
+    </div>
+    <div className="member"><b>Who comes along</b> <span className="muted small">one, or no one</span>
+      <label className="relic"><input type="radio" name="follower" checked=${!follower} onChange=${() => setFollower(null)} /> No one</label>
+      ${stock.followers.map((f) => html`<label key=${f.name} className="relic"><input type="radio" name="follower" checked=${follower === f.name} onChange=${() => setFollower(f.name)} /> <b>${f.name}</b> <span className="muted">(${f.pronouns}; ${f.looks}). ${f.what} Trying to reach: ${f.goal}.${f.knows?.length ? ` Knows: ${f.knows.join(" ")}` : ""}</span></label>`)}
+    </div>
+    ${stock.notes.length ? html`<div className="member"><b>Loose ends</b>${stock.notes.map((n, i) => html`<span key=${i} className="small">${n.what}</span>`)}</div>` : null}
+    <div className="talk">${stock.talk.map((t, i) => html`<p key=${i} className=${t.who === "dm" ? "" : "muted"}><b>${t.who === "dm" ? "DM" : "You"}:</b> ${t.text}</p>`)}</div>
+    <textarea rows="2" value=${text} disabled=${!!busy} placeholder="Wait, I thought I took the wine bottle?" onInput=${(e) => setText(e.target.value)}></textarea>
+    <div className="row" style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+      <button className="ghost" disabled=${!!busy || !text.trim()} onClick=${say}>Say it</button>
+      <button className="primary" disabled=${!!busy} onClick=${() => run("between", async () => settle(session, { keep, follower }))}>Walk on</button>
+    </div>
+  </div>`;
+}
+
+// Between rooms (D173): how the room ended; taking stock with the player (D190); then, without being asked, the DM's
+// verdict and the next room, generated while the player reads; at the sanctuary, the relics to keep before the next act. Each step is saved as it lands, so a
 // reload picks up where it stopped, and a failed step can be tried again.
 function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const h = session.ended;
@@ -717,10 +765,11 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const b = session.between;
   const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward].find((o) => o?.id === h.outcome)?.label ?? (h.outcome === "left" ? "You move on" : h.outcome === "rested" ? "You rest" : h.outcome);
   const [keep, setKeep] = useState([]);
-  const step = !b ? "judge" : b.actOver ? "relics" : !b.packet ? "next" : "ready";
+  const step = b ? (b.actOver ? "relics" : !b.packet ? "next" : "ready") : !session.stock?.talk?.length ? "open" : !session.stock.settled ? "stock" : "judge";
   useEffect(() => {
     if (busy || error) return;
-    if (step === "judge") run("between", () => judgeRoom(session, io, env.prompts));
+    if (step === "open") run("between", () => takeStock(session, io, env.prompts));
+    else if (step === "judge") run("between", () => judgeRoom(session, io, env.prompts));
     else if (step === "next") run("between", () => nextRoom(session, io, env.gen, env.roster));
   }, [step, !!busy, !!error]);
   const camp = session.camp;
@@ -728,7 +777,9 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < allowed ? [...k, id] : k));
   return html`<section className="ending">
     <h2>${label}</h2>
-    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>`}
+    ${step === "open" ? html`<p className="muted">${busy ?? "The DM looks over what you've got…"}</p>` : null}
+    ${step === "stock" ? html`<${TakingStock} session=${session} env=${env} io=${io} run=${run} busy=${busy} />` : null}
+    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : step === "judge" ? html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>` : null}
     ${b?.exit?.stub ? html`<p className="muted">${b.forced ? "You're carried on. " : ""}${b.exit.stub}</p>` : null}
     ${step === "relics" && b.last
       ? html`<p>You're out. That's the end of the adventure, for now.</p><button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>`

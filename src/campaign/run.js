@@ -22,35 +22,34 @@ export function drawExits(camp, n) {
 // campfire: in a room whose exits don't already lead to the campfire or the climax (D142).
 export const canSeparate = (camp) => camp.way.left > 0 && !["climax", "sanctuary", "campfire"].includes(camp.way.here);
 
-// A room has ended: its hand-off and its verdict (D146). Gold and relics come out of the hand-off; the verdict moves
-// how everyone feels and the leg's strain; the way on is the exit the party reached, or code picks one (D144). At a
-// campfire or the sanctuary the party rests and everyone is together again (D142). The climax's rating decides how many
-// relics the party may keep into the next act (D148). Returns the campaign and where the party is going.
-export function roomEnded(camp, { handoff, verdict, exits = [], members = [] }) {
+// A room has ended: its hand-off, what the player kept when taking stock, and its verdict (D146, D190). Gold and
+// relics come out of the hand-off; the verdict moves how everyone feels and the leg's strain; the way on is the exit the
+// party reached, or code picks one (D144). At a campfire or the sanctuary the party rests and everyone is together again
+// (D142). The climax's rating decides how many relics the party may keep into the next act (D148). Returns the
+// campaign and where the party is going.
+export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], members = [] }) {
   const out = structuredClone({ ...camp, romance: null });
   out.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
   out.gold = handoff.gold ?? out.gold;
   out.relics = [...out.relics, ...(handoff.relics ?? [])].slice(0, setting.relics.max);
-  // The pack (D184): what the party carried out of the room, whole. A thing left, lost or used up is simply not in
-  // the hand-off. An outfit a companion carried out is hers; one the player carried out waits to be given.
+  // The pack (D184, D190): what the player kept when taking stock. A thing left, lost or used up is simply not in it.
+  // An outfit a companion carried out is hers; one the player carried out waits to be given.
   out.items = (handoff.items ?? out.items ?? []).slice(0, setting.items.max);
   for (const { holder, ...fit } of handoff.outfits ?? []) {
     if (out.romance?.wardrobe?.[holder]) out.romance = addOutfit(out.romance, holder, fit.id, { name: fit.name, text: fit.text });
     else out.gifts = [...(out.gifts ?? []).filter((g) => g.id !== fit.id), fit];
   }
   out.carry = { conditions: handoff.conditions ?? [], spent: handoff.spent ?? {}, companions: handoff.companions ?? out.members };
+  // What the party has with it (D178, D190): the follower the player chose, if any, and what else goes on, as settled
+  // when taking stock. Without a settled stock, what they had stays.
+  if (carried) out.carried = carried;
+  // A follower who reached what they were after parts ways here, whatever else was settled (D190).
+  if (out.destination?.room === camp.roomNo) {
+    out.carried = (out.carried ?? []).filter((x) => !(x.kind === "follower" && x.name === out.destination.name));
+    out.destination = null;
+  }
   // What the act remembers (D164): the room's log line, the clues the party came away with, and anyone memorable the
   // verdict named, whom a later room may bring back.
-  // What the party has with it (D178): the verdict gives the whole list as they leave.
-  // A follower's record doesn't drift (D185): once a follower has a name, pronouns and looks, later rooms keep them
-  // whatever a verdict writes; only what they're doing and how they are can change.
-  const before = (out.carried ?? []).filter((x) => x.kind === "follower" && x.name);
-  const key = (n) => String(n ?? "").toLowerCase().split(/[ ,]/)[0];
-  out.carried = (verdict?.carried ?? out.carried ?? []).slice(0, 6).map((x) => {
-    if (x.kind !== "follower") return x;
-    const was = before.find((b) => key(b.name) === key(x.name) || (!x.name && key(x.what).length > 1 && key(b.name) === key(x.what)));
-    return was ? { ...x, name: was.name, pronouns: was.pronouns ?? x.pronouns, looks: was.looks ?? x.looks } : x;
-  });
   out.log = [...(out.log ?? []), handoff.log].filter(Boolean);
   out.clues = [...new Set([...(out.clues ?? []), ...(handoff.clues ?? [])])];
   out.memory = [...(out.memory ?? []), ...(verdict?.people ?? []).map((p) => ({ ...p, act: out.act }))].slice(-30);

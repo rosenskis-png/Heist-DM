@@ -245,14 +245,20 @@ function campaign(env, call, schema) {
   ];
 }
 
-// One line of what the party has with it (D178, D185): a follower with their fixed record first.
-export const carriedLine = (x) => `${x.kind}: ${x.name ? `${x.name} (${[x.pronouns, x.looks].filter(Boolean).join("; ")}). ` : ""}${x.what}`;
+// One line of what the party has with it (D178, D185, D190): a follower with their fixed record first, then what they
+// say they're after and what they know. Why they really want it is for the DM's calls alone: `hidden: false` leaves it
+// out, for a call whose words reach the player.
+export const carriedLine = (x, { hidden = true } = {}) =>
+  `${x.kind}: ${x.name ? `${x.name} (${[x.pronouns, x.looks].filter(Boolean).join("; ")}). ` : ""}${x.what}` +
+  (x.goal ? ` They're trying to reach: ${x.goal}.` : "") +
+  (hidden && x.motive ? ` Why, really (the party doesn't know): ${x.motive}.` : "") +
+  (x.knows?.length ? ` They know: ${x.knows.join(" ")}` : "");
 
 // What the party has to spend and the relics it holds (D147), for the DM's calls: each relic is a fact.
-function kit(env) {
+function kit(env, { hidden = true } = {}) {
   const { gold = 0, relics = [], carried = [] } = env.state ?? {};
   if (!gold && !relics.length && !carried.length) return null;
-  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map(carriedLine) } : {}) });
+  return block("The party's gold and relics, and what it has with it from earlier rooms", { gold, relics: relics.map((r) => `${r.name}: ${r.text}`), ...(carried.length ? { with_them: carried.map((x) => carriedLine(x, { hidden })) } : {}) });
 }
 
 // The party as the DM's calls see it; companions add their voice and mood, so the DM can voice them (D79).
@@ -562,7 +568,7 @@ export function roomSheet(state, packet = state.packet) {
     things: map.things.filter((t) => known(t) && (partyHas(t) || !found || found.has(s.at[t.id]) || found.has(s.at[s.holder[t.id]]) || s.party.some((p) => p.id === s.holder[t.id]))).map((t) => ({ id: t.id, name: t.name, where: where(t.id), what: `${t.properties}${t.notes?.length ? ` ${t.notes.join(" ")}` : ""}` })),
     people: perceived.map((p) => ({ id: p.id, name: p.name, where: seen.has(s.at[p.id]) ? `in ${label(s.at[p.id])}` : `heard from ${label(s.at[p.id])}`, ...(routine(p) ? { routine: routine(p) } : {}), ...(st.beats[p.id] ? { beat: st.beats[p.id] } : {}) })),
     facts: map.facts.filter((f) => known(f) && (!f.at || here_(f.at))).map((f) => f.text),
-    carried: (s.carried ?? []).map((x) => (x.name ? `${x.name}${x.pronouns ? ` (${x.pronouns})` : ""}: ${x.what}` : x.what)),
+    carried: (s.carried ?? []).map((x) => (x.name ? `${x.name}${x.pronouns ? ` (${x.pronouns})` : ""}: ${x.what}${x.goal ? ` Trying to reach: ${x.goal}.` : ""}` : x.what)),
     learned: st.facts.map((f) => f.text),
     now: [
       ...s.party.filter((p) => st.flags[p.id]).map((p) => `${p.name}: ${flagText(st.flags[p.id])}`),
@@ -659,7 +665,7 @@ export function questionInput(env, c, schema) {
   return compose([
     ...campaign(env, "question", schema),
     block("The party", party),
-    kit(env),
+    kit(env, { hidden: false }),
     block("The encounter", encounterText(env.packet, env.state, { intent: false, party: true, sheets: false })),
     block("Opening description", env.packet.opening),
     block("The ledger now", c.now),
@@ -728,7 +734,8 @@ export function verdictInput(env, c, schema) {
   const h = c.handoff;
   const ending = {
     ended: h.outcome, kind: h.ending, optional_met: h.optional?.met ?? [], optional_missed: h.optional?.missed ?? [],
-    left_by: h.way_on ?? "no exit reached", carried: h.gear, hurt: h.conditions.map((x) => `${x.who}: ${x.text}`),
+    left_by: h.way_on ?? "no exit reached", carried: h.kept ?? h.gear, hurt: h.conditions.map((x) => `${x.who}: ${x.text}`),
+    ...(h.follower !== undefined ? { coming_along: h.follower ?? "no one" } : {}),
   };
   const exits = (env.packet.intent.exits ?? []).map((e) => `${e.id} (from ${e.zone}, to a ${e.leads_to}${e.stub ? `: ${e.stub}` : ""})`);
   return compose([
@@ -739,11 +746,37 @@ export function verdictInput(env, c, schema) {
     exits.length ? block("The room's ways on", exits) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
-    c.calm ? "This was a calm room: it isn't rated (give any rating; it's set aside). What matters here is how each companion felt about what the party did, and what it has with it." : null,
-    env.state?.carried?.length ? block("What the party already had with it, coming in (a follower's name, pronouns and looks never change)", env.state.carried.map(carriedLine)) : null,
+    c.calm ? "This was a calm room: it isn't rated (give any rating; it's set aside). What matters here is how each companion felt about what the party did." : null,
+    env.state?.carried?.length ? block("What the party already had with it, coming in", env.state.carried.map((x) => carriedLine(x))) : null,
     "Judge how the room went.",
   ]);
 }
+
+// Taking stock when a room ends (docs/spec/calls/stock.md, D190): the room as the DM knew it, the ledger and the log
+// at the end, everything the DM narrated, what the party carried out and came in with, and the talk so far with the
+// lists as they stand, so each answer gives the whole lists again.
+export function stockInput(env, c, schema) {
+  const party = env.party.map((p) => ({ id: p.id, name: p.name }));
+  // The newest narration, as much as fits in its share of the call.
+  const told = [];
+  for (let i = (c.told ?? []).length - 1, size = 0; i >= 0 && (size += c.told[i].length) <= STOCK_TOLD; i--) told.unshift(c.told[i]);
+  return compose([
+    ...campaign(env, "stock", schema),
+    block("The party", party),
+    ...dmEncounter(env),
+    block("The ledger and the log at the end", c.now),
+    told.length ? block("What the DM narrated in this room, in order", told) : null,
+    block("What the game has the party carrying out", c.items.length ? c.items.map((i) => `${i.name} (held by ${i.holder}): ${i.properties}`) : ["nothing"]),
+    env.state?.carried?.length ? block("What the party had with it coming in (a follower's name, pronouns, looks, goal and why never change)", env.state.carried.map((x) => carriedLine(x))) : null,
+    c.arrived ? block("Who has reached what they were after", `${c.arrived} reached the place they were trying to get to, in this room. They part ways with the party now: leave them out of the followers.`) : null,
+    c.lists ? block("The lists as they stand", c.lists) : null,
+    c.talk?.length ? block("The talk so far", c.talk.map((t) => `${t.who === "player" ? "Player" : "DM"}: ${t.text}`)) : null,
+    c.said ? block("The player says", c.said) : null,
+    c.said ? "Answer the player, and give the whole lists again." : "Open the stock-taking: the lists, and a line to the player.",
+  ]);
+}
+// How much of the room's narration the stock call reads, in characters, newest kept first.
+const STOCK_TOLD = 6144;
 
 // A new world from the player's vibe (docs/spec/calls/pitch.md, D151): what every world shares, the companions'
 // needs with what Gravenhold made of each, Gravenhold as the worked example, the vibe, and any pitches the player has
@@ -799,6 +832,9 @@ const seedText = (seed, world) => ({
     ...(seed.clue
       ? { prize: { a_journal_page: { written_by: seed.clue.author }, how: "a loose page, torn from that writer's journal, somewhere in the room the party has to reach and can carry off. They'll read it at camp: nothing in the room says or shows what's on it, and nobody here knows" } }
       : seed.prize ? { prize: seed.prize } : {}),
+    ...(seed.destination
+      ? { where_a_follower_is_going: { who: seed.destination.name, place: seed.destination.goal, ...(seed.destination.motive ? { why_really: seed.destination.motive } : {}), how: "this room is that place, or the threshold of it. The follower's story comes to a head here: what they really wanted comes out, for good or ill, and by the room's end they part from the party, staying, leaving or lost. The party can still make of it what they like" } }
+      : {}),
     ...(seed.callback ? { someone_from_before: { ...seed.callback, how: "they turn up here, in whatever role fits the room; they may or may not help" } } : {}),
     ...(seed.hint ? { a_sign_of_what_is_coming: { sign: seed.hint, how: "something the party sees or hears here, in passing; never who or what it's a sign of, in person" } } : {}),
     ...(seed.news ? { news: { what: seed.news, how: "something the party hears or sees here of what's been set in motion; part of the room, not its subject" } } : {}),
@@ -877,7 +913,7 @@ export function sketchInput(env, c, schema) {
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
-    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map(carriedLine), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
+    c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map((x) => carriedLine(x)), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
     c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);

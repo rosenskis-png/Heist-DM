@@ -9,6 +9,7 @@ export { resolveSchema } from "./calls/resolve.js";
 export { sceneSchema } from "./calls/scene.js";
 export { questionSchema } from "./calls/question.js";
 export { verdictSchema } from "./calls/verdict.js";
+export { stockSchema } from "./calls/stock.js";
 export { pitchSchema } from "./calls/pitch.js";
 export { sketchSchema } from "./calls/sketch.js";
 export { readSchema } from "./calls/read.js";

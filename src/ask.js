@@ -6,14 +6,14 @@ import { validate, tidy } from "./validate.js";
 export const TIERS = ["quick", "default", "complex"];
 
 // The middle position of the speed and quality setting (D58). The other two move every call one tier (D70).
-export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", read: "quick", encode: "default", photo: "default" };
+export const MIDDLE = { adjudicate: "default", resolve: "default", scene: "default", question: "quick", verdict: "default", stock: "default", companion: "quick", party: "quick", campfire: "complex", pitch: "complex", act: "complex", sketch: "complex", read: "quick", encode: "default", photo: "default" };
 export const SPEEDS = { faster: -1, balanced: 0, smarter: 1 };
 export const tierFor = (call, speed = "balanced") => TIERS[Math.max(0, Math.min(TIERS.length - 1, TIERS.indexOf(MIDDLE[call]) + (SPEEDS[speed] ?? 0)))];
 
 // How big each call's input may grow before it's flagged (D76). Crossing one isn't an error: the call still
 // runs, the page shows a warning, and the save keeps a record of it, so growth can't happen unnoticed.
 // `test/budget.test.js` holds every DM call under its budget at the ledger's limits, mid-fight (D130).
-export const BUDGET = { adjudicate: 29696, resolve: 30720, scene: 30720, question: 23552, verdict: 27648, pitch: 24576, act: 20480, sketch: 32768, read: 8192, encode: 28672, companion: 22528, party: 26624 };
+export const BUDGET = { adjudicate: 29696, resolve: 30720, scene: 30720, question: 23552, verdict: 27648, stock: 43008, pitch: 24576, act: 20480, sketch: 32768, read: 8192, encode: 28672, companion: 22528, party: 26624 };
 
 // Replay is on where identical state should get an identical ruling, off for conversation and prose (D14).
 const REPLAY = new Set(["adjudicate"]);

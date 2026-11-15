@@ -22,6 +22,10 @@ export const DANGERS = ["asleep or dozing", "eating or drinking", "busy with wor
 // What's worth having beyond the way out (D164): nothing about half the time; a clue is one more kind of reward.
 export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a journal page"];
 const PRIZE_WEIGHTS = [10, 4, 2, 4];
+// Where a follower is going (D190): the rooms that can be that place, and how likely the room is it, by how many rooms
+// they've travelled with the party: never the first, then one in three, one in two from the third, and always from the fifth.
+const DESTINATION_KINDS = ["encounter", "oddity", "quiet"];
+const destinationOdds = (n) => (n >= 5 ? 1 : n >= 3 ? 2 : n >= 1 ? 3 : 0);
 // Rooms with a challenge; rooms that may hold a prize; rooms a returning character may turn up in (the designer's call).
 const CHALLENGED = ["encounter", "climax"];
 const PRIZED = ["encounter", "oddity", "quiet"];
@@ -106,10 +110,17 @@ export function seedFor(camp, world, kind, exits = []) {
       else seed.prize = "gold";
     }
   }
+  // The follower's destination (D190): this room may be the place they've been trying to reach. It's the room's
+  // premise, so the room has no other extra.
+  const follower = (camp.carried ?? []).find((x) => x.kind === "follower" && x.goal);
+  if (follower && DESTINATION_KINDS.includes(kind) && !camp.destination) {
+    const odds = destinationOdds(room - 1 - (follower.since ?? 0));
+    if (odds && roll(rng, odds) === 0) seed.destination = { name: follower.name, goal: follower.goal, motive: follower.motive ?? null };
+  }
   // At most one extra, never two rooms running: a returning character, or a sign of the act's peak (D164).
   const calledBack = camp.calledBack ?? [];
   const hintsUsed = camp.hintsUsed ?? [];
-  const quiet = camp.lastExtra === room - 1;
+  const quiet = camp.lastExtra === room - 1 || !!seed.destination;
   if (!quiet && CALLBACK_KINDS.includes(kind) && roll(rng, 3) === 0) {
     const who = (camp.memory ?? []).filter((p) => !calledBack.includes(p.name));
     // The act's picks first: people who'd plausibly be in this region (D167).
@@ -144,6 +155,7 @@ export function seedFor(camp, world, kind, exits = []) {
       newsUsed: seed.news ? [...newsUsed, seed.news] : newsUsed,
       storyShown: seed.herStory ? [...storyShown, seed.spotlight] : storyShown,
       ...(extra ? { lastExtra: room } : {}),
+      ...(seed.destination ? { destination: { name: seed.destination.name, room } } : {}),
       ...(seed.hint ? { hintLeg: camp.way.leg } : {}),
       spotlight: seed.spotlight,
     },

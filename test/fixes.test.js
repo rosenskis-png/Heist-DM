@@ -46,12 +46,13 @@ test("a call's slips are tidied before they're checked, never retried", () => {
   assert.equal(fixed.ends_at, 12);
 });
 
-test("a follower's name, pronouns and looks stay as they were, whatever a later verdict writes", () => {
-  const nib = { kind: "follower", name: "Nib", pronouns: "he/him", looks: "a molting kobold with a red judgement-mark", what: "untied and wary" };
-  const room = (carried) => ({ handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [], carried }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] });
-  let camp = roomEnded(newCampaign({ seed: 3 }), room([nib])).camp;
-  camp = roomEnded(camp, room([{ kind: "follower", name: "Nib", pronouns: "she/her", looks: "hooded", what: "frightened but safe" }])).camp;
-  assert.deepEqual(camp.carried[0], { ...nib, what: "frightened but safe" });
+test("a follower's name, pronouns, looks, goal and motive stay as they were, whatever a later stock-taking writes", async () => {
+  const { openStock, applyStock } = await import("../src/campaign/stock.js");
+  const nib = { kind: "follower", name: "Nib", pronouns: "he/him", looks: "a molting kobold with a red judgement-mark", what: "untied and wary", goal: "the Ash Market", motive: "to sell the party's names" };
+  const camp = { ...newCampaign({ seed: 3 }), carried: [nib] };
+  const stock = applyStock(openStock(camp, { items: [] }), { reply: "x", found: [], notes: [], followers: [{ name: "Nib", pronouns: "she/her", looks: "hooded", what: "frightened but safe", goal: "home", motive: "none" }] }, camp);
+  const { kind, ...was } = nib;
+  assert.deepEqual(stock.followers[0], { ...was, what: "frightened but safe" });
 });
 
 test("places aren't 'the the', a blank name isn't the class, and hidden fact labels aren't hidden words", () => {

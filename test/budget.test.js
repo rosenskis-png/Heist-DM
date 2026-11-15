@@ -4,13 +4,13 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newSession, envFor } from "../src/game/session.js";
-import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput, partyInput, questionInput, verdictInput } from "../src/context.js";
+import { ledgerText, aheadText, adjudicateInput, resolveInput, sceneInput, companionInput, partyInput, questionInput, verdictInput, stockInput } from "../src/context.js";
 import { narrated } from "../src/game/turns.js";
 import { LEDGER } from "../src/engine/index.js";
 import { CONDITIONS, THREATS } from "../content/rules.js";
 import { BUDGET } from "../src/ask.js";
 import { setting } from "../content/setting.js";
-import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema, partySchema, questionSchema, verdictSchema } from "../schemas/index.js";
+import { adjudicateSchema, resolveSchema, sceneSchema, companionSchema, partySchema, questionSchema, verdictSchema, stockSchema } from "../schemas/index.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
 const packet = JSON.parse(file("content/encounters/cells.json"));
@@ -46,12 +46,19 @@ test("every DM and companion call stays under its budget at the ledger's limits"
     companion: companionInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party[1], [s.party[2]], [{ from: "player", text: plan }], companionSchema),
     question: questionInput(env, { now: ledgerText(s, { log: false }), recent: Array.from({ length: 6 }, () => ({ from: "dm", text: line(300) })), question: plan }, questionSchema),
     verdict: verdictInput(env, { now: ledgerText(s), handoff: { outcome: "escaped", ending: "objective", optional: { met: [], missed: ["gear"] }, way_on: null, gear: [], conditions: s.conditions } }, verdictSchema),
+    stock: stockInput(env, {
+      now: ledgerText(s), told: Array.from({ length: 30 }, () => line(300).repeat(4)),
+      items: Array.from({ length: setting.items.max + 4 }, (_, i) => ({ id: `t${i}`, name: `Thing ${i}`, holder: "player", properties: line(160) })),
+      lists: { granted: Array.from({ length: 4 }, () => ({ name: line(40), properties: line(160), holder: "player", why: line(80) })), followers: Array.from({ length: 4 }, () => ({ name: line(20), pronouns: "he/him", looks: line(80), what: line(120), goal: line(120), motive: line(160), knows: [line(120), line(120), line(120)] })), notes: Array.from({ length: 4 }, () => ({ kind: "thread", what: line(160) })) },
+      talk: Array.from({ length: 12 }, (_, i) => ({ who: i % 2 ? "dm" : "player", text: line(300) })), said: line(300),
+    }, stockSchema),
     party: partyInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party.slice(1), [{ from: "player", text: plan }], partySchema),
   };
   const over = [];
   for (const [call, input] of Object.entries(sizes)) {
     const size = new TextEncoder().encode(input).length;
     console.log(`${call}: ${size} bytes (budget ${BUDGET[call]})`);
+    if (process.env.BLOCKS === call) for (const b of input.split(/\n(?=## )/)) console.log(`  ${b.split("\n")[0].slice(0, 60)}: ${b.length}`);
     if (size > BUDGET[call]) over.push(`${call}: ${size} bytes, over its budget of ${BUDGET[call]}`);
   }
   assert.deepEqual(over, []);
