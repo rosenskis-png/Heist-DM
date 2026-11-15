@@ -15,7 +15,8 @@ import { seedRoom, designRoom, edgesFor } from "../src/game/generate.js";
 import { actCall } from "../src/calls/act.js";
 import { pitchCall } from "../src/calls/pitch.js";
 import { tierFor, SPEEDS, CallFailed } from "../src/ask.js";
-import { ROOM_KINDS } from "../src/context.js";
+import { ROOM_KINDS, roomSheet } from "../src/context.js";
+import { load } from "../src/engine/load.js";
 
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const h = (tag, attrs = {}, ...kids) => {
@@ -57,7 +58,7 @@ const fields = (o, skip = []) => kv(Object.entries(o).filter(([k]) => k !== "id"
 
 const KINDS = ["encounter", "quiet", "oddity", "merchant", "campfire", "climax", "sanctuary"];
 const CHALLENGED = ["encounter", "climax"];
-const PROMPTS = ["pitch", "act", "sketch", "encode", "outfit"];
+const PROMPTS = ["pitch", "act", "sketch", "encode", "outfit", "read"];
 const PRIZED = ["encounter", "oddity", "quiet"];
 
 // ---------- state ----------
@@ -70,6 +71,8 @@ const S = {
   current: store.get("forge.current", null),
   setupExample: store.get("forge.example2", false),
   reuseSeed: false,
+  // Rooms show what the player is told; the DM side (seed, sketch, packet, calls) is a toggle.
+  dmSide: store.get("forge.dmSide", false),
   room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", place: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
   // Each adventure's act plans, by "adventure:act" (D164).
   plans: store.get("forge.plans", {}),
@@ -87,6 +90,7 @@ const save = () => {
   store.set("forge.rooms", S.rooms.slice(0, 40));
   store.set("forge.plans", S.plans);
   store.set("forge.example2", S.setupExample);
+  store.set("forge.dmSide", S.dmSide);
 };
 
 let env, sample, db;
@@ -377,7 +381,7 @@ function planView(adv, act) {
   const canRun = sample && !S.busy && w.regions;
   const head = h("div", { class: "row" },
     h("button", { class: plan ? "plain" : "go", disabled: !canRun, onclick: () => beginActHere(adv, act) }, plan ? `Begin act ${act} again` : `Begin act ${act}`),
-    plan ? null : h("span", { class: "status" }, "Rooms use the act's plan: its region now, busy lines, holders and peak. Begin the act first."));
+    plan ? null : h("span", { class: "status" }, "Rooms use the act's plan: its setting, its places, holders and peak. Begin the act first."));
   return h("section", { class: "card" },
     h("span", { class: "dm-tag" }, `Act ${act} · decided when it begins`),
     head,
@@ -495,16 +499,16 @@ function roomsTab() {
       S.busy ? h("button", { class: "plain danger", onclick: () => (controller.abort(), (controller = new AbortController())) }, "Stop") : null,
       S.busy ? h("span", { class: "status" }, S.busy) : null,
       sample ? null : h("span", { class: "status" }, "Open on claude.ai to run calls."),
-      h("span", { class: "status" }, "sketch, then encode · 2 calls")),
+      h("span", { class: "status" }, CHALLENGED.includes(r.kind) ? "sketch, encode, then one read from the player's chair · a lost reader remakes it once" : "sketch, then encode · 2 calls")),
   );
   const mine = S.rooms.filter((x) => x.adventure === adv.id);
   const others = S.rooms.length - mine.length;
-  return [planView(adv, r.act), controls, ...mine.map(roomView), others ? h("p", { class: "muted small" }, `${others} more rooms were designed in other adventures; switch adventure to see them.`) : null];
+  const dmToggle = h("label", { class: "small" }, h("input", { type: "checkbox", id: "dm-side", checked: S.dmSide, onchange: (e) => ((S.dmSide = e.target.checked), save(), render()) }), " Show the DM side of each room: seed, sketch, the first reader, the packet and the calls");
+  return [planView(adv, r.act), controls, mine.length ? dmToggle : null, ...mine.map(roomView), others ? h("p", { class: "muted small" }, `${others} more rooms were designed in other adventures; switch adventure to see them.`) : null];
 }
 
 const adventureActs = (adv) => (adv.world.regions ?? []).map((a, i) => [i + 1, `${i + 1}: ${a.name}${planOf(adv, i + 1) ? "" : " (not begun)"}`]);
 
-// Someone from before (D164): on the bench there's no played room to remember them from, so the designer can name one.
 // The place a room with danger in it is set in (D196): left empty, the game deals one from the act's places.
 function placeField(adv, r) {
   const pool = planOf(adv, r.act)?.places ?? [];
@@ -513,6 +517,7 @@ function placeField(adv, r) {
   return h("label", { class: "field" }, "Place", box);
 }
 
+// Someone from before (D164): on the bench there's no played room to remember them from, so the designer can name one.
 function callbackField(r) {
   const box = h("input", { type: "text", id: "room-callback", placeholder: "Optional: someone from before, as name | what became of them | how they feel about the party", oninput: (e) => ((S.room.callback = e.target.value), save()) });
   box.value = r.callback;
@@ -522,23 +527,64 @@ function callbackField(r) {
 function roomView(run) {
   const s = run.stages;
   const calls = S.calls[run.id] ?? run.calls ?? [];
+  const adv = S.adventures.find((a) => a.id === run.adventure) ?? (run.adventure === "gravenhold" ? GRAVENHOLD() : currentAdventure());
   const head = h("div", { class: "row" },
     h("span", { class: "chip accent" }, run.kind), h("span", { class: "chip" }, `act ${run.act}`), h("span", { class: "chip" }, when(run.at)),
     run.ms ? h("span", { class: "chip" }, `${Math.round(run.ms / 1000)} s`) : null,
-    run.error ? h("span", { class: "chip bad" }, `failed${run.failedCall ? ` at ${run.failedCall}` : ""}`) : s["laid out"] ? h("span", { class: `chip ${s["laid out"].mapped ? "ok" : "near"}` }, s["laid out"].mapped ? "laid out on the grid" : "no map: couldn't lay out") : h("span", { class: "chip near" }, "running"));
+    s.read?.clear === false ? h("span", { class: "chip near" }, "remade: the first reader was lost") : null,
+    run.error ? h("span", { class: "chip bad" }, `failed${run.failedCall ? ` at ${run.failedCall}` : ""}`) : s["laid out"] ? null : h("span", { class: "chip near" }, "running"));
   return h("section", { class: "card" },
     h("h2", {}, s["laid out"]?.packet.name ?? s.encoded?.name ?? `A ${run.kind}`),
     head,
-    seedView(run),
-    s.sketch ? stage("Sketch", sketchView(s.sketch)) : null,
-    s["laid out"] ? stage("The room as the DM gets it", packetView(s["laid out"].packet, s["laid out"].mapped), sizeChips(s["laid out"].packet)) : null,
+    s["laid out"] ? playerView(s["laid out"].packet, adv) : run.error ? null : h("p", { class: "status" }, "The player's view appears once the room is laid out."),
     run.error ? h("p", { class: "err" }, run.error) : null,
     run.error && s.sketch && !s["laid out"]
       ? h("div", { class: "row" }, h("button", { class: "go", disabled: !sample || !!S.busy, onclick: () => runRoom(run, S.adventures.find((a) => a.id === run.adventure) ?? currentAdventure()) }, "Resume: encode this sketch"), h("span", { class: "status" }, "Keeps the sketch; runs only the encode call."))
       : null,
-    stage("Calls", calls.length ? calls.map(recordView) : h("p", { class: "muted small" }, "None yet.")),
+    S.dmSide ? [
+      h("span", { class: "dm-tag" }, "DM-facing"),
+      seedView(run),
+      s.sketch ? stage("Sketch", sketchView(s.sketch)) : null,
+      s.read ? stage("The first reader, from the player's chair", readView(s.read)) : null,
+      s["laid out"] ? stage("The room as the DM gets it", packetView(s["laid out"].packet, s["laid out"].mapped), sizeChips(s["laid out"].packet)) : null,
+      stage("Calls", calls.length ? calls.map(recordView) : h("p", { class: "muted small" }, "None yet.")),
+    ] : null,
     noteBox("rooms", run),
   );
+}
+
+// What the player is told as the room opens: the room sheet the game shows (D174), from the packet loaded as the
+// game loads it. Nothing hidden, nothing only the DM reads.
+function playerView(packet, adv) {
+  let sheet;
+  try {
+    sheet = roomSheet(load({ packet, party: partyFor({ name: "The player", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world) }));
+  } catch (e) {
+    return h("div", { class: "pitch" }, h("span", { class: "eyebrow" }, "What the player is told"), h("div", { class: "prose" }, paras(packet.opening).map((t) => h("p", {}, t))), h("p", { class: "err" }, `The room wouldn't load for the rest of the sheet: ${errorText(e)}`));
+  }
+  const list = (title, items) => (items.length ? [h("h3", {}, title), h("ul", { class: "plain" }, items.map((x) => h("li", {}, x)))] : null);
+  return h("div", { class: "pitch" },
+    h("span", { class: "eyebrow" }, "What the player is told"),
+    paras(sheet.opening).map((t) => h("p", {}, t)),
+    h("details", { class: "fold" }, h("summary", {}, "The room sheet (what the party knows, as the game shows it)"),
+      h("div", { class: "stage" },
+        list("Places", sheet.places.map((p) => h("span", {}, h("b", {}, p.name), p.light ? ` (${p.light})` : "", `: ${p.what}`, p.here.length ? ` Here: ${p.here.join(", ")}.` : ""))),
+        list("Ways between them", sheet.ways.map((w) => `${w.between.join(" – ")}: ${w.how}`)),
+        list("Things", sheet.things.map((x) => h("span", {}, h("b", {}, x.name), ` (${x.where}): ${x.what}`))),
+        list("People", sheet.people.map((p) => `${p.name}, ${p.where}`)),
+        list("What anyone can tell by looking", sheet.facts),
+        list("Coming, as far as the party knows", sheet.coming))));
+}
+
+// The read call's answer (D177, D196): whether the reader could follow it, and what they made of it.
+function readView(r) {
+  return h("div", { class: "stage" },
+    h("div", { class: "row" }, h("span", { class: `chip ${r.clear ? "ok" : "bad"}` }, r.clear ? "could follow it" : "was lost: the room was remade once")),
+    kv([
+      ["Pictured it as", r.layout],
+      ["Would take hold of", r.handles?.length ? h("ul", { class: "plain" }, r.handles.map((x) => h("li", {}, h("b", {}, x.what), `: ${x.try} (${x.cost})`))) : "nothing"],
+      ["Couldn't tell", r.unclear?.length ? h("ul", { class: "plain" }, r.unclear.map((x) => h("li", {}, x))) : "nothing"],
+    ]));
 }
 
 const stage = (title, body, chip) => h("div", { class: "stage" }, h("div", { class: "stage-head" }, h("h3", {}, title), chip), body);
@@ -591,7 +637,7 @@ function sketchView(sk) {
       ["Things", h("span", {}, list(sk.things), h("span", { class: "chip" }, `${sk.things.length} things`))],
       ["Cut", sk.cut],
       ["Pressure", sk.pressure],
-      ["Outcomes", list(sk.outcomes)],
+      ["Outcomes", sk.outcomes?.length ? list(sk.outcomes) : null],
       ["Notes", sk.notes],
     ]),
     h("span", { class: "muted small" }, "Opening, as sketched"),
