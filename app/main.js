@@ -10,8 +10,9 @@ import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
-import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, moveOn, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
 import { packOf } from "../src/campaign/stock.js";
+import { proposedCore } from "../src/campaign/memories.js";
 import { setting } from "../content/setting.js";
 import { atFire, fireOf, fireView, heartsView, campTalk, sitWith, speakTo, giveOutfit } from "../src/game/camp.js";
 import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
@@ -822,7 +823,32 @@ function WaysOn({ session, busy, refresh, run }) {
   </div>`;
 }
 
-// Taking stock (D192): out of character, before the verdict. The pack with what the DM has granted, to keep up to its
+// Her memories of the room (D193), on the stock screen: what's new from this room and what she remembers from earlier in
+// the leg, each as a line that opens to the longer telling, and the core she carries all game. Ticking one makes it
+// core, up to the limit; the DM's picks come ticked while there's room, and a swap it suggests is the player's to make.
+function MemoriesOf({ who, camp, pending, core, setCore }) {
+  const max = setting.memories.core;
+  const mine = camp?.roomMemories?.[who.id] ?? { leg: [], core: [] };
+  const p = pending?.[who.id] ?? { fresh: [], forget: [] };
+  const pool = [...mine.core, ...mine.leg, ...p.fresh];
+  const toggle = (id) => setCore((c) => ({ ...c, [who.id]: c[who.id].includes(id) ? c[who.id].filter((x) => x !== id) : c[who.id].length < max ? [...c[who.id], id] : c[who.id] }));
+  const row = (m, note = null) => html`<label key=${m.id} className="relic">
+    <input type="checkbox" checked=${core.includes(m.id)} disabled=${!core.includes(m.id) && core.length >= max} onChange=${() => toggle(m.id)} />
+    <details className="ab"><summary><span>${m.short}</span>${note ? html`<span className="left small">${note}</span>` : null}</summary><span className="muted">${m.long}</span></details>
+  </label>`;
+  const swapOf = (m) => (m.instead_of ? pool.find((x) => x.id === m.instead_of) : null);
+  if (!pool.length) return null;
+  return html`<div className="member"><b>${who.name} remembers</b> <span className="muted small">core ${core.length} of ${max}: tick to keep for good</span>
+    ${p.fresh.length ? html`<span className="small muted">From this room</span>` : null}
+    ${p.fresh.map((m) => row(m, swapOf(m) ? `DM suggests, in place of “${swapOf(m).short}”` : m.core ? "DM's pick" : null))}
+    ${mine.leg.filter((m) => !p.forget.includes(m.id)).length ? html`<span className="small muted">Earlier this leg</span>` : null}
+    ${mine.leg.filter((m) => !p.forget.includes(m.id) && !mine.core.some((c) => c.id === m.id)).map((m) => row(m))}
+    ${mine.core.length ? html`<span className="small muted">Core</span>` : null}
+    ${mine.core.map((m) => row(m))}
+  </div>`;
+}
+
+// Taking stock (D192): out of character, after the verdict. The pack with what the DM has granted, to keep up to its
 // limit; who could come along, one or no one; the loose ends; and the talk with the DM, as long as the player likes.
 function TakingStock({ session, env, io, run, busy }) {
   const stock = session.stock;
@@ -832,6 +858,9 @@ function TakingStock({ session, env, io, run, busy }) {
   const [keep, setKeep] = useState(() => pack.slice(0, max).map((i) => i.id));
   const [follower, setFollower] = useState(() => (stock.followers.some((f) => f.name === came) ? came : null));
   const [text, setText] = useState("");
+  const companions = session.state.party.slice(1);
+  const pending = session.judged?.pending ?? {};
+  const [core, setCore] = useState(() => Object.fromEntries(companions.map((m) => [m.id, proposedCore(session.camp ?? {}, pending, m.id)])));
   const seen = useRef(new Set(pack.map((i) => i.id)));
   // Something newly granted goes in the pack if there's room.
   useEffect(() => {
@@ -857,12 +886,13 @@ function TakingStock({ session, env, io, run, busy }) {
       <label className="relic"><input type="radio" name="follower" checked=${!follower} onChange=${() => setFollower(null)} /> No one</label>
       ${stock.followers.map((f) => html`<label key=${f.name} className="relic"><input type="radio" name="follower" checked=${follower === f.name} onChange=${() => setFollower(f.name)} /> <b>${f.name}</b> <span className="muted">(${f.pronouns}; ${f.looks}). ${f.what} Trying to reach: ${f.goal}.${f.knows?.length ? ` Knows: ${f.knows.join(" ")}` : ""}</span></label>`)}
     </div>
+    ${companions.map((m) => html`<${MemoriesOf} key=${m.id} who=${m} camp=${session.camp} pending=${pending} core=${core[m.id] ?? []} setCore=${setCore} />`)}
     ${stock.notes.length ? html`<div className="member"><b>Loose ends</b>${stock.notes.map((n, i) => html`<span key=${i} className="small">${n.what}</span>`)}</div>` : null}
     <div className="talk">${stock.talk.map((t, i) => html`<p key=${i} className=${t.who === "dm" ? "" : "muted"}><b>${t.who === "dm" ? "DM" : "You"}:</b> ${t.text}</p>`)}</div>
     <textarea rows="2" value=${text} disabled=${!!busy} placeholder="Wait, I thought I took the wine bottle?" onInput=${(e) => setText(e.target.value)}></textarea>
     <div className="row" style=${{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
       <button className="ghost" disabled=${!!busy || !text.trim()} onClick=${say}>Say it</button>
-      <button className="primary" disabled=${!!busy} onClick=${() => run("between", async () => settle(session, { keep, follower }))}>Walk on</button>
+      <button className="primary" disabled=${!!busy} onClick=${() => run("between", async () => (settle(session, { keep, follower, core }), moveOn(session)))}>Walk on</button>
     </div>
   </div>`;
 }
@@ -876,11 +906,12 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   const b = session.between;
   const label = [s.packet.intent.objective, ...(s.packet.intent.alternates ?? []), s.packet.intent.fail_forward].find((o) => o?.id === h.outcome)?.label ?? (h.outcome === "left" ? "You move on" : h.outcome === "rested" ? "You rest" : h.outcome);
   const [keep, setKeep] = useState([]);
-  const step = b ? (b.actOver ? "relics" : !b.packet ? "next" : "ready") : !session.stock?.talk?.length ? "open" : !session.stock.settled ? "stock" : "judge";
+  // The verdict and taking stock start together as the room ends (D193); the campaign moves on when the player walks on.
+  const step = b ? (b.actOver ? "relics" : !b.packet ? "next" : "ready") : !session.judged || !session.stock?.talk?.length ? "open" : !session.stock.settled ? "stock" : "move";
   useEffect(() => {
     if (busy || error) return;
-    if (step === "open") run("between", () => takeStock(session, io, env.prompts));
-    else if (step === "judge") run("between", () => judgeRoom(session, io, env.prompts));
+    if (step === "open") run("between", () => Promise.all([session.judged ? null : judgeRoom(session, io, env.prompts), session.stock?.talk?.length ? null : takeStock(session, io, env.prompts)]));
+    else if (step === "move") run("between", async () => moveOn(session));
     else if (step === "next") run("between", () => nextRoom(session, io, env.gen, env.roster));
   }, [step, !!busy, !!error]);
   const camp = session.camp;
@@ -889,8 +920,9 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
   return html`<section className="ending">
     <h2>${label}</h2>
     ${step === "open" ? html`<p className="muted">${busy ?? "The DM looks over what you've got…"}</p>` : null}
+    ${!b && session.judged?.verdict ? (session.judged.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${session.judged.verdict.rating}/10.</b> ${session.judged.verdict.why}</p>`) : null}
     ${step === "stock" ? html`<${TakingStock} session=${session} env=${env} io=${io} run=${run} busy=${busy} />` : null}
-    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : step === "judge" ? html`<p className="muted">${busy ?? "The DM weighs how that went…"}</p>` : null}
+    ${b?.verdict ? (b.verdict.rating == null ? html`<p className="muted">A calm place: not rated.</p>` : html`<p><b>${b.verdict.rating}/10.</b> ${b.verdict.why}</p>`) : null}
     ${b?.exit?.stub ? html`<p className="muted">${b.forced ? "You're carried on. " : ""}${b.exit.stub}</p>` : null}
     ${step === "relics" && b.last
       ? html`<p>You're out. That's the end of the adventure, for now.</p><button className="primary" style=${{ justifySelf: "start" }} onClick=${onQuit}>Back to the title screen</button>`

@@ -1,7 +1,7 @@
 # Stock call
 
 **Job:** when a room ends, take stock with the player out of character. Grant what the game missed, name who could come along, and keep the loose ends (D192).
-**Runtime:** `sample.json`, replay off, `default`. It runs once when a room ends, before the verdict, and again for each thing the player says until they walk on.
+**Runtime:** `sample.json`, replay off, `default`. It runs once when a room ends, alongside the verdict (D193), and again for each thing the player says until they walk on.
 **Sees:** the party; the whole encounter as the DM knew it; the ledger and the log at the end; what the DM narrated in the room, newest first, up to its share of the call; what the game has the party carrying out; what the party came in with, including a follower's goal and motive; who has reached their goal here; and, once the talk has started, the lists as they stand, the talk so far and what the player says. Code: `stockInput` in `src/context.js`.
 
 ## Returns (`schemas/calls/stock.js`)

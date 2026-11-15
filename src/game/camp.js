@@ -10,6 +10,7 @@
 // | gives a waiting outfit     | the campfire call, for whoever is there (D184)               | `giveOutfit`|
 //
 // No DOM, so `node --test` can play it with recorded outputs.
+import { roadLines } from "../campaign/memories.js";
 import * as Rel from "../campaign/relationship.js";
 import * as Relationship from "../../content/relationship.js";
 import { addOutfit } from "../campaign/wardrobe.js";
@@ -160,17 +161,23 @@ export function heartsView(session) {
   });
 }
 
-// What she brings to the fire from the road (D190): the rooms since the last fire, with only her own reactions, and the
-// moments that stayed with her from earlier.
+// What she brings to the fire from the road (D190, D193): the rooms since the last fire, each with what kind of place
+// it was and only her own reactions; what she remembers of them; and the moments she carries all game, in full. A save
+// from before core memories still brings the strong reactions it kept.
 export function roadFor(camp, id) {
   const since = (camp.since ?? []).map((m) => ({
     room: m.room,
+    ...(m.place ? { place: m.place } : {}),
     what_happened: m.happened,
     ...(m.went ? { how_it_went: m.went } : {}),
     ...(m.felt?.[id]?.length ? { you_felt: m.felt[id].map((x) => `${x.sign > 0 ? "liked" : "disliked"}${x.intensity >= 2 ? " strongly" : ""}: ${x.reason}`) } : {}),
   }));
-  const kept = (camp.kept?.[id] ?? []).map((x) => `${x.room ? `${x.room}: ` : ""}${x.sign > 0 ? "liked" : "disliked"}: ${x.reason}`);
-  return { since, kept };
+  const leg = roadLines(camp.roomMemories, id);
+  const core = [
+    ...(camp.roomMemories?.[id]?.core ?? []).map((x) => x.long),
+    ...(camp.kept?.[id] ?? []).map((x) => `${x.room ? `${x.room}: ` : ""}${x.sign > 0 ? "liked" : "disliked"}: ${x.reason}`),
+  ];
+  return { since, leg, core };
 }
 
 // The player says or does something at the fire. Each companion present answers in turn, by campaign turn (D85); with

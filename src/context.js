@@ -1,5 +1,6 @@
 // Context assembly: what each call sees (docs/spec/context.md §1–3). Pure functions; the caller does the
 // fetching and the calling. Used by the game and the bench page.
+import { roadLines } from "./campaign/memories.js";
 import { beatOf, ladder } from "./engine/clock.js";
 import { bearing } from "./engine/map.js";
 import { toughnessOf } from "./engine/ledger.js";
@@ -278,6 +279,8 @@ export function companionInput(env, c, self, others, huddle, schema) {
     ...campaign(env, "companion", schema),
     block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
     form ? block("You, right now", { form }) : null,
+    whereText(env) ? block("Where you are", whereText(env)) : null,
+    roadLines(env.roomMemories, me.id).length ? block(ROAD, roadLines(env.roomMemories, me.id)) : null,
     block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
     block(SHEET, sheetText(roomSheet(env.state, env.packet))),
     told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
@@ -288,6 +291,25 @@ export function companionInput(env, c, self, others, huddle, schema) {
     privately ? `The player is talking to you alone. It's your turn, as ${me.name}.` : `It's your turn in the huddle, as ${me.name}.`,
   ]);
 }
+
+// Where the party is in the world (D193): the world itself and this act's part of it, so a companion knows what kind of
+// place she's in. `full` adds what the act is about and the world's heart, for the campfire.
+export function whereText(env, { full = false } = {}) {
+  const w = env.world;
+  if (!w) return null;
+  const region = w.regions?.[(env.act ?? 1) - 1];
+  const plan = env.plan;
+  const first = (t) => String(t ?? "").split(/(?<=[.!?])\s/)[0];
+  return {
+    world: full ? w.place : first(w.place),
+    ...(region ? { this_part_of_it: `${region.name}: ${region.what}. It feels ${region.feel}.` } : {}),
+    ...(full && plan?.setting ? { this_act: plan.setting } : {}),
+    ...(full && plan?.question ? { the_question_now: plan.question } : {}),
+  };
+}
+
+// Her memories of this leg's rooms (D193), for the rooms ahead: context for where she's been, not things to bring up.
+const ROAD = "The road since the last campfire, as you remember it (where you've been; bring it up only if it matters now)";
 
 // The room reaches the companions as the sheet the player reads (D174), and the DM's latest narrations without
 // the opening, which the sheet already holds.
@@ -308,11 +330,14 @@ export function partyInput(env, c, companions, huddle, schema) {
       ...briefProfile(me, standingOf(env, me.id), env.state),
       ...encounterCases(me, rom, order, { private: false, inPerson: false }),
       ...(form ? { right_now: { form } } : {}),
+      ...(roadLines(env.roomMemories, me.id).length ? { the_road_since_the_last_campfire: roadLines(env.roomMemories, me.id) } : {}),
     };
   };
   return compose([
     ...campaign(env, "party", schema),
     block("The companions you play", members.map(entry)),
+    whereText(env) ? block("Where they are", whereText(env)) : null,
+    members.some((m) => roadLines(env.roomMemories, m.id).length) ? "Each one's road since the last campfire is where she's been, as she remembers it: context, to bring up only if it matters now." : null,
     block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
     block(SHEET, sheetText(roomSheet(env.state, env.packet))),
     told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
@@ -371,10 +396,12 @@ export function campfireInput(env, c, self, others, schema) {
     alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
+    whereText(env, { full: true }) ? block("Where you are in the world", whereText(env, { full: true })) : null,
     block("The story so far", c.log ?? []),
     c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
     c.since?.length ? block("Since the last campfire (the rooms you came through with him, and how you felt about what happened)", c.since) : null,
-    c.kept?.length ? block("Moments from earlier that stayed with you", c.kept) : null,
+    c.leg?.length ? block("What you remember of the rooms since the last campfire", c.leg) : null,
+    c.core?.length ? block("The moments from the road you'll always carry", c.core) : null,
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
@@ -730,13 +757,16 @@ export function verdictInput(env, c, schema) {
   const members = resolveParty(env.party.slice(1), env.world);
   const values = (m) => {
     const { mood } = briefProfile(m, standingOf(env, m.id), env.state);
-    return { id: m.id, name: m.name, beliefs: m.beliefs, rules: m.rules, pursuit: m.pursuit, mood, admires: m.admires, despises: m.despises, heatActs: m.heatActs, turnoffs: m.turnoffs };
+    const mem = env.roomMemories?.[m.id] ?? { leg: [], core: [] };
+    return {
+      id: m.id, name: m.name, beliefs: m.beliefs, rules: m.rules, pursuit: m.pursuit, mood, admires: m.admires, despises: m.despises, heatActs: m.heatActs, turnoffs: m.turnoffs,
+      her_memories_so_far: { this_leg: mem.leg.map((x) => ({ id: x.id, short: x.short })), core: mem.core.map((x) => ({ id: x.id, short: x.short })), core_places_left: setting.memories.core - mem.core.length },
+    };
   };
   const h = c.handoff;
   const ending = {
     ended: h.outcome, kind: h.ending, optional_met: h.optional?.met ?? [], optional_missed: h.optional?.missed ?? [],
-    left_by: h.way_on ?? "no exit reached", carried: h.kept ?? h.gear, hurt: h.conditions.map((x) => `${x.who}: ${x.text}`),
-    ...(h.follower !== undefined ? { coming_along: h.follower ?? "no one" } : {}),
+    left_by: h.way_on ?? "no exit reached", carried: h.gear, hurt: h.conditions.map((x) => `${x.who}: ${x.text}`),
   };
   const exits = (env.packet.intent.exits ?? []).map((e) => `${e.id} (from ${e.zone}, to a ${e.leads_to}${e.stub ? `: ${e.stub}` : ""})`);
   return compose([
@@ -745,6 +775,7 @@ export function verdictInput(env, c, schema) {
     block("The companions", members.map(values)),
     ...dmEncounter(env),
     exits.length ? block("The room's ways on", exits) : null,
+    whereText(env) ? block("Where in the world", { ...whereText(env), ...(c.place ? { this_room: c.place } : {}) }) : null,
     block("The ledger and the log at the end", c.now),
     block("How it ended", ending),
     c.calm ? "This was a calm room: it isn't rated (give any rating; it's set aside). What matters here is how each companion felt about what the party did." : null,

@@ -30,6 +30,9 @@ function lateGame() {
   // Gold, and relics at their limit (D147).
   s.gold = 999;
   s.relics = Array.from({ length: setting.relics.max }, (_, i) => ({ id: `relic_${i}`, name: `Relic ${i}`, text: line(160) }));
+  // Her memories of rooms at their limits (D193): a full leg and a full core for each companion.
+  const mem = (id, n) => ({ id: `m${n}_${id}`, room: line(30), short: line(140), long: line(600) });
+  session.camp = { roomMemories: Object.fromEntries(s.party.slice(1).map((p) => [p.id, { leg: Array.from({ length: setting.memories.leg }, (_, i) => mem(p.id, i)), core: Array.from({ length: setting.memories.core }, (_, i) => mem(p.id, 10 + i)) }])) };
   for (let i = 0; i < 6; i++) session.feeds.table.push({ at: 100 + i, ch: "narration", who: "dm", text: line(300).repeat(4) });
   return session;
 }
@@ -45,7 +48,7 @@ test("every DM and companion call stays under its budget at the ledger's limits"
     scene: sceneInput(env, { to: "dm", now: ledgerText(s), timeline: aheadText(s, { ticks: 8 }), conversation: [{ from: "player", text: plan }] }, sceneSchema),
     companion: companionInput(env, { channel: "huddle", now: ledgerText(s, { party: true, history: false }), recent: narrated(session, 2), draft: { plan, stances: [] } }, s.party[1], [s.party[2]], [{ from: "player", text: plan }], companionSchema),
     question: questionInput(env, { now: ledgerText(s, { log: false }), recent: Array.from({ length: 6 }, () => ({ from: "dm", text: line(300) })), question: plan }, questionSchema),
-    verdict: verdictInput(env, { now: ledgerText(s), handoff: { outcome: "escaped", ending: "objective", optional: { met: [], missed: ["gear"] }, way_on: null, gear: [], conditions: s.conditions } }, verdictSchema),
+    verdict: verdictInput(env, { now: ledgerText(s), handoff: { outcome: "escaped", ending: "objective", optional: { met: [], missed: ["gear"] }, way_on: null, gear: [], conditions: s.conditions }, place: line(160) }, verdictSchema),
     stock: stockInput(env, {
       now: ledgerText(s), told: Array.from({ length: 30 }, () => line(300).repeat(4)),
       items: Array.from({ length: setting.items.max + 4 }, (_, i) => ({ id: `t${i}`, name: `Thing ${i}`, holder: "player", properties: line(160) })),

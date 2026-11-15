@@ -159,3 +159,13 @@ They're made in the Dressing Room (`src/ui/dressing.js`), mounted in the game as
 - Betrayal (D7).
 - The group-dynamic hints (`DYN_PHASE`, `pickDynamic`) and the hidden deliberation phase. Both shaped the companions' talk from outside; the huddle now lets them talk as themselves.
 - The DM writing companion dialogue inside narration. The companions' own talk happens in their own calls.
+
+## 10. Memories of rooms (D193)
+
+Each companion keeps her own memories of the rooms the party passes through. They're apart from what she remembers of camp: the relationship state's `memories`, written only by her campfire call, are untouched by any of this. Code: `src/campaign/memories.js`; numbers in `content/setting.js`, `memories`.
+
+- **Written by the verdict.** As a room ends, the verdict gives each companion up to two moments by her own values. Each has a **short** line ("in a noble's ballroom, he drove a hound off her with fire") and a **long** telling of a few sentences: where they were, what they were trying to do, what happened, and what specifically struck her. It can mark one as `core`. Once her core is full it can only suggest a swap (`instead_of`). It can also let go of earlier leg memories (`forget`).
+- **Her leg:** this room's memories join her memories from earlier in the leg, up to five, oldest let go first past that. Both forms are kept until the leg ends: at a campfire or the sanctuary, when the party leaves it.
+- **Her core:** up to five, kept all game in the long form. The verdict fills empty places and never replaces one. On the stock screen the player ticks any new or leg memory to make it core, or unticks a core one, within the limit; the verdict's picks come ticked while there's room, and its swaps are only suggestions.
+- **Who reads them:** in a room, her calls get her leg memories, short lines only and none that are core, as the road since the last fire: context, to bring up only if it matters now. Her campfire call gets her leg memories and her core in full. Nobody reads the other companion's.
+- **Where she is:** every companion call in a room gets the world in a sentence and this act's region with how it feels; the campfire gets the world's full description and what the act is about too (`whereText` in `src/context.js`).

@@ -26,6 +26,9 @@ export const setting = {
   // Relics (D147, D148). Starting values: the party holds at most `max` in an act, and the climax's verdict rating
   // decides how many it keeps into the next, `keptByRating[rating - 1]`.
   relics: { max: 6, keptByRating: [0, 0, 0, 1, 1, 1, 2, 2, 3, 3] },
+  // Her memories of rooms (D193), apart from what she remembers of camp: up to `leg` from the rooms since the last fire,
+  // and up to `core` that stay all game.
+  memories: { leg: 5, core: 5 },
   // The pack (D184, D192): how many things the party can carry from room to room, chosen when the room ends, how
   // many things learned about each go with it, and whether the pack lasts past an act's end.
   items: { max: 6, notes: 3, keptAcrossActs: false },

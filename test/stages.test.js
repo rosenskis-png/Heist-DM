@@ -129,7 +129,7 @@ test("what the campaign remembers: clues found, people worth meeting again, and 
   const h = handoff(s);
   assert.deepEqual(h.clues.sort(), ["seal_of_fire_1", "seal_of_fire_2"]);
   const people = [{ name: "Snick, a goblin runt", fate: "freed from the cage", feels: "owes them" }];
-  assert.deepEqual(validate(verdictSchema, { rating: 6, why: "x", reactions: [], people }), []);
+  assert.deepEqual(validate(verdictSchema, { rating: 6, why: "x", reactions: [], people, memories: [] }), []);
   assert.ok(validate(verdictSchema, { rating: 6, why: "x", reactions: [], people: [...people, ...people, ...people] }).length, "two at most");
   let camp = actBegun({ ...newCampaign({ act: 1 }), premises: ["a kennel"] }, plan);
   camp = roomEnded(camp, { handoff: { ...h, conditions: [], spent: {} }, verdict: { rating: 6, why: "x", reactions: [], people }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;

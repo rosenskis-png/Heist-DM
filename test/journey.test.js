@@ -4,7 +4,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { newSession, serialize, restore } from "../src/game/session.js";
-import { campaignOf, leaveBy, judgeRoom, nextRoom, enterRoom, endTheAct, startAdventure } from "../src/game/journey.js";
+import { campaignOf, leaveBy, judgeRoom, moveOn, nextRoom, enterRoom, endTheAct, startAdventure } from "../src/game/journey.js";
 import { worldOf } from "../src/campaign/world.js";
 
 const file = (p) => readFileSync(new URL(`../${p}`, import.meta.url), "utf8");
@@ -65,7 +65,8 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
     const exits = session.state.packet.intent.exits ?? [];
     leaveBy(session, exits[0]?.id ?? null);
     const calm = session.state.packet.mode === "room" && session.camp.way.here !== "sanctuary";
-    const b = await judgeRoom(session, io, prompts);
+    await judgeRoom(session, io, prompts);
+    const b = moveOn(session);
     // A calm room isn't rated, though its verdict still runs for the companions (D187).
     assert.equal(b.verdict.rating, calm ? null : 7);
     if (b.actOver) {

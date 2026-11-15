@@ -94,6 +94,9 @@ export function envFor(session, prompts) {
     standing: session.standing,
     // How the companions stand with each other and the player, kept by the campaign across rooms (D173).
     ...(session.camp?.romance ? { romance: session.camp.romance } : {}),
+    // Her memories of rooms (D193) and the act's plan, for where the party is in the world.
+    ...(session.camp?.roomMemories ? { roomMemories: session.camp.roomMemories } : {}),
+    ...(session.camp?.plan ? { plan: session.camp.plan } : {}),
   };
 }
 

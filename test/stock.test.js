@@ -9,7 +9,7 @@ import { worldOf } from "../src/campaign/world.js";
 import { setting } from "../content/setting.js";
 import { stockProblems } from "../src/calls/stock.js";
 import { newSession, envFor } from "../src/game/session.js";
-import { leaveBy, takeStock, settle, judgeRoom } from "../src/game/journey.js";
+import { leaveBy, takeStock, settle, judgeRoom, moveOn } from "../src/game/journey.js";
 import { questionInput, adjudicateInput, ledgerText } from "../src/context.js";
 import { questionSchema, adjudicateSchema, stockSchema } from "../schemas/index.js";
 import { validate } from "../src/validate.js";
@@ -90,7 +90,7 @@ test("the stock call's holders are the party's, and nobody comes along twice", (
   assert.equal(bad.length, 2);
 });
 
-test("taking stock reaches the verdict and the campaign: what was kept, and who came along", async () => {
+test("taking stock reaches the campaign: what was kept, and who came along", async () => {
   const session = newSession({ packet: cells, player: { name: "P", class: "rogue" }, companions: ["fern", "nadia"], seed: 3, world });
   leaveBy(session, null);
   session.ended.items = [thing(1), thing(2)];
@@ -105,13 +105,13 @@ test("taking stock reaches the verdict and the campaign: what was kept, and who 
       },
     },
   };
+  await judgeRoom(session, io, prompts);
   await takeStock(session, io, prompts);
   await takeStock(session, io, prompts, "Frank saw the warden's face");
   assert.equal(session.stock.talk.length, 3);
-  assert.ok(inputs[1].includes("Frank saw the warden's face") && inputs[1].includes("The lists as they stand"));
+  assert.ok(inputs[2].includes("Frank saw the warden's face") && inputs[2].includes("The lists as they stand"));
   settle(session, { keep: ["t2"], follower: "Frank" });
-  await judgeRoom(session, io, prompts);
-  assert.match(inputs.at(-1), /Thing 2/);
+  moveOn(session);
   assert.deepEqual(session.camp.items.map((i) => i.id), ["t2"]);
   assert.deepEqual(session.camp.carried.map((x) => x.name ?? x.what), ["Frank", "the warden owes them"]);
 });

@@ -11,6 +11,7 @@ import { beginAct, generateRoom } from "./generate.js";
 import { verdictCall } from "../calls/verdict.js";
 import { stockCall } from "../calls/stock.js";
 import { openStock, applyStock, settleStock } from "../campaign/stock.js";
+import { pendingMemories, remember } from "../campaign/memories.js";
 import { ledgerText } from "../context.js";
 import { load, bindParty } from "../engine/index.js";
 import { act, envFor, post, partyFor, newSession } from "./session.js";
@@ -68,10 +69,12 @@ export async function takeStock(session, io, prompts, said = null) {
   return session.stock;
 }
 
-// The player's choices when taking stock: the things to keep, by id, and the follower who goes on, by name, or none.
+// The player's choices when taking stock: the things to keep, by id; the follower who goes on, by name, or none; and
+// each companion's core memories, by id (D193), checked here so a bad choice fails before anything moves.
 export function settle(session, choices = {}) {
   const camp = campaignOf(session);
   const stock = session.stock ?? openStock(camp, session.ended);
+  if (choices.core && session.judged) remember(camp, session.judged.pending, choices.core);
   session.stock = { ...stock, settled: settleStock(stock, choices, camp), choices };
   return session.stock;
 }
@@ -79,26 +82,37 @@ export function settle(session, choices = {}) {
 // What the room was, for the record of rooms passed through.
 const summaryOf = (session, verdict) => ({ name: session.state.packet.name ?? session.state.packet.id, log: session.ended.log, rating: verdict?.rating ?? null, why: verdict?.why ?? null });
 
-// The room is over: the verdict call, then the campaign moves on by the exit the party took (D146). At the sanctuary the
-// act is over instead, and waits for the relics to be chosen (`endTheAct`). Stores what happens next in `session.between`.
+// The room is over: the verdict call (D146). It runs as the room ends, beside taking stock, so the memories it writes
+// are on the stock screen (D193). It moves nothing yet: `moveOn` does, once the player walks on. Stored in
+// `session.judged`.
 export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
-  // What the player kept when taking stock (D192). A room ended without it (an old save) keeps the pack as it came
-  // out, up to its limit, and whatever the party had with it.
-  const settled = session.stock?.settled ?? null;
-  const handoff = settled
-    ? { ...session.ended, items: settled.items, kept: settled.items.map((i) => i.name), follower: settled.carried.find((x) => x.kind === "follower")?.name ?? null }
-    : session.ended;
-  const members = session.state.party.slice(1);
-  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, and who's worth meeting
-  // again, but its rating is set aside, so it moves no regard and no strain.
+  // A calm room isn't rated (D187): the verdict call still runs for the companions' reactions, their memories and
+  // who's worth meeting again, but its rating is set aside, so it moves no regard and no strain.
   const calm = session.state.packet.mode === "room" && camp.way.here !== "sanctuary";
-  const judged = await verdictCall(io, envFor(session, prompts), { handoff, now: ledgerText(session.state), calm });
+  const judged = await verdictCall(io, envFor(session, prompts), { handoff: session.ended, now: ledgerText(session.state), calm, place: session.premise ?? null });
   const verdict = calm ? { ...judged, rating: null, why: null } : judged;
+  const ids = session.state.party.slice(1).map((p) => p.id);
+  session.judged = { verdict, pending: pendingMemories(camp, verdict, { room: session.state.packet.name ?? null, ids }) };
+  return session.judged;
+}
+
+// The player has walked on: the campaign moves on by the exit the party took, with what was kept when taking stock and
+// the memories as the player settled them (D146, D192, D193). At the sanctuary the act is over instead, and waits for the
+// relics to be chosen (`endTheAct`). A room ended without taking stock (an old save) keeps the pack as it came out, up
+// to its limit, and whatever the party had with it. Stores what happens next in `session.between`.
+export function moveOn(session) {
+  const camp = campaignOf(session);
+  const { verdict, pending } = session.judged ?? {};
+  if (!verdict) throw new Error("the room hasn't been judged yet");
+  const settled = session.stock?.settled ?? null;
+  const handoff = settled ? { ...session.ended, items: settled.items } : session.ended;
+  const memories = { pending, core: session.stock?.choices?.core ?? {} };
+  const members = session.state.party.slice(1);
   session.past = [...session.past, summaryOf(session, verdict)].slice(-PAST);
   if (camp.way.here === "sanctuary") {
     // The sanctuary is the act's main campfire: its leg's moments are spent there (D190).
-    const next = structuredClone(fireOut(camp));
+    const next = structuredClone(fireOut({ ...camp, roomMemories: remember(camp, pending, memories.core) }));
     next.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
     next.gold = handoff.gold ?? next.gold;
     if (settled) Object.assign(next, { items: settled.items, carried: settled.carried });
@@ -106,7 +120,7 @@ export async function judgeRoom(session, io, prompts) {
     session.between = { verdict, actOver: true, last: camp.act >= setting.arc.length };
     return session.between;
   }
-  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, carried: settled?.carried ?? null, exits: session.state.packet.intent.exits ?? [], members, name: session.state.packet.name ?? null });
+  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, carried: settled?.carried ?? null, exits: session.state.packet.intent.exits ?? [], members, name: session.state.packet.name ?? null, place: session.premise ?? null, memories });
   session.camp = moved;
   session.between = { verdict, kind, forced, exit: exit ? { id: exit.id, stub: exit.stub ?? null } : null };
   return session.between;
@@ -138,7 +152,8 @@ export async function nextRoom(session, io, env, roster = authored) {
   }
   session.camp = room.camp;
   const { resume, ...rest } = b;
-  session.between = { ...rest, packet: room.packet };
+  // The premise the room was built on, for what kind of place it was (D193).
+  session.between = { ...rest, packet: room.packet, premise: room.camp.premises?.at(-1) ?? null };
   return room.packet;
 }
 
@@ -162,9 +177,12 @@ export function enterRoom(session, roster = authored) {
     draft: emptyDraft(),
     card: null,
     counts: { exchanges: 0, edits: 0, out: null },
+    // What kind of place this room is (D193), for the companions' road.
+    premise: session.between?.premise ?? null,
     ended: null,
     between: null,
     stock: null,
+    judged: null,
     // The last campfire's scene is over (D190).
     fire: null,
   });

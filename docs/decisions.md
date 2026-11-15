@@ -201,9 +201,10 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 - **D188** The act stays a chain of rooms; the site test is closed: current
 - **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
-- **D190** Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her: current
+- **D190** Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her: changed by D193
 - **D191** Camp in the game has the bench's look behind the scene: current
-- **D192** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: current
+- **D192** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: changed by D193
+- **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
 
 ---
 
@@ -1223,3 +1224,16 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 
 **Why:** The verdict summarized what the party had from the record alone, without the narration, so things the DM described and the player took were lost, and it ran alongside the engine's exact pack. Followers had a purpose ("Frank wants to reach the White Lodge") and no way to get there. A room's end, out of character, is where the player can see what carried and say so. That's the deliberation Gravenhold put in the world, now moved out of it. A single follower keeps the context small and D123's worry in check: a follower can't guide the party forever, because their goal finishes their story.
 **Rules out:** The verdict deciding what carries. More than one follower at a time. The player editing a follower's goal or motive. A cap on how many claims the player can make.
+
+### D193. Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world
+**Decided:** The designer's call (2026-11-15). Changes D190 and D192.
+- **Each companion keeps her own memories of rooms,** apart from what she remembers of camp. The relationship state's `memories`, written only by her campfire call, are untouched.
+- **The verdict writes them.** As a room ends, it gives each companion up to two moments by her own values. Each has a short line and a long telling of a few sentences: where they were, what they were trying to do, what happened, and what specifically struck her.
+- **Her leg:** up to five memories from the rooms since the last fire. The verdict decides what to let go, and the oldest go first past the limit. They're spent when the party leaves a campfire or the sanctuary. Both forms are kept until then, so the player can still make one core.
+- **Her core:** up to five, kept all game in the long form. The verdict fills empty places but never replaces one; once her core is full it only suggests a swap. On the stock screen the player ticks or unticks within the limit. This replaces D190's strong reactions kept by code.
+- **Who reads them:** in a room, her calls get her leg memories as short lines, framed as context to bring up only if it matters. The companion call's budget rises by 1 KB for them. Her campfire call gets her leg memories and her core in full. The verdict sees each companion's memories so far by id, and its budget rises by 5 KB.
+- **Where she is:** every companion call in a room gets the world in a sentence and this act's region with how it feels. The campfire gets the world's full description and what the act is about. Each room on the road to the fire also carries its kind and premise.
+- **The order:** the verdict now runs alongside taking stock as a room ends, not after it, so its memories are on the stock screen. Nothing moves the campaign until the player walks on (`judgeRoom`, then `moveOn`).
+
+**Why:** Companions recalled earlier rooms only through the carried list, so they invented the rest, and the campfire had only reaction reasons, without the place or the moment. A memory worth keeping all game is the player's call as much as the AI's, and the AI mustn't overwrite one the player chose. The long form costs nothing in calls while it waits in the save; only the campfire reads it. A companion that doesn't know whether the world is Lovecraftian horror, or that this leg is underwater, can't sound like she's in it.
+**Rules out:** The verdict replacing a core memory on its own. One companion reading the other's memories. These memories mixing with what she remembers of camp.

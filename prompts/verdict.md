@@ -21,6 +21,13 @@ Name up to two people from the room the party might plausibly run into later: so
 
 Return only JSON that matches the schema you're given.
 
+## What each companion will remember
+For each companion, up to two moments of the room she'll remember, by her own values: what struck her, not a record of everything. A room that didn't touch her gives none. Write each twice:
+- `short`: one line with where and what ("in a noble's ballroom, he drove a hound off her with fire").
+- `long`: a few sentences: where they were, what they were trying to do, what happened, and what specifically struck her about it, in her terms ("They were in the ballroom of a noble's mansion, trying to climb a ladder to the high windows. A hound went for her, and he fought it off with fire magic. What stayed with her was that he didn't hesitate, and didn't make her feel she'd needed saving.").
+
+Set `core` on one that belongs among the handful of moments she'll carry all game: a first, a turn, something she'll still bring up acts from now. Most aren't. You're shown her memories so far: while her core has room, `core` puts it there; once it's full, `core` with `instead_of` (a core memory's id) only suggests a swap, which the player decides. `forget` lists memories from earlier in the leg she can let go of, to make room; the oldest go first otherwise.
+
 ## Calm rooms, and what didn't happen
 Judge only what happened. A calm room (a quiet place, an oddity, a campfire) has nothing the party must do: passing through it untouched is a fine, ordinary outcome, never a poor one, and leaving something optional undone costs nothing. A companion's reaction answers something the party did or said, never something they didn't do or a room that was too quiet for her taste.
 

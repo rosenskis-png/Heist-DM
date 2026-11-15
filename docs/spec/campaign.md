@@ -52,7 +52,7 @@ No map of the act is built in advance.
 - **Every leg ends at a campfire,** and the act ends at its sanctuary, the act's main campfire.
 - **A campfire is a night.** The party sleeps there and wakes to morning. Otherwise, the time of day is a room's to use if it wants; it's never a clock the party plans around.
 - **Every companion is present at every campfire.** A separation, whether captured, split up or sent away, resolves before the leg's campfire, so code never lets one start in a room whose exits already lead to the campfire or the climax, and the party is whole again at the fire.
-- **Camp happens there** (D190): the campfire call at every campfire and the sanctuary (`docs/spec/calls/campfire.md`). Each room since the last fire goes with the companions: what happened, how it went, and each one's own reactions. When the fire ends those are spent, and each companion's strong reactions stay with her for the rest of the game (`noteRoom`, `fireOut` in `src/campaign/run.js`).
+- **Camp happens there** (D190): the campfire call at every campfire and the sanctuary (`docs/spec/calls/campfire.md`). Each room since the last fire goes with the companions: what kind of place it was (its kind and premise), what happened, how it went, and each one's own reactions, with her own memories of rooms (`docs/spec/companions.md` §10, D193). When the fire ends those are spent, and her core memories stay (`noteRoom`, `fireOut` in `src/campaign/run.js`).
 - **A campfire is downtime and a fresh start,** never a trade-off between resting and something else. A leg that went well can't be ridden to the end of the act, and one that went badly doesn't follow the party past the fire.
 
 ## 7. What resets and what carries
@@ -63,7 +63,8 @@ No map of the act is built in advance.
 | Relics | The act, then as many as the climax allows (§5) |
 | The pack | Room to room, as kept when taking stock (§10), until the act ends |
 | A follower and the loose ends | Room to room, as settled when taking stock, until the follower reaches their goal (§10) |
-| The rooms since the last campfire (D190) | Until the next campfire; each companion's strong reactions among them, the whole game |
+| The rooms since the last campfire (D190), and each companion's leg memories of them (D193) | Until the next campfire ends |
+| Each companion's core memories of rooms (D193) | The whole game, until replaced |
 | Gold, how the companions feel about the player and about each other, memories, commitments, companion goals, outfits, and the world's memory (D123) | The whole game |
 
 ## 8. No campaign clocks
@@ -89,10 +90,11 @@ Gravenhold is the default world and the worked example a generated world is writ
 
 ## 10. Taking stock (D192)
 
-When a room ends, before its verdict, the player and the DM take stock out of character: nothing happens in the world, and the player talks it over for as long as they like (`docs/spec/calls/stock.md`). Code: `src/campaign/stock.js`, `takeStock` and `settle` in `src/game/journey.js`.
+When a room ends, alongside its verdict (D193), the player and the DM take stock out of character: nothing happens in the world, and the player talks it over for as long as they like (`docs/spec/calls/stock.md`). Code: `src/campaign/stock.js`, `takeStock` and `settle` in `src/game/journey.js`.
 
 - **The pack:** what the hand-off has the party holding, plus anything the DM grants that the game missed. The player keeps up to `content/setting.js` `items.max` (six). Gold, relics, outfits and journal pages don't count. Whatever isn't kept stays behind.
 - **A follower:** the DM lists who could come along, and the player picks one or no one. A follower has a name, pronouns, looks, how they are, a **goal** (a real place, person or thing a later room could be), a hidden **motive** (why they want it, good or bad) and what they know. Their record, goal and motive never change. Only how they are and what they know can. The motive reaches the DM's calls and the sketch, never the player, the room sheet or the question call.
 - **Loose ends:** up to four lines, each a lack that matters or a thread left open.
 - **Where a follower is going:** while one travels with the party, the seed may make an encounter, an oddity or a quiet room their goal. It's never the room right after they join. After that the chance is one in three, then one in two from their third room, and certain from their fifth (`DESTINATION_KINDS` in `src/campaign/seed.js`). That room has no other extra. Their story comes to a head there, and they part ways when it ends, whatever is settled.
-- The campaign keeps the result as `items` and `carried`. A room ended without taking stock keeps the pack as it came out, up to the limit, and what the party already had with it.
+- **Memories:** each companion's memories of the room, from the verdict, to make core or not (`docs/spec/companions.md` §10).
+- Nothing moves until the player walks on. Then the campaign keeps the result as `items`, `carried` and `roomMemories`. A room ended without taking stock keeps the pack as it came out, up to the limit, and what the party already had with it.

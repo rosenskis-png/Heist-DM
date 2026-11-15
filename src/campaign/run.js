@@ -6,6 +6,7 @@ import { startAct, exitKinds, enter, wayOn } from "./way.js";
 import { endEncounter } from "./relationship.js";
 import { addOutfit } from "./wardrobe.js";
 import { rest } from "../engine/handoff.js";
+import { remember, legOver } from "./memories.js";
 
 // A new campaign at the start of `act`. `members` are the two companions' profiles; `romance` their relationship state.
 export function newCampaign({ act = 1, seed = 1, members = [], romance = null } = {}) {
@@ -27,8 +28,10 @@ export const canSeparate = (camp) => camp.way.left > 0 && !["climax", "sanctuary
 // party reached, or code picks one (D144). At a campfire or the sanctuary the party rests and everyone is together again
 // (D142). The climax's rating decides how many relics the party may keep into the next act (D148). Returns the
 // campaign and where the party is going.
-export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], members = [], name = null }) {
-  const out = structuredClone({ ...(camp.way.here === "campfire" ? fireOut(camp) : noteRoom(camp, { name, handoff, verdict })), romance: null });
+export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], members = [], name = null, place = null, memories = null }) {
+  // Her memories of the room join her leg and core as the player settled them (D193), before a campfire spends the leg.
+  const remembered = memories ? { ...camp, roomMemories: remember(camp, memories.pending, memories.core) } : camp;
+  const out = structuredClone({ ...(camp.way.here === "campfire" ? fireOut(remembered) : noteRoom(remembered, { name, place, handoff, verdict })), romance: null });
   out.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
   out.gold = handoff.gold ?? out.gold;
   out.relics = [...out.relics, ...(handoff.relics ?? [])].slice(0, setting.relics.max);
@@ -65,22 +68,18 @@ export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], 
 // What the companions take to the next campfire (D190): each room since the last one, as it happened and as each of
 // them felt it. Her reactions are her own; the other companion's call never reads them.
 const SINCE = 8;
-const KEPT = 6;
-export function noteRoom(camp, { name = null, handoff = {}, verdict = null }) {
+export function noteRoom(camp, { name = null, place = null, handoff = {}, verdict = null }) {
   const felt = {};
   for (const x of verdict?.reactions ?? []) (felt[x.from] ??= []).push({ reason: x.reason, sign: x.sign, intensity: x.intensity ?? 1 });
-  const moment = { room: name, happened: handoff.log ?? null, went: verdict?.rating == null ? null : verdict.why ?? null, felt };
+  // What kind of place it was (D193): its kind and the premise it was built on.
+  const moment = { room: name, ...(place ? { place } : {}), happened: handoff.log ?? null, went: verdict?.rating == null ? null : verdict.why ?? null, felt };
   return { ...camp, since: [...(camp.since ?? []), moment].slice(-SINCE) };
 }
 
-// A campfire is over (D190): the moments of the leg are spent, and only what struck each companion hardest (a strong
-// reaction) stays with her for the rest of the game, the latest few.
+// A campfire is over (D190, D193): the moments of the leg are spent, and so are her leg memories of rooms; her core
+// memories stay. What she remembers of camp itself is the relationship state's, and untouched.
 export function fireOut(camp) {
-  const kept = structuredClone(camp.kept ?? {});
-  for (const m of camp.since ?? [])
-    for (const [id, list] of Object.entries(m.felt ?? {}))
-      for (const x of list.filter((x) => x.intensity >= 2)) kept[id] = [...(kept[id] ?? []), { room: m.room, reason: x.reason, sign: x.sign }].slice(-KEPT);
-  return { ...camp, since: [], kept };
+  return { ...camp, since: [], roomMemories: legOver(camp.roomMemories ?? {}) };
 }
 
 // The act ends at its sanctuary: the player keeps up to `camp.keep` of the act's relics, chosen by id, and the next act

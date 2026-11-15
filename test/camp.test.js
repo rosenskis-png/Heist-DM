@@ -93,22 +93,34 @@ test("where she stands after camp is what the rooms ahead read", async () => {
   assert.ok(JSON.parse(serialize(s)).fire.transcript.length, "the scene is in the save");
 });
 
-test("the road since the last fire reaches her, her own feelings only, and strong ones outlast the fire", async () => {
+test("the road since the last fire reaches her: what kind of place each room was, her own feelings, her memories of rooms, and where she is in the world (D190, D193)", async () => {
   let camp = campaignOf(atCamp());
-  camp = noteRoom(camp, { name: "The laundry", handoff: { log: "They hid in the vats." }, verdict: { rating: 6, why: "Messy but clean.", reactions: [{ from: "fern", reason: "he carried her across", sign: 1, intensity: 2 }, { from: "nadia", reason: "he left her behind", sign: -1, intensity: 1 }] } });
+  camp = noteRoom(camp, { name: "The laundry", place: "encounter: a laundry at its busiest, an ogre asleep on the sacks", handoff: { log: "They hid in the vats." }, verdict: { rating: 6, why: "Messy but clean.", reactions: [{ from: "fern", reason: "he carried her across", sign: 1, intensity: 2 }, { from: "nadia", reason: "he left her behind", sign: -1, intensity: 1 }] } });
+  camp.roomMemories = {
+    fern: { leg: [{ id: "m1", room: "The laundry", short: "in the laundry, he carried her over the vats", long: "x" }], core: [{ id: "m0", room: "The Cells", short: "y", long: "They were in the cells. He picked the lock while she kept watch, and he trusted her to." }] },
+    nadia: { leg: [{ id: "m2", room: "The laundry", short: "he left her behind in the steam", long: "z" }], core: [] },
+  };
+  camp.romance.rel.fern.memories = ["at the last fire he told her about his sister"];
   const fern = roadFor(camp, "fern");
   assert.equal(fern.since[0].what_happened, "They hid in the vats.");
+  assert.ok(fern.since[0].place.includes("ogre asleep"));
   assert.ok(fern.since[0].you_felt[0].includes("carried her across"));
-  assert.ok(!JSON.stringify(fern).includes("left her behind"), "the other's reactions are hers");
+  assert.deepEqual(fern.leg, ["in the laundry, he carried her over the vats"]);
+  assert.ok(fern.core[0].includes("picked the lock"), "core memories reach the fire in full");
+  assert.ok(!JSON.stringify(fern).includes("left her behind"), "the other's reactions and memories are hers");
   const after = fireOut(camp);
   assert.equal(after.since.length, 0);
-  assert.equal(after.kept.fern.length, 1);
-  assert.equal(after.kept.nadia, undefined, "a mild reaction doesn't stay");
+  assert.deepEqual(after.roomMemories.fern.leg, [], "the leg's memories are spent at the fire");
+  assert.equal(after.roomMemories.fern.core.length, 1, "core stays");
+  assert.deepEqual(after.romance.rel.fern.memories, ["at the last fire he told her about his sister"], "what she remembers of camp is untouched");
   const s = atCamp();
   s.camp = { ...camp, way: s.camp.way };
   const { io, inputs } = scripted([answer(), answer()]);
   await campTalk(s, io, prompts, { text: "Rough day." });
-  assert.ok(inputs.some((x) => x.includes("They hid in the vats.")));
+  const input = inputs.find((x) => x.includes("picked the lock"));
+  assert.ok(input, "her core memories reach her call");
+  for (const bit of ["They hid in the vats.", "ogre asleep", "Where you are in the world", "this_part_of_it"]) assert.ok(input.includes(bit), bit);
+  assert.ok(!inputs.find((x) => x.includes("left her behind in the steam") && x.includes("picked the lock")), "each reads only her own");
 });
 
 test("leaving a campfire spends the leg's moments; leaving any other room adds one", () => {
