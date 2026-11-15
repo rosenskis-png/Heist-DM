@@ -57,7 +57,7 @@ const fields = (o, skip = []) => kv(Object.entries(o).filter(([k]) => k !== "id"
 
 const KINDS = ["encounter", "quiet", "oddity", "merchant", "campfire", "climax", "sanctuary"];
 const CHALLENGED = ["encounter", "climax"];
-const PROMPTS = ["pitch", "act", "sketch", "encode"];
+const PROMPTS = ["pitch", "act", "sketch", "encode", "outfit"];
 const PRIZED = ["encounter", "oddity", "quiet"];
 
 // ---------- state ----------

@@ -9,8 +9,8 @@ import { checkPacket } from "../engine/load.js";
 const SLOTS = [{ id: "player" }, { id: "companion_a" }, { id: "companion_b" }];
 
 // What's wrong with an encoded room beyond its schema: the engine's own checks once it's laid out, and what the seed
-// fixed (its mode, one exit per kind drawn, a merchant's prices).
-export function encodeProblems(out, seed) {
+// fixed (its mode, one exit per kind drawn, a merchant's prices), and the outfit it hides, when it hides one (D195).
+export function encodeProblems(out, seed, outfit = null) {
   const { packet } = layout(out);
   const problems = checkPacket(packet, SLOTS);
   const mode = ROOM_KINDS.includes(seed.kind) ? "room" : "encounter";
@@ -25,7 +25,11 @@ export function encodeProblems(out, seed) {
   if (seed.clue && !packet.map.things.some((t) => t.reward?.clue === seed.clue.id)) problems.push(`the clue is a thing whose reward is {"clue": "${seed.clue.id}"}`);
   // Only the seed's prize is a reward (D164): no clue the world doesn't hold, no second prize.
   for (const t of packet.map.things.filter((x) => x.reward?.clue && x.reward.clue !== seed.clue?.id)) problems.push(`${t.id}'s reward is a clue the seed didn't place; take its reward off`);
-  if (seed.prize) {
+  if (outfit) {
+    const holding = packet.map.things.filter((x) => x.reward?.outfit);
+    if (!holding.some((x) => x.reward.outfit.id === outfit.id)) problems.push(`the outfit is a thing whose reward is {"outfit": {"id": "${outfit.id}", ...}}, hidden or hard to reach`);
+    for (const t of packet.map.things.filter((x) => x.reward && !(x.reward.outfit?.id === outfit.id))) problems.push(`${t.id} has a reward, but the room's only prize is the outfit; take its reward off`);
+  } else if (seed.prize) {
     const want = { gold: "gold", "a relic": "relic", "a journal page": "clue" }[seed.prize] ?? null;
     const extra = packet.map.things.filter((x) => x.reward && Object.keys(x.reward).find((k) => k !== "fixed") !== want);
     for (const t of extra) problems.push(want ? `${t.id} has a reward, but the room's only prize is ${seed.prize}; take its reward off` : `${t.id} has a reward, but this room has no prize; take its reward off`);
@@ -33,5 +37,12 @@ export function encodeProblems(out, seed) {
   return problems;
 }
 
-export const encodeCall = (io, env, c) =>
-  ask(io, { call: "encode", schema: encodeSchema, input: encodeInput(env, c, encodeSchema), check: (out) => encodeProblems(out, c.seed) });
+// The outfit's reward is the outfit exactly as designed, whatever encode copied of it.
+function withOutfit(out, outfit) {
+  if (!outfit) return out;
+  const things = out.map.things.map((t) => (t.reward?.outfit?.id === outfit.id ? { ...t, reward: { outfit: { ...outfit } } } : t));
+  return { ...out, map: { ...out.map, things } };
+}
+
+export const encodeCall = async (io, env, c) =>
+  withOutfit(await ask(io, { call: "encode", schema: encodeSchema, input: encodeInput(env, c, encodeSchema), check: (out) => encodeProblems(out, c.seed, c.outfit ?? null) }), c.outfit ?? null);

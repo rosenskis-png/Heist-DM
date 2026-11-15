@@ -15,4 +15,5 @@ export { sketchSchema } from "./calls/sketch.js";
 export { readSchema } from "./calls/read.js";
 export { actSchema } from "./calls/act.js";
 export { photoSchema } from "./calls/photo.js";
+export { outfitSchema } from "./calls/outfit.js";
 export { companionFileSchema } from "./companion.js";

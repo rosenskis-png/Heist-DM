@@ -863,6 +863,9 @@ const seedText = (seed, world) => ({
     ...(seed.clue
       ? { prize: { a_journal_page: { written_by: seed.clue.author }, how: "a loose page, torn from that writer's journal, somewhere in the room the party has to reach and can carry off. They'll read it at camp: nothing in the room says or shows what's on it, and nobody here knows" } }
       : seed.prize ? { prize: seed.prize } : {}),
+    ...(seed.outfit === "hidden"
+      ? { prize: { an_outfit: "clothes worth keeping, put somewhere hidden or hard to reach: found only by someone who looks closely, or reached only with effort or risk. Don't describe the clothes, which are designed afterwards; say only where they are and what it takes to get them" } }
+      : {}),
     ...(seed.destination
       ? { where_a_follower_is_going: { who: seed.destination.name, place: seed.destination.goal, ...(seed.destination.motive ? { why_really: seed.destination.motive } : {}), how: "this room is that place, or the threshold of it. The follower's story comes to a head here: what they really wanted comes out, for good or ill, and by the room's end they part from the party, staying, leaving or lost. The party can still make of it what they like" } }
       : {}),
@@ -956,6 +959,7 @@ export function encodeInput(env, c, schema) {
     block("Your job", env.prompts.encode),
     block("Output format", shapeText(schema)),
     block("Fixed by the seed", { kind: c.seed.kind, mode: ROOM_KINDS.includes(c.seed.kind) ? "room" : "encounter", act: c.seed.act, exits: c.seed.exits, ...(c.seed.prize ? { the_only_prize: c.seed.prize } : {}), ...(c.seed.clue ? { the_clue_id: c.seed.clue.id } : {}) }),
+    c.outfit ? block("The outfit: the room's only prize", { thing: "a thing the party can carry, where the sketch hides it: hidden, or somewhere hard to reach. Name it plainly (a folded bundle, a chest, a garment bag) and give it this reward exactly", reward: { outfit: { id: c.outfit.id, name: c.outfit.name, text: c.outfit.text } } }) : null,
     block("The party's slots", ["player", "companion_a", "companion_b"]),
     block("Worked example: a finished packet", env.examples?.encoded),
     block("The sketch", c.sketch),
@@ -990,3 +994,20 @@ export function actInput(env, c, schema) {
 
 // The kinds of room that are rooms rather than encounters (D121, D153).
 export const ROOM_KINDS = ["quiet", "oddity", "merchant", "campfire", "sanctuary"];
+
+// The outfit call (D195): the room it's found in, from the room's sketch; for a climax, the act's mood too; and the
+// outfits found so far, so it makes something new. Never a companion: an outfit is written for no one (D194).
+export function outfitInput(env, c, schema) {
+  const { sketch, world, plan, seed } = c.room;
+  const region = world?.regions?.[seed.act - 1];
+  return compose([
+    block("Your job", env.prompts.outfit),
+    block("Output format", shapeText(schema)),
+    block(seed.kind === "climax" ? "The room: the act's climax, where it's the reward for winning" : "The room it's found in", { premise: sketch.premise, what_the_party_sees: sketch.opening }),
+    seed.kind === "climax"
+      ? block("The act's mood", { ...(region ? { region: region.name, feel: region.feel } : {}), ...(plan ? { setting: plan.setting, question: plan.question, at_its_peak: plan.peak?.who } : {}) })
+      : null,
+    block("Outfits already found", (c.found ?? []).length ? c.found.map((f) => `${f.name}: ${String(f.text).split(";")[0]}`) : "none yet"),
+    "Design the outfit.",
+  ]);
+}

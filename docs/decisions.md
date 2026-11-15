@@ -205,7 +205,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D191** Camp in the game has the bench's look behind the scene: current
 - **D192** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: changed by D193
 - **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
-- **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: current
+- **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: changed by D195
+- **D195** The outfit generator: hidden in calm rooms, the climax's reward, sexy first and the room only a reminder: current
 
 ---
 
@@ -1250,3 +1251,13 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - The Dressing Room gives every companion every found outfit to try on.
 **Why:** The designer wants outfits as souvenirs of the journey that the player dresses companions in, not a gift economy or a choice the companion makes. A generic outfit's prose pasted into a photo prompt lost her register and had no subject; gear inside an outfit meant a change of clothes disarmed her.
 **Rules out:** Outfits written for one companion's body; a companion choosing her own outfit; gear that comes off with a change of clothes.
+
+### D195. The outfit generator: hidden in calm rooms, the climax's reward, sexy first and the room only a reminder
+**Decided:** The designer's call (2026-11-15). Changes D194's home for found outfits.
+- **Where.** Never in an encounter. A quiet room, an oddity or a campfire hides one somewhere hidden or hard to reach, while the act has fewer than its target (two or three, drawn once an act); the fewer calm rooms are left, the likelier, so the act reaches its target where the way allows. It's that room's only prize. Every climax rewards one more, from the room and the act's mood, given when the climax ends to wait for the sanctuary's fire.
+- **How.** A new call, `outfit`, runs after the sketch: the sketch says only where the outfit is and what it takes to get it; the call designs it from the sketch's premise and opening (and, at a climax, the act's mood) and the outfits already found; encode makes it a thing the party carries out, and code puts the outfit on it exactly. A failed outfit call leaves the room without one.
+- **What.** Very sexy first, and that outranks the room: a specific style with its cuts placed exactly in anatomical terms, a lot of skin, either a traditional garment recut to scandalise or something already scandalous (lingerie included). The room is a faint reminder only: one colour and at most one small nod, never its mechanics, materials or objects. Clothes only. Never anything slipping, sliding or falling off a shoulder.
+- **The wardrobe in the game.** The Pack tab lists what each companion owns and lets the player choose what she wears, any time. Found outfits carry where they came from.
+- `content/outfits.js` holds sample outfits for the Dressing Room, not the game's.
+**Why:** The designer stress-tested the brief on six rooms. Room-led outfits took too much from their rooms, generic style names were dull, and the outfits weren't revealing enough; an outfit in an encounter room competed with the danger. The rewritten brief's second round was right.
+**Rules out:** Outfits in encounter rooms; outfits that represent their room; modest or practical outfits; companions in the outfit call.

@@ -45,6 +45,7 @@ No map of the act is built in advance.
 ## 5. The climax
 
 - **The climax is a room the party always gets through.** What's at stake is how: how epic the escape is, decided by what the act built up; a choice at its peak, often between the companions' threads; and what comes away with them (D148).
+- **It rewards an outfit,** whatever the verdict, waiting to be given at the sanctuary's fire (D195).
 - **Its verdict decides how many of the act's relics carry into the next act:** none for a rough climax, up to three for a great one (`content/setting.js`, `relics.keptByRating`), and never more than the party has (D149). The player picks which at the sanctuary, and the next act starts fresh with them and the gold. How the companions feel, and everything else in §7's last row, carries as always.
 
 ## 6. Campfires

@@ -65,6 +65,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Read | `sample.json` | off | `quick` (D177) |
 | Encode | `sample.json` | off | `default` |
 | Photo | `sample.json` | off | `default` (D170; the bench only) |
+| Outfit | `sample.json` | off | `default` (D195) |
 
 - **Replay on** means identical input returns the stored answer for 5 minutes without calling Claude: the same ledger and plan get the same card, for free. Conversation and prose must never repeat, so their replay is off.
 - **Cost** is roughly input size × number of calls, charged to the player's usage. The biggest levers: keep packets small (D26), send raw exchanges only per the table above, answer questions on the cheap tier from the slice, voice both companions in one call, and call only the addressed companion on a private channel.

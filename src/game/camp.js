@@ -13,7 +13,7 @@
 import { roadLines } from "../campaign/memories.js";
 import * as Rel from "../campaign/relationship.js";
 import * as Relationship from "../../content/relationship.js";
-import { addOutfit } from "../campaign/wardrobe.js";
+import { addOutfit, equip, owned, equipped } from "../campaign/wardrobe.js";
 import { resolveParty } from "../campaign/roster.js";
 import { clueTexts } from "../campaign/world.js";
 import { campfireCall } from "../calls/campfire.js";
@@ -235,8 +235,27 @@ export async function giveOutfit(session, io, prompts, { outfit, to }) {
   const fit = (session.camp.gifts ?? []).find((g) => g.id === outfit);
   if (!fit) throw new Error("there's no such outfit waiting");
   // A shapeshifter in another's place takes the gift as that one would: it's still given to the one he thinks he's with.
-  session.camp.romance = addOutfit(session.camp.romance, to, fit.id, { name: fit.name, text: fit.text });
+  session.camp.romance = addOutfit(session.camp.romance, to, fit.id, { name: fit.name, text: fit.text, ...(fit.from ? { from: fit.from } : {}) });
   session.camp.gifts = session.camp.gifts.filter((g) => g.id !== outfit);
   if (fire.with === "both") speakTo(session, "all");
-  return campTalk(session, io, prompts, { text: `I give ${nameOf(session, to)} something I carried out for her: ${fit.name} (${fit.text}). It's hers now (outfit id "${fit.id}").`, gift: fit.id });
+  return campTalk(session, io, prompts, { text: `I give ${nameOf(session, to)} something I carried out for her: ${fit.name} (${fit.text}). It's hers now.`, gift: fit.id });
+}
+
+// What each companion owns to wear and what she has on (D194): the player's toggle, any time, like clothes in a life sim.
+export function wardrobeView(session) {
+  const rom = session.camp?.romance;
+  if (!rom?.wardrobe) return [];
+  return session.state.party.slice(1).filter((c) => rom.wardrobe[c.id]).map((c) => ({
+    id: c.id,
+    name: c.name,
+    wearing: equipped(rom, c),
+    outfits: Object.entries(owned(rom, c)).map(([id, o]) => ({ id, name: o.name, text: o.text, ...(o.from ? { from: o.from } : {}) })),
+  }));
+}
+
+// The player dresses a companion in an outfit she owns. Every call from now on describes her in it.
+export function dress(session, who, id) {
+  const c = session.state.party.find((p) => p.id === who);
+  if (!c || !session.camp?.romance) throw new Error("there's no such companion");
+  session.camp.romance = equip(session.camp.romance, c, id);
 }

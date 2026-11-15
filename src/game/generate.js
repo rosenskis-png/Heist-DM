@@ -11,6 +11,7 @@ import { readCall, thin } from "../calls/read.js";
 import { load } from "../engine/load.js";
 import { roomSheet, sheetText } from "../context.js";
 import { actCall } from "../calls/act.js";
+import { outfitCall } from "../calls/outfit.js";
 
 // The mysteries' edges that apply in this room (D164), as hidden facts the DM weighs and never says: a climax gets the
 // edges of its act's climax; a faction's room gets that faction's edges from their act on. Never sent to the sketch.
@@ -49,14 +50,20 @@ export function seedRoom(camp, world) {
 export async function designRoom(io, env, c) {
   const stage = (name, value) => (io.onStage?.(name, value), value);
   const sketch = c.sketch ?? stage("sketch", await sketchCall(io, env, c));
+  // The room's outfit (D195), designed from the sketch: hidden in a calm room, or the climax's reward. An outfit that
+  // fails to come is no reason to hold the room up: the room goes on without one.
+  const outfit = c.seed.outfit && env.prompts?.outfit
+    ? stage("outfit", await outfitCall(io, env, { room: { sketch, world: c.world, plan: c.plan, seed: c.seed }, found: c.found ?? [] }).catch(() => null))
+    : null;
+  const hidden = c.seed.outfit === "hidden" ? outfit : null;
   // A good design isn't thrown away because encoding it slipped (D185): encoding gets a second, fresh go with the
   // same sketch, and if that fails too the error carries the sketch, so trying again starts from it.
   let encoded;
   try {
-    encoded = await encodeCall(io, env, { ...c, sketch });
+    encoded = await encodeCall(io, env, { ...c, sketch, outfit: hidden });
   } catch (e) {
     try {
-      encoded = await encodeCall(io, env, { ...c, sketch });
+      encoded = await encodeCall(io, env, { ...c, sketch, outfit: hidden });
     } catch (e2) {
       e2.sketch = sketch;
       throw e2;
@@ -65,7 +72,7 @@ export async function designRoom(io, env, c) {
   const edges = edgesFor(c.world, c.seed);
   const withEdges = edges.length ? { ...encoded, map: { ...encoded.map, facts: [...encoded.map.facts, ...edges] } } : encoded;
   stage("encoded", withEdges);
-  const room = { ...stage("laid out", layout(withEdges)), sketch };
+  const room = { ...stage("laid out", layout(withEdges)), sketch, outfit };
   // One reading from the player's chair (D177): a room where danger stands in the way, read with only what the
   // player will be told. Too little to take hold of, and the room goes back to the sketch once, with the reader's
   // notes. A read that fails never holds a room up, and a room made again isn't read again.
@@ -95,12 +102,15 @@ export async function generateRoom(io, env, { camp, world, party, handoff = null
   const { seed, camp: next } = resume?.seed ? { seed: resume.seed, camp: resume.camp } : seedRoom(camp, world);
   let designed;
   try {
-    designed = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [], ...(resume?.sketch ? { sketch: resume.sketch } : {}) });
+    designed = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [], found: camp.outfitsFound ?? [], ...(resume?.sketch ? { sketch: resume.sketch } : {}) });
   } catch (e) {
     e.resume = { seed, camp: next, sketch: e.sketch ?? null };
     throw e;
   }
-  const { packet, mapped, sketch } = designed;
-  // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162).
-  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`] } };
+  const { packet, mapped, sketch, outfit } = designed;
+  // The act's rooms so far, by premise, so the next sketch goes somewhere different (D162). An outfit the room holds
+  // is counted toward the act's (D195); the climax's waits for the climax to end.
+  const placed = outfit && (seed.outfit === "after" || packet.map.things.some((t) => t.reward?.outfit?.id === outfit.id));
+  const found = placed ? [...(next.outfitsFound ?? []), { id: outfit.id, name: outfit.name, text: outfit.text, act: seed.act, ...(seed.outfit === "after" ? { climax: true } : {}) }] : next.outfitsFound ?? [];
+  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`], outfitsFound: found, ...(placed && seed.outfit === "after" ? { climaxOutfit: outfit } : {}) } };
 }

@@ -24,6 +24,7 @@ Code: `src/game/generate.js` (`generateRoom`: `seedRoom`, the code steps, then `
 | **Exits** | Code | Draws the kinds of room this room's exits lead to (D144); the room before a campfire, the climax or the sanctuary has one way on, to it (D169) |
 | **Seed** | Code | Picks the question (`src/campaign/seed.js`, below) |
 | **Sketch** | `sketch` call | Writes the whole room as a DM's prep note, premise first (`docs/spec/calls/sketch.md`) |
+| **Outfit** | `outfit` call | When the seed holds one, designs the room's outfit from the sketch (`docs/spec/calls/outfit.md`, D195) |
 | **Encode** | `encode` call | Turns the sketch into packet data without geometry, checked by the engine once laid out (`docs/spec/calls/encode.md`) |
 | **Edges** | Code | Adds the mysteries' edges that apply here as hidden facts (`edgesFor`): a climax gets its act's climax edges, a faction's room that faction's edges from their act on. Never sent to the sketch (D164) |
 | **Layout** | Code | Puts it on the grid from rough sizes (`src/engine/layout.js`); if it can't, the packet ships without a map (D9) |
@@ -39,6 +40,7 @@ What the seed fixes:
 - **Whose place it is,** for an encounter, the climax or an oddity: one of the factions that hold the region now, by the act's plan (or the region's holders).
 - **The shape and its centrepiece** (D163), from wide lists, neither repeated within an act.
 - **The prize,** for an encounter, an oddity or a quiet room (D164, D168): none about half the time, gold, a relic or a journal page. A page is one the campaign hasn't placed, from the act's live mysteries; the sketch is told only who wrote it, never its words, which the party reads at camp.
+- **An outfit** (D195): never in an encounter. A quiet room, an oddity or a campfire hides one, somewhere hidden or hard to reach, while the act has fewer than its two or three (drawn once an act), more likely the fewer calm rooms are left; it's that room's only prize, and the sketch says only where it is, never what it looks like. Every climax rewards one too, given when the climax ends. The outfit call designs it after the sketch; encode makes it a thing the party can carry, and code puts the outfit on it exactly as designed. An outfit that fails to come leaves the room without one.
 - **At most one extra** (D164), never in two rooms running: **someone from before**, from the verdicts' memory, only in an encounter or an oddity, at most once an act each; or **a sign of the act's peak**, from its hints, at most one a leg.
 
 Its leanings (D163, D169): **one motif** a room, a situation's shape with no examples (D168, D179). **Worn out:** every seed lists the props rooms must never build on (`content/stale.js`: hanging cages, ledgers and counting), and a sketch that uses one goes back once (D169). From the act's pools (D167), each item used once in the act: **a setting** for a quiet room, an oddity or a campfire, a different one from earlier in the act until they run out; and **news** as a third kind of extra. Pages come only from the act's live mysteries. **Her story's feature** reaches the sketch once an act for each companion; her other rooms touch her values. **The tone** also darkens as the act goes on, by the leg the room is in.
@@ -61,7 +63,7 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **Every exit carries a next-scene stub** (D119), and the exits lead to exactly the kinds code drew (D144).
 - **Its fail-forward ending moves the story on,** and so does `captured`, which every encounter has (D131): each has a next-scene stub that takes the party somewhere new, never back to where they started.
 - **Anyone who might fight has a tier and `breaks`** (D130), and a fight encounter's objective is something other than everyone down (`docs/design/encounter-craft.md` §3.9).
-- **A room has no objective or deadline** (D121). An outfit is a memento of the room it's found in, placed where it fits, two or three an act (D194).
+- **A room has no objective or deadline** (D121). An outfit is never in an encounter (D195).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
 - **It holds the seed's journal page,** when it placed one, as a thing the party can carry whose reward is that page, and no reward but the seed's prize (D164, D165, D168).

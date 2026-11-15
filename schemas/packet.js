@@ -77,8 +77,9 @@ const thing = obj(["id", "name", "properties", "location"], {
       obj(["gold"], { gold: { type: "integer", minimum: 1 } }),
       obj(["relic"], { relic: obj(["name", "text"], { name: r("text"), text: r("text") }) }),
       obj(["clue"], { clue: r("id"), fixed: { type: "boolean" } }),
-      // An outfit (D184): it goes to the companion who carries it out, or waits to be given if the player does.
-      obj(["outfit"], { outfit: obj(["id", "name", "text"], { id: r("id"), name: r("text"), text: r("text") }) }),
+      // An outfit (D184): it goes to the companion who carries it out, or waits to be given if the player does. `from`:
+      // where it was found (D195).
+      obj(["outfit"], { outfit: obj(["id", "name", "text"], { id: r("id"), name: r("text"), text: r("text"), from: r("text") }) }),
     ],
   },
   // What it costs, at a merchant: the party pays when one of them takes it (D147).

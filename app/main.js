@@ -14,7 +14,7 @@ import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, move
 import { packOf } from "../src/campaign/stock.js";
 import { proposedCore } from "../src/campaign/memories.js";
 import { setting } from "../content/setting.js";
-import { atFire, fireOf, fireView, heartsView, campTalk, sitWith, speakTo, giveOutfit } from "../src/game/camp.js";
+import { atFire, fireOf, fireView, heartsView, campTalk, sitWith, speakTo, giveOutfit, wardrobeView, dress } from "../src/game/camp.js";
 import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
 import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
@@ -25,7 +25,7 @@ import { partyPerceives } from "../src/engine/perceive.js";
 import { nameOf } from "../src/engine/world.js";
 import { LEDGER } from "../src/engine/ledger.js";
 
-const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict", "stock"];
+const PROMPTS = ["style", "companion", "party", "campfire", "adjudicate", "resolve", "scene", "question", "pitch", "act", "sketch", "read", "encode", "verdict", "stock", "outfit"];
 const url = (p) => new URL(`../${p}`, import.meta.url);
 const STATUS = {
   step: "Writing out the steps…",
@@ -363,7 +363,7 @@ function Game({ env, slot, initial, onQuit }) {
         ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
         ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
         ${tab === "camp" && fire ? html`<${CampTab} ...${props} error=${error?.where === "camp" ? error.text : null} />` : null}
-        ${tab === "pack" ? html`<${PackTab} session=${session} colors=${colors} />` : null}
+        ${tab === "pack" ? html`<${PackTab} session=${session} colors=${colors} onDress=${(who, id) => (dress(session, who, id), touch())} />` : null}
         ${tab === "map" ? html`<${MapTab} view=${mapView(s)} sketch=${sketchView(s)} sheet=${roomSheet(s)} colors=${colors} party=${s.party} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
       </main>
@@ -394,8 +394,9 @@ function RoomSheet({ sheet }) {
 }
 
 // The pack (D184, D189): everything the party has, in one place. What each of them is carrying now, with what's
-// known of each thing; the gold and relics; the journal pages to read at camp; and outfits waiting to be given.
-function PackTab({ session, colors }) {
+// known of each thing; the gold and relics; the journal pages to read at camp; outfits waiting to be given; and the
+// wardrobe, where the player chooses what each companion wears (D194).
+function PackTab({ session, colors, onDress }) {
   const s = session.state;
   const camp = session.camp ?? {};
   const members = sheetView(s);
@@ -411,7 +412,14 @@ function PackTab({ session, colors }) {
     </div>` : null))}
     ${s.relics?.length ? html`<div className="member"><b>Relics</b>${s.relics.map((r) => html`<details key=${r.id} className="ab"><summary><span>${r.name}</span></summary><span className="muted">${r.text}</span></details>`)}</div>` : null}
     ${pages ? html`<div className="member"><b>Journal pages</b><span className="muted small">${pages} ${pages === 1 ? "page" : "pages"} to read at camp.</span></div>` : null}
-    ${gifts.length ? html`<div className="member"><b>Outfits to give</b>${gifts.map((g) => html`<details key=${g.id} className="ab"><summary><span>${g.name}</span></summary><span className="muted">${g.text}</span></details>`)}</div>` : null}
+    ${gifts.length ? html`<div className="member"><b>Outfits to give</b>${gifts.map((g) => html`<details key=${g.id} className="ab"><summary><span>${g.name}</span></summary><span className="muted">${g.text}${g.from ? html`<br /><i>Found in ${g.from}.</i>` : null}</span></details>`)}</div>` : null}
+    ${wardrobeView(session).map((w) => html`<div key=${"w" + w.id} className="member" style=${{ "--cc": colors[w.id] }}>
+      <b>${w.name} wears</b>
+      ${w.outfits.length > 1
+        ? html`<select aria-label=${`What ${w.name} wears`} value=${w.wearing} onChange=${(e) => onDress(w.id, e.target.value)}>${w.outfits.map((o) => html`<option key=${o.id} value=${o.id}>${o.name}</option>`)}</select>`
+        : null}
+      ${w.outfits.filter((o) => o.id === w.wearing).map((o) => html`<span key=${o.id} className="muted small">${o.text}${o.from ? html`<br /><i>Found in ${o.from}.</i>` : null}</span>`)}
+    </div>`)}
   </section>`;
 }
 

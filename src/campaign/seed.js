@@ -3,6 +3,7 @@
 // what the act has used.
 import { motifs } from "../../content/motifs.js";
 import { d100 } from "../engine/rng.js";
+import { setting } from "../../content/setting.js";
 
 export const TONES = ["very stressed about time", "tense", "even", "light", "a fantasy playground"];
 // The players' main way of engaging, and what the room is built around: leanings the sketch uses or leaves (D163, D169).
@@ -30,6 +31,10 @@ const destinationOdds = (n) => (n >= 5 ? 1 : n >= 3 ? 2 : n >= 1 ? 3 : 0);
 const CHALLENGED = ["encounter", "climax"];
 const PRIZED = ["encounter", "oddity", "quiet"];
 const CALLBACK_KINDS = ["encounter", "oddity"];
+// Outfits (D195): hidden or hard to reach in a room without a fight, two or three an act, and one more as the reward
+// for every climax. `OUTFITS_CALM` is the share of the way's drawn rooms that are quiet or odd (content/setting.js).
+const OUTFIT_KINDS = ["quiet", "oddity", "campfire"];
+const OUTFITS_CALM = 0.3;
 const HINT_KINDS = ["encounter", "oddity", "quiet"];
 // The calm rooms the act gives settings for (D167).
 const SET_KINDS = ["quiet", "oddity", "campfire"];
@@ -137,6 +142,21 @@ export function seedFor(camp, world, kind, exits = []) {
     if (left.length) seed.news = pickFrom(rng, left);
   }
   const extra = seed.callback || seed.hint || seed.news;
+  // An outfit (D195): the climax always rewards one; a calm room hides one while the act is short of its two or three,
+  // more likely the fewer calm rooms are left. It's that room's only prize.
+  const target = camp.outfitTarget ?? 2 + roll(rng, 2);
+  if (kind === "climax") seed.outfit = "after";
+  else if (OUTFIT_KINDS.includes(kind)) {
+    const need = target - (camp.outfitsFound ?? []).filter((f) => f.act === camp.act && !f.climax).length;
+    const w = camp.way;
+    const ahead = (w.left ?? 0) + Math.max(0, (w.legs ?? 1) - (w.leg ?? 1)) * (setting.way.rooms ?? 3);
+    const chances = 1 + Math.max(0, (w.legs ?? 1) - (w.leg ?? 1)) + Math.round(ahead * OUTFITS_CALM);
+    if (need > 0 && (need >= chances || roll(rng, chances) < need)) {
+      seed.outfit = "hidden";
+      delete seed.prize;
+      delete seed.clue;
+    }
+  }
   return {
     seed,
     camp: {
@@ -149,6 +169,7 @@ export function seedFor(camp, world, kind, exits = []) {
       usedShapes: [...usedShapes, seed.shape],
       usedCentres: [...usedCentres, seed.centrepiece],
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
+      outfitTarget: target,
       calledBack: seed.callback ? [...calledBack, seed.callback.name] : calledBack,
       hintsUsed: seed.hint ? [...hintsUsed, seed.hint] : hintsUsed,
       settingsUsed: seed.setting ? [...settingsUsed, seed.setting] : settingsUsed,
