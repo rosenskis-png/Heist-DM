@@ -110,7 +110,6 @@ export function fireView(session, { reveal = false } = {}) {
                 o.storm != null ? `storm: ${o.storm}` : null,
                 o.risk ? `aside risk: ${o.risk}` : null,
                 o.form ? `new form: ${o.form}` : null,
-                o.outfit ? `changes into: ${o.outfit}` : null,
                 o.advances ? `moves: ${o.advances}` : null,
                 o.standing ? `mood: ${o.standing.mood} (${o.standing.why})` : null,
               ].filter(Boolean),

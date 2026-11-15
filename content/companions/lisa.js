@@ -94,7 +94,8 @@ export default {
       text: `A true reconciliation with her sister is possible now, if the scene really earns it: hard, costly, and real, not the act she's put on before.`,
     },
   ],
-  outfit: `Her sister's style in a skimpier, flirtier cut: a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, knee boots, and one piece of jewellery she has clearly borrowed from her sister.`,
+  outfit: `Her sister's style in a skimpier, flirtier cut: a sexy cropped laced bodice that bares her midriff, a very short skirt slit high up one side, and knee boots.`,
+  gear: `One piece of jewellery she has clearly borrowed from her sister.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her; each sister's tie entry replaces
   // what her heritage changes. See docs/spec/calls/photo.md.
   photo: {

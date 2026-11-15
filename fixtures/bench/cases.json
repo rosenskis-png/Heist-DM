@@ -233,7 +233,7 @@
   },
   {
    "id": "outfit",
-   "title": "Fern tries on a gift",
+   "title": "Fern is given a dress",
    "party": [
     "fern",
     "annaleise"
@@ -256,7 +256,7 @@
     "fern": {
      "spring_silk": {
       "name": "Spring-green silk dress",
-      "text": "A floor-length dress of spring-green silk the colour of new leaves, thin straps, bare back, cut to move; she wears it barefoot, with the mistletoe still in her hair."
+      "text": "A floor-length dress of spring-green silk the colour of new leaves, thin straps, bare back, cut to move."
      }
     }
    },
@@ -270,7 +270,7 @@
      "text": "I hand Fern the green silk dress from the quartermaster's stores. \"Found this. Thought of you.\""
     }
    ],
-   "look_for": "She changes into it on the page (outfit: spring_silk), and the description uses the dress, not her usual wrap and skirt. Fern changes in front of him without a flicker of shame; heat 3, so he's shown interest and she can flirt back."
+   "look_for": "She answers the gift as herself: thanks him in her own way, or teases, and says something about how it looks or how it would look on her. She doesn't change into it on the page; what she wears is the player's choice (D194), so her description stays her usual wrap and skirt."
   },
   {
    "id": "tension",

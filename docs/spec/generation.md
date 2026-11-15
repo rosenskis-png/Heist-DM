@@ -61,7 +61,7 @@ Beyond `docs/spec/packet.md`'s consistency checks:
 - **Every exit carries a next-scene stub** (D119), and the exits lead to exactly the kinds code drew (D144).
 - **Its fail-forward ending moves the story on,** and so does `captured`, which every encounter has (D131): each has a next-scene stub that takes the party somewhere new, never back to where they started.
 - **Anyone who might fight has a tier and `breaks`** (D130), and a fight encounter's objective is something other than everyone down (`docs/design/encounter-craft.md` §3.9).
-- **A room has no objective or deadline** (D121). An outfit is a reward placed where it fits, for a companion in the party (D143).
+- **A room has no objective or deadline** (D121). An outfit is a memento of the room it's found in, placed where it fits, two or three an act (D194).
 - **It fits the calls' budgets** (D76): `test/budget.test.js`'s late-game limits hold for a generated packet too.
 - **It places companions by slot,** never by name (D126).
 - **It holds the seed's journal page,** when it placed one, as a thing the party can carry whose reward is that page, and no reward but the seed's prize (D164, D165, D168).

@@ -30,7 +30,8 @@ const shapeshift = obj(["text"], { text: t, impersonation: list(obj(["chance"], 
 
 // Her picture identity (D170): the fixed words in every photo prompt of her, written for an image model. `age` is
 // for a companion whose `age` isn't a number; `bold` keeps the word "sexy" on her main garment.
-const photoFields = { age: { type: "integer", minimum: 18 }, role: t, face: t, identity: t, garments: t, bold: { type: "boolean" }, expression: t };
+// `gear`: what she always has on her, as a short line, in every picture whatever she wears.
+const photoFields = { age: { type: "integer", minimum: 18 }, role: t, face: t, identity: t, garments: t, gear: t, bold: { type: "boolean" }, expression: t };
 const photo = obj(["role", "face", "identity", "garments", "bold", "expression"], photoFields);
 
 // A tie's entry for one other companion: fields it sets or extends, and what it adds.
@@ -45,7 +46,7 @@ const tieEntry = obj([], {
   // What she holds against or hides from this partner: always in her own call, never in the partner's (D99).
   secret: t,
   // What this partner changes in her picture identity (D170). On no allowlist; only the photo call reads it.
-  photo: obj([], { role: t, face: t, identity: t, garments: t, expression: t }),
+  photo: obj([], { role: t, face: t, identity: t, garments: t, gear: t, expression: t }),
 });
 // A view of another companion: one number (affection) or any of the three axes (D92).
 const view = { oneOf: [{ type: "integer", minimum: -10, maximum: 10 }, { ...some(axes, { type: "integer", minimum: -10, maximum: 10 }) }] };
@@ -175,6 +176,8 @@ export const companionFileSchema = withDefs({
       notes: list(obj(["when", "text"], { when: gate, text: t })),
       // Outfits she owns from the start besides her `outfit` (docs/spec/companions.md §7).
       wardrobe: { type: "object", propertyNames: { pattern: "^[a-z][a-z0-9_]*$" }, additionalProperties: obj(["name", "text"], { name: t, text: t }) },
+      // What she always has on her, whatever she wears: weapons, a focus, a holy symbol, a binding (D194).
+      gear: t,
       // The outfit she starts in: "usual" or a key of her `wardrobe` (D171).
       wears: r("id"),
     },

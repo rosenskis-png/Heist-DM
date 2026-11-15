@@ -111,7 +111,8 @@ export default {
   other: `needs to be clearly first; tolerates the other companion only if he makes her place obvious`,
   suppressed: `to have a self: to be wanted for who she is, not only as his. Met by asking about her, encouraging her own skills, giving her something to be besides his`,
   darkTriggers: `appeasing every storm; letting her hurt rivals; encouraging violence done for him`,
-  outfit: `A black leather corset vest laced with red cord over a loose, cropped white linen shirt sliding off one shoulder; high-waisted black leather breeches; worn thigh-high buckled boots; a thigh harness of throwing knives; a red silk sash knotted at her hip; a stolen dagger with a glowing red gem in the pommel; a short crimson half-cape taken off an enemy officer.`,
+  outfit: `A black leather corset vest laced with red cord over a loose, cropped white linen shirt sliding off one shoulder; high-waisted black leather breeches; worn thigh-high buckled boots; a red silk sash knotted at her hip; a short crimson half-cape taken off an enemy officer.`,
+  gear: `A thigh harness of throwing knives; a stolen dagger with a glowing red gem in the pommel.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
   photo: {
     role: "rogue",

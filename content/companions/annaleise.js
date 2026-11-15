@@ -110,7 +110,8 @@ How she sounds (the content is only an example): "Okay, so the braid of Sévranc
   other: `wants to be friends with the other companion, touchily, and doesn't "understand" her boundaries; delighted when he defends her`,
   suppressed: `to be understood in her own language, as herself. Met by learning her words and hearing the clever woman behind the novice English`,
   darkTriggers: `defending her when she's knowingly cruel; treating the act as the whole of her; encouraging her to wreck what she's jealous of`,
-  outfit: `A loose, off-the-shoulder cream peasant blouse tied at the neckline, nearly sheer in firelight, with nothing under it; a short wine-red skirt; striped stockings and laced ankle boots; a black ribbon at her throat; a charcoal pencil tucked behind her ear.`,
+  outfit: `A loose, off-the-shoulder cream peasant blouse tied at the neckline, nearly sheer in firelight, with nothing under it; a short wine-red skirt; striped stockings and laced ankle boots; a black ribbon at her throat.`,
+  gear: `A charcoal pencil tucked behind her ear.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
   photo: {
     role: "woman with light olive skin",

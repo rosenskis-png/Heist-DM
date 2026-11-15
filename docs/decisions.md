@@ -97,7 +97,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D83** Personal quests are placed in packets; unwritten pairs start at 0: current
 - **D84** The fade comes just before anything explicit: current
 - **D85** Camp with both companions: two calls, alternating, and one of them moves something: changed by D88
-- **D86** Outfits are things a companion owns and wears: changed by D171
+- **D86** Outfits are things a companion owns and wears: changed by D171, D194
 - **D87** A second voice may take her own body in any private scene: changed by D89
 - **D88** Camp with both is about the two of them too; each has her own view of the other: changed by D90, D92
 - **D89** A second voice waits for its gate, then chooses: changed by D98
@@ -154,7 +154,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D140** The campaign is acts of one-way legs, drawn as the party goes: changed by D144
 - **D141** Slack, deadlines and the campaign clocks are retired: current
 - **D142** Campfires end every leg, at night, with everyone there: current
-- **D143** Rooms no longer hold one outfit each: current
+- **D143** Rooms no longer hold one outfit each: changed by D194
 - **D144** How the way ahead is drawn, and how a room's exits lead on: changed by D146
 - **D145** The decision log has an index, and entries that are only history are archived: current
 - **D146** A room's ending is judged by a verdict call, and the rating is a gradient: changed by D149
@@ -205,6 +205,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D191** Camp in the game has the bench's look behind the scene: current
 - **D192** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: changed by D193
 - **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
+- **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: current
 
 ---
 
@@ -1237,3 +1238,15 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 
 **Why:** Companions recalled earlier rooms only through the carried list, so they invented the rest, and the campfire had only reaction reasons, without the place or the moment. A memory worth keeping all game is the player's call as much as the AI's, and the AI mustn't overwrite one the player chose. The long form costs nothing in calls while it waits in the save; only the campfire reads it. A companion that doesn't know whether the world is Lovecraftian horror, or that this leg is underwater, can't sound like she's in it.
 **Rules out:** The verdict replacing a core memory on its own. One companion reading the other's memories. These memories mixing with what she remembers of camp.
+
+### D194. Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears
+**Decided:** The designer's call (2026-11-15). Changes D86 and D143.
+- **Mementos.** An outfit found on the journey is a memento of where it was found, inspired by the room loosely (a red qipao with gold flame inlay from a shelter in a dead red dragon's bones). Found outfits live in `content/outfits.js`, each with where it came from. Two or three an act.
+- **Written for no one.** An outfit's text describes clothes, never a body, so any outfit fits any companion and can be given to anyone.
+- **A cosmetic toggle.** What she wears is the player's choice, like changing clothes in a life sim. The campfire no longer returns `outfit` or reads her other outfits; she answers being given one (thanks, or snark if she dislikes him, and a word on how it looks), and that's all the gift is.
+- **Gear.** A companion file's `gear` is what she always has on her, whatever she wears: weapons, a focus, a holy symbol, a binding. Her profile and the other companion's view of her carry it beside her outfit. Her picture's `photo.gear` follows her garments line in every prompt.
+- **Pictures.** Her usual outfit keeps her hand-written garments line. Any other makes its own: "She wears", then the outfit's pieces as a list, with "sexy" on the first garment for a bold picture and never for a soft one (`garmentsLine` in `src/campaign/photo.js`).
+- **Shapeshifting.** Wearing the other companion, she wears her completely: her body and what she has on now. Any other shape changes her face and body (`form`), and she keeps her outfit.
+- The Dressing Room gives every companion every found outfit to try on.
+**Why:** The designer wants outfits as souvenirs of the journey that the player dresses companions in, not a gift economy or a choice the companion makes. A generic outfit's prose pasted into a photo prompt lost her register and had no subject; gear inside an outfit meant a change of clothes disarmed her.
+**Rules out:** Outfits written for one companion's body; a companion choosing her own outfit; gear that comes off with a change of clothes.

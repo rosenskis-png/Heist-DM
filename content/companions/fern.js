@@ -93,7 +93,8 @@ export default {
   other: `delighted when he's loving and generous with the other companion too; hurt if he's cruel or deceptive toward her`,
   suppressed: `to be someone's favourite. Met by choosing her freely and returning to her without asking her to give anything up; small rituals that are only theirs`,
   darkTriggers: "lies; possessiveness; cruelty to living things; neglect",
-  outfit: `A leaf-green linen wrap top tied at the back, leaving her shoulders and midriff bare; a long, flowing skirt of layered green and cream gauze slit to the thigh; a braided leather belt hung with herb pouches; wooden and bone bangles; a thin gold anklet; bare feet; a sprig of silver mistletoe woven into her hair as her druidic focus.`,
+  outfit: `A leaf-green linen wrap top tied at the back, leaving her shoulders and midriff bare; a long, flowing skirt of layered green and cream gauze slit to the thigh; wooden and bone bangles; a thin gold anklet; bare feet.`,
+  gear: `A braided leather belt hung with herb pouches; a sprig of silver mistletoe woven into her hair as her druidic focus.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
   photo: {
     role: "half-elf druid with softly pointed ears",

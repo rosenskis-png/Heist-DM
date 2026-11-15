@@ -3,7 +3,7 @@
 // does differently is declared in her file. Code never names a companion (D8).
 import * as R from "../../content/relationship.js";
 import { pairEntry } from "./roster.js";
-import { newWardrobe, equip, owned } from "./wardrobe.js";
+import { newWardrobe } from "./wardrobe.js";
 import { d100 } from "../engine/rng.js";
 
 const clamp = (v, [lo, hi]) => Math.max(lo, Math.min(hi, v));
@@ -258,7 +258,7 @@ export function applyBeats(rom, c, members, beats, scene = {}) {
 // A campfire output with its "nothing" parts filled in before it's checked (D110): an absent optional field is null,
 // an absent list is empty, and a segment with no aside marked is ordinary scene text. Anything else that's wrong
 // still fails the check and goes back for the one retry.
-const NULLABLE = ["advances", "outfit", "believes", "storm", "risk", "form", "agenda"];
+const NULLABLE = ["advances", "believes", "storm", "risk", "form", "agenda"];
 const LISTS = ["changes", "memories", "secrets", "commitments", "beats"];
 export function fillCampfire(out) {
   if (!out || typeof out !== "object" || Array.isArray(out)) return out;
@@ -270,7 +270,7 @@ export function fillCampfire(out) {
 }
 
 // Problems with a campfire output beyond its schema: beats not allowed, lines for a voice she doesn't have here,
-// an outfit she doesn't own, and, when she answers second with both companions present and the first moved
+// and, when she answers second with both companions present and the first moved
 // nothing (`scene.mustAdvance`, D85), moving nothing herself. A call with problems gets one retry with them listed (D13).
 export function campfireProblems(rom, c, members, out, scene = {}) {
   const problems = [];
@@ -281,7 +281,6 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
     s = r.state;
   }
   if (out.segments.some((x) => x.speaker === "second_voice") && !secondVoiceState(rom, c, scene)?.speaks) problems.push("no second voice speaks in this scene");
-  if (out.outfit && !owned(rom, c)[out.outfit]) problems.push(`she doesn't own an outfit called ${out.outfit}`);
   if (scene.mustAdvance && !out.advances) problems.push("the other companion moved nothing this exchange, so this answer has to (advances)");
   if (out.form && !c.shapeshift) problems.push("she can't change her shape (form must be null)");
   const top = c.escalation?.tiers.length ?? 0;
@@ -291,7 +290,7 @@ export function campfireProblems(rom, c, members, out, scene = {}) {
 }
 
 // A campfire output, once it has no problems: track changes (within the same caps), her view of the other
-// companion, beats, memories, revealed secrets, commitments and her outfit. Everything is about her (D45).
+// companion, beats, memories, revealed secrets and commitments. Everything is about her (D45).
 export function applyCampfire(rom, c, members, out, scene = {}) {
   const delta = {};
   const toward = {};
@@ -320,7 +319,7 @@ export function applyCampfire(rom, c, members, out, scene = {}) {
   r.memories = [...r.memories, ...out.memories].slice(-R.memoryLimit);
   r.commitments = [...r.commitments, ...out.commitments];
   r.revealed = [...new Set([...r.revealed, ...out.secrets])];
-  return out.outfit ? equip(s, c, out.outfit) : s;
+  return s;
 }
 
 // With no change to a baseline track this answer, a value below the baseline rises toward it (D93).

@@ -98,7 +98,8 @@ export default {
   other: `wants him to herself; watches the other companion the way a thief watches a lock`,
   suppressed: `to be wanted in her own face. Met by noticing her when she hasn't changed, and preferring it`,
   darkTriggers: `asking her to be someone else; interest in the other companion; rewarding her deceptions`,
-  outfit: `A close-fitting charcoal tunic, sleeveless and high-collared; dark leather leggings; soft-soled boots; a plain belt of many small pockets. Nothing anyone would remember.`,
+  outfit: `A close-fitting charcoal tunic, sleeveless and high-collared; dark leather leggings; soft-soled boots. Nothing anyone would remember.`,
+  gear: `A plain belt of many small pockets.`,
   // Her picture identity in her own shape (D170): the fixed words in every photo prompt of her. See
   // docs/spec/calls/photo.md.
   photo: {

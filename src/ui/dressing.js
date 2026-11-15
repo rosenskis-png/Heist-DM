@@ -13,7 +13,7 @@ import { photo as PHOTO } from "../../content/photo.js";
 import { resolveParty, partyProblems } from "../campaign/roster.js";
 import { worldOf, inWorld } from "../campaign/world.js";
 import * as Rel from "../campaign/relationship.js";
-import { equip, wardrobeFor, wearing, owned, equipped, addOutfit } from "../campaign/wardrobe.js";
+import { equip, wearing, owned, equipped, addOutfit } from "../campaign/wardrobe.js";
 import { outfits as found } from "../../content/outfits.js";
 import { withLooks, withChanges, changeProblems, getPath } from "../campaign/looks.js";
 import { css } from "./dressing-css.js";
@@ -452,7 +452,7 @@ function channelRows(sc) {
         ["outfit", own.outfit],
         own.second_voice?.may_take_her_own_body ? ["second_voice.may_take_her_own_body", own.second_voice.may_take_her_own_body] : null,
         own.shapeshift ? ["shapeshift", own.shapeshift] : null,
-        ["## Your outfits (its own block)", JSON.stringify(wardrobeFor(rom, me))],
+        own.gear ? ["gear", own.gear] : null,
       ].filter(Boolean),
       absent: me.secondVoice && !own.second_voice?.may_take_her_own_body ? `${me.secondVoice.name}'s own body isn't sent here yet: ${S.alone ? "she can take it only after the payoff" : "in company, she needs her in-company gate"}. Try "After her payoff"${S.alone ? "" : " and alone"}.` : null,
       guide: env?.prompts.campfire.split("\n").filter((l) => /\b(look|outfit|form|wearing)\b/i.test(l) && !/^#/.test(l)),
@@ -462,7 +462,7 @@ function channelRows(sc) {
     const cases = encounterCases(me, rom, members, { private: false, inPerson: false });
     return {
       where: `The party call (both companions over the rings) and her private channel, in her brief.`,
-      rows: [["outfit", cases.outfit], cases.look ? ["look", cases.look] : null].filter(Boolean),
+      rows: [["outfit", cases.outfit], cases.gear ? ["gear", cases.gear] : null, cases.look ? ["look", cases.look] : null].filter(Boolean),
       absent: `Her look isn't sent in a room (D79): only what she has on${me.shapeshift ? ", or her look while she's changed her shape" : ""}.`,
       guide: [],
     };

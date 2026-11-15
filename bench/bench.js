@@ -279,7 +279,6 @@ async function runCampfire(c, schema, tier) {
       { name: `${t.name}: tracks`, ok: "info", detail: t.tracks },
       { name: `${t.name}: beats`, ok: "info", detail: t.out.beats.join(", ") || "none" },
       { name: `${t.name}: moves`, ok: "info", detail: t.out.advances ?? "nothing" },
-      ...(t.out.outfit ? [{ name: `${t.name}: changes into`, ok: "info", detail: t.out.outfit }] : []),
     ]),
   ]);
   if (turns.length > 1) run.checks.push({ name: "Someone moved something", ok: turns.some((t) => t.out?.advances), detail: "" });
@@ -1004,7 +1003,6 @@ function campView() {
         o.risk ? `aside risk: ${o.risk}` : null,
         o.form ? `new form: ${o.form}` : null,
         o.advances ? `moves: ${o.advances}` : null,
-        o.outfit ? `changes into: ${o.outfit}` : null,
         t.retried ? `retried once${t.firstProblems ? ` (first draft: ${t.firstProblems.join("; ")})` : ""}` : null,
       ].filter(Boolean).join(" · ")),
       Speech.available() ? h("button", { class: "run-btn ghost", onclick: () => (Speech.unlock(), campRead([t])) }, "Read aloud") : null,

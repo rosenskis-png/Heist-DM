@@ -49,7 +49,7 @@ const romance = (members, rels = {}, over = {}) => {
   return { ...r, ...over };
 };
 // A campfire output that does nothing.
-const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: "no" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null, believes: null, storm: null, risk: null, form: null, inner: "x", agenda: null });
+const blank = () => ({ segments: [{ speaker: "self", text: "x", aside: "no" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, believes: null, storm: null, risk: null, form: null, inner: "x", agenda: null });
 // Two companions with no declared special cases.
 const plain = () => {
   const p = all.filter((c) => !c.tie && !c.secondVoice && !c.extraBeats && !c.notes && !c.limits && !c.escalation && !c.shapeshift && !c.fixed && !c.reveal);
@@ -384,7 +384,7 @@ test("a second voice is relayed in company, speaks in private, and may take her 
     }
   }
   const m = [voiced, o];
-  const lines = { segments: [{ speaker: "second_voice", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null, outfit: null };
+  const lines = { segments: [{ speaker: "second_voice", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null };
   assert.deepEqual(Rel.campfireProblems(romance(m), voiced, m, lines, {}), ["no second voice speaks in this scene"]);
   assert.deepEqual(Rel.campfireProblems(romance(m), voiced, m, lines, alone), []);
 });
@@ -466,15 +466,17 @@ test("she owns her usual outfit, can be given more, and her profile describes wh
   const input = huddle(P, Q, env({ romance: s }));
   assert.ok(input.includes(JSON.stringify(silk.text)) && !input.includes(JSON.stringify(P.outfit)));
   assert.equal(s.wardrobe[Q.id].equipped, "usual"); // only hers
-  // At camp she can change on the page, into something she owns.
+  // What she wears is the player's choice (D194): the campfire reads it and can't change it.
   const out = { segments: [{ speaker: "self", text: "x" }], changes: [], memories: [], secrets: [], commitments: [], beats: [], advances: null };
-  const back = Rel.applyCampfire(s, P, members, { ...out, outfit: "usual" });
-  assert.equal(W.wearing(back, P), P.outfit);
-  assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, outfit: "ballgown" }), ["she doesn't own an outfit called ballgown"]);
-  assert.ok(camp(P, Q, [P.id], env({ romance: s })).includes(`"wearing":{"id":"silk","name":"Silk dress"},"could_change_into":[{"id":"usual","name":"Usual outfit","looks":${JSON.stringify(P.outfit)}}]`));
-  // Naming the outfit she already has on is fine; null is no change.
-  assert.deepEqual(Rel.campfireProblems(s, P, members, { ...out, outfit: "silk" }), []);
-  assert.equal(W.wearing(Rel.applyCampfire(s, P, members, { ...out, outfit: null }), P), silk.text);
+  const fire = camp(P, Q, [P.id], env({ romance: s }));
+  assert.ok(fire.includes(JSON.stringify(silk.text)) && !fire.includes("could_change_into"));
+  assert.equal(W.wearing(Rel.applyCampfire(s, P, members, out), P), silk.text);
+});
+
+test("her gear stays whatever she wears", () => {
+  const G = { ...P, gear: "A knife in her boot." };
+  const W2 = romance([G, Q]);
+  assert.ok(huddle(G, Q, env({ romance: W2 })).includes(JSON.stringify(G.gear)));
 });
 
 test("a tie's outfit is her usual one in that party", { skip: !tied }, async () => {

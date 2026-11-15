@@ -9,11 +9,11 @@ import { validate } from "../validate.js";
 import { companionFileSchema } from "../../schemas/companion.js";
 
 const ID = "[a-z][a-z0-9_]*";
-const PHOTO = "(?:age|role|face|identity|garments|bold|expression)";
+const PHOTO = "(?:age|role|face|identity|garments|gear|bold|expression)";
 // The appearance fields of a companion file, and nothing else: her look and outfits, the outfit she starts in, her
 // picture identity, her second voice's look, and what a tie changes of these.
 export const LOOK_PATHS = new RegExp(
-  `^(?:look|outfit|wears|wardrobe\\.${ID}(?:\\.(?:name|text))?|photo\\.${PHOTO}|secondVoice\\.(?:look|photo)|tie\\.append\\.look|tie\\.set\\.outfit|tie\\.by\\.${ID}\\.(?:append\\.look|set\\.outfit|photo\\.${PHOTO}))$`,
+  `^(?:look|outfit|gear|wears|wardrobe\\.${ID}(?:\\.(?:name|text))?|photo\\.${PHOTO}|secondVoice\\.(?:look|photo)|tie\\.append\\.look|tie\\.set\\.outfit|tie\\.by\\.${ID}\\.(?:append\\.look|set\\.outfit|photo\\.${PHOTO}))$`,
 );
 
 export const getPath = (o, path) => path.split(".").reduce((x, k) => (x == null ? undefined : x[k]), o);

@@ -13,7 +13,7 @@ import { pairs } from "../content/pairs.js";
 import * as Relationship from "../content/relationship.js";
 import * as Rel from "./campaign/relationship.js";
 import { resolveParty, pairEntry } from "./campaign/roster.js";
-import { wearing, wardrobeFor } from "./campaign/wardrobe.js";
+import { wearing } from "./campaign/wardrobe.js";
 import { photoOf } from "./campaign/photo.js";
 
 // Act-tagged worked examples: kept only from their act on (docs/spec/context.md §3).
@@ -68,7 +68,7 @@ export function briefProfile(c, standing, s) {
 
 // A companion's profile is an allowlist (D59): fields not named here, including UI and engine data and any
 // declared data not resolved below, never reach a prompt.
-const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "pursuit",
+const PROFILE_FIELDS = ["id", "name", "race", "age", "role", "blurb", "fantasy", "heatMode", "look", "outfit", "gear", "pursuit",
   "heatActs", "turnoffs", "flattery", "voice", "rules", "skills", "beliefs", "admires", "despises", "askAbout", "other",
   "suppressed", "darkTriggers", "inOthers", "recalibrates", "boundaries", "honesty", "means", "whenRefused"];
 // Gated fields, by the gate's name in content/relationship.js `reveal`.
@@ -169,7 +169,7 @@ function relationshipFor(c, rom, members) {
 const romanceOf = (env, members) => env.romance ?? Rel.newRomance(members, env.pairs ?? pairs, { act: env.act });
 
 // What the other companion sees of her, including how she looks right now (a shapeshifter's current form, D101).
-export const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c) } : {}), abilities: abilitiesFor(c.abilities) });
+export const publicProfile = (c, rom) => ({ id: c.id, name: c.name, role: c.role, blurb: c.blurb, voice: c.voice, ...(rom ? { looks: rom.rel[c.id]?.form ?? c.look, wearing: wearing(rom, c), ...(c.gear ? { carrying: c.gear } : {}) } : {}), abilities: abilitiesFor(c.abilities) });
 
 // Compact JSON: indentation would cost about a third more input on every call.
 const block = (title, body) => `## ${title}\n\n${typeof body === "string" ? body : "```json\n" + JSON.stringify(body) + "\n```"}`;
@@ -355,7 +355,7 @@ export function partyInput(env, c, companions, huddle, schema) {
 export function encounterCases(c, rom, members, scene) {
   const own = ownProfile(c, rom, members, scene, { planning: false });
   const out = {};
-  for (const k of ["outfit", "second_voice", "shapeshift", "you_know"]) if (own[k] !== undefined) out[k] = own[k];
+  for (const k of ["outfit", "gear", "second_voice", "shapeshift", "you_know"]) if (own[k] !== undefined) out[k] = own[k];
   if (c.shapeshift && own.look !== c.look) out.look = own.look;
   if (own.tie) out.tie = { with: own.tie.with, bond: own.tie.bond, gift: own.tie.gift };
   if (own.tie_to_you) out.tie_to_you = { who: own.tie_to_you.who, note: own.tie_to_you.note, bond: own.tie_to_you.bond };
@@ -366,7 +366,7 @@ export function encounterCases(c, rom, members, scene) {
 // one), or both. In a scene with both, each exchange is two calls in `speakingOrder` (D85): she gets the other's
 // public profile and what the other has said and done in this scene, which is in `c.scene`, never the other's
 // secrets or private history; answering second after a turn that moved nothing, `c.mustAdvance` says so. The beats
-// she may report are listed, with any declared beat's own text, and the outfits she could change into.
+// she may report are listed, with any declared beat's own text.
 export function campfireInput(env, c, self, others, schema) {
   const [me, ...rest] = resolveParty([self, ...others], env.world);
   const members = [me, ...rest];
@@ -395,7 +395,6 @@ export function campfireInput(env, c, self, others, schema) {
     block("Your relationship with the player", relationshipFor(me, rom, members)),
     alone ? null : block("You and the other companion", { ...(pair ? { dynamic: pair.dynamic } : {}), ...(rom.open ? { in_the_open: "Where everyone stands with him is out in the open." } : {}) }),
     block("Beats that may happen now, if the scene really gets there", { beats, ...(extra.length ? { notes: extra } : {}) }),
-    wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     whereText(env, { full: true }) ? block("Where you are in the world", whereText(env, { full: true })) : null,
     block("The story so far", c.log ?? []),
     c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,

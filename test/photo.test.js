@@ -9,7 +9,7 @@ import { photo as P } from "../content/photo.js";
 import { pairings, resolveParty } from "../src/campaign/roster.js";
 import * as Rel from "../src/campaign/relationship.js";
 import { addOutfit, equip } from "../src/campaign/wardrobe.js";
-import { photoOf, photoPrompt, SLOTS } from "../src/campaign/photo.js";
+import { photoOf, photoPrompt, SLOTS, garmentsLine } from "../src/campaign/photo.js";
 import { photoInput } from "../src/context.js";
 import { photoProblems } from "../src/calls/photo.js";
 import { photoSchema } from "../schemas/index.js";
@@ -43,9 +43,18 @@ test("a tie's photo replaces her picture identity for that partner only", () => 
 test("her garments line follows what she has on", () => {
   const c = Object.values(authored).find((x) => x.photo && !x.tie);
   const rom = Rel.newRomance([c], pairs);
-  assert.equal(photoOf(c, rom).garments, c.photo.garments);
-  const changed = equip(addOutfit(rom, c.id, "gown", { name: "Gown", text: "A long green velvet gown." }), c, "gown");
-  assert.equal(photoOf(c, changed).garments, "A long green velvet gown.");
+  const g = c.photo.gear ? `, with ${c.photo.gear}` : "";
+  assert.equal(photoOf(c, rom).garments, c.photo.garments + g);
+  const changed = equip(addOutfit(rom, c.id, "gown", { name: "Gown", text: "A long green velvet gown; black flats." }), c, "gown");
+  assert.equal(photoOf({ ...c, photo: { ...c.photo, bold: true } }, changed).garments, `She wears a sexy long green velvet gown, and black flats${g}`);
+  assert.equal(photoOf({ ...c, photo: { ...c.photo, bold: false } }, changed).garments, `She wears a long green velvet gown, and black flats${g}`);
+});
+
+test("one outfit's text makes a garments line for anyone, in her register", () => {
+  assert.equal(garmentsLine("A red qipao; a gold necklace; black flats.", true), "She wears a sexy red qipao, a gold necklace, and black flats");
+  assert.equal(garmentsLine("White silk vestments", true), "She wears sexy white silk vestments");
+  assert.equal(garmentsLine("An emerald gown", false), "She wears an emerald gown");
+  assert.equal(garmentsLine("Mara's old coat", false), "She wears Mara's old coat");
 });
 
 test("the prompt keeps Gravenhold's skeleton, with defaults for empty slots", () => {

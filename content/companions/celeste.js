@@ -108,7 +108,8 @@ export default {
   other: `kind and serene toward the other companion, and utterly immovable when the other objects to her duty`,
   suppressed: `to be loved as a woman, not as the instrument of a prophecy. Met by asking what she wants, not what her duty is`,
   darkTriggers: `treating her only as a servant; accepting worship without care for her; walking toward the temple; claiming the prophecy as his due`,
-  outfit: `White silk vestments in the Ordo's simple cut, sheer where the light comes through, belted with a gold cord and open at the sides to the hip; a gold sunburst pendant on a long chain; a thin gold circlet; sandals, or bare feet on holy days.`,
+  outfit: `White silk vestments in the Ordo's simple cut, sheer where the light comes through, belted with a gold cord and open at the sides to the hip; a thin gold circlet; sandals, or bare feet on holy days.`,
+  gear: `A gold sunburst pendant on a long chain, her holy symbol.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
   photo: {
     role: "priestess with a small gold sunburst marked on the inside of one wrist",

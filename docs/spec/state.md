@@ -47,7 +47,7 @@ The engine checks that every write names real things before committing it (`docs
 | Verdict call | The room's rating and why, each companion's reactions to how it went (D146), and up to two people worth meeting again (D164) |
 | Act call | The act's plan: its region now, busy lines, holders, peak and its signs (D164) |
 | Engine | Ticks, routines, events, rolls, objective status, gold spent at a merchant, `down` at no toughness left, the event log, the hand-off |
-| Campfire | Relationship changes (including each one's view of the other), beliefs, storm level, caught asides, beats, memories, revealed secrets, commitments, her outfit |
+| Campfire | Relationship changes (including each one's view of the other), beliefs, storm level, caught asides, beats, memories, revealed secrets, commitments |
 
 ## The hand-off (D21)
 

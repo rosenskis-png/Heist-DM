@@ -5,7 +5,7 @@ import { r, list, obj } from "../shape.js";
 // Every field is about the companion whose call this is (D45); she never writes for the other one.
 export const campfireSchema = withDefs({
   $id: "campfire",
-  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "outfit", "believes", "storm", "risk", "form", "inner", "agenda"], {
+  ...obj(["segments", "changes", "memories", "secrets", "commitments", "beats", "advances", "believes", "storm", "risk", "form", "inner", "agenda"], {
     // Narration of what happens (her actions, the setting, time passing) and her dialogue, in order. A companion
     // with a second voice speaking in this scene may give it lines (docs/spec/companions.md §6); the engine rejects
     // them anywhere else. `aside` (D95, D108): "no" for the scene everyone shares; "action", something physical done
@@ -34,15 +34,13 @@ export const campfireSchema = withDefs({
     // What this answer moves, between the player and a companion or between the two companions: a question, a
     // move, a dare, something pushed or brought into the open. Null if nothing. With both present, one must (D85).
     advances: { oneOf: [r("text"), { type: "null" }] },
-    // The id of an outfit she owns that she changes into on the page, or null (docs/spec/companions.md §7).
-    outfit: { oneOf: [r("id"), { type: "null" }] },
     // What she now believes about him and the other companion, if this scene changed it, or null (D96). It can be wrong.
     believes: { oneOf: [obj(["past", "current"], { past: { type: "boolean" }, current: { type: "boolean" } }), { type: "null" }] },
     // Her storm level after this answer, if she has one, or null (D97). It can fall only one level an answer.
     storm: { oneOf: [{ type: "integer", minimum: 0, maximum: 5 }, { type: "null" }] },
     // How likely her asides are to be caught, if she made any, or null (D95).
     risk: { oneOf: [{ enum: ["low", "medium", "high"] }, { type: "null" }] },
-    // How she looks now, in full, if she changed her shape this answer, or null (D101).
+    // Her face and body now, if she changed her shape this answer, or null (D101). What she wears stays her outfit (D194).
     form: { oneOf: [r("text"), { type: "null" }] },
     // What she actually thinks right now, which may not be what she said or did (D107). Never shown to the other
     // companion, and hidden from the player in play.

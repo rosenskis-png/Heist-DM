@@ -123,7 +123,8 @@ export default {
     inCompany: [{ intimacy: [">=", 6], trust: [">=", 4], readAffection: [">=", 3] }],
     beat: "manifest",
   },
-  outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles; a fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,
+  outfit: `A jewelled saffron bandeau; a crimson skirt of sheer layered silk slit high on both sides; a coin belt low on her hips that chimes when she moves; gold armlets coiling up the tattooed arm; bells at her ankles.`,
+  gear: `A fire opal on a fine gold navel chain that warms and glows when Ember stirs.`,
   // Her picture identity (D170): the fixed words in every photo prompt of her. See docs/spec/calls/photo.md.
   photo: {
     role: "dancer with a flame tattoo spiraling up one arm",

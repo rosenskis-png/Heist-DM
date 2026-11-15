@@ -21,7 +21,7 @@ One file per companion, `content/companions/<id>.js`. Field groups:
 |---|---|
 | Identity | `id`, `name`, `race`, `age`, `role`, `color`, `rate` (speech rate for reading aloud, D104), `blurb` |
 | Fantasy | `fantasy`, `heatMode`, `pursuit`, `heatActs`, `turnoffs`, `flattery`, `payoff` (`at`, `minTurns`, `minAct`, `scene`), `leanFromHeat` |
-| Look | `look` (her body and face), `outfit` (what she usually wears), optionally `wardrobe`: other outfits she owns from the start (§7), and optionally `photo`: her picture identity, the fixed words in every photo prompt of her (`docs/spec/calls/photo.md`, D170) |
+| Look | `look` (her body and face), `outfit` (what she usually wears), optionally `gear` (what she always has on her, whatever she wears, §7), optionally `wardrobe`: other outfits she owns from the start (§7), and optionally `photo`: her picture identity, the fixed words in every photo prompt of her (`docs/spec/calls/photo.md`, D170) |
 | Story | `why`, `first`, `quest`, `questAct`, and `needs`: what her story needs the world to hold, as keys of a world's `features` (D150) |
 | Depth | `beliefs`, `admires`, `despises`, `askAbout`, `other` (how she wants the other companion treated), `suppressed`, `hidden`, `deep`, `dark`, `darkTriggers` |
 | Reactions | `react`: one line per configuration (§4) |
@@ -143,11 +143,13 @@ Gravenhold's DM scored each companion every turn: heat −2..2, depth −3..2, d
 | `stageLabels: { <stage>: label }` | Her own wording for any stage in `content/relationship.js`. | Any companion's own stage names |
 | `notes: [{ when, text }]` | Text her call gets only while the gate `when` holds, in the same form as the reveal gates: a list of alternatives, each a set of terms on her tracks and flags, her view of the other (`affection`, `respect`, `trust`), her read of the other's (`readAffection`, `readRespect`, `readTrust`, which may be wrong; D91), `believesPast`, `believesCurrent`, `open`, `storm`, `knowsShifter`, `turn`, `act`, `toPayoff` or `actsToQuest`. | Fern makes no advances until he shows interest |
 
-## 7. Wardrobe (D86)
+## 7. Wardrobe (D86, D194)
 
-An outfit is a name and a description. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. A new game starts her in her file's `wears` (an outfit she owns from the start), or her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
+An outfit is a name and a description of clothes, never of a body, so any outfit fits any companion. What she wears is the player's choice, a cosmetic toggle: no call changes it. Each companion owns her `outfit` (as "usual") and anything in her file's `wardrobe`, and wears one of them; in a tie's party, the tie's outfit is her usual one. A new game starts her in her file's `wears` (an outfit she owns from the start), or her usual one. Her profile in every call describes what she has on, so changing it changes how she's described.
 
-She comes to own more in play (a gift, a find, a purchase, and the one outfit every room holds, D121) through `addOutfit`, and changes through `equip`: from the UI, or at the campfire, where her call gets the id of what she has on and the id and description of each other outfit she owns, and returns `outfit` (an id she owns, or null). Code: `src/campaign/wardrobe.js`; the state lives with the relationship state, and holds only what play changes: what she has on and what she's gained in play. The outfits her file gives her are read from her file (with her live looks, §8) every time, so a change to them reaches every save (D171). If what she has on is taken away, she's in her usual outfit. Getting wet, torn or half-undressed is texture, not a change of outfit.
+Her `gear` is what she always has on her whatever she wears (weapons, a focus, a holy symbol, a binding), so a change of outfit never disarms her; her profile and the other companion's view of her carry it beside her outfit. Her picture has its own `gear` line, after her garments.
+
+She comes to own more in play through `addOutfit`: outfits found on the journey are mementos of where it went (`content/outfits.js`, each with where it came from), two or three an act. She answers being given one (thanks, or snark, and a word on how it looks), but the giving isn't the point. She changes through `equip`, from the UI only. A shapeshifter wearing the other companion wears her completely, body and what she has on now; any other shape changes her face and body, and she keeps her outfit. Code: `src/campaign/wardrobe.js`; the state lives with the relationship state, and holds only what play changes: what she has on and what she's gained in play. The outfits her file gives her are read from her file (with her live looks, §8) every time, so a change to them reaches every save (D171). If what she has on is taken away, she's in her usual outfit. Getting wet, torn or half-undressed is texture, not a change of outfit.
 
 ## 8. Live looks (D171)
 

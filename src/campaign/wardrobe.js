@@ -49,13 +49,3 @@ export const equipped = (rom, c) => {
 
 // What she's wearing now, as text for her profile.
 export const wearing = (rom, c) => owned(rom, c)[equipped(rom, c)].text;
-
-// Her outfits as her call reads them: what she has on, and what else she owns, each with its id (what `outfit`
-// names) and, for the ones she isn't wearing, what it looks like.
-export function wardrobeFor(rom, c) {
-  if (!rom?.wardrobe?.[c.id]) return null;
-  const all = owned(rom, c);
-  const on = equipped(rom, c);
-  const others = Object.entries(all).filter(([id]) => id !== on).map(([id, o]) => ({ id, name: o.name, looks: o.text }));
-  return { wearing: { id: on, name: all[on].name }, ...(others.length ? { could_change_into: others } : {}) };
-}
