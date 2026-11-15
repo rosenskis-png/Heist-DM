@@ -1,4 +1,4 @@
-// The stock call (docs/spec/calls/stock.md): when a room ends, the DM and the player take stock out of character (D190).
+// The stock call (docs/spec/calls/stock.md): when a room ends, the DM and the player take stock out of character (D192).
 // The DM grants things the record or the narration supports, names who could come along, and keeps the loose ends.
 import { ask } from "../ask.js";
 import { stockSchema } from "../../schemas/calls/stock.js";

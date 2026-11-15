@@ -4,7 +4,7 @@ Phases in order, each with an exit test. **Open questions live only here**, in t
 
 **Current phase: 7 (The generator), toward v0.1** (the path is under Open from play). Phases 0–5 are done, and Phase 6 is folded into Phase 7: Act 1 is generated, not written by hand (D115). The game plays one way: the DM rules and the engine keeps the books (D125).
 
-**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **The table is built and played once** (D127, D128, D132–D138); a second playtest checks the fixes, below. **Phase 7 starts with a rethink of encounter design** (D139), which has settled the campaign's shape so far (D140–D143, `docs/spec/campaign.md`).
+**Combat is decided:** a fight is a plan (D130), and the party always moves on, with how it went moving how they feel (D131). **Phase 7 starts with a rethink of encounter design** (D139), which has settled the campaign's shape so far (D140–D143, `docs/spec/campaign.md`).
 
 ---
 
@@ -19,6 +19,7 @@ Each phase's full record (findings, causes and fixes) is in git history; what it
 - **Phase 4: The Cells, playable** (D65–D79). The first two playtests, on the engine's pipeline, found its rules left no room to play. The third, with the DM ruling and the engine keeping the books, won by a lot (D75), and that's now the only way the game plays (D125).
 - **Phase 5: Companions ported** (D80–D113). The relationship model with Gravenhold's numbers, special cases as declared data, the campfire, outfits, and an open roster.
 - **Phase 6: Act 1, hand-authored.** Folded into Phase 7 (D115).
+- **The table** (D127, D128, D132–D138). Built, played once, fixed; its exit (the companions' voices hold, limited abilities hold to their uses) held in the second shakedown. What it left to watch is under Still open from earlier play.
 
 ## Open from play
 
@@ -28,7 +29,7 @@ Not gates. Each is answered when play shows it.
 Two shakedowns (D174–D187) settled the loop: the room sheet, companions as friends at the table, stakes before the roll, trouble on failure, the pack and carry-over, the map, and the post-mortem fixes. What's left, in order:
 
 1. ~~One leg in the goblin camp~~: played; the act stays a chain of rooms (D188).
-2. **Camp in the runner.** The campfire call at campfire rooms and the sanctuary, its beats, journal pages read, outfits, and rest. Each campfire gets the specific moments of the rooms since the last one (reactions, verdicts, what she did and what was done for her), and a handful of the campaign's most memorable moments stay with her. Outfits waiting in `camp.gifts` (D184) are given here. The bench has a working Camp to port. The largest piece.
+2. **Camp in the runner.** Built (D190): the campfire call at campfire rooms and the sanctuary, with beats, journal pages, outfits given from `camp.gifts`, where she stands afterward, the rooms since the last fire, and strong moments kept. The bench's look behind the scene is in the Camp tab (D191). Left: playing it, then reading answers aloud. *Recommendation:* judge in the Act 1 playtest whether the road since the last fire gives her enough to call back (the verdict's reactions may be too thin to recall the moment itself); if it doesn't, the verdict records one line per companion of what she did and what was done for her.
 3. **Setup choices.** The class choice (setup is rogue only), the player's pronouns as a role slot filled in code (the companions' files still say "he" in places), and the player's secret by act (`content/setting.js` gates it; nothing writes it yet).
 4. **The combat abilities pass** (below, under Combat).
 5. **Play Act 1 end to end with camp in it.** The exit: the companions are worth caring about at camp, the DM runs rooms well, nothing breaks across room boundaries, and the act ends wanting Act 2.
@@ -36,7 +37,7 @@ Two shakedowns (D174–D187) settled the loop: the room sheet, companions as fri
 **After v0.1:** playing from the prep note instead of the encoded packet (the token refactor); rooms between the fights, or an act that opens on a calm room; a move the DM calls fatal failing forward (the DM says so before it's committed, and if the player goes ahead it costs rather than refuses); separations and post-game acts; the seed's ingredient pools reviewed for premises that are machines; tuning the morale numbers, the pack's size and the ladders.
 
 ### Still open from earlier play
-- **Taking stock in play (D190).** It's untested whether the stock reply keeps the room's hidden things and a follower's motive to itself, and whether the destination odds bring a follower's goal round at a good pace. *Recommendation:* judge both in the first leg played with it, before changing anything.
+- **Taking stock in play (D192).** It's untested whether the stock reply keeps the room's hidden things and a follower's motive to itself, and whether the destination odds bring a follower's goal round at a good pace. *Recommendation:* judge both in the first leg played with it, before changing anything.
 - **What companions remember of recent rooms.** In a room a companion sees her standing (written only at camp, and camp isn't in the runner yet), the room sheet with what the party has with it, and the DM's narration. She gets nothing else from earlier rooms, so whatever she recalls beyond the carried list is invented. *Recommendation:* discuss before Camp in the runner. The sources are the verdict's reactions (once they see only what the party knows), the room's log line, and moments the player picks when taking stock.
 - **Pacing and game feel.** *Recommendation:* add nothing until a playtest shows a specific failure, then find its cause before changing anything.
 - **Card leaks the engine can't see.** The engine rejects a card that names a hidden thing, but not one that describes it in plain words ("he's got them on his belt"). *Recommendation:* watch for it in playtests before adding anything.
@@ -44,6 +45,11 @@ Two shakedowns (D174–D187) settled the loop: the room sheet, companions as fri
 - **The campaign turn.** The relationship model counts exchanges with the player (`nextTurn`). *Recommendation:* the page advances it once per player message in the huddle, the Moment or camp, and calls `endEncounter` with the hand-off.
 - **Beats outside camp.** Only the campfire reports beats (D80). If playtests show a rupture or a discovery that has to land in an encounter, the companion call is where to add it.
 - **Second-voice lines in the huddle.** A private channel gives her second voice's voice, but the companion call's candidates have no speaker. If Ember needs her own lines over the rings, the candidate needs a speaker.
+- **Wild Shape's uses.** Fern's file gives it once per encounter and three times per rest, and that's what the engine holds. *Recommendation:* keep the file's numbers until the abilities pass; set `rest: 1` there if twice is too many.
+- **Whether the DM records `used`.** It did, the one time it came up. *Recommendation:* keep watching the party's sheet; nothing to add unless a use goes unrecorded.
+- **Whether the ledger fills.** It reached 16 of 20 facts in 11 ticks, mostly from resolve recording the card's rulings again, which D138 stops. *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if a longer encounter fills it with facts that still matter.
+- **Whether companions catch too much,** now that each says one thing (D137). *Recommendation:* compare their catches on the bench's flaw cases with the old rates; bring chance back only in a form that never drops an answer to the player.
+- **Things that act.** The rats were a thing, and the plan made them act, so the card went back twice. *Recommendation:* the DM can make a thing an actor mid-encounter, as an op the engine records, rather than the generator foreseeing who can be talked into acting.
 
 ## Combat
 
@@ -52,21 +58,6 @@ Decided and built (D130, D131). What's left:
 - **Whether a fight card feels like homework** in play, against "I hit him" in the Moment. *Recommendation:* watch for it; the card already reads one line the way the player means it (D77).
 - **Threats that bind.** *Recommendation:* in playtests, check that an unanswered threat lands as shown and nothing worse, and that the card's notes flag it, before adding anything.
 - **The morale numbers** (`content/relationship.js`). Starting values; tune them once the hand-off and campfires play end to end.
-
-## The table: played once, fixed, playing again
-
-*Its exit held in the second shakedown: the companions' voices held, and limited abilities held to their uses. Trivial actions as cards was answered by D176, and a companion's line becoming a rule on herself by D185.*
-
-The first playtest (on the Cells, with D135's call records) found one companion's voice failing and over a quarter of the input wasted on retries; D137 and D138 fix what it found. The second playtest checks them.
-
-**Exit:** the companions' voices hold in a playtest, and limited abilities hold to their uses.
-
-**Open questions**
-- **Wild Shape's uses.** The exit asked that Fern can't Wild Shape twice before a rest, but her file gives it once per encounter and three times per rest, and that's what the engine holds. Not pushed in the first playtest. *Recommendation:* keep the file's numbers until the balance pass the designer has deferred; set `rest: 1` there if twice is too many.
-- **Whether the DM records `used`.** It did, the one time it came up. *Recommendation:* keep watching the party's sheet; nothing to add unless a use goes unrecorded.
-- **Whether the ledger fills.** It reached 16 of 20 facts in 11 ticks, but questions added only 2; most of the pressure was resolve recording the card's rulings again, which D138 stops. *Recommendation:* watch the fact count in the developer view; raise `LEDGER.facts` only if a longer encounter fills it with facts that still matter.
-- **Whether companions catch too much,** now that each says one thing (D137). *Recommendation:* compare their catches on the bench's flaw cases with the old rates; bring chance back only in a form that never drops an answer to the player.
-- **Things that act.** The rats were a thing, and the plan made them act, so the card went back twice. *Recommendation:* the DM can make a thing an actor mid-encounter, as an op the engine records, rather than the generator foreseeing who can be talked into acting.
 
 ## Phase 7: The generator
 
@@ -80,8 +71,8 @@ Generation as `docs/spec/generation.md` describes it: code picks a seed, the ske
 **Built:** the three stages, the room pipeline and the Forge, consolidated and frozen in D172; and the page runs a campaign (D173): verdicts between rooms, the next room generated while the player reads, ways on from calm rooms, relics kept at the sanctuary, a new act after it.
 
 **Still to do**
-1. **Play Act 1** from a new game, in a pitched world and in Gravenhold. This is the exit test, and it decides what happens to everything else here: a change to generation comes from a failure in play (D172). *Recommendation:* export a post-mortem from the developer view at the end of each room that felt wrong, and note which room and why before reading any call output.
-2. **The campfire conversation at a campfire room.** A campfire is a generated calm room for now (D173); the campfire call (`docs/spec/calls/campfire.md`) and its relationship beats aren't wired to it. *Recommendation:* add it when the first campfire in play feels empty, not before.
+1. **Play Act 1** from a new game, in a pitched world and in Gravenhold. This is the exit test, the same playtest as item 5 of the path to v0.1 (one run answers both), and it decides what happens to everything else here: a change to generation comes from a failure in play (D172). *Recommendation:* export a post-mortem from the developer view at the end of each room that felt wrong, and note which room and why before reading any call output.
+2. **Camp at campfire rooms:** item 2 of the path to v0.1, above.
 3. **The ten-room batch,** only if play leaves a question about variety: ten rooms from one world on the Forge, scored against a rubric written before reading them (D172).
 4. **Separations and post-game acts,** which the runner doesn't do yet (D173). *Recommendation:* wait for Act 1.
 5. **Clean out the engine-era material** the rethink replaces: `fixtures/cells/walkthrough.md`'s old design notes, and the Cells itself once a generated room replaces it (D139).

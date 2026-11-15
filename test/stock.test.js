@@ -1,4 +1,4 @@
-// Taking stock when a room ends (D190): the pack to keep, one follower or none, and where a follower is going.
+// Taking stock when a room ends (D192): the pack to keep, one follower or none, and where a follower is going.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";

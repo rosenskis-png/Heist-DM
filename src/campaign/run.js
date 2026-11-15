@@ -22,17 +22,17 @@ export function drawExits(camp, n) {
 // campfire: in a room whose exits don't already lead to the campfire or the climax (D142).
 export const canSeparate = (camp) => camp.way.left > 0 && !["climax", "sanctuary", "campfire"].includes(camp.way.here);
 
-// A room has ended: its hand-off, what the player kept when taking stock, and its verdict (D146, D190). Gold and
+// A room has ended: its hand-off, what the player kept when taking stock, and its verdict (D146, D192). Gold and
 // relics come out of the hand-off; the verdict moves how everyone feels and the leg's strain; the way on is the exit the
 // party reached, or code picks one (D144). At a campfire or the sanctuary the party rests and everyone is together again
 // (D142). The climax's rating decides how many relics the party may keep into the next act (D148). Returns the
 // campaign and where the party is going.
-export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], members = [] }) {
-  const out = structuredClone({ ...camp, romance: null });
+export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], members = [], name = null }) {
+  const out = structuredClone({ ...(camp.way.here === "campfire" ? fireOut(camp) : noteRoom(camp, { name, handoff, verdict })), romance: null });
   out.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
   out.gold = handoff.gold ?? out.gold;
   out.relics = [...out.relics, ...(handoff.relics ?? [])].slice(0, setting.relics.max);
-  // The pack (D184, D190): what the player kept when taking stock. A thing left, lost or used up is simply not in it.
+  // The pack (D184, D192): what the player kept when taking stock. A thing left, lost or used up is simply not in it.
   // An outfit a companion carried out is hers; one the player carried out waits to be given.
   out.items = (handoff.items ?? out.items ?? []).slice(0, setting.items.max);
   for (const { holder, ...fit } of handoff.outfits ?? []) {
@@ -40,10 +40,10 @@ export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], 
     else out.gifts = [...(out.gifts ?? []).filter((g) => g.id !== fit.id), fit];
   }
   out.carry = { conditions: handoff.conditions ?? [], spent: handoff.spent ?? {}, companions: handoff.companions ?? out.members };
-  // What the party has with it (D178, D190): the follower the player chose, if any, and what else goes on, as settled
+  // What the party has with it (D178, D192): the follower the player chose, if any, and what else goes on, as settled
   // when taking stock. Without a settled stock, what they had stays.
   if (carried) out.carried = carried;
-  // A follower who reached what they were after parts ways here, whatever else was settled (D190).
+  // A follower who reached what they were after parts ways here, whatever else was settled (D192).
   if (out.destination?.room === camp.roomNo) {
     out.carried = (out.carried ?? []).filter((x) => !(x.kind === "follower" && x.name === out.destination.name));
     out.destination = null;
@@ -60,6 +60,27 @@ export function roomEnded(camp, { handoff, verdict, carried = null, exits = [], 
   out.way = enter(way, kind, { rating: verdict?.rating ?? null });
   if (["campfire", "sanctuary"].includes(kind)) out.carry = { ...rest(out.carry), companions: out.members };
   return { camp: out, exit, kind, forced };
+}
+
+// What the companions take to the next campfire (D190): each room since the last one, as it happened and as each of
+// them felt it. Her reactions are her own; the other companion's call never reads them.
+const SINCE = 8;
+const KEPT = 6;
+export function noteRoom(camp, { name = null, handoff = {}, verdict = null }) {
+  const felt = {};
+  for (const x of verdict?.reactions ?? []) (felt[x.from] ??= []).push({ reason: x.reason, sign: x.sign, intensity: x.intensity ?? 1 });
+  const moment = { room: name, happened: handoff.log ?? null, went: verdict?.rating == null ? null : verdict.why ?? null, felt };
+  return { ...camp, since: [...(camp.since ?? []), moment].slice(-SINCE) };
+}
+
+// A campfire is over (D190): the moments of the leg are spent, and only what struck each companion hardest (a strong
+// reaction) stays with her for the rest of the game, the latest few.
+export function fireOut(camp) {
+  const kept = structuredClone(camp.kept ?? {});
+  for (const m of camp.since ?? [])
+    for (const [id, list] of Object.entries(m.felt ?? {}))
+      for (const x of list.filter((x) => x.intensity >= 2)) kept[id] = [...(kept[id] ?? []), { room: m.room, reason: x.reason, sign: x.sign }].slice(-KEPT);
+  return { ...camp, since: [], kept };
 }
 
 // The act ends at its sanctuary: the player keeps up to `camp.keep` of the act's relics, chosen by id, and the next act

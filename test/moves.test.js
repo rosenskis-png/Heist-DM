@@ -63,7 +63,7 @@ test("a try with a check waits with its stakes shown; backing out changes nothin
   assert.ok(told.includes("It doesn't budge.") && told.includes("The first thing happens."), "the failure and what got worse are both told");
 });
 
-test("what the party has with it goes from taking stock to the campaign, the next room and the sheet (D178, D190)", () => {
+test("what the party has with it goes from taking stock to the campaign, the next room and the sheet (D178, D192)", () => {
   const carried = [{ kind: "item", what: "unarmed: their weapons were left behind" }, { kind: "follower", name: "Ama", pronouns: "she/her", looks: "a freed villager", what: "weak and frightened", goal: "the mill at Harrow Ford", motive: "her son is there" }];
   let camp = newCampaign({ seed: 3 });
   camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, carried, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;

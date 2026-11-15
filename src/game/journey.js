@@ -3,7 +3,7 @@
 // plan yet; then the party walks into it (`enterRoom`). Calm rooms end when the party takes a way on (`leaveBy`); the
 // sanctuary ends the act once the player picks the relics to keep (`endTheAct`). Everything lives in the session, so a
 // save taken between rooms resumes where it stopped.
-import { newCampaign, roomEnded, endAct } from "../campaign/run.js";
+import { newCampaign, roomEnded, endAct, fireOut } from "../campaign/run.js";
 import { newRomance, endEncounter } from "../campaign/relationship.js";
 import { pairs } from "../../content/pairs.js";
 import { setting } from "../../content/setting.js";
@@ -55,7 +55,7 @@ export function leaveBy(session, exitId = null) {
   session.ended = { ...session.state.handoff, way_on: exitId ?? session.state.handoff.way_on };
 }
 
-// Taking stock when a room ends (D190), before the verdict: the stock call opens it, and each thing the player says
+// Taking stock when a room ends (D192), before the verdict: the stock call opens it, and each thing the player says
 // to the DM goes through it again, with the talk so far and the lists as they stand. Stored in `session.stock`, so a
 // reload picks up the talk where it stopped.
 export async function takeStock(session, io, prompts, said = null) {
@@ -83,7 +83,7 @@ const summaryOf = (session, verdict) => ({ name: session.state.packet.name ?? se
 // act is over instead, and waits for the relics to be chosen (`endTheAct`). Stores what happens next in `session.between`.
 export async function judgeRoom(session, io, prompts) {
   const camp = campaignOf(session);
-  // What the player kept when taking stock (D190). A room ended without it (an old save) keeps the pack as it came
+  // What the player kept when taking stock (D192). A room ended without it (an old save) keeps the pack as it came
   // out, up to its limit, and whatever the party had with it.
   const settled = session.stock?.settled ?? null;
   const handoff = settled
@@ -97,7 +97,8 @@ export async function judgeRoom(session, io, prompts) {
   const verdict = calm ? { ...judged, rating: null, why: null } : judged;
   session.past = [...session.past, summaryOf(session, verdict)].slice(-PAST);
   if (camp.way.here === "sanctuary") {
-    const next = structuredClone(camp);
+    // The sanctuary is the act's main campfire: its leg's moments are spent there (D190).
+    const next = structuredClone(fireOut(camp));
     next.romance = camp.romance ? endEncounter(camp.romance, members, verdict) : null;
     next.gold = handoff.gold ?? next.gold;
     if (settled) Object.assign(next, { items: settled.items, carried: settled.carried });
@@ -105,7 +106,7 @@ export async function judgeRoom(session, io, prompts) {
     session.between = { verdict, actOver: true, last: camp.act >= setting.arc.length };
     return session.between;
   }
-  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, carried: settled?.carried ?? null, exits: session.state.packet.intent.exits ?? [], members });
+  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff, verdict, carried: settled?.carried ?? null, exits: session.state.packet.intent.exits ?? [], members, name: session.state.packet.name ?? null });
   session.camp = moved;
   session.between = { verdict, kind, forced, exit: exit ? { id: exit.id, stub: exit.stub ?? null } : null };
   return session.between;
@@ -164,6 +165,8 @@ export function enterRoom(session, roster = authored) {
     ended: null,
     between: null,
     stock: null,
+    // The last campfire's scene is over (D190).
+    fire: null,
   });
   post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;

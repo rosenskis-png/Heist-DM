@@ -52,6 +52,7 @@ No map of the act is built in advance.
 - **Every leg ends at a campfire,** and the act ends at its sanctuary, the act's main campfire.
 - **A campfire is a night.** The party sleeps there and wakes to morning. Otherwise, the time of day is a room's to use if it wants; it's never a clock the party plans around.
 - **Every companion is present at every campfire.** A separation, whether captured, split up or sent away, resolves before the leg's campfire, so code never lets one start in a room whose exits already lead to the campfire or the climax, and the party is whole again at the fire.
+- **Camp happens there** (D190): the campfire call at every campfire and the sanctuary (`docs/spec/calls/campfire.md`). Each room since the last fire goes with the companions: what happened, how it went, and each one's own reactions. When the fire ends those are spent, and each companion's strong reactions stay with her for the rest of the game (`noteRoom`, `fireOut` in `src/campaign/run.js`).
 - **A campfire is downtime and a fresh start,** never a trade-off between resting and something else. A leg that went well can't be ridden to the end of the act, and one that went badly doesn't follow the party past the fire.
 
 ## 7. What resets and what carries
@@ -62,6 +63,7 @@ No map of the act is built in advance.
 | Relics | The act, then as many as the climax allows (§5) |
 | The pack | Room to room, as kept when taking stock (§10), until the act ends |
 | A follower and the loose ends | Room to room, as settled when taking stock, until the follower reaches their goal (§10) |
+| The rooms since the last campfire (D190) | Until the next campfire; each companion's strong reactions among them, the whole game |
 | Gold, how the companions feel about the player and about each other, memories, commitments, companion goals, outfits, and the world's memory (D123) | The whole game |
 
 ## 8. No campaign clocks
@@ -85,7 +87,7 @@ Every adventure is set in a world (`content/worlds/`, D150). The rules every wor
 
 Gravenhold is the default world and the worked example a generated world is written to match. A player who types a vibe at setup gets a world from the pitch call instead (`docs/spec/calls/pitch.md`, D151), in the same shape (`schemas/world.js`), holding every feature the two chosen companions need; the session keeps it whole and saves it, and it's never generated again. In every world the rings exist, the adventure is medieval fantasy, and the party is escaping a hostile, living place much bigger than itself, starting from a small prison inside it.
 
-## 10. Taking stock (D190)
+## 10. Taking stock (D192)
 
 When a room ends, before its verdict, the player and the DM take stock out of character: nothing happens in the world, and the player talks it over for as long as they like (`docs/spec/calls/stock.md`). Code: `src/campaign/stock.js`, `takeStock` and `settle` in `src/game/journey.js`.
 

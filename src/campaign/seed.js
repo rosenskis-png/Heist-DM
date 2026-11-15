@@ -22,7 +22,7 @@ export const DANGERS = ["asleep or dozing", "eating or drinking", "busy with wor
 // What's worth having beyond the way out (D164): nothing about half the time; a clue is one more kind of reward.
 export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a journal page"];
 const PRIZE_WEIGHTS = [10, 4, 2, 4];
-// Where a follower is going (D190): the rooms that can be that place, and how likely the room is it, by how many rooms
+// Where a follower is going (D192): the rooms that can be that place, and how likely the room is it, by how many rooms
 // they've travelled with the party: never the first, then one in three, one in two from the third, and always from the fifth.
 const DESTINATION_KINDS = ["encounter", "oddity", "quiet"];
 const destinationOdds = (n) => (n >= 5 ? 1 : n >= 3 ? 2 : n >= 1 ? 3 : 0);
@@ -110,7 +110,7 @@ export function seedFor(camp, world, kind, exits = []) {
       else seed.prize = "gold";
     }
   }
-  // The follower's destination (D190): this room may be the place they've been trying to reach. It's the room's
+  // The follower's destination (D192): this room may be the place they've been trying to reach. It's the room's
   // premise, so the room has no other extra.
   const follower = (camp.carried ?? []).find((x) => x.kind === "follower" && x.goal);
   if (follower && DESTINATION_KINDS.includes(kind) && !camp.destination) {

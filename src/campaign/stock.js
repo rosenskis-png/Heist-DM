@@ -1,4 +1,4 @@
-// Taking stock when a room ends (docs/spec/campaign.md §10, D190): out of character, the player and the DM settle what
+// Taking stock when a room ends (docs/spec/campaign.md §10, D192): out of character, the player and the DM settle what
 // goes on to the next room. The pack is the hand-off's, plus anything the DM grants; the player keeps up to the
 // pack's limit. At most one follower goes on, chosen by the player, or none. Pure: the stock call's output arrives
 // here as data.
@@ -11,7 +11,7 @@ const slug = (n) => String(n).toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(
 // The follower who came in with the party, if any.
 export const followerOf = (carried = []) => carried.find((x) => x.kind === "follower") ?? null;
 
-// A follower whose room this was has reached what they were after (D190): they part ways, and aren't offered again.
+// A follower whose room this was has reached what they were after (D192): they part ways, and aren't offered again.
 export function arrivedHere(camp) {
   const d = camp.destination;
   return d && d.room === camp.roomNo ? d.name : null;
@@ -49,7 +49,7 @@ export const packOf = (stock) => [...stock.items, ...stock.found.map(({ why, ...
 
 // The player's choices: which things to keep, by id (no more than the pack holds), and which follower goes on, by
 // name, or none. Returns the items and the `carried` list for the campaign. A follower keeps the room they joined in,
-// so a later seed knows how long they've travelled (D190).
+// so a later seed knows how long they've travelled (D192).
 export function settleStock(stock, { keep = null, follower = null } = {}, camp) {
   const pack = packOf(stock);
   const ids = keep ?? pack.slice(0, setting.items.max).map((i) => i.id);

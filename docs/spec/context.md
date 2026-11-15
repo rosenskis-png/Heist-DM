@@ -25,10 +25,10 @@ The encounter reaches the DM's calls as plain lines, not the packet's JSON (`enc
 | Scene | Characters; the party's gold and relics; the encounter without the objective; the opening; the ledger; what's coming; the draft; the conversation |
 | Question | The read-only slice (D127, D133): the party and its abilities, with what's left of them; its gold and relics; the encounter without the objective, sheets or reaction notes, with only the routines and events the party knows; the opening; the ledger without its event log; the DM's recent answers; the question |
 | Verdict | The record of a room that has ended (D146): the player; each companion's values (beliefs, rules, pursuit, mood, what she admires, despises, wants and can't stand); the whole encounter with its ways on; the ledger and the log at the end; how it ended, from the hand-off, with what was kept and who came along |
-| Stock | Taking stock when a room ends (D190): the party; the whole encounter; the ledger and the log at the end; the room's narration, newest first, up to its share; what the party carried out and came in with; who has reached their goal; the lists as they stand and the talk so far |
+| Stock | Taking stock when a room ends (D192): the party; the whole encounter; the ledger and the log at the end; the room's narration, newest first, up to its share; what the party carried out and came in with; who has reached their goal; the lists as they stand and the talk so far |
 | Party | Both companions' briefs, each exactly as her companion call has it (D132); the room sheet, as for the companion call; the DM's last two narrations, without the opening; the pair's dynamic; the table without private words or narration; the draft and the card as shown |
 | Companion | Her brief and the special cases she acts on (D79, D114, D175); the room sheet (D174); the DM's last two narrations, without the opening; the draft and the card as shown (D40); her private channel |
-| Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far and the last encounter |
+| Campfire | Her full profile, gated (`docs/spec/companions.md`); the scene; the story so far, the rooms since the last campfire and the moments that stayed with her (D190) |
 | Pitch | Its job and the format; the two companions' names, roles and blurbs; the features their stories need, with Gravenhold's version of each; Gravenhold as the worked example; pitches the player turned down; the vibe (D151) |
 
 - **Allowlists** (D59): each row is built from an explicit list. Abilities go without their `declared` blocks; a limited one says what's left of it instead (D128).
@@ -56,7 +56,7 @@ An invariant or worked example can carry an act gate: the first act it applies i
 | Scene | `sample.json` | off | `default` |
 | Question | `sample.json` | off | `quick` (D133) |
 | Verdict | `sample.json` | off | `default` (D146) |
-| Stock | `sample.json` | off | `default` (D190) |
+| Stock | `sample.json` | off | `default` (D192) |
 | Party | `sample.json` | off | `quick` (D132) |
 | Companion | `sample.json` | off | `quick` (D58) |
 | Campfire | `sample.json` | off | `complex` |

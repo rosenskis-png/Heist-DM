@@ -245,7 +245,7 @@ function campaign(env, call, schema) {
   ];
 }
 
-// One line of what the party has with it (D178, D185, D190): a follower with their fixed record first, then what they
+// One line of what the party has with it (D178, D185, D192): a follower with their fixed record first, then what they
 // say they're after and what they know. Why they really want it is for the DM's calls alone: `hidden: false` leaves it
 // out, for a call whose words reach the player.
 export const carriedLine = (x, { hidden = true } = {}) =>
@@ -373,7 +373,8 @@ export function campfireInput(env, c, self, others, schema) {
     wardrobeFor(rom, me) ? block("Your outfits", wardrobeFor(rom, me)) : null,
     block("The story so far", c.log ?? []),
     c.clues?.length ? block("Journal pages the party has found and read (what they say, not what they mean; wonder about them if it fits, never claim to know)", c.clues) : null,
-    c.events ? block("The last encounter", c.events) : null,
+    c.since?.length ? block("Since the last campfire (the rooms you came through with him, and how you felt about what happened)", c.since) : null,
+    c.kept?.length ? block("Moments from earlier that stayed with you", c.kept) : null,
     block("This scene so far", c.scene ?? []),
     c.mustAdvance ? `${rest.map((o) => o.name).join(" and ")} didn't move anything between anyone this time, so you do. Continue the scene as ${me.name}.` : `Continue the scene as ${me.name}.`,
   ]);
@@ -752,7 +753,7 @@ export function verdictInput(env, c, schema) {
   ]);
 }
 
-// Taking stock when a room ends (docs/spec/calls/stock.md, D190): the room as the DM knew it, the ledger and the log
+// Taking stock when a room ends (docs/spec/calls/stock.md, D192): the room as the DM knew it, the ledger and the log
 // at the end, everything the DM narrated, what the party carried out and came in with, and the talk so far with the
 // lists as they stand, so each answer gives the whole lists again.
 export function stockInput(env, c, schema) {

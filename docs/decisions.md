@@ -189,19 +189,21 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
 - **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
 - **D177** The note stops predicting, and a new room is read once from the player's chair: current
-- **D178** What the party has with it goes from room to room: changed by D190
+- **D178** What the party has with it goes from room to room: changed by D192
 - **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: changed by D188
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
 - **D183** The layout draws every room: it sets zones against what they join, grows arms to close loops, and gives things a square: current
-- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: changed by D190
+- **D184** The pack: what the party carries out goes on as what it is, with what was learned of it: changed by D192
 - **D185** Fixes from the second shakedown: plans finish before a room ends, slips are tidied not retried, followers keep their record: current
 - **D186** The DM reads the map, north is up, rings close, calm rooms aren't judged, encounters have two ways on: changed by D187
 - **D187** Calm rooms still get the companions' reactions; the header scrolls away on a phone: current
 - **D188** The act stays a chain of rooms; the site test is closed: current
 - **D189** A made roll costs nothing; heroes are larger than life; the pack has a tab; the tabs stay in reach: current
-- **D190** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: current
+- **D190** Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her: current
+- **D191** Camp in the game has the bench's look behind the scene: current
+- **D192** Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room: current
 
 ---
 
@@ -1196,7 +1198,22 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - **The tabs stay in reach.** On a phone they sit in a bar fixed to the bottom of the screen.
 **Why:** A forty-foot drop called near-deadly was never allowed to happen, so failure fell back on alarms; a mind flayer stunned the player after a made roll; the inventory couldn't be seen; and reaching the tabs meant scrolling to the top.
 
-### D190. Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room
+### D190. Camp in the game: a Camp tab at every fire, and the road since the last fire goes with her
+**Decided:** Item 2 of the path to v0.1 (`docs/roadmap.md`), first part. Builds D45, D85, D113, D142, D175 and D184.
+- **Where.** At a campfire room or the sanctuary the page opens a Camp tab and goes to it. The player sits with both companions or one alone, speaks aloud or whispers to one over the rings, and the campfire call runs for each companion present, in turn, as on the bench (`src/game/camp.js`, `src/calls/campfire.js`). One scene a fire (D113), kept in the save as `fire`, gone when the party walks on. Leaving is the room's ways on, as in any calm room; the rest the fire gives is unchanged (D142).
+- **The road goes with her.** When a room ends, the campaign keeps a line of it (`since`, `noteRoom` in `src/campaign/run.js`): its name, the hand-off's log of what happened, the verdict's reason if it was rated, and each companion's own reactions with why. Her campfire call reads the rooms since the last fire with only her own reactions. When a campfire or the sanctuary ends, the leg's moments are spent, and her strong reactions (intensity 2) stay with her for the rest of the game, the latest six (`kept`, `fireOut`).
+- **Gifts.** An outfit waiting in the pack (D184) is given at the fire to a companion sitting with the player: it's hers, and she answers the gift in the scene.
+- **Where she stands.** A campfire answer's `standing` and `learned` become what the rooms ahead read of her (D79).
+- **Not yet:** a shapeshifter forced into the other's place (the bench's testing switch), reading answers aloud in the game, and the developer view's look at her `inner`.
+**Why:** D175 took her romance register out of the rooms on the promise that the campfire would remember them. The verdict already says what moved each companion and why; that is the specific moment, in her own terms, and it costs nothing more to keep. Only her own reactions, because the other companion's are the other's inner life (D45). The strong ones are the ones worth a callback acts later; the rest would crowd the call.
+**Rules out:** A campfire that knows only the act's log lines; one companion's call reading the other's reactions; a summarizing call for the road (principle: record at the moment, never compress).
+
+### D191. Camp in the game has the bench's look behind the scene
+**Decided:** The designer's call (2026-11-13). Builds D190. A checkbox in the Camp tab, "Show what's really going on", kept in the save with the fire, shows what the bench's Camp shows: each companion's stage, how she feels about the player (heat, intimacy, regard and lean, in numbers and in the words her call reads), how she feels about the other on each axis and how she thinks the other feels about her, what she believes, her storm, form, mood and private agenda, her latest memories and commitments; and in the scene, words between the two companions in full, each answer's `inner`, a new agenda, what it moved, a caught hidden action, and whose face a shapeshifter wears (`fireView` with `reveal`, `heartsView` in `src/game/camp.js`). Off, the player sees only what they would.
+**Why:** The designer plays the game as its tester; without it, nothing at a campfire shows whether the relationship model moved the way the scene read.
+**Rules out:** Any of it reaching a call: it's the page's alone.
+
+### D192. Taking stock: the player settles the pack and one follower with the DM when a room ends, and a follower's goal becomes a room
 **Decided:** The designer's call (2026-11-15). Changes D178 and D184.
 - **Taking stock.** When a room ends, before the verdict, the player and the DM take stock out of character, through a new call, `stock` (`docs/spec/calls/stock.md`). Nothing happens in the world. The player talks with the DM for as long as they like. There's no limit on claims and no rule against appeals: the player is co-authoring in good faith, and the DM leans towards yes wherever the record and the narration allow it.
 - **The pack.** The screen shows what the game has the party holding, plus anything the DM grants ("wait, I thought I took the wine bottle?"). The player keeps up to six (`content/setting.js`, `items.max`, down from ten). Gold, relics, outfits and journal pages don't count. What isn't kept stays behind.

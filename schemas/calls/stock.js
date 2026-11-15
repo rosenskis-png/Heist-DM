@@ -1,4 +1,4 @@
-// Stock call output: taking stock when a room ends, out of character with the player (D190). Contract:
+// Stock call output: taking stock when a room ends, out of character with the player (D192). Contract:
 // docs/spec/calls/stock.md.
 import { withDefs } from "../defs.js";
 import { r, list, obj } from "../shape.js";

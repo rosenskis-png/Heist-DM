@@ -13,6 +13,7 @@ import { pitchCall } from "../src/calls/pitch.js";
 import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
 import { packOf } from "../src/campaign/stock.js";
 import { setting } from "../content/setting.js";
+import { atFire, fireOf, fireView, heartsView, campTalk, sitWith, speakTo, giveOutfit } from "../src/game/camp.js";
 import { mountDressingRoom, readLooks } from "../src/ui/dressing.js";
 import { withLooks } from "../src/campaign/looks.js";
 // The companions as they are in this world: their stories' role nouns filled in (D150).
@@ -44,6 +45,7 @@ const STATUS = {
   encode: "The DM sets out the room…",
   verdict: "The DM weighs how that went…",
   stock: "The DM looks over what you've got…",
+  campfire: "By the fire…",
 };
 
 const SPEED = [
@@ -225,7 +227,7 @@ function Game({ env, slot, initial, onQuit }) {
   const session = ref.current;
   const [, setV] = useState(0);
   const refresh = () => setV((v) => v + 1);
-  const [tab, setTab] = useState("table");
+  const [tab, setTab] = useState(atFire(session) ? "camp" : "table");
   const [seen, setSeen] = useState({ table: session.seq, plans: session.seq });
   const [busy, setBusy] = useState(null);
   const [error, setError] = useState(null);
@@ -300,6 +302,13 @@ function Game({ env, slot, initial, onQuit }) {
   }, [tab, feedSeq[tab]]);
 
   const colors = Object.fromEntries(s.party.map((p) => [p.id, p.color ?? "#d8a94e"]));
+  // At a campfire or the sanctuary, Camp is a tab, and the party goes to it on arriving (D190).
+  const fire = atFire(session);
+  useEffect(() => {
+    if (fire) setTab("camp");
+    else if (tab === "camp") setTab("table");
+  }, [fire, s.packet.id]);
+  const tabs = fire ? [["camp", "Camp"], ...TABS] : TABS;
   const exportFile = async (filename, data) => {
     if (!env.downloads) return setSaved("Downloads aren't available in this view.");
     try {
@@ -339,7 +348,7 @@ function Game({ env, slot, initial, onQuit }) {
           </div></div>`
         : null}
       <div className="gutter"><nav className="tabs" aria-label="Interfaces">
-        ${TABS.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
+        ${tabs.map(([id, label]) => html`<button key=${id} aria-current=${tab === id ? "page" : null} onClick=${() => setTab(id)}>${label}${tab !== id && feedSeq[id] > seen[id] ? html`<span className="dot" aria-label="new"></span>` : null}</button>`)}
         <button className="maptab" aria-pressed=${sideOpen} aria-current=${sideOpen ? "page" : null} onClick=${() => setSideOpen(!sideOpen)}>Room & party</button>
       </nav></div>
     </header>
@@ -352,6 +361,7 @@ function Game({ env, slot, initial, onQuit }) {
       <main className="pane">
         ${tab === "table" ? html`<${TableTab} ...${props} error=${error?.where === "table" ? error.text : null} goPlans=${() => setTab("plans")} />` : null}
         ${tab === "plans" ? html`<${PlansTab} ...${props} error=${error?.where === "plans" ? error.text : null} fresh=${fresh} setFresh=${setFresh} />` : null}
+        ${tab === "camp" && fire ? html`<${CampTab} ...${props} error=${error?.where === "camp" ? error.text : null} />` : null}
         ${tab === "pack" ? html`<${PackTab} session=${session} colors=${colors} />` : null}
         ${tab === "map" ? html`<${MapTab} view=${mapView(s)} sketch=${sketchView(s)} sheet=${roomSheet(s)} colors=${colors} party=${s.party} />` : null}
         ${dev ? html`<${DevView} session=${session} calls=${calls.current} onExport=${exportFile} />` : null}
@@ -509,6 +519,107 @@ function TableTab({ session, env, io, run, busy, error, betweenError, refresh, c
           </span></div>
         </div>`}
   </section>`;
+}
+
+// ---------- Camp (D190) ----------
+
+// At a campfire or the sanctuary: the player sits with both companions or one, says and does things in the moment,
+// whispers over the rings, and gives the outfits waiting in the pack. Moving on is the room's ways on, as in any calm room.
+function CampTab({ session, env, io, run, busy, error, refresh, colors }) {
+  const fire = fireOf(session);
+  const comps = session.state.party.slice(1);
+  const [text, setText] = useState("");
+  const end = useRef(null);
+  useEffect(() => {
+    end.current?.scrollIntoView?.({ block: "nearest" });
+  }, [fire.transcript.length]);
+  const name = (id) => comps.find((c) => c.id === id)?.name ?? id;
+  const send = () => {
+    const t = text.trim();
+    if (!t) return;
+    setText("");
+    run("camp", () => campTalk(session, io, env.prompts, { text: t }));
+  };
+  const here = fire.with === "both" ? comps : comps.filter((c) => c.id === fire.with);
+  const gifts = session.camp.gifts ?? [];
+  const chip = (on, label, click) => html`<button key=${label} aria-pressed=${on} disabled=${!!busy} onClick=${click}>${label}</button>`;
+  // The developer's view, as on the bench's Camp: how each feels, whispers between them, and what they really think.
+  const reveal = !!fire.reveal;
+  const disguise = reveal && fire.disguise ? `${name(fire.disguise.actor)} is wearing ${name(fire.disguise.as)}'s face` : null;
+  return html`<section className="feed" aria-label="Camp">
+    <p className="small muted">The fire's lit. Nothing is on a clock here: talk, wander, rest. Morning comes when you move on.</p>
+    <label className="small muted"><input type="checkbox" id="camp-reveal" checked=${reveal} onChange=${(e) => ((fire.reveal = e.target.checked), refresh())} /> Show what's really going on (feelings, whispers between them, thoughts, disguises)</label>
+    ${reveal ? html`<${Hearts} session=${session} colors=${colors} />` : null}
+    ${disguise ? html`<p className="small"><span className="pill gold">disguise</span> ${disguise}</p>` : null}
+    ${fireView(session, { reveal }).map((t, i) => {
+      if (t.from === "player")
+        return html`<div key=${i} className="say player"><span className="from">${t.to ? `You, whispering to ${name(t.to)}` : t.gift ? "You give a gift" : "You"}</span><span className="text">${t.text}</span></div>`;
+      if (t.error) return html`<p key=${i} className="error">${name(t.from)} didn't answer: ${t.error}</p>`;
+      return html`<div key=${i} className="say comp" style=${{ "--cc": colors[t.from] }}>
+        ${t.segments.map((g, j) =>
+          g.kind === "look"
+            ? html`<span key=${j} className="small muted">${g.text}</span>`
+            : html`<span key=${j} className=${`text${g.kind === "narration" ? " muted" : ""}`}>${g.aside === "ring" ? html`<span className="pill">over the rings</span> ` : g.aside === "action" ? html`<span className="pill">out of sight</span> ` : g.aside && g.aside !== "no" ? html`<span className="pill gold">${g.aside}</span> ` : null}${g.who ? html`<b>${g.who}: </b>` : null}${g.text}</span>`,
+        )}
+        ${t.truth
+          ? html`<div className="truth small">
+              ${t.truth.disguise ? html`<div><span className="pill gold">disguise</span> ${t.truth.disguise}</div>` : null}
+              ${t.truth.caught ? html`<div><span className="pill bad">caught</span> ${t.truth.caught}</div>` : null}
+              ${t.truth.inner ? html`<div><i>Inside:</i> ${t.truth.inner}</div>` : null}
+              ${t.truth.agenda ? html`<div><i>New agenda:</i> ${t.truth.agenda}</div>` : null}
+              ${t.truth.moved.length ? html`<div className="muted">${t.truth.moved.join(" · ")}</div>` : null}
+            </div>`
+          : null}
+      </div>`;
+    })}
+    <div ref=${end}></div>
+    <div className="composer">
+      <div className="to" role="group" aria-label="Who you sit with">
+        ${chip(fire.with === "both", "Both of them", () => (sitWith(session, "both"), refresh()))}
+        ${comps.map((c) => chip(fire.with === c.id, `${c.name}, alone`, () => (sitWith(session, c.id), refresh())))}
+      </div>
+      ${fire.with === "both"
+        ? html`<div className="to" role="group" aria-label="Who it's for">
+            ${chip(fire.to === "all", "Aloud", () => (speakTo(session, "all"), refresh()))}
+            ${comps.map((c) => chip(fire.to === c.id, `Whisper to ${c.name}`, () => (speakTo(session, c.id), refresh())))}
+          </div>`
+        : null}
+      <span className="hint">${fire.with !== "both" ? `Just the two of you. ${comps.find((c) => c.id !== fire.with)?.name} is elsewhere in camp.` : fire.to === "all" ? "Both of them hear it, and both answer." : `Over the rings: only ${name(fire.to)} hears it.`}</span>
+      <textarea id="camp-input" rows="2" value=${text} disabled=${!!busy} onChange=${(e) => setText(e.target.value)}
+        onKeyDown=${(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
+        placeholder="What you say or do"></textarea>
+      ${error ? html`<p className="error">${error}</p>` : null}
+      <div className="row"><span className="status">${busy ?? ""}</span><button className="primary" disabled=${!!busy || !text.trim()} onClick=${send}>Send</button></div>
+      ${gifts.length
+        ? html`<div className="ways"><span className="small muted">Waiting to be given:</span>
+            ${gifts.flatMap((g) => here.map((c) => html`<button key=${g.id + c.id} className="ghost" disabled=${!!busy} title=${g.text} onClick=${() => run("camp", () => giveOutfit(session, io, env.prompts, { outfit: g.id, to: c.id }))}>Give ${g.name} to ${c.name}</button>`))}
+          </div>`
+        : null}
+    </div>
+    <${WaysOn} session=${session} busy=${busy} refresh=${refresh} run=${run} />
+  </section>`;
+}
+
+// How each companion feels right now, for the developer's view: toward the player in words and numbers, toward the
+// other companion and how she thinks the other feels about her, what she believes, and her private agenda.
+function Hearts({ session, colors }) {
+  return html`<div className="hearts">
+    ${heartsView(session).map((c) => html`<div key=${c.id} className="heart" style=${{ "--cc": colors[c.id] }}>
+      <div><b>${c.name}</b> <span className="pill">${c.stage}</span>${c.mood ? html` <span className="muted small">mood: ${c.mood.mood}${c.mood.why ? ` (${c.mood.why})` : ""}</span>` : null}</div>
+      <div className="small"><span className="muted">Toward you</span> · ${c.toward_you.map((x) => `${x.k} ${x.v}${x.k === "heat" ? `/${c.payoff_at}` : ""}`).join(" · ")}</div>
+      <ul className="small">${c.toward_you.filter((x) => x.words).map((x) => html`<li key=${x.k}>${x.words}</li>`)}</ul>
+      ${c.other
+        ? html`<div className="small"><span className="muted">Toward ${c.other} (feels · thinks ${c.other} feels)</span> · ${c.toward_other.map((x) => `${x.k} ${x.v} · ${x.read}`).join("; ")}</div>
+            <div className="small muted">Believes: ${c.believes} · ${c.config}</div>`
+        : null}
+      ${c.happened.length ? html`<div className="small muted">So far: ${c.happened.join(", ")}</div>` : null}
+      ${c.storm ? html`<div className="small">Storm: ${c.storm}</div>` : null}
+      ${c.form ? html`<div className="small">Current form: ${c.form}</div>` : null}
+      ${c.agenda ? html`<div className="small"><i>Agenda:</i> ${c.agenda}</div>` : null}
+      ${c.memories.length ? html`<details className="small"><summary>Memories (${c.memories.length})</summary><ul>${c.memories.map((m, i) => html`<li key=${i}>${m}</li>`)}</ul></details>` : null}
+      ${c.commitments.length ? html`<details className="small"><summary>Commitments (${c.commitments.length})</summary><ul>${c.commitments.map((m, i) => html`<li key=${i}>${m}</li>`)}</ul></details>` : null}
+    </div>`)}
+  </div>`;
 }
 
 // ---------- Plans ----------
@@ -711,7 +822,7 @@ function WaysOn({ session, busy, refresh, run }) {
   </div>`;
 }
 
-// Taking stock (D190): out of character, before the verdict. The pack with what the DM has granted, to keep up to its
+// Taking stock (D192): out of character, before the verdict. The pack with what the DM has granted, to keep up to its
 // limit; who could come along, one or no one; the loose ends; and the talk with the DM, as long as the player likes.
 function TakingStock({ session, env, io, run, busy }) {
   const stock = session.stock;
@@ -756,7 +867,7 @@ function TakingStock({ session, env, io, run, busy }) {
   </div>`;
 }
 
-// Between rooms (D173): how the room ended; taking stock with the player (D190); then, without being asked, the DM's
+// Between rooms (D173): how the room ended; taking stock with the player (D192); then, without being asked, the DM's
 // verdict and the next room, generated while the player reads; at the sanctuary, the relics to keep before the next act. Each step is saved as it lands, so a
 // reload picks up where it stopped, and a failed step can be tried again.
 function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
