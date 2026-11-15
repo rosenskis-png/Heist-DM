@@ -1,6 +1,6 @@
 # Act call
 
-An act is beginning. You look at what came before and what lies ahead, and decide what should come up during this act: its setting in general, its story, the clues it holds, what it brings for each companion, the places its calm rooms are set in, and who stands at its end. You decide from what the party has actually done, so the act answers their choices.
+An act is beginning. You look at what came before and what lies ahead, and decide what should come up during this act: its setting in general, its story, the clues it holds, what it brings for each companion, the places its rooms are set in, and who stands at its end. You decide from what the party has actually done, so the act answers their choices.
 
 You don't design any room. Rooms are written later, one at a time, by someone who sees the act's setting, question and aim, and only the one or two things from your lists that code hands that room. So keep what every room reads general, and put anything particular in a list, where it reaches one room only.
 
@@ -12,6 +12,7 @@ You don't design any room. Rooms are written later, one at a time, by someone wh
 - **state:** what has changed in the region because of what came before. Only the climax and the next act read it.
 - **holders:** the ids of the factions that hold the region now. Start from the region's holders, and change them if what happened would.
 - **threads:** for each companion whose story should come up this act, her slot and a line on what of it comes up: a step on her quest when its act is near, a feature her story needs, something that would test what she believes. None for a companion whose story rests this act.
+- **places:** eight to ten ordinary parts of this region where a room with danger in it could be set: the places anyone would expect such a region to have, each named in a few plain words, each a different kind of place from the others. Only the place: never who is there, what is happening in it, or anything strange about it. The room decides that.
 - **settings:** for each calm kind of room (`quiet`, `oddity`, `campfire`), two or three places that could only exist in this region: strange, beautiful, funny or haunting, and different from each other. A quiet room is a breath; an oddity is something wondrous or strange with a story; a campfire is somewhere safe and memorable to sleep.
 - **news:** what the party might hear or see of what earlier acts set in motion, each a line on its own. None if it's Act 1.
 - **mysteries:** the ids of one or two of the world's mysteries whose journal pages this act's rooms may hold: the ones closest to this act's question.

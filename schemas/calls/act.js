@@ -8,7 +8,7 @@ const pool = (min) => list(r("text"), min);
 
 export const actSchema = withDefs({
   $id: "act",
-  ...obj(["goal", "setting", "question", "aim", "state", "holders", "threads", "settings", "news", "mysteries", "returning", "peak", "hints"], {
+  ...obj(["goal", "setting", "question", "aim", "state", "holders", "threads", "places", "settings", "news", "mysteries", "returning", "peak", "hints"], {
     // The act's job, in this world's terms. The climax reads it.
     goal: r("text"),
     // The region in general, in a sentence or two: what this part of the place is and who's in it. Every room reads it.
@@ -23,7 +23,9 @@ export const actSchema = withDefs({
     holders: list(r("id"), 1),
     // What should come up for each companion this act, if anything: her room reads it.
     threads: list(obj(["slot", "beat"], { slot: { enum: ["companion_a", "companion_b"] }, beat: r("text") })),
-    // Pools, one item to one room, each used once in the act.
+    // Pools, one item to one room, each used once in the act. Plain places for the rooms with danger in them (D196),
+    // and stranger ones for the calm rooms.
+    places: pool(6),
     settings: obj(["quiet", "oddity", "campfire"], { quiet: pool(2), oddity: pool(2), campfire: pool(2) }),
     news: pool(0),
     // The ids of the one or two mysteries whose clues this act's rooms hold.

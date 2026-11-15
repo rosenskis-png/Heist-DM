@@ -77,12 +77,13 @@ Nothing counts against the party across rooms: no alert, no days and no hidden s
 Every adventure is set in a world (`content/worlds/`, D150). The rules every world shares are in `content/setting.js`: the five-act shape, the way ahead, relics, the whisper rings, and how much of the player's secret each act may show. A world holds what changes:
 
 - **The place** and **its way out.**
+- **Its tone** (D196): the register the adventure is told in, a line or two on its genre and mood. The sketch writes every room to it and the DM's calls tell the room in it. A generated world's comes from the player's vibe.
 - **Its roles:** the nouns companion text uses as slots (`docs/spec/companions.md` §2): its name, what kind of place it is, who built it, who rules it now, its commander and master, its working levels, its old depths and its seat of power. Code fills them (`src/campaign/world.js`).
 - **Its heart:** what's sealed at the bottom, that the factions want.
-- **Its life:** what it's busy with, whatever the party does.
-- **Its factions,** and the **tensions** between them: what they want from each other, not only from the party.
+- **Its life:** what goes on in it, whatever the party does, crowded or nearly empty.
+- **Its factions,** as many as the place really has, from one to four, and where there are several the **tensions** between them: what they want from each other, not only from the party.
 - **Its features:** what it holds that companions' stories need. Each companion lists hers as `needs`, and a world that lacks one for a companion in the party has a problem to fix.
-- **Its factions' ladders:** three named leaders each, lowest first: a local face, a lieutenant and the top, each with a visible hook. Each act's peak climbs them (D164).
+- **Its factions' ladders:** three named leaders each, lowest first: a local face, a lieutenant and the top, each with a hook a player would remember, in the world's tone. Each act's peak climbs them (D164).
 - **Its regions:** the part of the place each act crosses, what it is, its sanctuary, the factions that hold it at first, and how it feels, rising from personal (Act 1) through communal and ancient to mythic (Act 4), then the aftermath (Act 5). What happens in an act is decided when it begins, by the act call (`docs/spec/calls/act.md`).
 - **Its mysteries:** truths the game never confirms, each with an edge (one place later where knowing it quietly helps, as a hidden fact in the packets it applies to) and a journal someone in the world wrote about it, torn into pages that rooms hold as rewards and the party reads at camp (D164, D168).
 - **The player's secrets** it can draw from, and **world facts that never change** (`invariants`, with act gates). The player's secrets and the rings are revealed by act, as story; the mysteries never are.

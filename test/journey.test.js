@@ -17,7 +17,7 @@ const world = worldOf();
 const plan = {
   goal: "Cross the Warrens.", question: "Can they cross before the Court learns they're loose?", aim: "Learn the way down.",
   setting: "The old dwarven working levels.", state: "The forges run double shifts.", holders: ["undead"],
-  threads: [], settings: { quiet: ["a flooded chapel", "a bone library"], oddity: ["a well that answers", "a coat ballroom"], campfire: ["a warm bread oven", "a crypt of snoring knights"] },
+  threads: [], places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel"], settings: { quiet: ["a flooded chapel", "a bone library"], oddity: ["a well that answers", "a coat ballroom"], campfire: ["a warm bread oven", "a crypt of snoring knights"] },
   news: [], mysteries: ["court_of_debts"], returning: [],
   peak: { who: "Lord Chamberlain Vesk", why: "his court holds the stair", wants: "a perfect banquet", turns: "courtesy, then knights", where: "the banquet hall" },
   hints: ["black invitations nailed to doors", "a herald calling names"],
@@ -49,7 +49,7 @@ const io = {
       calls.push(call);
       if (call === "act") return structuredClone(plan);
       if (call === "sketch") return sketch;
-      if (call === "read") return { layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
+      if (call === "read") return { clear: true, layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
       if (call === "verdict") return { rating: 7, why: "Clean.", reactions: [], people: [] };
       return encode(input);
     },

@@ -1,13 +1,13 @@
 # Pitch call
 
-The player is starting a new adventure and has typed a vibe: a few words about what they want it to feel like. You write the world the whole adventure is set in, and a short pitch they read before choosing it. Make it a real, specific take on what they typed, not a safe average. This is pulp fantasy played straight: bold, visible and a little larger than life.
+The player is starting a new adventure and has typed a vibe: a few words about what they want it to feel like. You write the world the whole adventure is set in, and a short pitch they read before choosing it. Make it a real, specific take on what they typed, not a safe average. The vibe sets the tone: if they name a kind of story or a place they know, write that, in its own register, the expected thing done well.
 
 ## What every world is
 Whatever the vibe, every world is the same kind of adventure, and yours must be too:
 
-- **An escape from a hostile, living place much bigger than the party.** The place has its own life and isn't mainly concerned with the party: it's busy with its own work, feasts, rites and feuds. Its people are mostly hostile, but they're going about their business, not hunting the party. The party starts small, in a cell inside it, and escapes outward through it over five acts.
+- **An escape from a hostile, living place much bigger than the party.** The place has its own life and isn't mainly concerned with the party. That life is whatever the vibe calls for, crowded or nearly empty, loud or silent. Whoever is in it is mostly hostile, but about their own business, not hunting the party. The party starts small, held somewhere inside it, and escapes outward through it over five acts.
 - **A heart at the bottom:** something deep in the place that its factions each want, for their own ends, of the kind the seed names. It's what the adventure builds toward.
-- **Factions that want things from each other, not only from the party,** so the party has leverage and the place has surprises in it. Give two to four, each with its own way of behaving and what works on it.
+- **The powers that hold it:** as many factions as the place really has, from one to four, each with its own way of behaving and what works on it. A place with one master has one. Where there are several, they want things from each other, not only from the party, so the party has leverage.
 - **Medieval fantasy,** in whatever key the vibe asks for. The three of them wake wearing silver rings that let them talk silently, mind to mind; that's true in every world, and who put them there is revealed in Act 3.
 
 ## The five regions
@@ -21,7 +21,7 @@ Each act crosses one region of the place, and the five always rise the same way:
 For each region write its `name`; `what` it is, in a line; its `sanctuary`, where the party rests at the act's end; its `holders`, the ids of the factions that hold it; and its `feel`: how it looks, sounds and moves, so no two regions feel alike. Don't write what happens in each act: that's decided when the act begins, from what the party has done.
 
 ## Factions
-For each faction: `name`, `short` (a few words), `desc`, `rules` (how they behave and what works on them), `goal` (what they want from the heart), and a `ladder` of three leaders, lowest first: a local face the party could meet early, a lieutenant, and the top. Give each a name and a `hook`: one visible, larger-than-life thing a player would remember them by.
+For each faction: `name`, `short` (a few words), `desc`, `rules` (how they behave and what works on them), `goal` (what they want from the heart), and a `ladder` of three leaders, lowest first: a local face the party could meet early, a lieutenant, and the top. Give each a name and a `hook`: the one thing a player would remember them by, in this world's tone. The top of a ladder is the figure the place is known for.
 
 ## Mysteries
 Two to four mysteries: truths about the place that the game never confirms. A player who pieces one together might gain an edge; one who ignores them all can still finish. For each:
@@ -37,8 +37,9 @@ The companions in this party each have a story that needs the place to hold some
 
 ## The rest
 - `place` and `escape`: the place in a sentence or two, and its one real way out, which should lead the party deeper before it leads them out.
-- `life`: what the place is busy with, whatever the party does: several different things, not one.
-- `tensions`: two or three lines on what the factions want from each other.
+- `tone`: the register the whole adventure is told in, in a line or two: its genre and mood, how loud or quiet, how peopled or empty, how grim or light. Every room is written to it.
+- `life`: what goes on in the place, whatever the party does.
+- `tensions`: what the factions want from each other, a line each; none when one power holds the place.
 - `playerSecrets`: two secrets, one of each kind the seed names, each tying the player to the place, revealed over the acts. They needn't touch the heart. The player's gender isn't known: always write them as "they".
 - `invariants`: world facts that never change, each optionally gated to the act it first applies in. One or two is plenty. Never one that states a mystery's truth or gives its edge away.
 - `id`: a short lowercase id for the world.

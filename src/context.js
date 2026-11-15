@@ -237,9 +237,12 @@ function compose(parts) {
 }
 
 // Campaign tier, then encounter, then live (docs/spec/context.md §1).
+// The calls whose words are the DM's telling: they read the world's tone (D196), so a room keeps the register it opened in.
+const TELLS = ["question", "adjudicate", "resolve", "scene"];
 function campaign(env, call, schema) {
   return [
     block("How this game is written", env.prompts.style),
+    TELLS.includes(call) && env.world?.tone ? block("This world's tone: tell it this way", env.world.tone) : null,
     block("Your job", promptFor(env.prompts[call], env.act)),
     block("Output format", shapeText(schema)),
     invariantsFor(env.act, env.world?.invariants).length ? block("World facts that never change", invariantsFor(env.act, env.world?.invariants)) : null,
@@ -845,14 +848,15 @@ function climaxText(c) {
   };
 }
 
-// What the room's sketch is built from (D160–D164): what the seed fixes, its leanings, and at most one prize and one
-// extra, each a slice code chose, never the pool it came from.
+// What the room's sketch is built from (D160–D164, D196): what the seed fixes, its leanings, and at most one prize and one
+// extra, each a slice code chose, never the pool it came from. A room with danger in it has a place; a calm room has a
+// tone, a busy-ness, a shape and a centrepiece.
 const seedText = (seed, world) => ({
   fixed: {
     kind: seed.kind,
-    tone: seed.tone,
-    busy_with: seed.busy,
-    ...(seed.danger ? { how_the_danger_stands: seed.danger } : {}),
+    ...(seed.place ? { place: seed.place } : {}),
+    ...(seed.tone ? { tone: seed.tone } : {}),
+    ...(seed.busy ? { busy_with: seed.busy } : {}),
     ...(seed.shape ? { shape: seed.shape } : {}),
     ...(seed.centrepiece ? { centrepiece: seed.centrepiece } : {}),
     ...(seed.factions?.length ? { whose_place_it_is: seed.factions.map((f) => world.factions[f]?.name ?? f) } : {}),
@@ -907,7 +911,7 @@ function designParty(c) {
   ];
 }
 
-// The world as the sketch needs it (D163, D169): the place, its life, heart and tensions, the act's setting in general,
+// The world as the sketch needs it (D163, D169, D196): the place, its tone, its life, heart and tensions, the act's setting in general,
 // its question and aim, and the faction whose place it is, with its rules and the rungs of its ladder below the act's
 // peak. Nothing particular from the act: every room invents its own.
 function designWorld(c) {
@@ -917,7 +921,7 @@ function designWorld(c) {
   const peak = plan?.peak?.who ?? "";
   const ladder = (f?.ladder ?? []).filter((l) => !(peak && (peak.includes(l.name) || l.name.includes(peak))));
   return {
-    place: world.place, life: world.life, heart: world.heart, tensions: world.tensions,
+    place: world.place, ...(world.tone ? { tone: world.tone } : {}), life: world.life, heart: world.heart, tensions: world.tensions,
     this_act: {
       ...(region ? { region: region.name } : {}),
       setting: plan?.setting ?? (region ? `${region.what}. ${region.feel}` : undefined),
@@ -948,7 +952,7 @@ export function sketchInput(env, c, schema) {
     block("The party", designParty(c)),
     h ? block("Must honour: how the party arrives", { through: h.stub ?? "unknown", carrying: h.conditions?.map((x) => x.text) ?? [], the_last_rooms: c.log ?? [] }) : null,
     c.carried?.length || c.items?.length ? block("Must honour: what the party has with it", [...(c.carried ?? []).map((x) => carriedLine(x)), ...(c.items ?? []).map((x) => `in their pack: ${x.name}`)]) : null,
-    c.reader ? block("A first reader's notes on an earlier try at this room", { ways_they_saw: c.reader.handles.map((x) => x.what), could_not_tell: c.reader.unclear }) : null,
+    c.reader ? block("A first reader's notes on an earlier try at this room", { how_they_pictured_it: c.reader.layout, could_not_tell: c.reader.unclear }) : null,
     "Write the room's note.",
   ]);
 }
@@ -976,7 +980,7 @@ export function actInput(env, c, schema) {
     block("Your job", env.prompts.act),
     block("Output format", shapeText(schema)),
     block("The world", {
-      place: w.place, heart: w.heart, life: w.life, tensions: w.tensions,
+      place: w.place, ...(w.tone ? { tone: w.tone } : {}), heart: w.heart, life: w.life, tensions: w.tensions,
       factions: Object.fromEntries(Object.entries(w.factions).map(([id, f]) => [id, { name: f.name, desc: f.desc, rules: f.rules, goal: f.goal, ladder: f.ladder }])),
       regions: w.regions.map((r, i) => `${i + 1}: ${r.name}, ${r.what}`),
     }),

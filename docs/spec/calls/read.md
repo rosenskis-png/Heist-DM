@@ -6,8 +6,9 @@
 **Never sees:** the sketch, the packet, the seed, the party's abilities.
 
 ## Returns (`schemas/calls/read.js`)
+- **clear:** whether, after one hearing, the reader could picture the room and knew what they'd want in it.
 - **layout:** the room as the reader pictures it.
-- **handles:** up to eight things a player could take hold of to get past the danger, each with what they'd try and what it might cost.
+- **handles:** up to eight things a player could take hold of, each with what they'd try and what it might cost. For the designer on the Forge; never counted.
 - **unclear:** up to five things they'd have to ask before planning.
 
-Code (`src/calls/read.js`, `designRoom` in `src/game/generate.js`) counts distinct handles. Fewer than four, and the room goes back to the sketch once with the handles and the unclear points as a first reader's notes. No play call sees any of it.
+Code (`src/calls/read.js`, `designRoom` in `src/game/generate.js`) reads `clear`. When it's false, the room goes back to the sketch once, with how the reader pictured it and the unclear points as a first reader's notes (D196). No play call sees any of it.

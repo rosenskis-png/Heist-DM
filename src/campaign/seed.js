@@ -1,6 +1,7 @@
-// A room's seed (D118, D153, D158, D162–D164): code picks the question the sketch call answers, so a model asked for a
-// room doesn't write the average one every time. Pure and seeded; the campaign keeps the seed's random position and
-// what the act has used.
+// A room's seed (D118, D153, D158, D162–D164, D196): code picks the question the sketch call answers, so a model asked
+// for a room doesn't write the average one every time. A room with danger in it gets a plain place from the act's pool
+// and one motif; a calm room keeps the wide lists below. Pure and seeded; the campaign keeps the seed's random position
+// and what the act has used.
 import { motifs } from "../../content/motifs.js";
 import { d100 } from "../engine/rng.js";
 import { setting } from "../../content/setting.js";
@@ -9,17 +10,13 @@ export const TONES = ["very stressed about time", "tense", "even", "light", "a f
 // The players' main way of engaging, and what the room is built around: leanings the sketch uses or leaves (D163, D169).
 export const XFACTORS = ["explore", "interact", "acquire", "overcome", "get through"];
 export const CORES = ["a place hard at its own work", "one big thing in a space", "a danger in the way"];
-// What the place is busy with when the party arrives (D162). The act call writes what each kind looks like in this
-// region (D164); code draws a kind per room, never repeating within an act.
+// What a calm room's place is busy with when the party arrives (D162, D196): code draws a kind per calm room, never
+// repeating within an act.
 export const BUSY = ["hard labour", "a feast or celebration", "a rite or worship", "a punishment or execution", "trade or a market", "getting ready for a raid", "sleep or the night watch", "sickness or a plague", "ruin and decay", "beasts or monsters kept or loose", "a burial or mourning", "a quarrel or a reckoning", "building or repair", "training or drill"];
-// The space's rough form, and the one thing the eye goes to (D163): fixed, from wide lists, not repeated within an act,
-// because any image the prompt itself holds becomes an anchor.
+// A calm room's rough form, and the one thing the eye goes to (D163, D196): fixed, from wide lists, not repeated within
+// an act, because any image the prompt itself holds becomes an anchor.
 export const SHAPES = ["a street or alley", "a long gallery or nave", "a warren of small chambers", "a garden or orchard", "a market of stalls", "a river crossing or ford", "a field of pillars or columns", "a wide stair hall", "a courtyard open to the sky", "a ship's deck or barge", "a pit or bowl", "terraces down a slope", "a tower or shaft", "a bridge or ledge over a drop", "an island in something", "a cave of natural rock", "a ruin half fallen in", "a crossroads of tunnels"];
 export const CENTREPIECES = ["a statue or idol", "a cauldron, vat or kiln", "a fire or forge", "a tree or great growth", "a throne or seat of honour", "a wreck", "a pool or spring", "a beast", "a tower or scaffold", "an altar", "a table set for many", "a gate or portcullis", "a pile of something valuable", "a cart, wagon or vessel", "a grave or tomb", "a bell, drum or horn", "a heap of spoils or trophies", "a hole in the floor"];
-// How the room's main danger stands as the party arrives (D179): too much to fight head-on, and in a state that can
-// tip. A danger in a plain state anyone understands is what makes a room playable many ways; one that runs on a
-// rule has to be worked out first. Fixed by the seed, never repeated within an act.
-export const DANGERS = ["asleep or dozing", "eating or drinking", "busy with work it can't leave", "quarrelling among itself", "chained, caged or penned", "hurt or sick", "waiting for someone who's late", "searching for something it lost", "showing off to an audience", "drunk or celebrating", "afraid of something else here", "bored and looking for sport"];
 // What's worth having beyond the way out (D164): nothing about half the time; a clue is one more kind of reward.
 export const PRIZES = ["none: getting out is the whole of it", "gold", "a relic", "a journal page"];
 const PRIZE_WEIGHTS = [10, 4, 2, 4];
@@ -70,8 +67,7 @@ export function seedFor(camp, world, kind, exits = []) {
   const room = (camp.roomNo ?? 0) + 1;
   const seed = { kind, act: camp.act, exits };
   seed.spotlight = spotlightFor(rng, kind, camp.spotlight ?? null);
-  // One or two motifs for an encounter or the climax, one for any other room: situations' shapes, as leanings (D163,
-  // D169), not repeated in the act where it can be helped.
+  // One motif a room: a situation's shape, as a leaning (D163, D169), not repeated in the act where it can be helped.
   const fit = motifs.filter((m) => m.kinds.includes(kind) && (seed.spotlight || m.id !== "valued_thing"));
   const pool = [...fresh(fit, used, (m) => m.id)];
   // One motif a room (D179): two pulled a room toward two ideas joined together.
@@ -84,20 +80,25 @@ export function seedFor(camp, world, kind, exits = []) {
   // Her story's feature once an act; her other rooms touch her values (D167).
   const storyShown = camp.storyShown ?? [];
   if (seed.spotlight && seed.spotlight !== "both") seed.herStory = !storyShown.includes(seed.spotlight);
-  // Tone: a rough leg leans stressed, a smooth one playful, and the act darkens as it goes (D167).
-  const lean = Math.max(-2, Math.min(2, Math.round(((camp.way.strain ?? 0) - 2) / 2)));
-  const legs = camp.way.legs ?? 1;
-  const late = legs > 1 ? Math.round((((camp.way.leg ?? 1) - 1) / (legs - 1)) * 1.5) : 0;
-  seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean - late))];
-  // What it's busy with: a kind, never repeated in the act; the sketch fits it to the world (D162, D169).
+  // A room with danger in it is set in a plain place from the act's pool, a different one from any used earlier in the
+  // act until they run out (D196): one draw, where a calm room has four.
+  const placesUsed = camp.placesUsed ?? [];
   const usedBusy = camp.usedBusy ?? [];
-  seed.busy = pickFrom(rng, fresh(BUSY, usedBusy));
-  const usedDangers = camp.usedDangers ?? [];
-  if (CHALLENGED.includes(kind)) seed.danger = pickFrom(rng, fresh(DANGERS, usedDangers));
   const usedShapes = camp.usedShapes ?? [];
   const usedCentres = camp.usedCentres ?? [];
-  seed.shape = pickFrom(rng, fresh(SHAPES, usedShapes));
-  seed.centrepiece = pickFrom(rng, fresh(CENTREPIECES, usedCentres));
+  if (kind === "encounter") {
+    if (plan?.places?.length) seed.place = pickFrom(rng, fresh(plan.places, placesUsed));
+  } else if (kind !== "climax") {
+    // A calm room (D163, D167): its tone, what the place is busy with, its shape and its centrepiece. A rough leg leans
+    // the tone stressed, a smooth one playful, and the act darkens as it goes.
+    const lean = Math.max(-2, Math.min(2, Math.round(((camp.way.strain ?? 0) - 2) / 2)));
+    const legs = camp.way.legs ?? 1;
+    const late = legs > 1 ? Math.round((((camp.way.leg ?? 1) - 1) / (legs - 1)) * 1.5) : 0;
+    seed.tone = TONES[Math.max(0, Math.min(TONES.length - 1, roll(rng, TONES.length) - lean - late))];
+    seed.busy = pickFrom(rng, fresh(BUSY, usedBusy));
+    seed.shape = pickFrom(rng, fresh(SHAPES, usedShapes));
+    seed.centrepiece = pickFrom(rng, fresh(CENTREPIECES, usedCentres));
+  }
   // Whose place it is: one of the factions that hold the region now.
   if (CHALLENGED.includes(kind) || kind === "oddity") {
     const holders = (plan?.holders ?? world.regions?.[camp.act - 1]?.holders ?? []).filter((f) => world.factions[f]);
@@ -164,10 +165,10 @@ export function seedFor(camp, world, kind, exits = []) {
       seedRng: rng.rng,
       roomNo: room,
       used: [...used, ...seed.motifs.map((m) => m.id)],
-      usedBusy: [...usedBusy, seed.busy],
-      usedDangers: seed.danger ? [...usedDangers, seed.danger] : usedDangers,
-      usedShapes: [...usedShapes, seed.shape],
-      usedCentres: [...usedCentres, seed.centrepiece],
+      usedBusy: seed.busy ? [...usedBusy, seed.busy] : usedBusy,
+      usedShapes: seed.shape ? [...usedShapes, seed.shape] : usedShapes,
+      usedCentres: seed.centrepiece ? [...usedCentres, seed.centrepiece] : usedCentres,
+      placesUsed: seed.place ? [...placesUsed, seed.place] : placesUsed,
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
       outfitTarget: target,
       calledBack: seed.callback ? [...calledBack, seed.callback.name] : calledBack,

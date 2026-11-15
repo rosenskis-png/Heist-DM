@@ -8,7 +8,7 @@ What each AI call is given, in what order, and how it's sent.
 
 | Tier | Blocks | Changes |
 |---|---|---|
-| **Campaign** | The call's job, the shared style guide, worked examples for this act, invariants in play this act, the output format | When the act changes |
+| **Campaign** | The call's job, the shared style guide, the world's tone for the calls that tell the room (question, adjudicate, resolve, scene; D196), worked examples for this act, invariants in play this act, the output format | When the act changes |
 | **Encounter** | Character sheets, the encounter as plain lines, the opening | Per encounter |
 | **Live** | The ledger, what's coming, recent narration and log, the draft or card, the conversation, the request | Every call |
 

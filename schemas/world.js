@@ -4,7 +4,7 @@ import { r, list, obj } from "./shape.js";
 
 export const WORLD_ROLES = ["place", "kind", "builders", "builders_adj", "rulers", "commander", "master", "working", "depths", "sanctum"];
 const roles = obj(WORLD_ROLES, Object.fromEntries(WORLD_ROLES.map((k) => [k, r("text")])));
-// A faction's ladder of leaders (D164): a local face, a lieutenant and the top, each with a hook a player can see. The
+// A faction's ladder of leaders (D164): a local face, a lieutenant and the top, each with a hook a player would remember. The
 // act call picks each act's peak from the ladders of whoever blocks the party, climbing them across the acts.
 const rung = obj(["name", "hook"], { name: r("text"), hook: r("text") });
 const faction = obj(["name", "short", "desc", "rules", "goal", "ladder"], {
@@ -46,13 +46,18 @@ export const worldShape = obj(["id", "name", "place", "escape", "roles", "heart"
   id: r("id"),
   name: r("text"),
   place: r("text"),
+  // The register the world is told in (D196): its genre and mood in a line or two, from the player's vibe. Optional, so
+  // a world saved before it still loads.
+  tone: r("text"),
   escape: r("text"),
   roles,
   heart: r("text"),
   life: r("text"),
-  tensions: list(r("text"), 2),
+  // What its powers want from each other; none when one power holds the place (D196).
+  tensions: list(r("text")),
   features: { type: "object", additionalProperties: r("text") },
-  factions: { type: "object", minProperties: 2, additionalProperties: faction },
+  // As many powers as the place really has (D196): one is fine.
+  factions: { type: "object", minProperties: 1, additionalProperties: faction },
   // The five regions, one per act, in the shape every world shares (content/setting.js, `arc`).
   regions: { ...list(region, 5), maxItems: 5 },
   mysteries: list(mystery, 2),

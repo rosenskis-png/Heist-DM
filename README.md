@@ -67,4 +67,4 @@ The design before this layout (specs v3 and v4, the engine brief) is preserved o
 
 ## Status
 
-**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is the current phase. Generation is built and frozen until play (D172), and the page runs a campaign, room after room (D173), so the next step is to play Act 1 from a new game. See `docs/roadmap.md`.
+**Phases 4 and 5 are done** (D115): the Cells is playable with the DM ruling and the engine keeping the books (D125), and the companions are ported, two of them chosen by the player (D126). **Phase 7: The generator** is the current phase. Generation is built and frozen until play (D172); its first failure in play changed how encounters are seeded and written (D196, on a branch to compare), and the page runs a campaign, room after room (D173), so the next step is to play Act 1 from a new game. See `docs/roadmap.md`.

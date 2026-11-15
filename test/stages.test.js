@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, BUSY } from "../src/campaign/seed.js";
+import { seedFor } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded, endAct, actBegun } from "../src/campaign/run.js";
 import { worldOf, clueTexts } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
@@ -26,20 +26,20 @@ const plan = {
   setting: "The old dwarven working levels, run by four powers who hate each other.",
   state: "The forges have doubled their shifts since the escape.", holders: ["undead"],
   threads: [{ slot: "companion_b", beat: "the dead court keeps a record of her people's hearth" }],
-  settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
+  places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel"], settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
   news: ["word that the goblins blame the Court for the escape"], mysteries: ["court_of_debts"], returning: [],
   peak: { who: "Lord Chamberlain Vesk", why: "his court holds the only stair down", wants: "a perfect banquet", turns: "courtesy, then knights, then the bells", where: "the banquet hall" },
   hints: ["black invitations nailed to doors", "a skeletal herald calling names", "candles lit for guests who never come"],
 };
 
-test("the act's holders own its rooms; busy-ness is a generic kind, never repeating; the room before a campfire leads only there (D164, D169, D186)", async () => {
+test("the act's holders own its rooms; a room with danger in it is set in one of the act's places, never repeating; the room before a campfire leads only there (D164, D169, D186, D196)", async () => {
   let camp = { ...newCampaign({ seed: 5, act: 2 }), plan };
   const kinds = [];
   for (let i = 0; i < 4; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter"]);
     assert.deepEqual(seed.factions, ["undead"]);
-    assert.ok(BUSY.includes(seed.busy) && !seed.busyLine);
-    kinds.push(seed.busy);
+    assert.ok(plan.places.includes(seed.place) && !seed.busy && !seed.shape && !seed.tone);
+    kinds.push(seed.place);
     camp = next;
   }
   assert.equal(new Set(kinds).size, 4);

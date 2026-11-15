@@ -77,18 +77,20 @@ test("what the party has with it goes from taking stock to the campaign, the nex
   assert.ok(!sheet.includes("her son"), "why a follower really wants it never reaches the sheet");
 });
 
-test("an encounter's seed fixes how its danger stands, never twice in an act, with one motif and no rule-driven business (D179)", async () => {
-  const { seedFor, DANGERS, BUSY } = await import("../src/campaign/seed.js");
+test("an encounter's seed draws one place and one motif, and nothing about how its danger stands (D179, D196)", async () => {
+  const { seedFor, BUSY } = await import("../src/campaign/seed.js");
   const { worldOf } = await import("../src/campaign/world.js");
-  let camp = { ...newCampaign({ seed: 5 }), way: { ...newCampaign({ seed: 5 }).way, here: "encounter" } };
+  const places = ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury"];
+  let camp = { ...newCampaign({ seed: 5 }), plan: { places }, way: { ...newCampaign({ seed: 5 }).way, here: "encounter" } };
   const seen = [];
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, worldOf(), "encounter", ["encounter"]);
-    assert.ok(DANGERS.includes(seed.danger) && !seen.includes(seed.danger));
+    assert.ok(places.includes(seed.place) && !seen.includes(seed.place));
     assert.equal(seed.motifs.length, 1);
-    seen.push(seed.danger);
+    assert.equal(seed.danger, undefined);
+    seen.push(seed.place);
     camp = next;
   }
-  assert.equal(seedFor(camp, worldOf(), "quiet", ["encounter"]).seed.danger, undefined);
+  assert.equal(seedFor(camp, worldOf(), "quiet", ["encounter"]).seed.place, undefined);
   assert.ok(!BUSY.some((b) => /game|contest/.test(b)));
 });

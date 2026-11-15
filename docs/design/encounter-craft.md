@@ -6,7 +6,7 @@ How to design a room that plays the way a great DM would run it, in a game where
 
 **This is not a prompt.** Rules in a prompt compete (`docs/principles.md`). The generator gets small slices as judgment; anything checkable becomes a check in code.
 
-**§16 governs.** It is the designer's discussion of 2026-11-07 on what plays in theatre of the mind (D160). Where an earlier section pulls toward more (more sides, inner lives, measured blockouts, hiding what's plain), §16 wins.
+**§16 governs.** It is what the designer's discussions of 2026-11-07 and 2026-11-15 settled about what plays in theatre of the mind (D160, D196). Where an earlier section pulls toward more (more sides, more approaches, inner lives, measured blockouts, hiding what's plain), §16 wins.
 
 ---
 
@@ -115,7 +115,7 @@ Define observers by their senses where it matters. Different senses make disguis
 
 ## 14. The generator's order
 
-1. **Seed** (code): what it fixes (the kind, the tone, whose room it is, the exits' kinds) and its leanings (the x-factor, a shape, what the room is built around, whether there's a prize, one or two motifs, the factions), which the sketch uses or leaves (D160).
+1. **Seed** (code): what it fixes (the kind, whose place and whose room it is, the exits' kinds, the prize, and an encounter's place) and its leaning, one motif, which the sketch uses or leaves (D160, D196). `docs/spec/generation.md` has the whole of it.
 2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the cut, the pressure, notes, the opening (§16, `docs/spec/calls/sketch.md`).
 3. **Encode** turns the note into the packet, adding nothing (D156, D160).
 
@@ -140,32 +140,34 @@ Nothing reviews the sketch (D156): a clever player who finds the move that empti
 
 ## 16. Theatre of the mind
 
-The goal is emergent play: a few clear, obvious things that all bump into each other, so the complexity comes from what the players do, not from what was set up. The touchstones are the designer's: a mind flayer sergeant asleep beside a chest of loot at the top of the watchtower in the middle of a goblin camp, with gems in the ceiling, rotten walkways across it and caged spiders on the far side; goblins pressing wine round a two-storey vat while the hobgoblin at the door drinks the stock; a shaft of four stone rings strung with silk, a pincer-mouthed girl hanging in the hollow, and a living child at the bottom. The worked notes are `fixtures/generator/sketches.json`, for designers; the generator never sees them (D161).
+Two things come before everything else in this document, because a room that fails either is never played (D196):
 
-**Things**
-- **Few, and each one touching others.** A thing counts by how many others it touches, not by how many there are. Every thing changes how the party can get past the core danger; theme is optional, plausibility is enough.
-- **Two ways to hold together:** a place hard at its own work (the winery), or one big thing in a space (the watchtower).
-- **Bold, visible and a little pulpy** beats subtle and hidden. Detail counts by what players can do with it. Stacked quirks (an odd local, an odd clue-giver, an odd premise) read as gonzo; the act gives rooms direction, never characters or curiosities to fit in (D169).
-- **Worn-out props are retired** (D169): hanging cages, ledgers and counting turned up in nearly every generated room and world, so every seed lists them as never to use, and a sketch that does goes back once.
-- **People from outside:** what they're doing, what state they're in, and where their attention is. Someone who watches everything at once leaves nothing to play with; say plainly who's busy, who's arguing, who only looks up at a shout. An inner life is a single lever (the alcoholic goblin); visible behaviour invites many plays.
-- **Everything cuts both ways,** and is in a state that can tip: asleep, caged, rotten, sinking.
-- **Many uses, not one.** Plain physical words suggest many; a hidden special property (a knife that cuts silk silently) is an answer key.
-- **The genre's old images supply the verbs:** the sleeping monster, the caged beast, the rotten walkway.
+- **The player can follow it.** They hear the room once, with no map. If they've lost the picture by the end of the first paragraph, nothing else about the room matters.
+- **It is the kind of story that was asked for.** A world has a tone, and the room is written in it. A player who asked for a haunted castle wants the haunted castle done well, not something original in every noun.
 
-**The core danger**
-- **Danger between the party and where it wants to be,** which is often just the way out. Escape alone is a whole objective.
-- **A risk, not a gate.** A lock, a password or a key on a belt has one answer. A danger beside the goal can only be managed, and managing it is the game.
-- **A temptation, not an obligation,** and often no prize at all.
-- **Pressure from the premise:** the sleeper stirring, the creature descending. One built-in source beats three bolted on.
+Both fail the same way: too much invention. A room where every element is new has nothing ordinary for the new thing to stand out against. The touchstones are the published rooms players remember: a dining hall with places laid for the party and a host at the organ; a bedchamber with a charmed girl in the vampire's bed; a square stone room with a cold flame and a verse on the wall. Each is a room you already know, with three or four things in it, one idea, and at most one inhabitant. What those rooms lack, and ours add, is something already in motion and something to weigh.
 
-**The space**
-- **One shape anyone can picture from a sentence:** rings, a tower, a bridge, a pit, a stair, a deck.
-- **The place works.** Its layout follows from what its people do there: what moves where, and why things sit where they sit. A player could sketch it on a napkin after hearing it once.
-- **More than one way past the danger.**
-- **Places in relational words:** above, below, across, at the centre, on the far side. No measurements.
-- **The shape makes the trouble:** the way out lies past the danger, or toward it.
-- **Characters move; the ground doesn't change.** No terrain that changes state, no lines of sight to compute, no timing windows, no machines with a rule to learn (a see-saw bridge to balance). A layout that needs a grid, a timer or a tracker is a video game.
-- **Leave the DM plenty to rule.**
+**The room**
+- **A place the players already know.** A kitchen, a stable yard or a chapel is whole in the listener's head before it's described, for free. The description adds only what's different today. An encounter is set in a plain place of the region, dealt by code (D196); a calm room can be stranger (§11).
+- **One thing going on.** One situation explains everything in the room: who's here, what they're doing, why things are where they are. A detail that needs its own explanation is a second idea.
+- **Few things, few people.** Size comes from wants that pull against each other, not from headcount or zones. Three people who each want something different are a bigger room than a crowd.
+- **Ordinary sense.** A player plans from what they already know about people, creatures, doors and fire, and about the genre's well-known monsters. A rule that has to be worked out from how people behave is a puzzle. An invented rule is fine only when there is one of it, it's a physical thing, and the fiction states it outright, as a verse on a wall does.
+- **Already going somewhere.** Something is moving toward an end whether or not the party acts, and the DM knows what happens if they do nothing. It moves when the party commits to something; watching and thinking are free (D176).
+- **Something to weigh.** The party always wants the way on. Most rooms give them something more to want (someone, something, a chance), so that getting it and getting through pull against each other. Costs should be in view, and differ in kind. A room with only the way on is fine.
+- **Loud or quiet.** Tone is the world's register, not a volume. Either is right when the world calls for it.
+
+**What the DM needs written down**
+- **People as people:** what each believes and wants, how they decide, what they don't know, and how they'd take a stranger walking in (attack, challenge, ignore or welcome). That is enough to rule on any conversation.
+- **How a straight fight would go.** Some dangers can be fought and some can't. Either is fine, and the DM and the player both need to know which. Never "too big to fight" as a rule of every room.
+- **The plain physical truth:** what the door is made of, how high the gallery is, what opens from which side. This is what an unplanned idea gets ruled against.
+- **What things are, never what they do for the party** (§4). "The doorway is narrow" is a fact; "a flare draws his eye" is an answer key.
+- **Hidden things placed in advance** (principle 8), never the way the room works.
+
+**What the player is told**
+- **One picture,** told the way a person tells a friend what they saw: the place, who's in it and what they're doing. Not several things happening at once.
+- **What the party makes of it,** because a capable adventurer can judge at a glance what the player can't see: what these are, by a name the player knows; roughly how a straight fight would go; whether they'd talk first. When the party can't tell, say that. In correspondence play a question costs a whole exchange, so this goes in the opening.
+- **Where anyone can stand** is a relation to something named in the picture: in the doorway, behind the table, on the gallery. Three or four such features are a room's whole geography.
+- **Other people are something to work with,** as much as the place is.
 
 **The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163).
 
@@ -174,14 +176,10 @@ The goal is emergent play: a few clear, obvious things that all bump into each o
 - **A mystery is never confirmed.** Its truth quietly makes something more likely to work in one place later (the edge, a hidden fact in that packet); a player who pieced it together might use it, a lucky one might stumble on it, and nobody at the table ever says so.
 - **Allies are people, not a faction score.** Someone the party helped may turn up again in an encounter or an oddity and vouch for them, or not.
 
-**The opening**
-- **A scene in motion,** told the way a person tells a friend what they saw.
-- **Teach how the room works with a small event** in the first seconds: a foot on the web, a head snapping round.
-- **Make the dilemma felt:** the child's whimper.
+**Where variety comes from.** Any salient context becomes an anchor: a world whose life is one industry made every room that industry, and every concrete image in the sketch's prompt came back in room after room (D162, D163). So concrete content reaches a room only through something code deals out one at a time and never repeats in an act, and the prompt holds no images. For an encounter that is the place and one motif, with the act's earlier premises in view (D196); a calm room keeps the wider lists (a tone, a busy-ness, a shape, a centrepiece and a setting). One draw varies the rooms. Four or five draws, each an idea of its own, make a room that has to reconcile them, and reads as disjointed.
 
-**Variety comes from the seed, not the model.** Any salient context becomes an anchor: with the examples gone, a world whose life is one industry made every room that industry. So code draws what the place is busy with, whose place it is, the shape and its centrepiece, and the sketch sees the act's earlier premises (D162, D163). The same holds for the prompt itself: every concrete image in it, even one only illustrating an instruction, came back in room after room (a captive lowered toward doom a notch at a time, in six rooms across three worlds), so concrete content comes only from lists code draws and rotates, never from fixed prompt text (D163).
+**Why generators get this wrong:** people add rather than subtract; each instruction fixes a real problem and looks fine alone, and nothing checks the total; a seed's requirements turn into extra things; a count of anything becomes a quota that gets filled; and rooms judged by reading them drift toward what is charming to read, which is not what is easy to play.
 
-**Why generators get this wrong:** people add rather than subtract; each thing looks fine alone and nothing checks the total; literary taste prefers subtle to bold; a seed's requirements turn into extra things (a required second side became a second faction in every early Forge room); and old defaults creep back (the key on the guard's belt in all three).
+**How the generator is steered** is by form and by what it's given, not by rules or checks that reject (D160): a short prep note written premise first, a cut, a few questions asked from the player's chair, no example rooms (D161), and as few fixed ingredients as will keep rooms different.
 
-**How the generator is steered toward it** is by form, order, questions and unexplained examples, not by rules or checks that reject (D160): the sketch is a short prep note written premise first; it asks itself questions it never writes down; it names a cut; it sees no example rooms, because every example becomes an anchor (D161); and the seed's axes are leanings, not requirements.
-
+**The test** is to read the opening as the player: can you picture it after one hearing, do you know what you want, what you're up against, and what you could try?

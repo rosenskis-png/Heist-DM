@@ -34,6 +34,7 @@ export const rosterIn = (roster, world = worldOf()) => Object.fromEntries(Object
 // (`needs`, each one a key of the world's `features`). A generated world with problems goes back (D150).
 export function worldProblems(world, members) {
   const problems = ROLES.filter((r) => !world.roles?.[r]).map((r) => `the world has no ${r}`);
+  if (!world.tone) problems.push("the world has no tone");
   for (const c of members) for (const need of c.needs ?? []) if (!world.features?.[need]) problems.push(`${c.name} needs ${need.replaceAll("_", " ")}`);
   return problems;
 }

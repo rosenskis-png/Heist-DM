@@ -183,14 +183,14 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D169** Rooms are generated D163-style; the act decides what comes up, not what rooms hold; worn-out props are retired: archived
 - **D170** The Dressing Room: a bench for how companions look, where photo prompts return: changed by D171
 - **D171** Live looks: companions' appearance changes without a republish, from a dev panel in the game: current
-- **D172** The generator as it stands, in one entry, and frozen until play: current
+- **D172** The generator as it stands, in one entry, and frozen until play: changed by D196
 - **D173** The page runs a campaign: current
 - **D174** The room sheet: the player reads what the companions are sent, and a room with no drawn map is one scene: current
 - **D175** In a room the companions are friends at the table: they speak when spoken to, pitch whole ideas, and leave their pursuit at the campfire: current
 - **D176** A move shows its stakes before the roll, and a room's trouble moves on failure, never on the clock: current
-- **D177** The note stops predicting, and a new room is read once from the player's chair: current
+- **D177** The note stops predicting, and a new room is read once from the player's chair: changed by D196
 - **D178** What the party has with it goes from room to room: changed by D192
-- **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: current
+- **D179** A room is a danger in a plain state with loose things around it, and the seed fixes that state: changed by D196
 - **D180** A site: one place of several areas, hand-built as the goblin camp, to test before any generator: changed by D188
 - **D181** The map is its own tab, drawn from state, with what's unexplored marked and people last seen as ghosts: current
 - **D182** The map's art: places drawn from their outlines as built, natural or round, coloured by ground and light, in a window that pans and zooms: current
@@ -207,6 +207,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
 - **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: changed by D195
 - **D195** The outfit generator: hidden in calm rooms, the climax's reward, sexy first and the room only a reminder: current
+- **D196** A room is a known place with one thing going on, told in the world's tone: current
 
 ---
 
@@ -1261,3 +1262,28 @@ The act stays a chain of single rooms, one leg of them between campfires (D140).
 - `content/outfits.js` holds sample outfits for the Dressing Room, not the game's.
 **Why:** The designer stress-tested the brief on six rooms. Room-led outfits took too much from their rooms, generic style names were dull, and the outfits weren't revealing enough; an outfit in an encounter room competed with the danger. The rewritten brief's second round was right.
 **Rules out:** Outfits in encounter rooms; outfits that represent their room; modest or practical outfits; companions in the outfit call.
+
+### D196. A room is a known place with one thing going on, told in the world's tone
+**Decided:** The designer's call (2026-11-15), from a failure in play: the first room of a world pitched as "Castle Ravenloft from Curse of Strahd" was a crowded, comic feast in a terraced bowl that the designer could not follow past its first paragraph and scored 2 out of 10. Changes D172, D177 and D179. The craft is `docs/design/encounter-craft.md` §16; the detail is in `docs/spec/generation.md` and the calls' specs.
+- **Tone belongs to the world.** A world has a `tone`, a line or two on its register, written by the pitch call from the player's vibe (Gravenhold's is its old pulp line). The sketch writes every room to it, and the DM's telling calls (question, adjudicate, resolve, scene) read it. The pulp paragraph is gone from the sketch and pitch prompts.
+- **An encounter's seed draws a place and a motif.** The act call writes eight to ten plain, ordinary places of its region (`places`), and code deals one to each encounter, never repeating in the act. An encounter no longer draws a tone, what the place is busy with, a shape, a centrepiece or how its danger stands. Calm rooms keep all of their draws and their strange settings, unchanged.
+- **The sketch prompt** describes a room as a place the players already know, one thing going on, few things behaving as anyone would expect, something already going somewhere, and often something more to want than the way on. Its notes say how each person would take a stranger, how a straight fight would likely go, and the plain physical truth; its opening is one picture that ends with what the party makes of the danger. Gone: a danger too big to fight head-on, four things to take hold of, the second idea, the small event that teaches the danger, what pulls each person's attention away, and exits that must feel different.
+- **Encode** puts the physical truth and the party's read of the danger in view, never a rule for how someone reacts to a particular act.
+- **The read call** says whether the reader could picture the room and knew what they'd want (`clear`). Only a false `clear` sends a room back, once. Handles are listed for the designer and never counted.
+- **The world template** asks for a living place, crowded or nearly empty as the vibe calls for, with one to four factions and tensions only where there are several. A leader's hook is what a player would remember them by, in the world's tone.
+- The resolve and scene budgets rise by 512 bytes for the tone line.
+
+**Why:** Read against the seed and the prompts, nearly every element of the room was one instruction or one draw being satisfied: the bowl, the throne, the feast and the showing-off danger were four separate draws; the cleaver throw was the required small event; the courtesy rule and the list of distractions were "what sets the danger off" and "what pulls their attention"; the ledges, lift, platters and spit-cranks were the four handles; the circus register was the prompt's own tone. Each instruction fixed a real earlier problem, and together the only room that satisfied them was a disjointed one: the Gravenhold failure (`docs/principles.md`) one level up, which D179 had named and only partly undone. Given the same task with none of it (a setting, two or three rooms, text only), a plain room with a stated want, ordinary opposition and visible costs was judged 9 out of 10. Comprehension and genre are gates: a player who is lost in the first paragraph never reaches the room's choices.
+
+What each removed thing was for, and what stands in for it:
+- *Shape and centrepiece (D163)* stopped four rooms in seven being a round shaft, when the prompt's own images anchored every room. The prompt still holds no images, and the place now varies the space.
+- *Busy-with (D162)* stopped every room being the world's most famous industry, when the world's `life` was the only anchor. The place is dealt one at a time and never repeats, the way D167 found pools vary where shared pictures anchor; the motif and the way so far vary the situation.
+- *The danger's state (D179)* stopped dangers that ran on a rule. The prompt still says a room that needs a rule explained is a puzzle; the state itself became one more idea to reconcile.
+- *Too big to fight head-on (D179)* widened rooms beyond a brawl. It also closed fighting in every room, and can't mean anything in a world without combat. The note now says how a fight would go, and the player is told.
+- *Four handles (D177)* caught rooms with one answer. It was a quota, which D177 itself ruled out for sizes, and it filled rooms with props. The reader still reads every encounter, and its judgment that it was lost is what sends a room back.
+- *The small event (D155)* showed how a room worked before it mattered. With no rule to learn there is less to teach, and the party's read says the rest outright.
+- *The second idea (D163)* avoided the average room. In a world with a tone, the expected room done well is what was asked for; sameness is the seed's job.
+- *The pulp tone (D160)* countered literary subtlety. It is now the world's to set, and Gravenhold keeps it.
+
+**Rules out:** A tone fixed in a prompt. Counting anything in a room. A rule that every danger is unbeatable, or that every room holds a second thing to want. Judging generated rooms only by reading them as a designer.
+**Not yet:** whether encounters need their own draw of how tense they are; how populated a world should be; whether the worn-out props list still earns its place; stranger calm rooms (`docs/roadmap.md`).

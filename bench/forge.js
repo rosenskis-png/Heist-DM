@@ -70,7 +70,7 @@ const S = {
   current: store.get("forge.current", null),
   setupExample: store.get("forge.example2", false),
   reuseSeed: false,
-  room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", place: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
   // Each adventure's act plans, by "adventure:act" (D164).
   plans: store.get("forge.plans", {}),
   rooms: store.get("forge.rooms", []),
@@ -227,7 +227,7 @@ function adventureView(adv) {
     h("span", { class: "dm-tag" }, "DM-facing · the campaign's shape"),
     h("h2", {}, w.name),
     h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === true ? h("span", { class: "chip near" }, "written with the example") : null, adv.seedReused ? h("span", { class: "chip" }, "seed reused from the last pitch") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
-    h("h3", {}, "The place"), kv([["Place", w.place], ["The way out", w.escape], ["Life", w.life]]),
+    h("h3", {}, "The place"), kv([["Place", w.place], ["Tone", w.tone], ["The way out", w.escape], ["Life", w.life]]),
     h("h3", {}, "The heart"), prose(w.heart),
     h("h3", {}, "Tensions"), h("ul", { class: "plain" }, w.tensions.map((t) => h("li", {}, t))),
     h("h3", {}, "Factions"), h("div", { class: "grid2" }, factions),
@@ -277,11 +277,14 @@ function historyView() {
 function pinsFor(adv, r) {
   const challenged = CHALLENGED.includes(r.kind);
   const p = {};
-  if (TONES.includes(r.tone)) p.tone = r.tone;
-  if (SHAPES.includes(r.shape)) p.shape = r.shape;
-  if (CENTREPIECES.includes(r.centrepiece)) p.centrepiece = r.centrepiece;
+  // A room with danger in it draws a place (D196); a calm room keeps its tone, busy-ness, shape and centrepiece.
+  const calm = !challenged;
+  if (r.kind === "encounter" && (r.place ?? "").trim()) p.place = r.place.trim();
+  if (calm && TONES.includes(r.tone)) p.tone = r.tone;
+  if (calm && SHAPES.includes(r.shape)) p.shape = r.shape;
+  if (calm && CENTREPIECES.includes(r.centrepiece)) p.centrepiece = r.centrepiece;
   if (PRIZED.includes(r.kind) && PRIZES.includes(r.prize)) p.prize = r.prize;
-  if (BUSY.includes(r.busy)) p.busy = r.busy;
+  if (calm && BUSY.includes(r.busy)) p.busy = r.busy;
   if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
   const fs = challenged || r.kind === "oddity" ? r.factions.filter((f) => adv.world.factions[f]) : [];
   if (fs.length) p.factions = fs;
@@ -303,16 +306,17 @@ function seedWith(adv, r) {
   const usedBusy = earlier.map((x) => x.seed?.busy).filter(Boolean);
   const usedShapes = earlier.map((x) => x.seed?.shape).filter(Boolean);
   const usedCentres = earlier.map((x) => x.seed?.centrepiece).filter(Boolean);
+  const placesUsed = earlier.map((x) => x.seed?.place).filter(Boolean);
   const cluesPlaced = inAdventure.map((x) => x.seed?.clue?.id).filter(Boolean);
   const hintsUsed = earlier.map((x) => x.seed?.hint).filter(Boolean);
   const localsUsed = earlier.map((x) => x.seed?.local).filter(Boolean);
   const settingsUsed = earlier.map((x) => x.seed?.setting).filter(Boolean);
   const newsUsed = earlier.map((x) => x.seed?.news).filter(Boolean);
   const storyShown = earlier.filter((x) => x.seed?.herStory).map((x) => x.seed.spotlight);
-  camp = { ...camp, plan: planOf(adv, r.act), used, usedBusy, usedShapes, usedCentres, cluesPlaced, hintsUsed, localsUsed, settingsUsed, newsUsed, storyShown, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
+  camp = { ...camp, plan: planOf(adv, r.act), used, usedBusy, usedShapes, usedCentres, placesUsed, cluesPlaced, hintsUsed, localsUsed, settingsUsed, newsUsed, storyShown, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
-  for (const k of ["tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
+  for (const k of ["place", "tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
   // On the bench a brief comes first (D166): an unpinned busy-ness gives way to it.
   if (r.brief.trim() && !p.busy) delete seed.busy;
   if (p.busy) seed.busy = p.busy;
@@ -388,6 +392,7 @@ function planView(adv, act) {
         ["Held by", plan.holders.map((f) => w.factions[f]?.name ?? f).join(", ")],
         ["Live mysteries", (plan.mysteries ?? []).join(", ")],
         ["Companion threads", plan.threads?.length ? h("ul", { class: "plain" }, plan.threads.map((t) => h("li", {}, h("b", {}, authored[adv.companions[t.slot === "companion_a" ? 0 : 1]]?.name ?? t.slot), ": ", t.beat))) : "none this act"],
+        ["Places (rooms with danger)", (plan.places ?? []).join(" · ") || null],
         ["Settings", plan.settings ? h("div", {}, ...["quiet", "oddity", "campfire"].map((k) => h("p", { class: "small" }, h("b", {}, k), ": ", (plan.settings[k] ?? []).join(" · ")))) : null],
         ["News", plan.news?.length ? h("ul", { class: "plain" }, plan.news.map((x) => h("li", {}, x))) : null],
         ["Peak", h("div", {}, h("p", {}, h("b", {}, plan.peak.who)), kv([["Why them", plan.peak.why], ["Wants", plan.peak.wants], ["Turns", plan.peak.turns], ["Where", plan.peak.where]]))],
@@ -466,10 +471,10 @@ function roomsTab() {
     h("div", { class: "grid2" },
       sel("kind", "Kind of room", KINDS.map((k) => [k, `${k}${ROOM_KINDS.includes(k) ? " (a room, no objective)" : ""}`]), { random: null }),
       sel("act", "Act", adventureActs(adv), { random: null }),
-      sel("tone", "Tone", TONES.map((t) => [t, t])),
-      sel("busy", "Busy with", BUSY.map((t) => [t, t])),
-      sel("shape", "Shape", SHAPES.map((t) => [t, t])),
-      sel("centrepiece", "Centrepiece", CENTREPIECES.map((t) => [t, t])),
+      challenged ? null : sel("tone", "Tone", TONES.map((t) => [t, t])),
+      challenged ? null : sel("busy", "Busy with", BUSY.map((t) => [t, t])),
+      challenged ? null : sel("shape", "Shape", SHAPES.map((t) => [t, t])),
+      challenged ? null : sel("centrepiece", "Centrepiece", CENTREPIECES.map((t) => [t, t])),
       PRIZED.includes(r.kind) ? sel("prize", "Prize", PRIZES.map((t) => [t, t])) : null,
       sel("spotlight", "Whose room it is", r.kind === "climax"
         ? [["both", "Both companions'"]]
@@ -483,6 +488,7 @@ function roomsTab() {
       h("div", { class: "motifs" }, fits.map((m) => h("label", {}, h("input", { type: "checkbox", id: `motif-${m.id}`, checked: r.motifs.includes(m.id), onchange: () => toggle("motifs", m.id) }), h("span", {}, h("b", {}, m.name), h("span", { class: "muted" }, ` · ${m.decisions}`)))))),
     h("label", { class: "field" }, "Your brief: what this room should hold", brief),
     h("label", { class: "field" }, "How the party arrives", arrives),
+    r.kind === "encounter" ? placeField(adv, r) : null,
     ["encounter", "oddity"].includes(r.kind) ? callbackField(r) : null,
     h("div", { class: "row" },
       h("button", { class: "go", disabled: !sample || !!S.busy, onclick: designOne }, "Design the room"),
@@ -499,6 +505,14 @@ function roomsTab() {
 const adventureActs = (adv) => (adv.world.regions ?? []).map((a, i) => [i + 1, `${i + 1}: ${a.name}${planOf(adv, i + 1) ? "" : " (not begun)"}`]);
 
 // Someone from before (D164): on the bench there's no played room to remember them from, so the designer can name one.
+// The place a room with danger in it is set in (D196): left empty, the game deals one from the act's places.
+function placeField(adv, r) {
+  const pool = planOf(adv, r.act)?.places ?? [];
+  const box = h("input", { type: "text", id: "room-place", placeholder: pool.length ? `Optional: pin the place. Empty: one of the act's (${pool.join(", ")})` : "Optional: the place this room is set in. This act has no places yet: generate its plan first", oninput: (e) => ((S.room.place = e.target.value), save()) });
+  box.value = r.place ?? "";
+  return h("label", { class: "field" }, "Place", box);
+}
+
 function callbackField(r) {
   const box = h("input", { type: "text", id: "room-callback", placeholder: "Optional: someone from before, as name | what became of them | how they feel about the party", oninput: (e) => ((S.room.callback = e.target.value), save()) });
   box.value = r.callback;
@@ -541,11 +555,11 @@ function seedView(run) {
   const mark = (k, v) => (pinned[k] ? h("span", {}, v, " ", h("span", { class: "chip" }, "pinned")) : v);
   return stage("Seed", h("div", { class: "grid2" },
     kv([
-      ["Tone", mark("tone", seed.tone)],
+      ["Place", seed.place && mark("place", seed.place)],
+      ["Tone", seed.tone && mark("tone", seed.tone)],
       ["Shape", seed.shape && mark("shape", seed.shape)],
       ["Centrepiece", seed.centrepiece && mark("centrepiece", seed.centrepiece)],
       ["Busy with", seed.busy && mark("busy", seed.busy)],
-      ["How the danger stands", seed.danger],
       ["Prize", seed.clue ? mark("prize", h("span", {}, "a journal page by ", h("b", {}, seed.clue.author), pageText(run, seed.clue.id) ? `: "${pageText(run, seed.clue.id)}"` : "")) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],
       ["A sign of what's coming", seed.hint],

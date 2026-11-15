@@ -27,18 +27,20 @@ const party = partyFor({ name: "P", class: "rogue" }, ["fern", "nadia"], world);
 const SLOTS = [{ id: "player" }, { id: "companion_a" }, { id: "companion_b" }];
 
 test("the seed asks a different question each time, suits the kind, and avoids the act's used motifs", () => {
-  let camp = newCampaign({ seed: 7 });
+  let camp = { ...newCampaign({ seed: 7 }), plan: { places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "the chapel"] } };
   const seen = new Set();
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
-    assert.ok(SHAPES.includes(seed.shape) && PRIZES.includes(seed.prize) && seed.tone && seed.factions.length === 1);
-    assert.ok(BUSY.includes(seed.busy) && !(camp.usedBusy ?? []).includes(seed.busy), "what the place is busy with doesn't repeat within an act");
+    assert.ok(PRIZES.includes(seed.prize) && seed.factions.length === 1);
+    assert.ok(camp.plan.places.includes(seed.place) && !(camp.placesUsed ?? []).includes(seed.place), "the place doesn't repeat within an act (D196)");
+    assert.ok(!seed.shape && !seed.centrepiece && !seed.busy && !seed.tone && !seed.danger, "a room with danger in it draws a place, not four ingredients (D196)");
     assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
     camp = next;
   }
   assert.ok(seen.size >= 5, "motifs vary across an act");
   const calm = seedFor(newCampaign(), world, "campfire", ["encounter"]).seed;
+  assert.ok(SHAPES.includes(calm.shape) && BUSY.includes(calm.busy) && calm.tone && !calm.place, "a calm room keeps its wide lists");
   assert.equal(calm.xFactor, undefined);
   assert.equal(calm.motifs.length, 1);
   assert.deepEqual(seedFor(newCampaign({ seed: 3 }), world, "encounter", []).seed, seedFor(newCampaign({ seed: 3 }), world, "encounter", []).seed);
@@ -89,7 +91,7 @@ test("the pipeline: exits drawn, seed, sketch, encode, layout, and a packet the 
       json: async (input) => {
         const call = input.includes("# Sketch call") ? "sketch" : input.includes("# Read call") ? "read" : "encode";
         calls.push(call);
-        if (call === "read") return { layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
+        if (call === "read") return { clear: true, layout: "x", handles: ["a", "b", "c", "d"].map((what) => ({ what, try: "x", cost: "x" })), unclear: [] };
         if (call === "encode") {
           // Encode what the seed fixed: its exits.
           const block = input.split("Fixed by the seed")[1];
@@ -214,31 +216,34 @@ test("the worked notes are prep notes the sketch schema accepts, and the sketch 
 
 test("the act's earlier premises reach the next sketch, and the campaign keeps each new one (D162)", async () => {
   const { seed } = seedFor(newCampaign(), world, "encounter", ["encounter", "quiet"]);
-  const input = sketchInput(env, { seed, world, party, earlier: ["A goblin oil works round a boiling cauldron."] }, sketchSchema);
+  const input = sketchInput(env, { seed: { ...seed, place: "the old kitchens" }, world, party, earlier: ["A goblin oil works round a boiling cauldron."] }, sketchSchema);
   assert.match(input, /The way so far this act[\s\S]*goblin oil works/);
-  assert.match(input, /"busy_with":/);
+  assert.match(input, /"place":"the old kitchens"/);
+  assert.doesNotMatch(input, /"busy_with":|"shape":|how_the_danger_stands/);
+  assert.match(input, /"tone":"Pulp fantasy/, "the world's tone reaches the sketch (D196)");
   assert.match(input, /"whose_place_it_is":/);
   assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## The way so far/);
 });
 
-test("shape and centrepiece are fixed, drawn from code's lists without repeats in an act; the climax alone gets its block; the prompt holds no images (D163)", () => {
+test("a calm room's shape and centrepiece are fixed, drawn from code's lists without repeats in an act; the climax alone gets its block; the prompt holds no images (D163, D196)", () => {
   let camp = newCampaign({ seed: 11 });
   const shapes = [], centres = [];
   for (let i = 0; i < 6; i++) {
-    const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
+    const { seed, camp: next } = seedFor(camp, world, "quiet", ["encounter"]);
     assert.ok(SHAPES.includes(seed.shape) && CENTREPIECES.includes(seed.centrepiece));
     shapes.push(seed.shape); centres.push(seed.centrepiece);
     camp = next;
   }
   assert.equal(new Set(shapes).size, 6);
   assert.equal(new Set(centres).size, 6);
-  const enc = seedFor(newCampaign(), world, "encounter", ["encounter"]).seed;
+  const enc = seedFor(newCampaign(), world, "quiet", ["encounter"]).seed;
   const input = sketchInput(env, { seed: enc, world, party }, sketchSchema);
   assert.match(input, /"fixed":\{[^}]*"shape":[^}]*"centrepiece":/);
   assert.doesNotMatch(input, /## The climax\n\n```json/);
   const climax = seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed;
   assert.match(sketchInput(env, { seed: climax, world, party, earlier: ["x"] }, sketchSchema), /## The climax\n\n```json[\s\S]*who_stands_at_its_centre/);
   assert.doesNotMatch(prompts.sketch, /by a thread|pincer|lowering|sinking|mind flayer|winery|hung in the air/i, "the sketch prompt holds no concrete images");
+  assert.doesNotMatch(prompts.sketch, /pulp|larger than life|head-on|four different things|Have the second/i, "the sketch prompt sets no tone of its own and no quotas (D196)");
 });
 
 test("only the seed's prize is a reward: no invented clue, no second prize (D164)", async () => {
@@ -253,21 +258,24 @@ test("only the seed's prize is a reward: no invented clue, no second prize (D164
   assert.ok(encodeProblems(packet([{ gold: 3 }]), { ...seed, prize: "none: getting out is the whole of it" }).some((p) => /no prize/.test(p)));
 });
 
-test("a room with too little to take hold of goes back to the sketch once, with the reader's notes, and isn't read again (D177)", async () => {
+test("a room the reader couldn't follow goes back to the sketch once, with the reader's notes, and isn't read again; handles are never counted (D177, D196)", async () => {
   const { designRoom } = await import("../src/game/generate.js");
   const { seedRoom } = await import("../src/game/generate.js");
   let camp = newCampaign({ seed: 11 });
   camp = roomEnded(camp, { handoff: { conditions: [], spent: {}, gold: 0, relics: [] }, verdict: { rating: 6, why: "x", reactions: [] }, exits: [{ id: "e", zone: "z", leads_to: "encounter" }] }).camp;
-  const { seed } = seedRoom(camp, world);
+  // No prize, so the stand-in encode has nothing to place.
+  const { clue, ...drawn } = seedRoom(camp, world).seed;
+  const seed = { ...drawn, prize: PRIZES[0] };
   const calls = [];
   const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", notes: "x", opening: "x" };
+  let lostOnce = true;
   const io = {
     sample: {
       json: async (input) => {
         const call = input.includes("# Sketch call") ? "sketch" : input.includes("# Read call") ? "read" : "encode";
         calls.push(call + (input.includes("notes on an earlier try") ? "+notes" : ""));
         if (call === "sketch") return sketch;
-        if (call === "read") return { layout: "x", handles: [{ what: "the one lever", try: "pull it", cost: "noise" }], unclear: ["where the door is"] };
+        if (call === "read") return { clear: !lostOnce, layout: "x", handles: [{ what: "the one lever", try: "pull it", cost: "noise" }], unclear: ["where the door is"] };
         const block = input.split("Fixed by the seed")[1];
         const kinds = JSON.parse(block.slice(block.indexOf("{"), block.indexOf("}") + 1)).exits;
         const out = structuredClone(encoded);
@@ -280,4 +288,9 @@ test("a room with too little to take hold of goes back to the sketch once, with 
   };
   await designRoom(io, { prompts, examples: { encoded } }, { seed, world, party, earlier: [] });
   assert.deepEqual(calls, ["sketch", "encode", "read", "sketch+notes", "encode"]);
+  // One handle is no reason to remake a room the reader could follow.
+  calls.length = 0;
+  lostOnce = false;
+  await designRoom(io, { prompts, examples: { encoded } }, { seed, world, party, earlier: [] });
+  assert.deepEqual(calls, ["sketch", "encode", "read"]);
 });

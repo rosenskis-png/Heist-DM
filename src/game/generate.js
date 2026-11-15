@@ -7,7 +7,7 @@ import { seedFor } from "../campaign/seed.js";
 import { layout } from "../engine/layout.js";
 import { sketchCall } from "../calls/sketch.js";
 import { encodeCall } from "../calls/encode.js";
-import { readCall, thin } from "../calls/read.js";
+import { readCall, lost } from "../calls/read.js";
 import { load } from "../engine/load.js";
 import { roomSheet, sheetText } from "../context.js";
 import { actCall } from "../calls/act.js";
@@ -74,12 +74,12 @@ export async function designRoom(io, env, c) {
   stage("encoded", withEdges);
   const room = { ...stage("laid out", layout(withEdges)), sketch, outfit };
   // One reading from the player's chair (D177): a room where danger stands in the way, read with only what the
-  // player will be told. Too little to take hold of, and the room goes back to the sketch once, with the reader's
-  // notes. A read that fails never holds a room up, and a room made again isn't read again.
+  // player will be told. If the reader couldn't follow it, the room goes back to the sketch once, with the reader's
+  // notes (D196). A read that fails never holds a room up, and a room made again isn't read again.
   if (!READ.includes(c.seed.kind) || c.sketch || c.reader || !env.prompts?.read) return room;
   const read = await readCall(io, env, { told: toldOf(room.packet, c.party) }).catch(() => null);
   stage("read", read);
-  return read && thin(read) ? designRoom(io, env, { ...c, reader: read }) : room;
+  return read && lost(read) ? designRoom(io, env, { ...c, reader: read }) : room;
 }
 
 // The kinds of room that are read: the ones with a danger to get past.

@@ -8,6 +8,8 @@ export default {
   name: "Gravenhold",
   // The place, in a sentence or two.
   place: `Gravenhold, a dwarven prison-citadel sunk into a mountain, built centuries ago to contain an ancient being sealed in its deepest vault (the Hollow King). The dwarves vanished; the fortress was abandoned.`,
+  // The register it's told in (D196).
+  tone: `Pulp fantasy, played straight: bold, visible and a little larger than life. Dangerous, but an adventure more than a horror, with room for the strange and the funny.`,
   escape: `The main gate is sealed and garrisoned; the only real escape is a forgotten dwarven shaft that begins below the vault, so the party must descend toward the danger before climbing out.`,
   // The role nouns companion text uses as slots (`{place}`, `{master}`, ...; capitalised as `{Master}` at the start
   // of a sentence). Filled by src/campaign/world.js.
