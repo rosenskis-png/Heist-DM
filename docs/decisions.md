@@ -207,7 +207,8 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
 - **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: changed by D195
 - **D195** The outfit generator: hidden in calm rooms, the climax's reward, sexy first and the room only a reminder: current
-- **D196** A room is a known place with one thing going on, told in the world's tone: current
+- **D196** A room is a known place with one thing going on, told in the world's tone: changed by D197
+- **D197** One place a room and no image lists; the act offers antagonists and an opening, and scripts nothing: current
 
 ---
 
@@ -1287,3 +1288,32 @@ What each removed thing was for, and what stands in for it:
 
 **Rules out:** A tone fixed in a prompt. Counting anything in a room. A rule that every danger is unbeatable, or that every room holds a second thing to want. Judging generated rooms only by reading them as a designer.
 **Not yet:** whether encounters need their own draw of how tense they are; how populated a world should be; whether the worn-out props list still earns its place; stranger calm rooms (`docs/roadmap.md`).
+
+### D197. One place a room and no image lists; the act offers antagonists and an opening, and scripts nothing
+**Decided:** The designer's call (2026-11-15), from the first world, act and encounter made on the D196 Forge ("Castle Ravenloft from Curse of Strahd") and the designer's notes on them. Changes D196, and D164, D167 and D169 where they still held.
+
+*The room*
+- **The seed draws one place and nothing else about the picture.** An encounter or a merchant gets one of the act's plain places; a quiet room, an oddity or a campfire gets one of its stranger settings. The lists of tones, busy-withs, shapes and centrepieces are deleted, for calm rooms too. No room is drawn a faction: the sketch sees every power in the place in brief, and never a leader's name.
+- **The sketch** has no `cut`. Its opening says what a capable eye sees of the danger (how many, how armed, how they carry themselves) and never what anyone is thinking; it explains anything particular to the world in a few plain words, and why the room's business is going on. Each way on says what the party can tell of where it leads, and the rule that the easier way leads to the encounter is gone. A prize is something wanted on sight, and gold is loose valuables, never part of someone's dress. The place has room to move in.
+- **The act's places** are rooms with floor to move about in, named only by what they are.
+- **A person's sheet** needs what they want, their disposition and their position; the other five fields are filled only where the note says something real.
+- **Bells** join the worn-out props. The check no longer matches "count" (it sent back a room for naming the Count), and it runs on the pitch and the act as well as the sketch.
+
+*The act*
+- **Antagonists, not a peak.** The act call offers two or three who could stand at its climax, each with why, each big enough for the act. It no longer writes how they act in turns, where the climax is, or signs of them, and rooms no longer carry signs. The climax's sketch chooses one from the journey so far, names them, and builds the showdown as it likes, at the act's scale; the campaign records the choice as the act's peak. The act call no longer names who holds the region.
+- **An opening narration** (`intro`): a paragraph or two in the DM's voice as the act opens, posted above the opening of the act's first room.
+- **A new adventure opens on a quiet room** with no danger and no clock, where the party comes to, for talking and looking about. Gravenhold still opens on the hand-written Cells.
+- **A mystery's edge** is spelled out exactly, so the DM can recognise it when a player does it, and is never the way out. It reaches every room from its act on, or only one act's climax.
+
+**Why:** The room passed D196's two gates, and the notes found what was left. Most of it traced to something still being asked for. "Sickness or a plague" and "a feast" were entries in the busy-with list, which is why they turned up in unrelated worlds. The `cut` field is written after the things, so it could remove nothing, and in this room it named a detail that was never a separate idea. The faction drawn for each room and the holders named for each act added a draw without adding a choice. The act's place was "a landing where the diggers carry salt sacks past": a passage, with the room's situation already in it. The opening told the player what the footman was thinking, because the prompt asked whether he would talk before he struck; it called its workers "diggers" without saying what they were, and never said the salt was going up to be burned, though the world knew. The guarded door led to an encounter and the unguarded stair to a quiet room, which is the old exit rule working as written and against a player's instinct. The gold was a collar on the footman's chest, which reads as dress. And the act's peak was the gaoler, the lowest rung of his ladder as the prompt asked, with turns that made him one more polite servant at a door; scripting the climax when the act began also forced a story before the party had made one.
+
+What each removed thing was for, and what stands in for it:
+- *The calm rooms' image lists (D163, D167)* kept calm rooms from all being the same shaft or the world's one industry. The act's settings, dealt one at a time and never repeated, already do that, and they are written for the world.
+- *A faction per room (D162)* stopped every room belonging to the ruling power. The sketch now sees all the powers and picks who fits the place.
+- *The peak's turns and signs (D163, D164)* made the climax a showdown and foreshadowed it. The climax's own prompt still asks for someone present who changes the room; foreshadowing is lost until play shows it's missed.
+- *Hiding the chosen peak from rooms (D167)* becomes hiding every leader.
+- *The easier way leads to the encounter (D167)* rewarded doing well with a calm room. Nothing told the player, so it could not be played for; saying where each way leads lets them choose.
+- *The check on "count" (D169)* caught ledgers and tallies by another word; those words are still caught.
+
+**Rules out:** Lists of images in the seed. A climax scripted before its act is played. A leader in a room before a climax. Telling the player what an NPC is thinking. A mystery that is the only way out.
+**Not yet:** an adventure that doesn't start in a cell, or without taking back confiscated gear; the room's layout as the player pictures it, which waits for the map rework (`docs/roadmap.md`).

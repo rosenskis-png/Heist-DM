@@ -10,7 +10,7 @@ import { remember, legOver } from "./memories.js";
 
 // A new campaign at the start of `act`. `members` are the two companions' profiles; `romance` their relationship state.
 export function newCampaign({ act = 1, seed = 1, members = [], romance = null } = {}) {
-  return { act, way: startAct(act, seed), gold: 0, relics: [], carry: { conditions: [], spent: {} }, members: members.map((m) => m.id), romance, keep: null, used: [], usedBusy: [], usedShapes: [], usedCentres: [], placesUsed: [], premises: [], log: [], calledBack: [], hintsUsed: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, lastExtra: null, hintLeg: null, history: [], peaks: [], memory: [], clues: [], cluesPlaced: [], roomNo: 0, seedRng: (seed ^ 0x9e3779b9) >>> 0 };
+  return { act, way: startAct(act, seed), gold: 0, relics: [], carry: { conditions: [], spent: {} }, members: members.map((m) => m.id), romance, keep: null, used: [], placesUsed: [], premises: [], log: [], calledBack: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, lastExtra: null, history: [], peaks: [], memory: [], clues: [], cluesPlaced: [], roomNo: 0, seedRng: (seed ^ 0x9e3779b9) >>> 0 };
 }
 
 // The kinds of room the current room's exits lead to, for the room being written (D144).
@@ -96,10 +96,13 @@ export function endAct(camp, chosen = [], seed = 1) {
   if (kept.length > (camp.keep ?? 0)) throw new Error(`the climax lets the party keep ${camp.keep ?? 0} relics, not ${kept.length}`);
   const act = camp.act + 1;
   // The act's facts go into its history, for the next act call; what the act alone used starts again.
-  const done = { act: camp.act, question: camp.plan?.question ?? null, peak: camp.plan?.peak?.who ?? null, state: camp.plan?.state ?? null, rooms: camp.premises ?? [], log: camp.log ?? [] };
-  return { ...structuredClone(camp), act, way: startAct(act, seed), items: setting.items.keptAcrossActs ? camp.items ?? [] : [], relics: kept, keep: null, history: [...(camp.history ?? []), done], used: [], usedBusy: [], usedShapes: [], usedCentres: [], placesUsed: [], premises: [], log: [], calledBack: [], hintsUsed: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, lastExtra: null, hintLeg: null, outfitTarget: null };
+  const done = { act: camp.act, question: camp.plan?.question ?? null, peak: camp.peak ?? null, state: camp.plan?.state ?? null, rooms: camp.premises ?? [], log: camp.log ?? [] };
+  return { ...structuredClone(camp), act, way: startAct(act, seed), items: setting.items.keptAcrossActs ? camp.items ?? [] : [], relics: kept, keep: null, history: [...(camp.history ?? []), done], used: [], placesUsed: [], premises: [], log: [], calledBack: [], settingsUsed: [], newsUsed: [], storyShown: [], plan: null, peak: null, lastExtra: null, outfitTarget: null };
 }
 
-// An act has begun (D164): its plan, from the act call, holds the region, its busy-ness and holders, and its peak, which
-// is never chosen again.
-export const actBegun = (camp, plan) => ({ ...camp, plan, peaks: [...(camp.peaks ?? []), plan.peak.who] });
+// An act has begun (D164, D197): its plan, from the act call. Who stands at its climax is chosen when the climax is
+// written (`climaxChosen`), from the plan's candidates.
+export const actBegun = (camp, plan) => ({ ...camp, plan, peak: null });
+
+// The climax has been written (D197): whoever it stands at its centre is the act's peak, never chosen again.
+export const climaxChosen = (camp, who) => (who ? { ...camp, peak: who, peaks: [...(camp.peaks ?? []), who] } : camp);

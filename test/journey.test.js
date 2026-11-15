@@ -16,13 +16,12 @@ const world = worldOf();
 
 const plan = {
   goal: "Cross the Warrens.", question: "Can they cross before the Court learns they're loose?", aim: "Learn the way down.",
-  setting: "The old dwarven working levels.", state: "The forges run double shifts.", holders: ["undead"],
+  setting: "The old dwarven working levels.", state: "The forges run double shifts.", intro: "The Warrens open below you, loud with forges.",
   threads: [], places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel"], settings: { quiet: ["a flooded chapel", "a bone library"], oddity: ["a well that answers", "a coat ballroom"], campfire: ["a warm bread oven", "a crypt of snoring knights"] },
   news: [], mysteries: ["court_of_debts"], returning: [],
-  peak: { who: "Lord Chamberlain Vesk", why: "his court holds the stair", wants: "a perfect banquet", turns: "courtesy, then knights", where: "the banquet hall" },
-  hints: ["black invitations nailed to doors", "a herald calling names"],
+  antagonists: [{ who: "Lord Chamberlain Vesk", why: "his court holds the stair" }, { who: "Warchief Grizzak", why: "his warband holds the gate" }],
 };
-const sketch = { premise: "A laundry at its busiest.", shape: "A long floor.", things: ["vats"], cut: "nothing", pressure: "none", outcomes: ["through"], notes: "x", opening: "Steam." };
+const sketch = { premise: "A laundry at its busiest.", shape: "A long floor.", things: ["vats"], pressure: "none", notes: "x", opening: "Steam.", antagonist: "Lord Chamberlain Vesk" };
 
 // Encode exactly what the seed fixed: the mode, the act, one exit per kind drawn, and only the seed's prize.
 function encode(input) {
@@ -75,10 +74,12 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
     }
     await nextRoom(session, io, env);
     if (i === 3) saved = serialize(session);
+    const opensAct = !!session.between.newAct;
     enterRoom(session);
     kinds.push(session.camp.way.here);
     assert.equal(session.state.tick, 0);
-    assert.equal(session.feeds.table.length, 1, "the table starts fresh with the opening");
+    // The table starts fresh with the opening; a new act's first room has the act's narration above it (D197).
+    assert.deepEqual(session.feeds.table.map((e) => e.text), opensAct ? [plan.intro, session.packet.opening] : [session.packet.opening]);
   }
   assert.equal(session.camp.act, 2, `reached Act 2 through ${kinds.join(", ")}`);
   for (const k of ["campfire", "climax", "sanctuary"]) assert.ok(kinds.includes(k), `passed a ${k}`);
@@ -95,10 +96,13 @@ test("the runner plays a whole act: the Cells, generated rooms, a campfire, the 
 test("a generated world starts with its act call and a generated first room", async () => {
   calls.length = 0;
   const session = await startAdventure(io, env, { player: { name: "P", class: "rogue" }, companions: ["fern", "nadia"], world, seed: 4 });
-  assert.deepEqual(calls, ["act", "sketch", "encode", "read"]);
-  assert.equal(session.state.packet.mode, "encounter");
-  assert.equal(session.camp.plan.peak.who, "Lord Chamberlain Vesk");
-  assert.equal(session.feeds.table[0].text, session.packet.opening);
+  // The adventure opens on a calm room (D197), which isn't read, under the act's own narration.
+  assert.deepEqual(calls, ["act", "sketch", "encode"]);
+  assert.equal(session.camp.plan.antagonists[0].who, "Lord Chamberlain Vesk");
+  assert.equal(session.camp.peak, null, "nobody stands at the climax until it's written");
+  assert.equal(session.feeds.table[0].text, plan.intro);
+  assert.equal(session.feeds.table[1].text, session.packet.opening);
+  assert.equal(session.camp.first, false);
 });
 
 test("the live looks reach a room in progress: the party is rebuilt, the room keeps its place (D171, D173)", async () => {

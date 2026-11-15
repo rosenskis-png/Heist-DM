@@ -113,7 +113,8 @@ const schedule = obj(["id", "period", "phase", "beats"], {
   beats: list(beat, 1),
 });
 
-const npc = obj(["id", "name", "wants", "fears", "knows", "will_never", "temper", "under_pressure", "disposition", "position"], {
+// A person's sheet: what they want, and only as much more as the room's note gives (D197).
+const npc = obj(["id", "name", "wants", "disposition", "position"], {
   id: r("id"),
   name: r("text"),
   // How tough they are in a fight (content/rules.js), and when they stop fighting: yield, flee or bargain (D130).

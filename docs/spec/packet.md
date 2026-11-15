@@ -22,7 +22,7 @@ Rooms (D22, D121) have `mode: "room"`, no objective and no deadline, and may pla
 The party's companions appear only by slot, `companion_a` and `companion_b`, which loading binds to the party's companions in order (D126). A packet never names one.
 
 ## 2. People
-One sheet per NPC: `wants`, `fears`, `knows`, `will_never`, temper and how they react under pressure, `disposition`, position, and a `schedule` if they have one. Anyone who might fight has a `tier`, which sets their toughness (`content/rules.js`), and `breaks`: when they stop fighting, by yielding, fleeing or bargaining (D130). The DM plays people from these sheets and the packet's `notes`.
+One sheet per NPC: `wants`, `disposition` and position always; `fears`, `knows`, `will_never`, temper and how they react under pressure only where there is something real to say (D197); and a `schedule` if they have one. Anyone who might fight has a `tier`, which sets their toughness (`content/rules.js`), and `breaks`: when they stop fighting, by yielding, fleeing or bargaining (D130). The DM plays people from these sheets and the packet's `notes`.
 
 ## 3. Map
 

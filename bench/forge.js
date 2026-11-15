@@ -10,7 +10,7 @@ import { motifs } from "../content/motifs.js";
 import { worldOf, pitchSeed } from "../src/campaign/world.js";
 import { partyFor } from "../src/game/session.js";
 import { newCampaign } from "../src/campaign/run.js";
-import { TONES, SHAPES, CENTREPIECES, PRIZES, BUSY } from "../src/campaign/seed.js";
+import { PRIZES } from "../src/campaign/seed.js";
 import { seedRoom, designRoom, edgesFor } from "../src/game/generate.js";
 import { actCall } from "../src/calls/act.js";
 import { pitchCall } from "../src/calls/pitch.js";
@@ -73,7 +73,7 @@ const S = {
   reuseSeed: false,
   // Rooms show what the player is told; the DM side (seed, sketch, packet, calls) is a toggle.
   dmSide: store.get("forge.dmSide", false),
-  room: { kind: "encounter", act: 1, tone: "", shape: "", centrepiece: "", prize: "", busy: "", place: "", spotlight: "", factions: [], motifs: [], arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
+  room: { kind: "encounter", act: 1, prize: "", place: "", spotlight: "", motifs: [], first: false, arrives: "", brief: "", callback: "", ...store.get("forge.room", {}) },
   // Each adventure's act plans, by "adventure:act" (D164).
   plans: store.get("forge.plans", {}),
   rooms: store.get("forge.rooms", []),
@@ -222,10 +222,10 @@ function adventureView(adv) {
   const regions = (w.regions ?? []).map((a, i) =>
     h("li", {}, h("span", { class: "actn" }, i + 1),
       h("div", { class: "sub" }, h("h4", {}, a.name, " ", h("span", { class: "chip accent" }, `${setting.arc[i].act} · ${setting.arc[i].legs} legs`)),
-        kv([["What it is", a.what], ["Feel", a.feel], ["Held by", a.holders.map((f) => w.factions[f]?.name ?? f).join(", ")], ["Sanctuary", a.sanctuary], ["Player's secret", setting.playerSecretReveal?.[i + 1]]]))));
+        kv([["What it is", a.what], ["Feel", a.feel], ["Sanctuary", a.sanctuary], ["Player's secret", setting.playerSecretReveal?.[i + 1]]]))));
   const mysteries = (w.mysteries ?? []).map((m) =>
     h("div", { class: "sub" }, h("h4", {}, m.id.replaceAll("_", " ")),
-      kv([["Truth (never told)", m.truth], ["Edge", `${m.edge.text} (from act ${m.edge.act}, ${m.edge.at === "climax" ? "at its climax" : `in ${w.factions[m.edge.at]?.name ?? m.edge.at}'s rooms`})`],
+      kv([["Truth (never told)", m.truth], ["Edge", `${m.edge.text} (from act ${m.edge.act}, ${m.edge.at === "climax" ? "at its climax" : `on ${w.factions[m.edge.at]?.name ?? m.edge.at}, anywhere`})`],
         ["Journal", h("div", {}, h("p", { class: "small muted" }, m.journal.author), h("ol", { class: "plain" }, m.journal.pages.map((p) => h("li", {}, p.text))))]])));
   const dm = h("section", { class: "card" },
     h("span", { class: "dm-tag" }, "DM-facing · the campaign's shape"),
@@ -233,7 +233,7 @@ function adventureView(adv) {
     h("div", { class: "row" }, h("span", { class: "chip" }, `for ${names.join(" & ")}`), adv.example === true ? h("span", { class: "chip near" }, "written with the example") : null, adv.seedReused ? h("span", { class: "chip" }, "seed reused from the last pitch") : null, adv.vibe != null ? h("span", { class: "chip" }, adv.vibe ? `vibe: ${adv.vibe}` : "no vibe") : null, adv.at ? h("span", { class: "chip" }, when(adv.at)) : null),
     h("h3", {}, "The place"), kv([["Place", w.place], ["Tone", w.tone], ["The way out", w.escape], ["Life", w.life]]),
     h("h3", {}, "The heart"), prose(w.heart),
-    h("h3", {}, "Tensions"), h("ul", { class: "plain" }, w.tensions.map((t) => h("li", {}, t))),
+    h("h3", {}, "Tensions"), h("ul", { class: "plain" }, (w.tensions ?? []).map((t) => h("li", {}, t))),
     h("h3", {}, "Factions"), h("div", { class: "grid2" }, factions),
     h("h3", {}, "The five regions"), regions.length ? h("ol", { class: "acts" }, regions) : h("p", { class: "err" }, "This world was written before regions (D164); pitch a new one."),
     h("h3", {}, "Mysteries"), mysteries.length ? h("div", { class: "grid2" }, mysteries) : h("p", { class: "muted small" }, "None."),
@@ -279,19 +279,11 @@ function historyView() {
 // The pins that apply to this kind of room in this world (D159): a motif that doesn't suit the kind, a faction the world
 // doesn't have, or an axis the kind doesn't take is never sent, and never shown as pinned.
 function pinsFor(adv, r) {
-  const challenged = CHALLENGED.includes(r.kind);
   const p = {};
-  // A room with danger in it draws a place (D196); a calm room keeps its tone, busy-ness, shape and centrepiece.
-  const calm = !challenged;
-  if (r.kind === "encounter" && (r.place ?? "").trim()) p.place = r.place.trim();
-  if (calm && TONES.includes(r.tone)) p.tone = r.tone;
-  if (calm && SHAPES.includes(r.shape)) p.shape = r.shape;
-  if (calm && CENTREPIECES.includes(r.centrepiece)) p.centrepiece = r.centrepiece;
+  // A room with danger in it or a merchant is set in one of the act's places (D196); pinned here, it's set there.
+  if (["encounter", "merchant"].includes(r.kind) && (r.place ?? "").trim()) p.place = r.place.trim();
   if (PRIZED.includes(r.kind) && PRIZES.includes(r.prize)) p.prize = r.prize;
-  if (calm && BUSY.includes(r.busy)) p.busy = r.busy;
   if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
-  const fs = challenged || r.kind === "oddity" ? r.factions.filter((f) => adv.world.factions[f]) : [];
-  if (fs.length) p.factions = fs;
   const ms = r.motifs.filter((id) => motifs.find((m) => m.id === id)?.kinds.includes(r.kind));
   if (ms.length) p.motifs = ms;
   if (["encounter", "oddity"].includes(r.kind) && r.callback.trim()) p.callback = r.callback.trim();
@@ -307,23 +299,16 @@ function seedWith(adv, r) {
   const inAdventure = S.rooms.filter((x) => x.adventure === adv.id);
   const earlier = inAdventure.filter((x) => x.act === r.act);
   const used = earlier.flatMap((x) => x.seed?.motifs?.map((m) => m.id) ?? []);
-  const usedBusy = earlier.map((x) => x.seed?.busy).filter(Boolean);
-  const usedShapes = earlier.map((x) => x.seed?.shape).filter(Boolean);
-  const usedCentres = earlier.map((x) => x.seed?.centrepiece).filter(Boolean);
   const placesUsed = earlier.map((x) => x.seed?.place).filter(Boolean);
   const cluesPlaced = inAdventure.map((x) => x.seed?.clue?.id).filter(Boolean);
-  const hintsUsed = earlier.map((x) => x.seed?.hint).filter(Boolean);
   const localsUsed = earlier.map((x) => x.seed?.local).filter(Boolean);
   const settingsUsed = earlier.map((x) => x.seed?.setting).filter(Boolean);
   const newsUsed = earlier.map((x) => x.seed?.news).filter(Boolean);
   const storyShown = earlier.filter((x) => x.seed?.herStory).map((x) => x.seed.spotlight);
-  camp = { ...camp, plan: planOf(adv, r.act), used, usedBusy, usedShapes, usedCentres, placesUsed, cluesPlaced, hintsUsed, localsUsed, settingsUsed, newsUsed, storyShown, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
+  camp = { ...camp, plan: planOf(adv, r.act), used, placesUsed, cluesPlaced, localsUsed, first: r.kind === "quiet" && !!r.first, settingsUsed, newsUsed, storyShown, roomNo: earlier.length, way: { ...camp.way, here: r.kind } };
   const { seed } = seedRoom(camp, adv.world);
   const p = pinsFor(adv, r);
-  for (const k of ["place", "tone", "shape", "centrepiece", "factions"]) if (p[k]) seed[k] = p[k];
-  // On the bench a brief comes first (D166): an unpinned busy-ness gives way to it.
-  if (r.brief.trim() && !p.busy) delete seed.busy;
-  if (p.busy) seed.busy = p.busy;
+  if (p.place) seed.place = p.place;
   if (p.prize) {
     seed.prize = p.prize;
     if (p.prize !== "a journal page") delete seed.clue;
@@ -337,7 +322,6 @@ function seedWith(adv, r) {
   if (p.callback) {
     const [name, fate = "met before", feels = "unknown"] = p.callback.split("|").map((x) => x.trim());
     seed.callback = { name, fate, feels };
-    delete seed.hint;
   }
   if (p.spotlight) seed.spotlight = p.spotlight === "none" ? null : p.spotlight;
   if (p.motifs) seed.motifs = p.motifs.map((id) => motifs.find((m) => m.id === id));
@@ -356,9 +340,10 @@ async function beginActHere(adv, act) {
   const peaks = [];
   for (let a = 1; a < act; a++) {
     const pl = planOf(adv, a);
-    if (pl) peaks.push(pl.peak.who);
+    const stood = S.rooms.find((x) => x.adventure === adv.id && x.act === a && x.kind === "climax" && x.stages?.sketch?.antagonist)?.stages.sketch.antagonist ?? pl?.peak?.who;
+    if (stood) peaks.push(stood);
     const rooms = S.rooms.filter((x) => x.adventure === adv.id && x.act === a && x.stages?.sketch?.premise).map((x) => x.stages.sketch.premise).reverse();
-    earlier.push({ act: a, question: pl?.question ?? null, peak: pl?.peak?.who ?? null, state: pl?.state ?? null, rooms, log: [] });
+    earlier.push({ act: a, question: pl?.question ?? null, peak: stood ?? null, state: pl?.state ?? null, rooms, log: [] });
   }
   try {
     const party = partyFor({ name: "P", class: adv.cls ?? S.setup.cls }, adv.companions, adv.world);
@@ -381,7 +366,7 @@ function planView(adv, act) {
   const canRun = sample && !S.busy && w.regions;
   const head = h("div", { class: "row" },
     h("button", { class: plan ? "plain" : "go", disabled: !canRun, onclick: () => beginActHere(adv, act) }, plan ? `Begin act ${act} again` : `Begin act ${act}`),
-    plan ? null : h("span", { class: "status" }, "Rooms use the act's plan: its setting, its places, holders and peak. Begin the act first."));
+    plan ? null : h("span", { class: "status" }, "Rooms use the act's plan: its setting and its places. Begin the act first."));
   return h("section", { class: "card" },
     h("span", { class: "dm-tag" }, `Act ${act} · decided when it begins`),
     head,
@@ -389,18 +374,17 @@ function planView(adv, act) {
     plan ? [
       kv([
         ["Goal", plan.goal],
+        ["Opening narration (the player reads this)", plan.intro ? h("div", { class: "opening" }, paras(plan.intro).map((t) => h("p", {}, t))) : null],
         ["Setting", plan.setting],
         ["The act's question", plan.question],
         ["Its aim", plan.aim],
         ["What has changed", plan.state],
-        ["Held by", plan.holders.map((f) => w.factions[f]?.name ?? f).join(", ")],
         ["Live mysteries", (plan.mysteries ?? []).join(", ")],
         ["Companion threads", plan.threads?.length ? h("ul", { class: "plain" }, plan.threads.map((t) => h("li", {}, h("b", {}, authored[adv.companions[t.slot === "companion_a" ? 0 : 1]]?.name ?? t.slot), ": ", t.beat))) : "none this act"],
         ["Places (rooms with danger)", (plan.places ?? []).join(" · ") || null],
         ["Settings", plan.settings ? h("div", {}, ...["quiet", "oddity", "campfire"].map((k) => h("p", { class: "small" }, h("b", {}, k), ": ", (plan.settings[k] ?? []).join(" · ")))) : null],
         ["News", plan.news?.length ? h("ul", { class: "plain" }, plan.news.map((x) => h("li", {}, x))) : null],
-        ["Peak", h("div", {}, h("p", {}, h("b", {}, plan.peak.who)), kv([["Why them", plan.peak.why], ["Wants", plan.peak.wants], ["Turns", plan.peak.turns], ["Where", plan.peak.where]]))],
-        ["Signs of it", h("ul", { class: "plain" }, plan.hints.map((x) => h("li", {}, x)))],
+        ["Who could stand at the climax", plan.antagonists?.length ? h("ul", { class: "plain" }, plan.antagonists.map((x) => h("li", {}, h("b", {}, x.who), ": ", x.why))) : plan.peak?.who],
       ]),
       plan.calls?.length ? fold("The act call", json(plan.calls)) : null,
     ] : null);
@@ -451,17 +435,14 @@ function roomsTab() {
   // Clear pins this kind or world can't take, so nothing hidden rides along (D159).
   const fitting = pinsFor(adv, r);
   r.motifs = fitting.motifs ?? [];
-  if (CHALLENGED.includes(r.kind) || r.kind === "oddity") r.factions = fitting.factions ?? [];
-  for (const k of ["tone", "shape", "centrepiece", "prize", "busy", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
+  for (const k of ["prize", "spotlight"]) if (r[k] && !fitting[k]) r[k] = "";
   const set = (k, v) => ((S.room[k] = v), save(), render());
   const sel = (k, label, options, { random = "Random, as the game draws it" } = {}) =>
     h("label", { class: "field" }, label,
       h("select", { id: `room-${k}`, onchange: (e) => set(k, k === "act" ? Number(e.target.value) : e.target.value) },
         random ? h("option", { value: "", selected: !r[k] }, random) : null,
         options.map(([v, l]) => h("option", { value: v, selected: String(r[k]) === String(v) }, l))));
-  const challenged = CHALLENGED.includes(r.kind);
   const fits = motifs.filter((m) => m.kinds.includes(r.kind));
-  const factionIds = Object.keys(adv.world.factions);
   const toggle = (k, v) => set(k, r[k].includes(v) ? r[k].filter((x) => x !== v) : [...r[k], v]);
   const brief = h("textarea", { id: "room-brief", rows: 3, placeholder: "A flooded chapel where the choir is still singing; someone in it knows the way down", oninput: (e) => ((S.room.brief = e.target.value), save()) });
   brief.value = r.brief;
@@ -475,24 +456,17 @@ function roomsTab() {
     h("div", { class: "grid2" },
       sel("kind", "Kind of room", KINDS.map((k) => [k, `${k}${ROOM_KINDS.includes(k) ? " (a room, no objective)" : ""}`]), { random: null }),
       sel("act", "Act", adventureActs(adv), { random: null }),
-      challenged ? null : sel("tone", "Tone", TONES.map((t) => [t, t])),
-      challenged ? null : sel("busy", "Busy with", BUSY.map((t) => [t, t])),
-      challenged ? null : sel("shape", "Shape", SHAPES.map((t) => [t, t])),
-      challenged ? null : sel("centrepiece", "Centrepiece", CENTREPIECES.map((t) => [t, t])),
       PRIZED.includes(r.kind) ? sel("prize", "Prize", PRIZES.map((t) => [t, t])) : null,
       sel("spotlight", "Whose room it is", r.kind === "climax"
         ? [["both", "Both companions'"]]
         : [["companion_a", `${authored[adv.companions[0]]?.name ?? "First companion"}'s`], ["companion_b", `${authored[adv.companions[1]]?.name ?? "Second companion"}'s`], ["none", "No one's"]]),
     ),
-    challenged || r.kind === "oddity"
-      ? h("div", { class: "field" }, h("span", { class: "muted small" }, "Whose place it is (none ticked: the game picks one of the region's holders)"),
-        h("div", { class: "row" }, factionIds.map((f) => h("label", { class: "small" }, h("input", { type: "checkbox", id: `fac-${f}`, checked: r.factions.includes(f), onchange: () => toggle("factions", f) }), " ", adv.world.factions[f].name))))
-      : null,
+    r.kind === "quiet" ? h("label", { class: "small" }, h("input", { type: "checkbox", id: "room-first", checked: !!r.first, onchange: (e) => set("first", e.target.checked) }), " The adventure's first room: where the party comes to, with no danger and no hurry") : null,
     h("div", { class: "field" }, h("span", { class: "muted small" }, `Motif for a ${r.kind}, a leaning (none ticked: the game draws one)`),
       h("div", { class: "motifs" }, fits.map((m) => h("label", {}, h("input", { type: "checkbox", id: `motif-${m.id}`, checked: r.motifs.includes(m.id), onchange: () => toggle("motifs", m.id) }), h("span", {}, h("b", {}, m.name), h("span", { class: "muted" }, ` · ${m.decisions}`)))))),
     h("label", { class: "field" }, "Your brief: what this room should hold", brief),
     h("label", { class: "field" }, "How the party arrives", arrives),
-    r.kind === "encounter" ? placeField(adv, r) : null,
+    ["encounter", "merchant"].includes(r.kind) ? placeField(adv, r) : null,
     ["encounter", "oddity"].includes(r.kind) ? callbackField(r) : null,
     h("div", { class: "row" },
       h("button", { class: "go", disabled: !sample || !!S.busy, onclick: designOne }, "Design the room"),
@@ -602,17 +576,12 @@ function seedView(run) {
   return stage("Seed", h("div", { class: "grid2" },
     kv([
       ["Place", seed.place && mark("place", seed.place)],
-      ["Tone", seed.tone && mark("tone", seed.tone)],
-      ["Shape", seed.shape && mark("shape", seed.shape)],
-      ["Centrepiece", seed.centrepiece && mark("centrepiece", seed.centrepiece)],
-      ["Busy with", seed.busy && mark("busy", seed.busy)],
+      ["First room", seed.first ? "the adventure begins here" : null],
       ["Prize", seed.clue ? mark("prize", h("span", {}, "a journal page by ", h("b", {}, seed.clue.author), pageText(run, seed.clue.id) ? `: "${pageText(run, seed.clue.id)}"` : "")) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],
-      ["A sign of what's coming", seed.hint],
       ["News", seed.news],
       ["Setting", seed.setting],
       ["Her story", seed.herStory === false ? "not this time (shown earlier in the act)" : seed.herStory ? "this room carries it" : null],
-      ["Whose place", seed.factions && mark("factions", seed.factions.join(", "))],
       ["Whose room", mark("spotlight", seed.spotlight === "both" ? "both companions'" : seed.spotlight ? `${authored[run.companions?.[seed.spotlight === "companion_a" ? 0 : 1]]?.name ?? seed.spotlight}'s` : seed.spotlight === null ? "no one's" : null)],
       ["Exits lead to", seed.exits.length ? seed.exits.join(", ") : "nothing: the act ends"],
     ]),
@@ -635,7 +604,7 @@ function sketchView(sk) {
       ["Premise", h("b", {}, sk.premise)],
       ["Shape", sk.shape],
       ["Things", h("span", {}, list(sk.things), h("span", { class: "chip" }, `${sk.things.length} things`))],
-      ["Cut", sk.cut],
+      ["Stands at its centre", sk.antagonist],
       ["Pressure", sk.pressure],
       ["Outcomes", sk.outcomes?.length ? list(sk.outcomes) : null],
       ["Notes", sk.notes],

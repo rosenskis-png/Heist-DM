@@ -64,7 +64,7 @@ export const motifs = [
     name: "The builders' works",
     pattern: `Something the place's builders left still works by its own consistent rules, and its rules can be learned from what's in the room before they're relied on.`,
     decisions: `learn the rules, then use them against the room or for the way on`,
-    kinds: ["encounter", "oddity", "quiet"],
+    kinds: ["oddity", "quiet"],
   },
   {
     id: "the_offer",

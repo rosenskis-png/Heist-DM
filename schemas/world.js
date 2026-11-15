@@ -18,12 +18,12 @@ const faction = obj(["name", "short", "desc", "rules", "goal", "ladder"], {
   ladder: { ...list(rung, 3), maxItems: 3 },
 });
 // A region: the part of the place one act crosses (D164). The act call writes what it's like when the act starts.
-const region = obj(["name", "what", "sanctuary", "holders", "feel"], {
+const region = obj(["name", "what", "sanctuary", "feel"], {
   name: r("text"),
   what: r("text"),
   sanctuary: r("text"),
-  // The ids of the factions that hold it at first; the act call may change them.
-  holders: list(r("id"), 1),
+  // Older worlds name the factions that hold it; nothing reads them now (D197).
+  holders: list(r("id")),
   feel: r("text"),
 });
 // A mystery (D164, D168): a hidden truth that is never confirmed, an edge it quietly gives in one place later, and a
@@ -32,7 +32,7 @@ const region = obj(["name", "what", "sanctuary", "holders", "feel"], {
 const mystery = obj(["id", "truth", "edge", "journal"], {
   id: r("id"),
   truth: r("text"),
-  // `at` is "climax" (that act's climax) or a faction id (that faction's rooms, from that act on).
+  // `at` is "climax" (that act's climax only) or the id of the faction it works on (every room from that act on, D197).
   edge: obj(["act", "at", "text"], { act: { type: "integer", minimum: 2, maximum: 5 }, at: r("text"), text: r("text") }),
   journal: obj(["author", "pages"], {
     // Who wrote it, in a phrase ("a Haskan loremaster, dying").

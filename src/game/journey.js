@@ -39,8 +39,10 @@ export async function startAdventure(io, env, { player, companions, world, seed,
   const members = party.slice(1);
   let camp = newCampaign({ seed, members, romance: newRomance(members, pairs, { act: 1 }) });
   camp = await beginAct(io, env, { camp, world, party });
+  // The adventure opens on a calm room with no clock (D197): where the party comes to, to talk and look about.
+  camp = { ...camp, way: { ...camp.way, here: "quiet" }, first: true };
   const room = await generateRoom(io, env, { camp, world, party });
-  const session = newSession({ packet: room.packet, player, companions, seed, world, roster });
+  const session = newSession({ packet: room.packet, player, companions, seed, world, roster, intro: camp.plan?.intro ?? null });
   Object.assign(session, { camp: room.camp, packet: room.packet, past: [] });
   return session;
 }
@@ -163,6 +165,8 @@ export function enterRoom(session, roster = authored) {
   const packet = session.between?.packet;
   if (!packet) throw new Error("the next room isn't ready");
   const camp = session.camp;
+  // A new act's first room opens under the act's own narration (D197).
+  const intro = session.between?.newAct ? camp.plan?.intro ?? null : null;
   const seed = (session.start.seed * 31 + 7 * (session.past?.length ?? 0) + 1) >>> 0 || 1;
   const party = partyFor(session.player, session.companions, session.world, roster);
   session.state = load({ packet, party, seed, conditions: camp.carry.conditions, spent: camp.carry.spent, gold: camp.gold, relics: camp.relics, carried: camp.carried ?? [], items: camp.items ?? [] });
@@ -186,6 +190,7 @@ export function enterRoom(session, roster = authored) {
     // The last campfire's scene is over (D190).
     fire: null,
   });
+  if (intro) post(session, "table", { ch: "narration", who: "dm", text: intro });
   post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;
 }

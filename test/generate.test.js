@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
-import { seedFor, SHAPES, CENTREPIECES, PRIZES, BUSY } from "../src/campaign/seed.js";
+import { seedFor, PRIZES } from "../src/campaign/seed.js";
 import { newCampaign, roomEnded } from "../src/campaign/run.js";
 import { layout } from "../src/engine/layout.js";
 import { geometryProblems } from "../src/engine/map.js";
@@ -31,7 +31,7 @@ test("the seed asks a different question each time, suits the kind, and avoids t
   const seen = new Set();
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
-    assert.ok(PRIZES.includes(seed.prize) && seed.factions.length === 1);
+    assert.ok(PRIZES.includes(seed.prize) && !seed.factions);
     assert.ok(camp.plan.places.includes(seed.place) && !(camp.placesUsed ?? []).includes(seed.place), "the place doesn't repeat within an act (D196)");
     assert.ok(!seed.shape && !seed.centrepiece && !seed.busy && !seed.tone && !seed.danger, "a room with danger in it draws a place, not four ingredients (D196)");
     assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
@@ -39,9 +39,10 @@ test("the seed asks a different question each time, suits the kind, and avoids t
     camp = next;
   }
   assert.ok(seen.size >= 5, "motifs vary across an act");
-  const calm = seedFor(newCampaign(), world, "campfire", ["encounter"]).seed;
-  assert.ok(SHAPES.includes(calm.shape) && BUSY.includes(calm.busy) && calm.tone && !calm.place, "a calm room keeps its wide lists");
-  assert.equal(calm.xFactor, undefined);
+  const calm = seedFor({ ...newCampaign(), plan: { settings: { campfire: ["a warm bread oven", "a dry cistern"] } } }, world, "campfire", ["encounter"]).seed;
+  assert.ok(calm.setting && !calm.place && !calm.shape && !calm.busy && !calm.tone, "a calm room's one draw is its setting (D197)");
+  const first = seedFor({ ...newCampaign(), first: true, plan: { settings: { quiet: ["a painted cell"] } } }, world, "quiet", ["encounter"]);
+  assert.ok(first.seed.first && !first.seed.setting && !first.seed.prize && !first.seed.motifs.length && first.camp.first === false, "the first room is where the party comes to (D197)");
   assert.equal(calm.motifs.length, 1);
   assert.deepEqual(seedFor(newCampaign({ seed: 3 }), world, "encounter", []).seed, seedFor(newCampaign({ seed: 3 }), world, "encounter", []).seed);
   assert.ok(motifs.every((m) => !/\b(route|path to|solution)\b/i.test(m.pattern)), "a motif never describes a route");
@@ -130,7 +131,7 @@ test("the designer's brief reaches the sketch only when given, and never encode 
   const c = { seed, world, party, brief: "A drowned chapel with a choir still singing." };
   assert.match(sketchInput(env, c, sketchSchema), /designer's brief[\s\S]*drowned chapel/);
   assert.doesNotMatch(sketchInput(env, { ...c, brief: "" }, sketchSchema), /designer's brief/);
-  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" };
+  const sketch = { premise: "x", shape: "x", things: ["x"], pressure: "x", notes: "x", opening: "x" };
   assert.doesNotMatch(encodeInput(env, { ...c, sketch }, encodeSchema), /drowned chapel/);
 });
 
@@ -154,6 +155,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
   // A quiet room with no prize, so the example's rewards come off (D164).
   const seed = { ...seedFor(newCampaign(), world, "quiet", ["encounter"]).seed, prize: "none: getting out is the whole of it" };
   delete seed.clue;
+  delete seed.outfit;
   const calls = [];
   let dropped = 0;
   const io = {
@@ -169,7 +171,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
       },
     },
   };
-  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" };
+  const sketch = { premise: "x", shape: "x", things: ["x"], pressure: "x", notes: "x", opening: "x" };
   const { packet } = await designRoom(io, env, { seed, world, party, sketch });
   assert.deepEqual(calls, ["encode", "encode"]);
   assert.equal(packet.mode, "room");
@@ -200,7 +202,7 @@ test("a reply with no JSON is tried once more, and what it said is kept (D159)",
   const { ask } = await import("../src/ask.js");
   let n = 0;
   const records = [];
-  const io = { sample: { json: async () => (n++ ? { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", outcomes: ["x"], notes: "x", opening: "x" } : Promise.reject({ code: "invalid_json", message: "no JSON", text: "I'd rather not." })) }, onCall: (r) => records.push(r) };
+  const io = { sample: { json: async () => (n++ ? { premise: "x", shape: "x", things: ["x"], pressure: "x", notes: "x", opening: "x" } : Promise.reject({ code: "invalid_json", message: "no JSON", text: "I'd rather not." })) }, onCall: (r) => records.push(r) };
   const out = await ask(io, { call: "sketch", schema: sketchSchema, input: "x" });
   assert.equal(out.premise, "x");
   assert.equal(records[0].noJson, "I'd rather not.");
@@ -221,29 +223,30 @@ test("the act's earlier premises reach the next sketch, and the campaign keeps e
   assert.match(input, /"place":"the old kitchens"/);
   assert.doesNotMatch(input, /"busy_with":|"shape":|how_the_danger_stands/);
   assert.match(input, /"tone":"Pulp fantasy/, "the world's tone reaches the sketch (D196)");
-  assert.match(input, /"whose_place_it_is":/);
+  assert.match(input, /"the_powers_here":/);
+  assert.doesNotMatch(input, /whose_place_it_is|"cut"/);
   assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## The way so far/);
 });
 
-test("a calm room's shape and centrepiece are fixed, drawn from code's lists without repeats in an act; the climax alone gets its block; the prompt holds no images (D163, D196)", () => {
-  let camp = newCampaign({ seed: 11 });
-  const shapes = [], centres = [];
-  for (let i = 0; i < 6; i++) {
+test("a calm room is set in one of the act's settings, never repeating until they run out; the climax alone gets its block; the prompt holds no images (D163, D167, D197)", () => {
+  const settings = { quiet: ["a painted cell", "a dripping basin", "an echoing corridor"] };
+  let camp = { ...newCampaign({ seed: 11 }), plan: { settings } };
+  const drawn = [];
+  for (let i = 0; i < 3; i++) {
     const { seed, camp: next } = seedFor(camp, world, "quiet", ["encounter"]);
-    assert.ok(SHAPES.includes(seed.shape) && CENTREPIECES.includes(seed.centrepiece));
-    shapes.push(seed.shape); centres.push(seed.centrepiece);
+    assert.ok(settings.quiet.includes(seed.setting) && !seed.shape && !seed.centrepiece && !seed.busy && !seed.tone);
+    drawn.push(seed.setting);
     camp = next;
   }
-  assert.equal(new Set(shapes).size, 6);
-  assert.equal(new Set(centres).size, 6);
-  const enc = seedFor(newCampaign(), world, "quiet", ["encounter"]).seed;
+  assert.equal(new Set(drawn).size, 3);
+  const enc = seedFor({ ...newCampaign(), plan: { settings } }, world, "quiet", ["encounter"]).seed;
   const input = sketchInput(env, { seed: enc, world, party }, sketchSchema);
-  assert.match(input, /"fixed":\{[^}]*"shape":[^}]*"centrepiece":/);
+  assert.match(input, /"fixed":\{[^}]*"setting":/);
   assert.doesNotMatch(input, /## The climax\n\n```json/);
   const climax = seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed;
-  assert.match(sketchInput(env, { seed: climax, world, party, earlier: ["x"] }, sketchSchema), /## The climax\n\n```json[\s\S]*who_stands_at_its_centre/);
+  assert.match(sketchInput(env, { seed: climax, world, party, earlier: ["x"] }, sketchSchema), /## The climax\n\n```json[\s\S]*who_could_stand_at_its_centre/);
   assert.doesNotMatch(prompts.sketch, /by a thread|pincer|lowering|sinking|mind flayer|winery|hung in the air/i, "the sketch prompt holds no concrete images");
-  assert.doesNotMatch(prompts.sketch, /pulp|larger than life|head-on|four different things|Have the second/i, "the sketch prompt sets no tone of its own and no quotas (D196)");
+  assert.doesNotMatch(prompts.sketch, /pulp|larger than life|head-on|four different things|Have the second|\*\*cut\.\*\*|easier one to reach/i, "the sketch prompt sets no tone of its own and no quotas (D196, D197)");
 });
 
 test("only the seed's prize is a reward: no invented clue, no second prize (D164)", async () => {
@@ -267,7 +270,7 @@ test("a room the reader couldn't follow goes back to the sketch once, with the r
   const { clue, ...drawn } = seedRoom(camp, world).seed;
   const seed = { ...drawn, prize: PRIZES[0] };
   const calls = [];
-  const sketch = { premise: "x", shape: "x", things: ["x"], cut: "nothing", pressure: "x", notes: "x", opening: "x" };
+  const sketch = { premise: "x", shape: "x", things: ["x"], pressure: "x", notes: "x", opening: "x" };
   let lostOnce = true;
   const io = {
     sample: {

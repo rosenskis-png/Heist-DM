@@ -2,7 +2,7 @@
 // the kinds its exits lead to and its seed; the sketch call designs it; the encode call turns it into packet data; code
 // lays it out. The sketch is generator-only and thrown away, except its premise, which the campaign keeps for the act's
 // next sketches (D162).
-import { drawExits, actBegun } from "../campaign/run.js";
+import { drawExits, actBegun, climaxChosen } from "../campaign/run.js";
 import { seedFor } from "../campaign/seed.js";
 import { layout } from "../engine/layout.js";
 import { sketchCall } from "../calls/sketch.js";
@@ -13,11 +13,12 @@ import { roomSheet, sheetText } from "../context.js";
 import { actCall } from "../calls/act.js";
 import { outfitCall } from "../calls/outfit.js";
 
-// The mysteries' edges that apply in this room (D164), as hidden facts the DM weighs and never says: a climax gets the
-// edges of its act's climax; a faction's room gets that faction's edges from their act on. Never sent to the sketch.
+// The mysteries' edges that apply in this room (D164, D197), as hidden facts the DM weighs and never says: an edge at
+// a climax reaches that act's climax; any other reaches every room from its act on, so the same key works wherever the
+// party tries it. Never sent to the sketch.
 export function edgesFor(world, seed) {
   return (world.mysteries ?? [])
-    .filter((m) => (m.edge.at === "climax" ? seed.kind === "climax" && seed.act === m.edge.act : seed.factions?.includes(m.edge.at) && seed.act >= m.edge.act))
+    .filter((m) => (m.edge.at === "climax" ? seed.kind === "climax" && seed.act === m.edge.act : seed.act >= m.edge.act))
     .map((m) => ({ id: `edge_${m.id}`, text: `${m.edge.text} This shapes how likely steps are; never say it, show it or hint at it.`, hidden: true }));
 }
 
@@ -112,5 +113,7 @@ export async function generateRoom(io, env, { camp, world, party, handoff = null
   // is counted toward the act's (D195); the climax's waits for the climax to end.
   const placed = outfit && (seed.outfit === "after" || packet.map.things.some((t) => t.reward?.outfit?.id === outfit.id));
   const found = placed ? [...(next.outfitsFound ?? []), { id: outfit.id, name: outfit.name, text: outfit.text, act: seed.act, ...(seed.outfit === "after" ? { climax: true } : {}) }] : next.outfitsFound ?? [];
-  return { packet, mapped, seed, camp: { ...next, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`], outfitsFound: found, ...(placed && seed.outfit === "after" ? { climaxOutfit: outfit } : {}) } };
+  // The climax's antagonist, as the sketch chose from the act's candidates (D197).
+  const chosen = seed.kind === "climax" ? climaxChosen(next, sketch.antagonist ?? null) : next;
+  return { packet, mapped, seed, camp: { ...chosen, premises: [...(next.premises ?? []), `${seed.kind}: ${sketch.premise}`], outfitsFound: found, ...(placed && seed.outfit === "after" ? { climaxOutfit: outfit } : {}) } };
 }

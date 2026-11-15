@@ -68,7 +68,7 @@ Winning and losing aren't outcomes. They're the players' own judgment of the out
 
 - **Prizes are one lever among several,** never a room full of loot. Gold, a relic, an outfit, a companion moment, progress on a companion's goal, knowledge of what's ahead, or the choice of where to go next (D147). Optional content has diminishing returns, and too much drowns the room.
 - **The way on is part of the prize.** The party leaves by an exit it managed to reach (D144). One setup among many: to the left a prize guarded by one thing, leading to one kind of room; to the right another, leading elsewhere. A bold, successful party takes both and chooses; an adequate one takes one path; a poor one gets neither and is carried on. A forced way on should lead to a different kind of story, not simply a worse room.
-- **The harder way leads somewhere calmer.** When one way on leads to an encounter and another to a calm room, the encounter's is the easier to reach; reaching the calm one is the reward for doing well (D167).
+- **A reason to pick one way over the other.** The player can tell from the room something of what lies each way: what they can see, hear or guess of it. Where they can't, the choice is a coin toss (D197).
 - **Exits feel different.** Warm wet air one way, a kitchen's clatter the other. Choosing between identical doors is the worst choice a room can offer. Nothing two rooms ahead is shown (D140).
 - **Momentum is progress that strengthens the party against what's coming,** not just progress. Things the party carries out (an ally, a weakness learned, a relic) should matter later. Inertia (what pushes back) and momentum are separate pulls, and the players should feel both.
 
@@ -115,8 +115,8 @@ Define observers by their senses where it matters. Different senses make disguis
 
 ## 14. The generator's order
 
-1. **Seed** (code): what it fixes (the kind, whose place and whose room it is, the exits' kinds, the prize, and an encounter's place) and its leaning, one motif, which the sketch uses or leaves (D160, D196). `docs/spec/generation.md` has the whole of it.
-2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the cut, the pressure, notes, the opening (§16, `docs/spec/calls/sketch.md`).
+1. **Seed** (code): what it fixes (the kind, whose room it is, the exits' kinds, the prize, and where the room is) and its leaning, one motif, which the sketch uses or leaves (D160, D196). `docs/spec/generation.md` has the whole of it.
+2. **The sketch,** a DM's prep note, in this order: the premise, the shape, a line for each thing, the pressure, notes, the opening (§16, `docs/spec/calls/sketch.md`).
 3. **Encode** turns the note into the packet, adding nothing (D156, D160).
 
 Nothing reviews the sketch (D156): a clever player who finds the move that empties a threat has been rewarded, not exploited a flaw.
@@ -152,6 +152,7 @@ Both fail the same way: too much invention. A room where every element is new ha
 - **One thing going on.** One situation explains everything in the room: who's here, what they're doing, why things are where they are. A detail that needs its own explanation is a second idea.
 - **Few things, few people.** Size comes from wants that pull against each other, not from headcount or zones. Three people who each want something different are a bigger room than a crowd.
 - **Ordinary sense.** A player plans from what they already know about people, creatures, doors and fire, and about the genre's well-known monsters. A rule that has to be worked out from how people behave is a puzzle. An invented rule is fine only when there is one of it, it's a physical thing, and the fiction states it outright, as a verse on a wall does.
+- **Room to move.** Fewer people and things should not mean less space. The place has its ordinary parts, and being in one rather than another matters.
 - **Already going somewhere.** Something is moving toward an end whether or not the party acts, and the DM knows what happens if they do nothing. It moves when the party commits to something; watching and thinking are free (D176).
 - **Something to weigh.** The party always wants the way on. Most rooms give them something more to want (someone, something, a chance), so that getting it and getting through pull against each other. Costs should be in view, and differ in kind. A room with only the way on is fine.
 - **Loud or quiet.** Tone is the world's register, not a volume. Either is right when the world calls for it.
@@ -165,21 +166,23 @@ Both fail the same way: too much invention. A room where every element is new ha
 
 **What the player is told**
 - **One picture,** told the way a person tells a friend what they saw: the place, who's in it and what they're doing. Not several things happening at once.
-- **What the party makes of it,** because a capable adventurer can judge at a glance what the player can't see: what these are, by a name the player knows; roughly how a straight fight would go; whether they'd talk first. When the party can't tell, say that. In correspondence play a question costs a whole exchange, so this goes in the opening.
+- **What a capable eye sees of the danger:** how many, how they're armed, how they carry themselves, what they're attending to. Enough for the player to judge a fight or a parley for themselves, and never the judgment itself or what anyone is thinking: "a sword at his hip and the stance of a clerk", not "he would sooner talk". In correspondence play a question costs a whole exchange, so this goes in the opening (D197).
+- **Nothing unexplained.** The player hasn't read the world. A kind of creature, a group or a custom particular to it is said in a few plain words the first time it's named, and so is why the room's business is going on: where things come from and where they're going.
+- **A prize is wanted on sight:** money, something of plain power, or a thing whose use here anyone can see (a badge lying loose that everyone knows marks an officer). Something valuable worn as part of someone's dress reads as decoration.
 - **Where anyone can stand** is a relation to something named in the picture: in the doorway, behind the table, on the gallery. Three or four such features are a room's whole geography.
 - **Other people are something to work with,** as much as the place is.
 
-**The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163).
+**The climax** is the act's showdown, not a harder room: an antagonist present and acting, who changes the room in turns like a boss fight; the act's rooms paying off; and a choice at the peak (D148, D163). Who stands there is chosen when the climax is written, from the act's candidates and the journey so far, and nothing else about it is decided in advance. It is the biggest thing the party has faced that act, far beyond anyone in its rooms, and none of the candidates appears in a room before it (D197).
 
 **Lore, clues and edges** (D164)
 - **Clues are journal pages,** rewards like gold: somewhere the party has to reach, missable, carried off and read at camp (D168). Each mystery's journal is written whole by someone in the world and torn into pages, with what the truth needs spread across them. Nobody in a room shouts lore.
 - **A mystery is never confirmed.** Its truth quietly makes something more likely to work in one place later (the edge, a hidden fact in that packet); a player who pieced it together might use it, a lucky one might stumble on it, and nobody at the table ever says so.
 - **Allies are people, not a faction score.** Someone the party helped may turn up again in an encounter or an oddity and vouch for them, or not.
 
-**Where variety comes from.** Any salient context becomes an anchor: a world whose life is one industry made every room that industry, and every concrete image in the sketch's prompt came back in room after room (D162, D163). So concrete content reaches a room only through something code deals out one at a time and never repeats in an act, and the prompt holds no images. For an encounter that is the place and one motif, with the act's earlier premises in view (D196); a calm room keeps the wider lists (a tone, a busy-ness, a shape, a centrepiece and a setting). One draw varies the rooms. Four or five draws, each an idea of its own, make a room that has to reconcile them, and reads as disjointed.
+**Where variety comes from.** Any salient context becomes an anchor: a world whose life is one industry made every room that industry, and every concrete image in the sketch's prompt came back in room after room (D162, D163). So concrete content reaches a room only through something code deals out one at a time and never repeats in an act, and the prompt holds no images. Every room gets one place from the act (a plain room for an encounter or a merchant, a stranger setting for a calm room) and one motif, with the act's earlier premises in view (D196, D197). The lists of images are gone: sickness and feasts kept turning up in unrelated worlds because they were entries in one. One draw varies the rooms. Four or five draws, each an idea of its own, make a room that has to reconcile them, and reads as disjointed.
 
 **Why generators get this wrong:** people add rather than subtract; each instruction fixes a real problem and looks fine alone, and nothing checks the total; a seed's requirements turn into extra things; a count of anything becomes a quota that gets filled; and rooms judged by reading them drift toward what is charming to read, which is not what is easy to play.
 
-**How the generator is steered** is by form and by what it's given, not by rules or checks that reject (D160): a short prep note written premise first, a cut, a few questions asked from the player's chair, no example rooms (D161), and as few fixed ingredients as will keep rooms different.
+**How the generator is steered** is by form and by what it's given, not by rules or checks that reject (D160): a short prep note written premise first, a few questions asked from the player's chair, no example rooms (D161), and as few fixed ingredients as will keep rooms different.
 
 **The test** is to read the opening as the player: can you picture it after one hearing, do you know what you want, what you're up against, and what you could try?

@@ -78,7 +78,7 @@ test("what the party has with it goes from taking stock to the campaign, the nex
 });
 
 test("an encounter's seed draws one place and one motif, and nothing about how its danger stands (D179, D196)", async () => {
-  const { seedFor, BUSY } = await import("../src/campaign/seed.js");
+  const { seedFor } = await import("../src/campaign/seed.js");
   const { worldOf } = await import("../src/campaign/world.js");
   const places = ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury"];
   let camp = { ...newCampaign({ seed: 5 }), plan: { places }, way: { ...newCampaign({ seed: 5 }).way, here: "encounter" } };
@@ -92,5 +92,4 @@ test("an encounter's seed draws one place and one motif, and nothing about how i
     camp = next;
   }
   assert.equal(seedFor(camp, worldOf(), "quiet", ["encounter"]).seed.place, undefined);
-  assert.ok(!BUSY.some((b) => /game|contest/.test(b)));
 });

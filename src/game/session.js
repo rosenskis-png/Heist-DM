@@ -20,7 +20,7 @@ export const partyFor = (player, companionIds, world = worldOf(), roster = autho
 
 // `companions` is the two companion ids the player chose.
 // `world` is the adventure's world: Gravenhold, or one the pitch call wrote (D151), kept whole in the save.
-export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1, world = worldOf(), roster = authored }) {
+export function newSession({ packet, player, companions, seed = 1, act = packet.act ?? 1, world = worldOf(), roster = authored, intro = null }) {
   const party = partyFor(player, companions, world, roster);
   const state = load({ packet, party, seed });
   const session = {
@@ -47,6 +47,8 @@ export function newSession({ packet, player, companions, seed = 1, act = packet.
     // The last few dozen call outputs, for a playtest's post-mortem (D135). Outputs only, never inputs.
     calls: [],
   };
+  // The act's own narration comes before its first room's opening (D197).
+  if (intro) post(session, "table", { ch: "narration", who: "dm", text: intro });
   post(session, "table", { ch: "narration", who: "dm", text: packet.opening });
   return session;
 }
