@@ -13,7 +13,8 @@ import { photo as PHOTO } from "../../content/photo.js";
 import { resolveParty, partyProblems } from "../campaign/roster.js";
 import { worldOf, inWorld } from "../campaign/world.js";
 import * as Rel from "../campaign/relationship.js";
-import { equip, wardrobeFor, wearing, owned, equipped } from "../campaign/wardrobe.js";
+import { equip, wardrobeFor, wearing, owned, equipped, addOutfit } from "../campaign/wardrobe.js";
+import { outfits as found } from "../../content/outfits.js";
 import { withLooks, withChanges, changeProblems, getPath } from "../campaign/looks.js";
 import { css } from "./dressing-css.js";
 import { photoOf, photoPrompt } from "../campaign/photo.js";
@@ -147,6 +148,8 @@ function sceneOf(id) {
   const [me, them] = members;
   let rom = Rel.newRomance(members, pairs, { act: 1 });
   if (S.late) Object.assign(rom.rel[me.id], { heat: 9, intimacy: 8, payoff: true, involved: true, vuln: true, deep: true });
+  // Every outfit found on the journey, as if she'd been given it, so any of them can be tried on her.
+  for (const [oid, o] of Object.entries(found)) rom = addOutfit(rom, me.id, oid, o);
   const eq = S.equipped[id];
   if (eq && owned(rom, me)[eq]) rom = equip(rom, me, eq);
   return { id, pid, self, other, members, me, them, rom };
