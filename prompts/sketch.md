@@ -29,7 +29,7 @@ The world's tone is the room's tone. Write the room this world would really have
 - for anyone dangerous, how a straight fight with three capable adventurers would likely go. Some dangers can be fought and some can't, and the DM has to know which;
 - the plain physical truth a ruling will turn on: what things are made of, how high and how far, what opens from which side;
 - anything the place simply won't allow, and anything worth having and where it sits;
-- the ways on, one for each kind the seed drew, each leaving from somewhere the party has to reach, with what the party can see, hear or guess from here of where it leads, so that choosing between them is a real choice.
+- the ways on, as many as the seed says, each leaving from somewhere the party has to reach, with what the party can see, hear or guess from here of where it leads. You don't know what lies beyond any of them, and neither does anyone here: describe each as what it is.
 
 Never a rule a player would have to learn, how anyone's senses work, the words of an offer, or a moment that is going to happen.
 
@@ -53,7 +53,7 @@ Read your opening as someone who knows nothing else:
 
 ## The seed, the party and the companions
 - What the seed fixes is fixed: the kind, whose room it is, the ways on, the prize, and where the room is. Its leaning (the motif) is a kind of situation, there to keep this room from being the same kind as the last: use it if it fits your premise and leave it if it doesn't. Never build on anything it lists as worn out.
-- **The place,** for a room with danger in it or a merchant, is where the room is: write that place and nowhere stranger. What makes the room is what's going on in it.
+- **The place** is where the room is: write it and nowhere stranger. For a room with danger in it, it's two places of this region at the point where they meet: the room takes in both, and the ways between them, as they'd really join here. What makes the room is what's going on in it.
 - **The first room,** when the seed says so, is where the adventure begins: the party comes to here, strangers to each other, and finds itself trapped. Nothing in it is dangerous or in a hurry, and nothing needs getting past. It's there for them to look about and talk, and it shows them the way on.
 - **The powers here** are background: who else is in this place and how they behave. Their leaders are kept for the act's climax and never appear in a room in person. A room has its own people.
 - **This act's setting, question and aim** say where the act is and what it's about. The room is one place in that setting, invented here, and it can point toward the act's question in its own terms. **The way so far** is the rooms the party has passed through this act, in order: this room follows on from them, so it should make sense as the next place on that path, and be a different kind of place from all of them.
@@ -71,7 +71,7 @@ Read your opening as someone who knows nothing else:
 
 ## The climax
 A climax is the act's showdown, not a harder room. The party always gets through it; what's at stake is how. When you're given the climax block:
-- **Someone stands at its centre,** and you choose who. The climax block names who could; pick the one the journey so far has made this party's enemy, and name them in `antagonist`. Nothing else about the showdown is decided: build it around them from what the act's rooms have shown. They are present, wanting something now, changing the room as it goes and answering what the party does. A hazard alone is not a climax.
+- **Someone stands at its centre,** and you choose who. The climax block names who could: the act's candidates, and anyone the party has met this act. Pick the one the journey so far has made this party's enemy, and name them in `antagonist`. Nothing else about the showdown is decided: build it around them from what the act's rooms have shown. They are present, wanting something now, changing the room as it goes and answering what the party does. A hazard alone is not a climax.
 - **At the act's scale.** This is the biggest thing the party has faced this act: a threat that takes all three of them at their best, far beyond anyone they have already got past.
 - **The act pays off here:** what the party passed through this act shows up again, changed, and the companions' threads meet.
 - **A choice at the peak:** something the party can't have both of, often between the two companions' threads.

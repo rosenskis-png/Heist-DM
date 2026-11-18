@@ -207,8 +207,9 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D193** Memories of rooms: a leg the verdict keeps and the fire spends, a core the player settles, and where she is in the world: current
 - **D194** Outfits are mementos any companion can wear, chosen by the player; her gear stays whatever she wears: changed by D195
 - **D195** The outfit generator: hidden in calm rooms, the climax's reward, sexy first and the room only a reminder: current
-- **D196** A room is a known place with one thing going on, told in the world's tone: changed by D197
-- **D197** One place a room and no image lists; the act offers antagonists and an opening, and scripts nothing: current
+- **D196** A room is a known place with one thing going on, told in the world's tone: changed by D197, D198
+- **D197** One place a room and no image lists; the act offers antagonists and an opening, and scripts nothing: changed by D198
+- **D198** An encounter is where two places meet, its ways on are drawn after it's written, and the climax can choose someone the party met: current
 
 ---
 
@@ -1317,3 +1318,15 @@ What each removed thing was for, and what stands in for it:
 
 **Rules out:** Lists of images in the seed. A climax scripted before its act is played. A leader in a room before a climax. Telling the player what an NPC is thinking. A mystery that is the only way out.
 **Not yet:** an adventure that doesn't start in a cell, or without taking back confiscated gear; the room's layout as the player pictures it, which waits for the map rework (`docs/roadmap.md`).
+
+### D198. An encounter is where two places meet, its ways on are drawn after it's written, and the climax can choose someone the party met
+**Decided:** The designer's call (2026-11-18), from the Carrow act and its barracks room. Changes D196 and D197.
+- **Two places meet.** An encounter draws two of the act's places and is set where they join; a merchant still draws one. The act writes twelve to sixteen places, ones that could stand side by side, so an act's encounters don't run through them.
+- **Ways on are drawn, not designed.** The sketch is told how many ways on the room has and never where they lead. Once the room is encoded, its ways take the drawn kinds in the order it wrote them.
+- **The climax can choose someone the party met.** Beside the act's candidates, the climax sees the people the verdicts named this act.
+- **The act's narration** no longer tells how the party came to be where it is.
+
+**Why:** The barracks was a single hall with the party at one end and both ways on further down it: one lane and nothing to decide about where to be. One place gives the sketch one shape; two places give it a seam, a second lane and a reason to be in one part rather than another, without bringing back a list of shapes. The calm way on was a hatch beside the stove, nearer and unguarded, and the encounter's was a barred door with guards beyond it: knowing where each led, the sketch built the calm one as the safe one, so the choice was made for the player. Two of the act's candidates for the climax existed nowhere before it, and one only made sense if the party had met him. The narration wrote the player's memories of being arrested, in a world whose player secret is a false memory.
+**Rules out:** The sketch knowing where its ways on lead. A rule to make the ways on balanced.
+**Not yet:** the narration that carries the room, and quiet rooms as curiosities (`docs/roadmap.md`).
+

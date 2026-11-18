@@ -281,7 +281,11 @@ function historyView() {
 function pinsFor(adv, r) {
   const p = {};
   // A room with danger in it or a merchant is set in one of the act's places (D196); pinned here, it's set there.
-  if (["encounter", "merchant"].includes(r.kind) && (r.place ?? "").trim()) p.place = r.place.trim();
+  // An encounter's pin may name two places, "the kitchens + the yard" (D198).
+  if (["encounter", "merchant"].includes(r.kind) && (r.place ?? "").trim()) {
+    const parts = r.place.split("+").map((x) => x.trim()).filter(Boolean);
+    p.place = r.kind === "encounter" && parts.length === 2 ? parts : r.place.trim();
+  }
   if (PRIZED.includes(r.kind) && PRIZES.includes(r.prize)) p.prize = r.prize;
   if ((r.kind === "climax" ? ["both"] : ["companion_a", "companion_b", "none"]).includes(r.spotlight)) p.spotlight = r.spotlight;
   const ms = r.motifs.filter((id) => motifs.find((m) => m.id === id)?.kinds.includes(r.kind));
@@ -486,7 +490,7 @@ const adventureActs = (adv) => (adv.world.regions ?? []).map((a, i) => [i + 1, `
 // The place a room with danger in it is set in (D196): left empty, the game deals one from the act's places.
 function placeField(adv, r) {
   const pool = planOf(adv, r.act)?.places ?? [];
-  const box = h("input", { type: "text", id: "room-place", placeholder: pool.length ? `Optional: pin the place. Empty: one of the act's (${pool.join(", ")})` : "Optional: the place this room is set in. This act has no places yet: generate its plan first", oninput: (e) => ((S.room.place = e.target.value), save()) });
+  const box = h("input", { type: "text", id: "room-place", placeholder: pool.length ? `Optional: pin the place, or two joined by + for an encounter. Empty: drawn from the act's (${pool.join(", ")})` : "Optional: the place this room is set in. This act has no places yet: generate its plan first", oninput: (e) => ((S.room.place = e.target.value), save()) });
   box.value = r.place ?? "";
   return h("label", { class: "field" }, "Place", box);
 }
@@ -575,7 +579,7 @@ function seedView(run) {
   const mark = (k, v) => (pinned[k] ? h("span", {}, v, " ", h("span", { class: "chip" }, "pinned")) : v);
   return stage("Seed", h("div", { class: "grid2" },
     kv([
-      ["Place", seed.place && mark("place", seed.place)],
+      ["Place", seed.place && mark("place", [seed.place].flat().join(" + "))],
       ["First room", seed.first ? "the adventure begins here" : null],
       ["Prize", seed.clue ? mark("prize", h("span", {}, "a journal page by ", h("b", {}, seed.clue.author), pageText(run, seed.clue.id) ? `: "${pageText(run, seed.clue.id)}"` : "")) : seed.prize && mark("prize", seed.prize)],
       ["Someone from before", seed.callback && mark("callback", `${seed.callback.name} (${seed.callback.fate}; ${seed.callback.feels})`)],

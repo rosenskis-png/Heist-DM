@@ -21,7 +21,7 @@ const CALLBACK_KINDS = ["encounter", "oddity"];
 // for every climax. `OUTFITS_CALM` is the share of the way's drawn rooms that are quiet or odd (content/setting.js).
 const OUTFIT_KINDS = ["quiet", "oddity", "campfire"];
 const OUTFITS_CALM = 0.3;
-// The calm rooms the act gives settings for (D167), and the rooms set in one of its plain places (D196).
+// The calm rooms the act gives settings for (D167), and the rooms set in its plain places (D196, D198).
 const SET_KINDS = ["quiet", "oddity", "campfire"];
 const PLACE_KINDS = ["encounter", "merchant"];
 // Whose room it is (D158): one companion's slot, or neither, which is the commonest; never the same companion twice in a
@@ -70,7 +70,13 @@ export function seedFor(camp, world, kind, exits = []) {
   const placesUsed = camp.placesUsed ?? [];
   const first = !!camp.first;
   if (first) seed.first = true;
-  else if (PLACE_KINDS.includes(kind) && plan?.places?.length) seed.place = pickFrom(rng, fresh(plan.places, placesUsed));
+  // An encounter is set where two of the act's places meet (D198), which gives it more than one part and more than one
+  // way through; a merchant is one place.
+  else if (kind === "encounter" && plan?.places?.length > 1) {
+    const one = pickFrom(rng, fresh(plan.places, placesUsed));
+    const two = pickFrom(rng, fresh(plan.places.filter((p) => p !== one), [...placesUsed, one]));
+    seed.place = [one, two];
+  } else if (PLACE_KINDS.includes(kind) && plan?.places?.length) seed.place = pickFrom(rng, fresh(plan.places, placesUsed));
   else if (SET_KINDS.includes(kind) && plan?.settings?.[kind]?.length) seed.setting = pickFrom(rng, fresh(plan.settings[kind], settingsUsed));
   // Her story's feature once an act; her other rooms touch her values (D167).
   const storyShown = camp.storyShown ?? [];
@@ -131,7 +137,7 @@ export function seedFor(camp, world, kind, exits = []) {
       seedRng: rng.rng,
       roomNo: room,
       used: [...used, ...seed.motifs.map((m) => m.id)],
-      placesUsed: seed.place ? [...placesUsed, seed.place] : placesUsed,
+      placesUsed: seed.place ? [...placesUsed, ...[seed.place].flat()] : placesUsed,
       cluesPlaced: seed.clue ? [...placed, seed.clue.id] : placed,
       outfitTarget: target,
       calledBack: seed.callback ? [...calledBack, seed.callback.name] : calledBack,

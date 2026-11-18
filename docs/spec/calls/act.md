@@ -17,7 +17,7 @@ Rooms are invented by the room call, D163-style (D169), so what reaches every ro
 | **state** | what has changed in the region because of earlier acts | the climax, the next act call |
 | **intro** | the DM's narration as the act opens: a paragraph or two that sets the scene, narrating no room the party acts in (D197) | the player, above the opening of the act's first room |
 | **threads** | for each companion whose story comes up this act, what of it comes up | her room, once an act |
-| **places** | eight to ten ordinary parts of the region, each a different kind of place, named plainly, with nothing about who is there or what is happening (D196) | one encounter each, a different one from earlier in the act until they run out |
+| **places** | twelve to sixteen ordinary parts of the region, each a different kind of place, named plainly, with nothing about who is there or what is happening (D196, D198) | two to each encounter, which is set where they meet, and one to each merchant, none used twice in the act until they run out |
 | **settings** | two or three places for each calm kind (`quiet`, `oddity`, `campfire`) | one calm room each, a different one from earlier in the act until they run out |
 | **news** | what the party might hear of what earlier acts set in motion | one room each, as the room's one extra |
 | **mysteries** | the one or two whose journal pages this act's rooms may hold | code, drawing pages |

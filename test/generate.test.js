@@ -32,7 +32,8 @@ test("the seed asks a different question each time, suits the kind, and avoids t
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter", "quiet"]);
     assert.ok(PRIZES.includes(seed.prize) && !seed.factions);
-    assert.ok(camp.plan.places.includes(seed.place) && !(camp.placesUsed ?? []).includes(seed.place), "the place doesn't repeat within an act (D196)");
+    assert.ok(seed.place.length === 2 && seed.place[0] !== seed.place[1] && seed.place.every((x) => camp.plan.places.includes(x)), "an encounter is where two places meet (D198)");
+    if (i < 3) assert.ok(seed.place.every((x) => !(camp.placesUsed ?? []).includes(x)), "no place repeats until they run out");
     assert.ok(!seed.shape && !seed.centrepiece && !seed.busy && !seed.tone && !seed.danger, "a room with danger in it draws a place, not four ingredients (D196)");
     assert.ok(seed.motifs.length >= 1 && seed.motifs.length <= 2 && seed.motifs.every((m) => m.kinds.includes("encounter")));
     for (const m of seed.motifs) seen.add(m.id);
@@ -225,6 +226,12 @@ test("the act's earlier premises reach the next sketch, and the campaign keeps e
   assert.match(input, /"tone":"Pulp fantasy/, "the world's tone reaches the sketch (D196)");
   assert.match(input, /"the_powers_here":/);
   assert.doesNotMatch(input, /whose_place_it_is|"cut"/);
+  // The sketch is told how many ways on there are, never where they lead (D198).
+  assert.match(input, /"ways_on":"two ways on/);
+  assert.doesNotMatch(input, /a way on to/);
+  const climax = seedFor(newCampaign(), world, "climax", ["sanctuary"]).seed;
+  const ci = sketchInput(env, { seed: climax, world, party, met: [{ name: "Snick, a goblin runt", fate: "freed from the cage", feels: "owes them" }] }, sketchSchema);
+  assert.match(ci, /or_someone_the_party_met_this_act[\s\S]*Snick/, "the climax may choose someone the party met (D198)");
   assert.doesNotMatch(sketchInput(env, { seed, world, party }, sketchSchema), /## The way so far/);
 });
 

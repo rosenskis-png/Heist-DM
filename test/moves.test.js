@@ -85,10 +85,10 @@ test("an encounter's seed draws one place and one motif, and nothing about how i
   const seen = [];
   for (let i = 0; i < 6; i++) {
     const { seed, camp: next } = seedFor(camp, worldOf(), "encounter", ["encounter"]);
-    assert.ok(places.includes(seed.place) && !seen.includes(seed.place));
+    assert.ok(seed.place.every((x) => places.includes(x)));
     assert.equal(seed.motifs.length, 1);
     assert.equal(seed.danger, undefined);
-    seen.push(seed.place);
+    seen.push(...seed.place);
     camp = next;
   }
   assert.equal(seedFor(camp, worldOf(), "quiet", ["encounter"]).seed.place, undefined);

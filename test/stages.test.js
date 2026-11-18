@@ -26,7 +26,7 @@ const plan = {
   setting: "The old dwarven working levels, run by four powers who hate each other.",
   state: "The forges have doubled their shifts since the escape.", intro: "Below the cells the mountain opens into the Warrens.",
   threads: [{ slot: "companion_b", beat: "the dead court keeps a record of her people's hearth" }],
-  places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel"], settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
+  places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel", "the bakehouse", "the tannery", "a pigeon loft", "the brewhouse"], settings: { quiet: ["a flooded chapel where candles burn underwater", "a library of whispering bones"], oddity: ["a ballroom where the dancers are coats on strings", "a well that answers in your mother's voice"], campfire: ["a warm bread oven big enough to sleep in", "a crypt of sleeping knights who snore"] },
   news: ["word that the goblins blame the Court for the escape"], mysteries: ["court_of_debts"], returning: [],
   antagonists: [{ who: "Lord Chamberlain Vesk", why: "his court holds the only stair down" }, { who: "Warchief Grizzak", why: "his warband holds the gate" }],
 };
@@ -37,11 +37,11 @@ test("a room with danger in it is set in one of the act's places, never repeatin
   for (let i = 0; i < 4; i++) {
     const { seed, camp: next } = seedFor(camp, world, "encounter", ["encounter"]);
     assert.equal(seed.factions, undefined, "no room is drawn a faction (D197)");
-    assert.ok(plan.places.includes(seed.place) && !seed.busy && !seed.shape && !seed.tone);
-    kinds.push(seed.place);
+    assert.ok(seed.place.every((x) => plan.places.includes(x)) && !seed.busy && !seed.shape && !seed.tone);
+    kinds.push(...seed.place);
     camp = next;
   }
-  assert.equal(new Set(kinds).size, 4);
+  assert.equal(new Set(kinds).size, 8);
   const { seedRoom } = await import("../src/game/generate.js");
   let c = newCampaign({ seed: 2 });
   c = { ...c, way: { ...c.way, left: 0, here: "encounter" } };

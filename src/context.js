@@ -836,17 +836,20 @@ export function pitchInput(env, c, schema) {
 
 // ---------- generation (docs/spec/generation.md, D153) ----------
 
-// What a climax is built from (D163, D164, D197): the act's goal and scale, who could stand at its centre (the sketch
-// chooses, from the journey so far), the heart, and the act's rooms so far, which the climax pays off. Sent only to a
-// climax. A plan saved before candidates has one peak.
+// What a climax is built from (D163, D164, D197, D198): the act's goal and scale, who could stand at its centre (the
+// act's candidates, or someone the party met this act; the sketch chooses, from the journey so far), the heart, and the
+// act's rooms so far, which the climax pays off. Sent only to a climax. A plan saved before candidates has one peak.
 function climaxText(c) {
   const plan = c.plan;
   const region = c.world.regions?.[c.seed.act - 1];
   const arc = setting.arc[c.seed.act - 1];
   const who = plan?.antagonists?.length ? plan.antagonists : plan?.peak ? [{ who: plan.peak.who, why: plan.peak.why }] : null;
+  // Or someone the party met this act (D198), so the act can end on someone the player knows.
+  const met = (c.met ?? []).map((p) => ({ who: p.name, met_as: p.fate, feels: p.feels }));
   return {
     the_act: { region: region?.name, goal: plan?.goal ?? arc?.job, ...(arc?.scale ? { scale: arc.scale } : {}), ...(plan?.state ? { what_has_changed: plan.state } : {}) },
     who_could_stand_at_its_centre: who ?? "whoever's design blocks the party's way",
+    ...(met.length ? { or_someone_the_party_met_this_act: met } : {}),
     the_heart: c.world.heart,
     what_the_act_built_up: c.earlier?.length ? c.earlier : "the act so far",
   };
@@ -859,11 +862,12 @@ const seedText = (seed, world) => ({
   fixed: {
     kind: seed.kind,
     ...(seed.first ? { the_first_room: "the adventure begins here: where the party comes to and finds itself trapped, as the place and this act's setting say. Nothing here is dangerous and nothing is in a hurry. It's a room for three strangers to look about, talk and take stock, with the way on in plain view" } : {}),
-    ...(seed.place ? { place: seed.place } : {}),
+    ...(Array.isArray(seed.place) ? { place: { where: `where ${seed.place[0]} and ${seed.place[1]} meet`, how: "the room takes in both, and the ways between them, as they would really join in this region" } } : seed.place ? { place: seed.place } : {}),
     whose_room: seed.spotlight === "both" ? "both companions': the room touches each one's story"
       : seed.spotlight ? `${seed.spotlight}'s: the room touches her story and values; the other companion only reacts to it as herself`
       : "no one's: the room touches no companion's story; they react to it as themselves",
-    ways_on: seed.exits.length ? seed.exits.map((k) => `a way on to ${k === "encounter" ? "an encounter" : `a ${k}`}`) : ["none: the act ends here"],
+    // How many ways on, never what they lead to (D198): which is which is drawn after the room is written.
+    ways_on: seed.exits.length ? `${["one", "two", "three"][seed.exits.length - 1] ?? seed.exits.length} way${seed.exits.length > 1 ? "s" : ""} on, each leaving from somewhere the party has to reach` : "none: the act ends here",
     ...(seed.clue
       ? { prize: { a_journal_page: { written_by: seed.clue.author }, how: "a loose page, torn from that writer's journal, somewhere in the room the party has to reach and can carry off. They'll read it at camp: nothing in the room says or shows what's on it, and nobody here knows" } }
       : seed.prize ? { prize: seed.prize } : {}),

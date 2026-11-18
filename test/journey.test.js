@@ -17,7 +17,7 @@ const world = worldOf();
 const plan = {
   goal: "Cross the Warrens.", question: "Can they cross before the Court learns they're loose?", aim: "Learn the way down.",
   setting: "The old dwarven working levels.", state: "The forges run double shifts.", intro: "The Warrens open below you, loud with forges.",
-  threads: [], places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel"], settings: { quiet: ["a flooded chapel", "a bone library"], oddity: ["a well that answers", "a coat ballroom"], campfire: ["a warm bread oven", "a crypt of snoring knights"] },
+  threads: [], places: ["the kitchens", "the stables", "a guardroom", "the laundry", "a wine cellar", "the armoury", "a servants' stair", "the chapel", "the bakehouse", "the tannery", "a pigeon loft", "the brewhouse"], settings: { quiet: ["a flooded chapel", "a bone library"], oddity: ["a well that answers", "a coat ballroom"], campfire: ["a warm bread oven", "a crypt of snoring knights"] },
   news: [], mysteries: ["court_of_debts"], returning: [],
   antagonists: [{ who: "Lord Chamberlain Vesk", why: "his court holds the stair" }, { who: "Warchief Grizzak", why: "his warband holds the gate" }],
 };

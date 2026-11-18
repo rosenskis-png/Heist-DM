@@ -33,9 +33,9 @@ The sketch is generator-only: no play call ever sees it (D59), and it holds no r
 
 ## The seed (D118, D153, D160–D164, D196, D197)
 What the seed fixes:
-- **The kind** comes from the way (D144); the exits' kinds are drawn with it.
+- **The kind** comes from the way (D144); the exits' kinds are drawn with it. The sketch is told only how many ways on there are, never where they lead: each way it writes takes the drawn kinds in order once the room is encoded (D198).
 - **Whose room it is** (D158): one companion's slot or no one's, no one's about half the time, never the same companion twice running; the climax is both companions'. A companion's thing (the motif) is drawn only when the room is someone's.
-- **Where the room is** (D196, D197), the seed's one draw of a place, a different one from any used earlier in the act until they run out: for an encounter or a merchant, a plain, ordinary room of the region from the act's `places`; for a quiet room, an oddity or a campfire, one of the act's stranger `settings`. A climax is set wherever its sketch puts it. The seed draws no tone, busy-ness, shape, centrepiece, faction or state for the danger: the image lists are gone (D197).
+- **Where the room is** (D196, D197), the seed's one draw of a place, a different one from any used earlier in the act until they run out: for an encounter, two of the act's plain `places`, and the room is where they meet (D198); for a merchant, one; for a quiet room, an oddity or a campfire, one of the act's stranger `settings`. A climax is set wherever its sketch puts it. The seed draws no tone, busy-ness, shape, centrepiece, faction or state for the danger: the image lists are gone (D197).
 - **The first room** (D197): a new adventure opens on a quiet room marked `first`, with no place, motif, prize or extra: where the party comes to, with nothing dangerous and no clock, for talking and looking about.
 - **The prize,** for an encounter, an oddity or a quiet room (D164, D168): none about half the time, gold, a relic or a journal page. A page is one the campaign hasn't placed, from the act's live mysteries; the sketch is told only who wrote it, never its words, which the party reads at camp.
 - **An outfit** (D195): never in an encounter. A quiet room, an oddity or a campfire hides one, somewhere hidden or hard to reach, while the act has fewer than its two or three (drawn once an act), more likely the fewer calm rooms are left; it's that room's only prize, and the sketch says only where it is, never what it looks like. Every climax rewards one too, given when the climax ends. The outfit call designs it after the sketch; encode makes it a thing the party can carry, and code puts the outfit on it exactly as designed. An outfit that fails to come leaves the room without one.
@@ -56,7 +56,7 @@ The campaign records what the act has used (motifs, places, settings, premises, 
 Plus the party: who each is, never their abilities, so no room is built around one; each companion's values; her story's needs and her quest only when the room is hers (D158). No example rooms (D161), and never an AI summary of the act. On the Forge, a designer's brief comes first where it and the seed disagree, and an unpinned busy-ness gives way to it (D166).
 
 ## The climax's antagonist (D197)
-The act offers two or three who could stand at its climax. The climax's sketch chooses one, from the way so far, names them in `antagonist`, and builds the showdown as it likes. The campaign records the choice as the act's peak (`climaxChosen` in `src/campaign/run.js`), and no later act offers them again.
+The act offers two or three who could stand at its climax, and the climax also sees the people the party met this act (D198). The climax's sketch chooses one, from the way so far, names them in `antagonist`, and builds the showdown as it likes. The campaign records the choice as the act's peak (`climaxChosen` in `src/campaign/run.js`), and no later act offers them again.
 
 ## What every packet must have
 Beyond `docs/spec/packet.md`'s consistency checks:

@@ -70,6 +70,9 @@ export async function designRoom(io, env, c) {
       throw e2;
     }
   }
+  // Which way on leads where is drawn, not designed (D198): the sketch writes its ways on without knowing, and they take
+  // the seed's kinds in the order they're written, which the draw already randomised.
+  encoded = { ...encoded, intent: { ...encoded.intent, exits: (encoded.intent.exits ?? []).map((e, i) => ({ ...e, leads_to: c.seed.exits[i] ?? e.leads_to })) } };
   const edges = edgesFor(c.world, c.seed);
   const withEdges = edges.length ? { ...encoded, map: { ...encoded.map, facts: [...encoded.map.facts, ...edges] } } : encoded;
   stage("encoded", withEdges);
@@ -103,7 +106,7 @@ export async function generateRoom(io, env, { camp, world, party, handoff = null
   const { seed, camp: next } = resume?.seed ? { seed: resume.seed, camp: resume.camp } : seedRoom(camp, world);
   let designed;
   try {
-    designed = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, carried: camp.carried ?? [], items: camp.items ?? [], found: camp.outfitsFound ?? [], ...(resume?.sketch ? { sketch: resume.sketch } : {}) });
+    designed = await designRoom(io, env, { seed, world, party, handoff, log, earlier: camp.premises ?? [], plan: camp.plan ?? null, met: seed.kind === "climax" ? (camp.memory ?? []).filter((p) => p.act === camp.act) : [], carried: camp.carried ?? [], items: camp.items ?? [], found: camp.outfitsFound ?? [], ...(resume?.sketch ? { sketch: resume.sketch } : {}) });
   } catch (e) {
     e.resume = { seed, camp: next, sketch: e.sketch ?? null };
     throw e;

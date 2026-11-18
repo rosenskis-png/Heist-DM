@@ -26,7 +26,7 @@ export const actSchema = withDefs({
     threads: list(obj(["slot", "beat"], { slot: { enum: ["companion_a", "companion_b"] }, beat: r("text") })),
     // Pools, one item to one room, each used once in the act. Plain places for the rooms with danger in them and
     // merchants (D196), and stranger ones for the calm rooms.
-    places: pool(6),
+    places: pool(10),
     settings: obj(["quiet", "oddity", "campfire"], { quiet: pool(2), oddity: pool(2), campfire: pool(2) }),
     news: pool(0),
     // The ids of the one or two mysteries whose clues this act's rooms hold.
