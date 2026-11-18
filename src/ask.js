@@ -51,7 +51,8 @@ export async function ask(io, { call, input, schema, check = () => [], fix = (x)
   // Never a loop.
   const send = (x) =>
     io.sample.json(x, opts).catch(async (e) => {
-      if (e?.code === "upstream_error") return io.sample.json(x, opts);
+      // A dropped connection waits a moment before its one more try (D199): an immediate retry often met the same outage.
+      if (e?.code === "upstream_error") return pause(io.retryAfter ?? 5000, io.signal).then(() => io.sample.json(x, opts));
       if (e?.code === "invalid_json") {
         record.noJson = String(e.text ?? "").slice(0, 20000);
         return io.sample.json(x, opts);

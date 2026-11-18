@@ -159,7 +159,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
   delete seed.outfit;
   const calls = [];
   let dropped = 0;
-  const io = {
+  const io = { retryAfter: 0,
     sample: {
       json: async (input) => {
         calls.push(input.includes("# Sketch call") ? "sketch" : "encode");
@@ -176,7 +176,7 @@ test("a room resumes from its sketch with only the encode call, and a dropped co
   const { packet } = await designRoom(io, env, { seed, world, party, sketch });
   assert.deepEqual(calls, ["encode", "encode"]);
   assert.equal(packet.mode, "room");
-  const twice = { sample: { json: async () => { throw { code: "upstream_error", message: "x" }; } } };
+  const twice = { retryAfter: 0, sample: { json: async () => { throw { code: "upstream_error", message: "x" }; } } };
   await assert.rejects(designRoom(twice, env, { seed, world, party, sketch }), (e) => e.code === "upstream_error");
 });
 

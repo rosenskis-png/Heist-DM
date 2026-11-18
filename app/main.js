@@ -10,7 +10,7 @@ import { addItem, editItem, moveItem, removeItem, clearDraft } from "../src/game
 import { companions as authored } from "../content/companions/index.js";
 import { rosterIn, worldOf, pitchSeed } from "../src/campaign/world.js";
 import { pitchCall } from "../src/calls/pitch.js";
-import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, moveOn, nextRoom, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
+import { campaignOf, startAdventure, leaveBy, takeStock, settle, judgeRoom, moveOn, nextRoom, prepareNext, enterRoom, endTheAct, whereView, relook } from "../src/game/journey.js";
 import { packOf } from "../src/campaign/stock.js";
 import { proposedCore } from "../src/campaign/memories.js";
 import { setting } from "../content/setting.js";
@@ -356,7 +356,7 @@ function Game({ env, slot, initial, onQuit }) {
     <div className="body gutter">
       <aside className=${`side${sideOpen ? "" : " closed"}`}>
         <section className="mapbox" aria-label="Clock"><${Clock} clock=${clockView(s)} /></section>
-        <${RoomSheet} sheet=${roomSheet(s)} />
+        ${s.packet.mode === "room" ? null : html`<${RoomSheet} sheet=${roomSheet(s)} />`}
         <${PartySheet} sheet=${sheetView(s)} colors=${colors} />
       </aside>
       <main className="pane">
@@ -922,6 +922,10 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
     else if (step === "move") run("between", async () => moveOn(session));
     else if (step === "next") run("between", () => nextRoom(session, io, env.gen, env.roster));
   }, [step, !!busy, !!error]);
+  // The next room is written while the player takes stock (D199), quietly: its calls don't hold the page up.
+  useEffect(() => {
+    if (step === "stock" && session.judged) prepareNext(session, { ...io, onStart: null }, env.gen, env.roster)?.then((a) => a && refresh());
+  }, [step, !!session.judged]);
   const camp = session.camp;
   const allowed = camp?.keep ?? 0;
   const toggle = (id) => setKeep((k) => (k.includes(id) ? k.filter((x) => x !== id) : k.length < allowed ? [...k, id] : k));
@@ -942,6 +946,7 @@ function Between({ session, env, io, run, busy, error, refresh, onQuit }) {
         </div>`
       : null}
     ${step === "next" ? html`<p className="muted">${busy ?? "The DM prepares what's next…"} The next room takes a minute or two.</p>` : null}
+    ${step === "stock" ? html`<p className="muted small">${session.ahead ? "The next room is ready when you are." : "The DM is preparing the next room while you take stock."}</p>` : null}
     ${step === "ready" ? html`<button className="primary" style=${{ justifySelf: "start" }} onClick=${() => run("table", async () => enterRoom(session, env.roster))}>Go on</button>` : null}
     ${error ? html`<p className="error">${error} <button className="link" onClick=${() => run("between", async () => {})}>Try again</button></p>` : null}
     ${session.past?.length > 1 ? html`<details><summary className="small muted">The way so far (${session.past.length} rooms)</summary><ol className="small">${session.past.map((r, i) => html`<li key=${i}><b>${r.name}</b>${r.rating ? ` · ${r.rating}/10` : ""}${r.why ? `: ${r.why}` : ""}</li>`)}</ol></details>` : null}

@@ -13,7 +13,7 @@ Generation happens at three moments, each deciding only what it can decide well 
 Later stages see slices, never pools: a room gets one place or setting, at most one clue, at most one extra, chosen by code, so nothing in a pool can take over every room.
 
 ## When it runs
-When an encounter or room ends and its hand-off is final (`docs/spec/state.md`), the verdict runs, and then the next packet generates while the player reads it (`nextRoom` in `src/game/journey.js`, D173): the verdict comes first because its rating moves the leg's strain, which decides the next room's ways on. An act's call runs as the act begins (`beginAct`), before its first room. Loading a save never generates (D11).
+When an encounter or room ends and its hand-off is final (`docs/spec/state.md`), the verdict runs, and then the next packet generates while the player reads it (`nextRoom` in `src/game/journey.js`, D173): the verdict comes first because its rating moves the leg's strain, which decides the next room's ways on. An act's call runs as the act begins (`beginAct`), before its first room. Loading a save never generates (D11). Once the verdict is in, the next room is made ahead while the player takes stock (`prepareNext`), from the campaign as it will be with what the room's end handed over; when the player walks on by that way, `nextRoom` uses it and keeps what its making changed in the campaign. If it failed or isn't ready, the room is made then, as before (D199). The adventure's first room is marked `first` in its packet, and its sketch sees the act's narration, which the opening picks up from.
 
 ## The pipeline
 

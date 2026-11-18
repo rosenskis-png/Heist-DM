@@ -210,6 +210,7 @@ Every entry, and whether it still holds as written: current, changed by a later 
 - **D196** A room is a known place with one thing going on, told in the world's tone: changed by D197, D198
 - **D197** One place a room and no image lists; the act offers antagonists and an opening, and scripts nothing: changed by D198
 - **D198** An encounter is where two places meet, its ways on are drawn after it's written, and the climax can choose someone the party met: current
+- **D199** The next room is made while the player takes stock; calm rooms are only what the DM said; the first room's companions are strangers: current
 
 ---
 
@@ -1329,4 +1330,15 @@ What each removed thing was for, and what stands in for it:
 **Why:** The barracks was a single hall with the party at one end and both ways on further down it: one lane and nothing to decide about where to be. One place gives the sketch one shape; two places give it a seam, a second lane and a reason to be in one part rather than another, without bringing back a list of shapes. The calm way on was a hatch beside the stove, nearer and unguarded, and the encounter's was a barred door with guards beyond it: knowing where each led, the sketch built the calm one as the safe one, so the choice was made for the player. Two of the act's candidates for the climax existed nowhere before it, and one only made sense if the party had met him. The narration wrote the player's memories of being arrested, in a world whose player secret is a false memory.
 **Rules out:** The sketch knowing where its ways on lead. A rule to make the ways on balanced.
 **Not yet:** the narration that carries the room, and quiet rooms as curiosities (`docs/roadmap.md`).
+
+### D199. The next room is made while the player takes stock; calm rooms are only what the DM said; the first room's companions are strangers
+**Decided:** The designer's call (2026-11-18), from playing a generated world's first room on the branch build.
+- **Made ahead.** Once a room's verdict is in, the next room is generated in the background while the player takes stock, from the campaign as it will be with what the room's end handed over. Walking on by that way uses it; anything else makes the room then, as before.
+- **Calm rooms have no room sheet.** The page doesn't show one, and the companions get only what the DM has said, with a line that the place is calm and there's nothing to plan.
+- **Nothing past the ways on.** Every companion call is told what lies beyond can't be seen or scouted.
+- **The first room's companions are strangers.** They're not told where they are in the world, their road, the pair dynamic or a tie, or anyone's name: the others are known by how they look until they say who they are. The first room's sketch sees the act's narration and picks up from it.
+- **A dropped connection waits five seconds** before its one more try.
+
+**Why:** In the first room of the serpent-folk world, Celeste named the place, its purpose and its matron on her first line, from the world and the sheet; both companions planned a scouting run in a room with nothing to get past, and kept asking about what lay ahead, which doesn't exist until it's made. The act's narration and the first room's opening both told the party waking. The room after it failed because the sketch call's connection dropped and its immediate retry dropped too; the seed and campaign were kept, so trying again resumes. Making the room ahead means a player who takes stock for a minute never waits at all.
+**Rules out:** A room sheet in a calm room. Companions who know the party before they've met it.
 

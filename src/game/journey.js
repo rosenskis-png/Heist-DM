@@ -136,13 +136,49 @@ export function endTheAct(session, chosen = []) {
   session.between = { ...session.between, actOver: false, kind: "encounter", exit: null, newAct: session.camp.act };
 }
 
+// The next room, made ahead while the player takes stock (D199). Once the verdict is in, the way on and the next
+// room's kind are known, so the room can be written then, from the campaign as it will be after the player walks on,
+// with what the room's end handed over in place of what the player will settle. `session.ahead` keeps it, with what
+// generating it changed in the campaign, for `nextRoom` to use if the player walks on by the same way. A room made
+// ahead that fails is simply made again later. Not at the sanctuary, whose next act is planned first.
+const making = new WeakMap();
+const changed = (before, after) => Object.fromEntries(Object.keys(after).filter((k) => JSON.stringify(after[k]) !== JSON.stringify(before[k])).map((k) => [k, after[k]]));
+export function prepareNext(session, io, env, roster = authored) {
+  if (making.has(session) || session.ahead || !session.judged || !session.ended) return making.get(session) ?? null;
+  const camp = campaignOf(session);
+  if (camp.way.here === "sanctuary" || !camp.plan) return null;
+  const party = partyFor(session.player, session.companions, session.world, roster);
+  const members = session.state.party.slice(1);
+  const { camp: moved, exit, kind, forced } = roomEnded(camp, { handoff: session.ended, verdict: session.judged.verdict, exits: session.state.packet.intent.exits ?? [], members, name: session.state.packet.name ?? null, place: session.premise ?? null });
+  const handoff = exit?.stub || forced ? { stub: exit?.stub ?? "the party was carried on", conditions: moved.carry.conditions } : null;
+  const job = generateRoom(io, env, { camp: moved, world: session.world, party, handoff, log: (moved.log ?? []).slice(-3) })
+    .then((room) => {
+      session.ahead = { exit: exit?.id ?? null, kind, packet: room.packet, premise: room.camp.premises?.at(-1) ?? null, patch: changed(moved, room.camp) };
+      return session.ahead;
+    })
+    .catch(() => null)
+    .finally(() => making.delete(session));
+  making.set(session, job);
+  return job;
+}
+
 // The next room, generated while the closing narration is read (docs/spec/generation.md): the act call first when the
-// act has no plan yet, then the room from the way on the party took. `env` has the prompts and the worked example.
+// act has no plan yet, then the room from the way on the party took. A room made ahead by the same way is used as it
+// is (D199). `env` has the prompts and the worked example.
 export async function nextRoom(session, io, env, roster = authored) {
   const party = partyFor(session.player, session.companions, session.world, roster);
+  if (making.has(session)) await making.get(session);
+  const b = session.between ?? {};
+  const ahead = session.ahead;
+  session.ahead = null;
+  if (ahead && ahead.kind === b.kind && ahead.exit === (b.exit?.id ?? null) && session.camp?.plan) {
+    session.camp = { ...session.camp, ...ahead.patch };
+    const { resume, ...rest } = b;
+    session.between = { ...rest, packet: ahead.packet, premise: ahead.premise };
+    return ahead.packet;
+  }
   let camp = campaignOf(session);
   if (!camp.plan) camp = session.camp = await beginAct(io, env, { camp, world: session.world, party });
-  const b = session.between ?? {};
   const handoff = b.exit?.stub || b.forced ? { stub: b.exit?.stub ?? "the party was carried on", conditions: camp.carry.conditions } : null;
   let room;
   try {
@@ -187,6 +223,7 @@ export function enterRoom(session, roster = authored) {
     between: null,
     stock: null,
     judged: null,
+    ahead: null,
     // The last campfire's scene is over (D190).
     fire: null,
   });

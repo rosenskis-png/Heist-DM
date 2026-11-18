@@ -171,6 +171,8 @@ export const packetSchema = withDefs({
     // How people react, in plain words, for the DM to apply (D76).
     notes: { type: "array", items: r("text") },
     mode: { enum: ["encounter", "room"] },
+    // The adventure's first room (D199): the party has just come to, and its members are strangers.
+    first: { type: "boolean" },
     // A site (D180): a place of several areas the party moves about in, discovering them as it goes.
     site: { type: "boolean" },
     act: { type: "integer", minimum: 1 },

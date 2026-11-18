@@ -116,3 +116,38 @@ test("the live looks reach a room in progress: the party is rebuilt, the room ke
   assert.equal(session.state.party.find((p) => p.id === "fern").outfit, "a green cloak and nothing else");
   assert.equal(session.state.tick, tick);
 });
+
+test("the next room is made while the player takes stock, and used when they walk on by that way (D199)", async () => {
+  const { prepareNext } = await import("../src/game/journey.js");
+  const session = await startAdventure(io, env, { player: { name: "P", class: "rogue" }, companions: ["fern", "nadia"], world, seed: 6 });
+  leaveBy(session, session.state.packet.intent.exits[0].id);
+  await judgeRoom(session, io, prompts);
+  calls.length = 0;
+  await prepareNext(session, io, env);
+  assert.ok(session.ahead?.packet, "made ahead");
+  const made = calls.length;
+  assert.ok(made >= 2);
+  moveOn(session);
+  await nextRoom(session, io, env);
+  assert.equal(calls.length, made, "no second room is written");
+  enterRoom(session);
+  assert.equal(session.state.packet.id, session.packet.id);
+  assert.equal(session.ahead, null);
+});
+
+test("in the first room the companions are strangers who know only what the DM said; a calm room has no sheet (D199)", async () => {
+  const { companionInput, partyInput } = await import("../src/context.js");
+  const { envFor } = await import("../src/game/session.js");
+  const { companionSchema } = await import("../schemas/calls/companion.js");
+  const { partySchema } = await import("../schemas/calls/party.js");
+  const session = await startAdventure(io, env, { player: { name: "Wren", class: "rogue" }, companions: ["fern", "nadia"], world, seed: 8 });
+  const e = envFor(session, prompts);
+  assert.ok(e.packet.first && e.packet.mode === "room");
+  const [fern, nadia] = e.companions;
+  const one = companionInput(e, { recent: session.feeds.table.map((x) => x.text) }, fern, [nadia], [], companionSchema);
+  assert.doesNotMatch(one, /Nadia|Wren|## Where you are|## The room sheet/);
+  assert.match(one, /a stranger you woke beside[\s\S]*## What the DM has told you[\s\S]*## Beyond this room/);
+  const both = partyInput(e, { recent: [] }, e.companions, [], partySchema);
+  assert.doesNotMatch(both, /Wren|## The room sheet|## The two of them/);
+  assert.match(both, /## This place/);
+});

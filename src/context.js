@@ -280,14 +280,14 @@ export function companionInput(env, c, self, others, huddle, schema) {
   const form = env.state?.flags?.[me.id]?.form;
   return compose([
     ...campaign(env, "companion", schema),
-    block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false }) }),
+    block("You are", { ...briefProfile(me, standingOf(env, me.id), env.state), ...(firstRoom(env) ? {} : encounterCases(me, rom, [me, ...rest], { private: privately, inPerson: false })) }),
     form ? block("You, right now", { form }) : null,
-    whereText(env) ? block("Where you are", whereText(env)) : null,
-    roadLines(env.roomMemories, me.id).length ? block(ROAD, roadLines(env.roomMemories, me.id)) : null,
-    block("At the table with you", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...rest.map((o) => publicProfile(o))]),
-    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
-    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
-    pair ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
+    !firstRoom(env) && whereText(env) ? block("Where you are", whereText(env)) : null,
+    !firstRoom(env) && roadLines(env.roomMemories, me.id).length ? block(ROAD, roadLines(env.roomMemories, me.id)) : null,
+    block(firstRoom(env) ? "With you" : "At the table with you", atTable(env, rest)),
+    ...roomFor(env, c),
+    AHEAD,
+    pair && !firstRoom(env) ? block("You and the other companion", { dynamic: pair.dynamic }) : null,
     block(privately ? "Just you and the player, through your ring (the other companion can't hear this)" : "The huddle so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.card ? block("The plan as the card shows it", c.card) : null,
@@ -315,9 +315,28 @@ export function whereText(env, { full = false } = {}) {
 const ROAD = "The road since the last campfire, as you remember it (where you've been; bring it up only if it matters now)";
 
 // The room reaches the companions as the sheet the player reads (D174), and the DM's latest narrations without
-// the opening, which the sheet already holds.
+// the opening, which the sheet already holds. In a calm room there's no sheet: what the DM said is all there is
+// (D199).
 const SHEET = "The room sheet";
 const told = (env, c) => (c.recent ?? []).filter((x) => x !== env.packet?.opening);
+const calmRoom = (env) => env.packet?.mode === "room";
+// The adventure's first room (D199): the three of them have only just come to, and are strangers.
+const firstRoom = (env) => !!env.packet?.first;
+function roomFor(env, c) {
+  if (!calmRoom(env)) return [block(SHEET, sheetText(roomSheet(env.state, env.packet))), told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null];
+  const heard = c.recent?.includes(env.packet.opening) ? c.recent : [env.packet.opening, ...(c.recent ?? [])];
+  return [
+    block("This place", "A calm place: nothing here is a danger and nothing is in a hurry. There's nothing to plan or get past. Look about, wonder at it and talk, with the player."),
+    block("What the DM has told you, which is all you know of it", heard),
+  ];
+}
+const AHEAD = block("Beyond this room", "What lies past the ways on is out of sight and out of reach: nobody can see, scout or learn it from here. You'll find out when you go.");
+// Who else is at the table. In the first room, nobody has been introduced: each of the others is a stranger, known
+// only by how they look, until they say who they are.
+const atTable = (env, others) =>
+  firstRoom(env)
+    ? [{ id: "player", who: "a stranger you woke beside" }, ...others.map((o) => ({ id: o.id, who: "a stranger you woke beside", looks: o.look }))]
+    : [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }, ...others.map((o) => publicProfile(o))];
 
 // Both companions in the huddle, in one call (docs/spec/calls/party.md): each one's brief and special cases as
 // companionInput gives them, and the table as both of them see it.
@@ -331,20 +350,22 @@ export function partyInput(env, c, companions, huddle, schema) {
     const order = [me, ...members.filter((o) => o !== me)];
     return {
       ...briefProfile(me, standingOf(env, me.id), env.state),
-      ...encounterCases(me, rom, order, { private: false, inPerson: false }),
+      ...(firstRoom(env) ? { the_others: "strangers she has just woken beside, known only by how they look until they say who they are", how_she_looks: me.look } : encounterCases(me, rom, order, { private: false, inPerson: false })),
       ...(form ? { right_now: { form } } : {}),
-      ...(roadLines(env.roomMemories, me.id).length ? { the_road_since_the_last_campfire: roadLines(env.roomMemories, me.id) } : {}),
+      ...(!firstRoom(env) && roadLines(env.roomMemories, me.id).length ? { the_road_since_the_last_campfire: roadLines(env.roomMemories, me.id) } : {}),
     };
   };
   return compose([
     ...campaign(env, "party", schema),
     block("The companions you play", members.map(entry)),
-    whereText(env) ? block("Where they are", whereText(env)) : null,
-    members.some((m) => roadLines(env.roomMemories, m.id).length) ? "Each one's road since the last campfire is where she's been, as she remembers it: context, to bring up only if it matters now." : null,
-    block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
-    block(SHEET, sheetText(roomSheet(env.state, env.packet))),
-    told(env, c).length ? block("What has happened since, as the DM told it", told(env, c)) : null,
-    pair ? block("The two of them", { dynamic: pair.dynamic }) : null,
+    !firstRoom(env) && whereText(env) ? block("Where they are", whereText(env)) : null,
+    !firstRoom(env) && members.some((m) => roadLines(env.roomMemories, m.id).length) ? "Each one's road since the last campfire is where she's been, as she remembers it: context, to bring up only if it matters now." : null,
+    firstRoom(env)
+      ? block("The first room", "The three of them have only just come to, here, and have never met: they know nothing of where they are or who the others are beyond what they can see and what the DM has said. Each knows only her own name and her own story, and learns the others' when they're told.")
+      : block("At the table with them", [{ id: "player", name: env.party[0].name, role: env.party[0].role ?? "The player" }]),
+    ...roomFor(env, c),
+    AHEAD,
+    pair && !firstRoom(env) ? block("The two of them", { dynamic: pair.dynamic }) : null,
     block("The table so far", huddle),
     c.draft ? block("The plan the player is drafting", c.draft) : null,
     c.card ? block("The plan as the card shows it", c.card) : null,
@@ -944,6 +965,7 @@ export function sketchInput(env, c, schema) {
     block("Output format", shapeText(schema)),
     block("This room's seed: what it fixes, and leanings to use or leave", seedText(c.seed, c.world)),
     c.earlier?.length ? block("The way so far this act, in order: this room follows on from it, and is a different kind of place", c.earlier) : null,
+    c.seed.first && c.plan?.intro ? block("What the DM has just read aloud, before this room (the opening picks up from here and doesn't tell it again)", c.plan.intro) : null,
     c.seed.kind === "climax" ? block("The climax", climaxText(c)) : null,
     block("The world", designWorld(c)),
     c.brief ? block("The designer's brief: what this room should hold (where it and the seed disagree, the brief comes first)", c.brief) : null,

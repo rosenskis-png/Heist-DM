@@ -72,6 +72,7 @@ export async function designRoom(io, env, c) {
   }
   // Which way on leads where is drawn, not designed (D198): the sketch writes its ways on without knowing, and they take
   // the seed's kinds in the order they're written, which the draw already randomised.
+  if (c.seed.first) encoded = { ...encoded, first: true };
   encoded = { ...encoded, intent: { ...encoded.intent, exits: (encoded.intent.exits ?? []).map((e, i) => ({ ...e, leads_to: c.seed.exits[i] ?? e.leads_to })) } };
   const edges = edgesFor(c.world, c.seed);
   const withEdges = edges.length ? { ...encoded, map: { ...encoded.map, facts: [...encoded.map.facts, ...edges] } } : encoded;
